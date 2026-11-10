@@ -1,8 +1,8 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Problems;
 
@@ -24,6 +24,12 @@ public static class ProblemText
         ProblemSign.Sunburn => Strings.Pests.SignSunburn,
         ProblemSign.Leggy => Strings.Pests.SignLeggy,
         ProblemSign.Edema => Strings.Pests.SignEdema,
+        ProblemSign.PaleLeaves => Strings.Pests.SignPaleLeaves,
+        ProblemSign.PaleNewGrowth => Strings.Pests.SignPaleNewGrowth,
+        ProblemSign.LostVariegation => Strings.Pests.SignLostVariegation,
+        ProblemSign.Speckled => Strings.Pests.SignSpeckled,
+        ProblemSign.Sticky => Strings.Pests.SignSticky,
+        ProblemSign.Curled => Strings.Pests.SignCurled,
         _ => Strings.Pests.SignOther
     };
 
@@ -110,7 +116,7 @@ public static class ProblemText
     /// <summary>"Updates: worse, the same, better", or null when none has a trend.</summary>
     public static string? TrendsLabel(IEnumerable<ProblemTrend> trends) =>
         trends.Select(TrendWord).ToList() is { Count: > 0 } words
-            ? string.Format(CultureInfo.CurrentCulture, Strings.Pests.TrendsLabel, string.Join(", ", words))
+            ? F(Strings.Pests.TrendsLabel, string.Join(", ", words))
             : null;
 
     /// <summary>"12 Oct".</summary>
@@ -135,8 +141,8 @@ public static class ProblemText
     /// <summary>"Over after 23 days: got better", or without the outcome when a newer version wrote one this version doesn't know.</summary>
     public static string OverAfter(Problem problem) =>
         problem.Outcome is { } outcome
-            ? string.Format(CultureInfo.CurrentCulture, Strings.Pests.OverAfterOutcome, Duration(DaysLasted(problem, problem.StartedOn)), LowerFirst(Outcome(outcome)))
-            : string.Format(CultureInfo.CurrentCulture, Strings.Pests.OverAfter, Duration(DaysLasted(problem, problem.StartedOn)));
+            ? F(Strings.Pests.OverAfterOutcome, Duration(DaysLasted(problem, problem.StartedOn)), LowerFirst(Outcome(outcome)))
+            : F(Strings.Pests.OverAfter, Duration(DaysLasted(problem, problem.StartedOn)));
 
     /// <summary>What the problem page calls it: the signs, or "A problem" when none are known to this version.</summary>
     public static string Title(Problem problem) =>

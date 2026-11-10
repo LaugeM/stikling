@@ -933,8 +933,14 @@
   <data name="SomethingSWrongWithPlantQ" xml:space="preserve">
     <value>Der er noget galt med en plante. Hvor skriver jeg det?</value>
   </data>
+  <data name="WhatCouldItBeQ" xml:space="preserve">
+    <value>Hvad gør Hvad kan det være?</value>
+  </data>
+  <data name="WhatCouldItBeA1" xml:space="preserve">
+    <value>Vælg hvad du ser under &lt;em&gt;Noget er galt&lt;/em&gt;, eller åbn et problem, og tryk på &lt;em&gt;Hvad kan det være?&lt;/em&gt;. Du får op til tre sandsynlige årsager ud fra det du valgte, tre hurtige spørgsmål og det appen ved om planten, fx en nylig flytning eller en måling med fugtmåleren. Hver årsag siger hvad du kan se efter og hvor den kommer fra, og du kan fjerne flueben ved det appen har forkert. Den siger aldrig at du skal vande, gøde, ompotte eller behandle, og den gemmer ingenting.</value>
+  </data>
   <data name="SomethingSWrongWithPlantA1" xml:space="preserve">
-    <value>Åbn planten, tryk på Mere og så &lt;em&gt;Noget er galt&lt;/em&gt;. Vælg hvad du ser, fx gule blade eller rodråd, og tilføj en note eller et billede. Senere trykker du på &lt;em&gt;Hvordan ser den ud?&lt;/em&gt; på planten eller problemet og fortæller om det er bedre, det samme eller værre, og hvad du har gjort. Når det er overstået, skriver du hvordan det endte.</value>
+    <value>Åbn planten, tryk på Mere og så &lt;em&gt;Noget er galt&lt;/em&gt;. Vælg hvad du ser, fx gule blade, klistrede blade eller rodråd, og tilføj en note eller et billede. Senere trykker du på &lt;em&gt;Hvordan ser den ud?&lt;/em&gt; på planten eller problemet og fortæller om det er bedre, det samme eller værre, og hvad du har gjort. Når det er overstået, skriver du hvordan det endte.</value>
   </data>
   <data name="SDifferenceBetweenProblemPestQ" xml:space="preserve">
     <value>Hvad er forskellen på et problem og en skadedyrssag?</value>
@@ -1367,5 +1373,29 @@
   </data>
   <data name="KeepPlantOffMyPublicPageA2" xml:space="preserve">
     <value>En ændring når siden efter næste synkronisering. En plante, der er død, givet væk eller solgt, er aldrig på siden, så der er ikke noget at skjule.</value>
+  </data>
+  <data name="SpeciesFactsQ" xml:space="preserve">
+    <value>Hvor kommer Om denne art fra?</value>
+  </data>
+  <data name="SpeciesFactsA1" xml:space="preserve">
+    <value>Fra Wikipedia, og nogle få fakta som højden fra Trefle, en åben plantedatabase. Appen beder Stiklings server om dem først når du trykker på linket, og sender kun plantens navn, så det kræver en forbindelse, og virker med og uden konto. Det handler om arten og ikke din kultivar, og om slægten når det er alt planten har. Plejeråd tages aldrig derfra.</value>
+  </data>
+  <data name="IdentifyFromPhotoQ" xml:space="preserve">
+    <value>Kan Stikling sige hvilken plante det er?</value>
+  </data>
+  <data name="IdentifyFromPhotoA1" xml:space="preserve">
+    <value>Ja, ud fra et billede. På siderne Tilføj en plante og Tilføj en stikling trykker du på knappen &lt;em&gt;Billede&lt;/em&gt; for enden af navnesøgningen. På en plante eller stikling hvor navnet mangler eller er usikkert, trykker du på &lt;em&gt;Find navnet ud fra et billede&lt;/em&gt; under navnet. Tag et billede eller vælg et, så viser Stikling op til fem forslag og hvor godt hvert af dem passer. Tryk på et for at udfylde slægt og art. Intet bliver udfyldt, før du trykker. Fra plantens side bliver navnet gemt som cf., fordi det er et gæt, så sæt det til Sikker når du ved det. Den giver arten, ikke kultivaren, så vælg en kultivar i navnefelterne, hvis du kender den.</value>
+  </data>
+  <data name="IdentifyFromPhotoA2" xml:space="preserve">
+    <value>Billedet bliver sendt til Pl@ntNet, en tjeneste der genkender planter, og bliver ikke gemt. Når du er logget ind, kan du prøve 10 gange om dagen. Uden en konto kan du tilføje din egen gratis Pl@ntNet-nøgle under Planter i indstillingerne, så går billedet direkte fra din enhed til Pl@ntNet.</value>
+  </data>
+  <data name="GuidesQ" xml:space="preserve">
+    <value>Er der guider i appen?</value>
+  </data>
+  <data name="GuidesA1" xml:space="preserve">
+    <value>Ja. Guider har korte vejledninger i at tage en stikling, flytte en plante til semi-hydro, vande med væge og blande jord. De virker uden forbindelse, og hver siger hvor den kommer fra. Hvor gartnere gør noget på forskellige måder, viser en guide de almindelige måder side om side og peger ikke på en bedste. De fleste åbner fra det sted de handler om, som en stikling, en plante der er på vej over i LECA eller PON, en selvvandende potte eller Jordblandinger, og du finder dem også under Udstyr og i søgningen.</value>
+  </data>
+  <data name="GuidesLink" xml:space="preserve">
+    <value>Guider: sådan tager du en stikling, flytter til semi-hydro og mere</value>
   </data>
 </root>

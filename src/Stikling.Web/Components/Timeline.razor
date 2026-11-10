@@ -61,7 +61,7 @@ else
                                     <p class="entry-text">@shotPlace</p>
                                 }
                                 <a class="shelf-history-photo" href="shelf/@shot.Photo.Id?mark=@SubjectId"
-                                   aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))">
+                                   aria-label="@F(Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))">
                                     <PhotoImage PhotoId="shot.Photo.Id" Thumbnail="false" FrameOverride="PhotoFrame.From(shot.X, shot.Y, 2.5)" />
                                 </a>
                             </li>
@@ -138,7 +138,7 @@ else
                             }
                             @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
                             {
-                                <p class="entry-comes-back">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.TlComesBack, Labels.Date(comesBack))</p>
+                                <p class="entry-comes-back">@F(Strings.Propagations.TlComesBack, Labels.Date(comesBack))</p>
                             }
 
                             @if (versionsId == entry.Id)
@@ -150,7 +150,7 @@ else
                                         {
                                             <li>
                                                 <span class="entry-versions-meta">
-                                                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.TlVersionMeta, Labels.Date(LocalDay(version.OccurredAt)), Labels.Date(LocalDay(version.ReplacedAt)))
+                                                    @F(Strings.Propagations.TlVersionMeta, Labels.Date(LocalDay(version.OccurredAt)), Labels.Date(LocalDay(version.ReplacedAt)))
                                                 </span>
                                                 @if (string.IsNullOrWhiteSpace(version.Text))
                                                 {

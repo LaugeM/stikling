@@ -1,5 +1,6 @@
 using System.Reflection;
 using System.Text.RegularExpressions;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -25,6 +26,6 @@ public static class AppVersion
 
     /// <summary>"Version 2026.10.09", or "Development build".</summary>
     public static string Label => Date is { } date
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Stikling.Web.Resources.Settings.VersionLabel, date)
+        ? F(Stikling.Web.Resources.Settings.VersionLabel, date)
         : Stikling.Web.Resources.Settings.DevelopmentBuild;
 }

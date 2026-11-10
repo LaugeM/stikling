@@ -18,7 +18,7 @@
 
     @if (IsNew)
     {
-        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.SellerNew, SellerName.Clean(Value))</div>
+        <div class="form-text">@F(Strings.Plants.SellerNew, SellerName.Clean(Value))</div>
     }
 </div>
 

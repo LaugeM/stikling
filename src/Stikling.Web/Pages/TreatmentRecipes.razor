@@ -45,16 +45,16 @@
                         var ingredient = draft.Ingredients[index];
                         <li class="recipe-row">
                             <input class="form-control recipe-ingredient" autocomplete="off"
-                                   aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesIngredientN, index + 1))" value="@ingredient.Name"
+                                   aria-label="@(F(Strings.Pests.RecipesIngredientN, index + 1))" value="@ingredient.Name"
                                    @oninput="e => ingredient.Name = e.Value?.ToString() ?? string.Empty" />
                             <div class="recipe-tools">
                                 <button type="button" class="recipe-tool" disabled="@(index == 0)"
-                                        aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesMoveUp, Some(ingredient)))"
+                                        aria-label="@(F(Strings.Pests.RecipesMoveUp, Some(ingredient)))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="recipe-tool" disabled="@(index == draft.Ingredients.Count - 1)"
-                                        aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesMoveDown, Some(ingredient)))"
+                                        aria-label="@(F(Strings.Pests.RecipesMoveDown, Some(ingredient)))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="recipe-tool remove" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesRemove, Some(ingredient)))"
+                                <button type="button" class="recipe-tool remove" aria-label="@(F(Strings.Pests.RecipesRemove, Some(ingredient)))"
                                         @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                             <DoseInput Label="@Some(ingredient)"
@@ -163,7 +163,7 @@ else
                             </ol>
                             @if (measuring && litres > 0)
                             {
-                                <div class="recipe-fill">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesFillUp, Doses.Water(litres.Value))</div>
+                                <div class="recipe-fill">@F(Strings.Pests.RecipesFillUp, Doses.Water(litres.Value))</div>
                             }
                         }
 
@@ -230,12 +230,12 @@ else
 
     /// <summary>"Used 3 times, last 12 Sep 2026".</summary>
     private static string Used(RecipeUse use) => use.LastUsed is { } last
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesUsed, Plural.Of(use.Times, Strings.Pests.RecipesTime_One, Strings.Pests.RecipesTime_Other), Labels.Date(last))
+        ? F(Strings.Pests.RecipesUsed, Plural.Of(use.Times, Strings.Pests.RecipesTime_One, Strings.Pests.RecipesTime_Other), Labels.Date(last))
         : Strings.Pests.RecipesNotUsed;
 
     private static string DeleteWarning(RecipeUse use) => use.Times == 0
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesDelete, use.Recipe.Name)
-        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.RecipesDeleteUsed, use.Recipe.Name, Plural.Of(use.Times, Strings.Pests.RecipesTime_One, Strings.Pests.RecipesTime_Other));
+        ? F(Strings.Pests.RecipesDelete, use.Recipe.Name)
+        : F(Strings.Pests.RecipesDeleteUsed, use.Recipe.Name, Plural.Of(use.Times, Strings.Pests.RecipesTime_One, Strings.Pests.RecipesTime_Other));
 
     private void Add(string? name) => draft!.Ingredients.Add(new RecipeIngredient { Name = name ?? "" });
 
@@ -274,7 +274,7 @@ else
             return;
 
         draft.Name = draft.Name?.Trim();
-        draft.Method = string.IsNullOrWhiteSpace(draft.Method) ? null : draft.Method.Trim();
+        draft.Method = Clean(draft.Method);
         foreach (var ingredient in draft.Ingredients)
             ingredient.Name = ingredient.Name.Trim();
         // A row added and never filled in is dropped rather than refused

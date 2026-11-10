@@ -68,6 +68,7 @@ else
             {
                 <button type="button" class="btn btn-primary" @onclick="() => OpenUpdate(null)">@Strings.Pests.ProblemHowDoesItLook</button>
                 <button type="button" class="btn btn-outline-primary" @onclick="OpenClose">@Strings.Pests.ProblemItsOver</button>
+                <button type="button" class="btn btn-outline-primary" @onclick="OpenCheck">@Strings.Pests.SymptomCheckButton</button>
             }
             else
             {
@@ -173,7 +174,7 @@ else
     @if (past.Count > 0)
     {
         <section class="problem-before" aria-labelledby="problem-before-title">
-            <h2 id="problem-before-title">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.ProblemBefore, BeforeSign)</h2>
+            <h2 id="problem-before-title">@F(Strings.Pests.ProblemBefore, BeforeSign)</h2>
             <p class="problem-before-hint">@Strings.Pests.ProblemBeforeHint</p>
             <ul class="item-list">
                 @foreach (var earlier in past.Take(5))
@@ -225,6 +226,10 @@ else
 
             case Shown.Edit:
                 <ProblemSheet Plant="plant" Mode="ProblemSheetMode.Open" Problem="problem" BackLabel="@Strings.Common.Cancel" OnBack="CloseSheet" OnSaved="SavedAsync" />
+                break;
+
+            case Shown.Check:
+                <SymptomCheckView Plant="plant" Signs="problem.KnownSigns" BackLabel="@Strings.Common.Back" OnBack="CloseSheet" />
                 break;
 
             case Shown.Close:
@@ -290,7 +295,7 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum Shown { None, Update, Edit, Close, Died }
+    private enum Shown { None, Update, Edit, Check, Close, Died }
 
     private Problem? problem;
     private Plant? plant;
@@ -325,6 +330,7 @@ else
     {
         Shown.Update => Strings.Pests.ProblemHowDoesItLook,
         Shown.Edit => Strings.Pests.ProblemSomethingsWrong,
+        Shown.Check => Strings.Pests.SymptomCheckButton,
         Shown.Close => Strings.Pests.ProblemHowDidItEnd,
         Shown.Died => Strings.Pests.ProblemItDied,
         _ => ""
@@ -380,6 +386,8 @@ else
     }
 
     private void OpenEdit() => sheet = Shown.Edit;
+
+    private void OpenCheck() => sheet = Shown.Check;
 
     private void OpenClose()
     {
@@ -438,7 +446,7 @@ else
         {
             var before = plant!.Copy();
             plant.Status = PlantStatus.Died;
-            plant.CauseOfDeath = string.IsNullOrWhiteSpace(cause) ? null : cause.Trim();
+            plant.CauseOfDeath = Clean(cause);
             await PlantService.UpdateAsync(before, plant, Labels.For);
             sheet = Shown.None;
             status = Strings.Pests.ProblemMarkedDied;

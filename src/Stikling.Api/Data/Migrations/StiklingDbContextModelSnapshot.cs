@@ -59,6 +59,24 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("DeletedAccounts");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonId", "Day");
+
+                    b.HasIndex("Day");
+
+                    b.ToTable("IdentificationUses");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>
                 {
                     b.Property<Guid>("CollectionId")
@@ -436,6 +454,15 @@ namespace Stikling.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>

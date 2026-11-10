@@ -12,8 +12,8 @@ using Stikling.Api.Data;
 namespace Stikling.Api.Data.Migrations
 {
     [DbContext(typeof(StiklingDbContext))]
-    [Migration("20261106164014_AddPublicPages")]
-    partial class AddPublicPages
+    [Migration("20261106155830_AddIdentificationUses")]
+    partial class AddIdentificationUses
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -60,6 +60,24 @@ namespace Stikling.Api.Data.Migrations
                     b.HasKey("ClerkUserId");
 
                     b.ToTable("DeletedAccounts");
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly>("Day")
+                        .HasColumnType("date");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.HasKey("PersonId", "Day");
+
+                    b.HasIndex("Day");
+
+                    b.ToTable("IdentificationUses");
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>
@@ -179,118 +197,6 @@ namespace Stikling.Api.Data.Migrations
                     b.HasKey("CollectionId", "PhotoId", "Size");
 
                     b.ToTable("PhotoImages");
-                });
-
-            modelBuilder.Entity("Stikling.Api.Data.PublicPage", b =>
-                {
-                    b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<Guid>("CollectionId")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<DateTimeOffset>("CreatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<Guid?>("CreatedBy")
-                        .HasColumnType("uniqueidentifier");
-
-                    b.Property<string>("Language")
-                        .IsRequired()
-                        .HasMaxLength(10)
-                        .HasColumnType("nvarchar(10)");
-
-                    b.Property<string>("Layout")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Shelves");
-
-                    b.Property<string>("Line")
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
-
-                    b.Property<string>("Name")
-                        .HasMaxLength(30)
-                        .HasColumnType("nvarchar(30)");
-
-                    b.Property<string>("NameClaims")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Order")
-                        .IsRequired()
-                        .ValueGeneratedOnAdd()
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasDefaultValue("Newest");
-
-                    b.Property<bool>("Searchable")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ShowPropagations")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("bit")
-                        .HasDefaultValue(true);
-
-                    b.Property<bool>("ShowStories")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ShowSwap")
-                        .HasColumnType("bit");
-
-                    b.Property<bool>("ShowWishlist")
-                        .HasColumnType("bit");
-
-                    b.Property<string>("TimeZone")
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
-
-                    b.Property<string>("Title")
-                        .HasMaxLength(80)
-                        .HasColumnType("nvarchar(80)");
-
-                    b.Property<string>("Token")
-                        .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .UseCollation("Latin1_General_100_BIN2");
-
-                    b.Property<DateTimeOffset?>("TurnedOffAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.Property<DateTimeOffset>("UpdatedAt")
-                        .HasColumnType("datetimeoffset");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("CollectionId")
-                        .IsUnique()
-                        .HasFilter("[TurnedOffAt] IS NULL");
-
-                    b.HasIndex("Name")
-                        .IsUnique()
-                        .HasFilter("[Name] IS NOT NULL");
-
-                    b.HasIndex("Token")
-                        .IsUnique();
-
-                    b.HasIndex("CreatedBy", "CreatedAt");
-
-                    b.ToTable("PublicPages");
-                });
-
-            modelBuilder.Entity("Stikling.Api.Data.PublicPageName", b =>
-                {
-                    b.Property<string>("NameHash")
-                        .HasColumnType("char(64)")
-                        .IsFixedLength();
-
-                    b.HasKey("NameHash");
-
-                    b.ToTable("PublicPageNames");
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.ShareLink", b =>
@@ -441,6 +347,15 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("Records");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>
                 {
                     b.HasOne("Stikling.Api.Data.Collection", "Collection")
@@ -485,20 +400,6 @@ namespace Stikling.Api.Data.Migrations
                         .HasForeignKey("CollectionId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-                });
-
-            modelBuilder.Entity("Stikling.Api.Data.PublicPage", b =>
-                {
-                    b.HasOne("Stikling.Api.Data.Collection", null)
-                        .WithMany()
-                        .HasForeignKey("CollectionId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Stikling.Api.Data.Person", null)
-                        .WithMany()
-                        .HasForeignKey("CreatedBy")
-                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.ShareLink", b =>

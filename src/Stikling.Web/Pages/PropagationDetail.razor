@@ -23,6 +23,9 @@
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject SettingsService SettingsService
+@inject IdentificationService Identification
+@inject SubjectPhotos SubjectPhotos
+@using Stikling.Core.Identification
 @using System.Globalization
 @using Stikling.Core.Propagations
 @using Stikling.Core.Settings
@@ -45,7 +48,7 @@ else
             {
                 <div class="detail-hero">
                     <button type="button" class="detail-hero-open" aria-label="@Strings.Propagations.DetOpenCover" @onclick="() => timeline?.OpenPhoto(coverId)">
-                        <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPhotoOf, propagation.DisplayName)" />
+                        <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@F(Strings.Propagations.DetPhotoOf, propagation.DisplayName)" />
                     </button>
                 </div>
             }
@@ -89,6 +92,13 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    @if (identifyOffered && IdentifyWanted)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            @Strings.Identify.Button
+                        </button>
+                    }
                     <NumberClashNote Code="@propagation.CollectionNumber" Clashes="numberClashes" />
                     <div class="profile-badges">
                         @if (propagation.IsDormant)
@@ -97,7 +107,7 @@ else
                         }
                         @if (propagation.SpareAvailable > 0)
                         {
-                            <a class="badge swap-badge" href="swap">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardToSwap, propagation.SpareAvailable)</a>
+                            <a class="badge swap-badge" href="swap">@F(Strings.Propagations.CardToSwap, propagation.SpareAvailable)</a>
                         }
                         @if (!propagation.IsActive)
                         {
@@ -123,21 +133,21 @@ else
                         {
                             <div>
                                 <dt>@(propagation.Type == PropagationType.Seed ? Strings.Propagations.DetFirstSeedling : Strings.Propagations.EditFirstRoot)</dt>
-                                <dd>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDayBold, toRoot))</dd>
+                                <dd>@((MarkupString)F(Strings.Propagations.DetDayBold, toRoot))</dd>
                             </div>
                         }
                         <div>
                             <dt>@Strings.Propagations.EditPottedUp</dt>
-                            <dd>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPottedOfBold, result.PottedUp, result.Started))</dd>
+                            <dd>@((MarkupString)F(Strings.Propagations.DetPottedOfBold, result.PottedUp, result.Started))</dd>
                         </div>
                     </dl>
                     @if (result.GivenAway > 0)
                     {
-                        <p class="outcome-given">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetOutcomeGiven, result.GivenAway)</p>
+                        <p class="outcome-given">@F(Strings.Propagations.DetOutcomeGiven, result.GivenAway)</p>
                     }
                     @if (result.Failed > 0)
                     {
-                        <p class="outcome-failed">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetOutcomeFailed, result.Failed)</p>
+                        <p class="outcome-failed">@F(Strings.Propagations.DetOutcomeFailed, result.Failed)</p>
                     }
                     @if (result.Plants.Count > 0)
                     {
@@ -159,15 +169,15 @@ else
                             <h3 class="outcome-differed-title">@Strings.Propagations.DetDiffTitle</h3>
                             @if (!comparison.HasEnough)
                             {
-                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffTooFew, FailedComparisons.MinimumRooted, comparison.Rooted)</p>
+                                <p>@F(Strings.Propagations.DetDiffTooFew, FailedComparisons.MinimumRooted, comparison.Rooted)</p>
                             }
                             else if (comparison.NothingStandsOut)
                             {
-                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffNothing, comparison.Rooted)</p>
+                                <p>@F(Strings.Propagations.DetDiffNothing, comparison.Rooted)</p>
                             }
                             else
                             {
-                                <p>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffCompared, comparison.Rooted)</p>
+                                <p>@F(Strings.Propagations.DetDiffCompared, comparison.Rooted)</p>
                                 <ul>
                                     @foreach (var difference in comparison.Differences)
                                     {
@@ -201,7 +211,7 @@ else
                 }
                 @if (parent is not null)
                 {
-                    <text> · @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetFromParent, $"<a class=\"link-action\" href=\"plants/{parent.Id}\">{System.Net.WebUtility.HtmlEncode(parent.DisplayName)}</a>"))</text>
+                    <text> · @((MarkupString)F(Strings.Propagations.DetFromParent, $"<a class=\"link-action\" href=\"plants/{parent.Id}\">{System.Net.WebUtility.HtmlEncode(parent.DisplayName)}</a>"))</text>
                 }
                 else if (sellers.For(propagation.SellerId, propagation.Source) is { } headerSeller)
                 {
@@ -213,7 +223,7 @@ else
                 }
                 @if (generation is { Number: >= 2 } line)
                 {
-                    <text> · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.FactGeneration, Ordinal.Of(line.Number))</text>
+                    <text> · @F(Strings.Propagations.FactGeneration, Ordinal.Of(line.Number))</text>
                 }
                 @if (Pace is { IsSlow: true })
                 {
@@ -273,7 +283,7 @@ else
                                 <a href="plants/@parent.Id">@parent.DisplayName</a>
                                 @if (generation is { Number: >= 2 } here)
                                 {
-                                    <div class="text-body-secondary small">@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.FamilyGeneration, System.Net.WebUtility.HtmlEncode(Ordinal.Of(here.Number)), $"<a class=\"link-action\" href=\"plants/{here.Oldest.Id}\">{System.Net.WebUtility.HtmlEncode(here.Oldest.DisplayName)}</a>"))</div>
+                                    <div class="text-body-secondary small">@((MarkupString)F(Strings.Propagations.FamilyGeneration, System.Net.WebUtility.HtmlEncode(Ordinal.Of(here.Number)), $"<a class=\"link-action\" href=\"plants/{here.Oldest.Id}\">{System.Net.WebUtility.HtmlEncode(here.Oldest.DisplayName)}</a>"))</div>
                                 }
                             }
                             else if (sellers.For(propagation.SellerId, propagation.Source) is { } seller)
@@ -309,7 +319,7 @@ else
                             <dd>
                                 <span class="@(pace.IsSlow ? "pace-slow" : "pace-on-time")">@(pace.IsSlow ? Strings.Propagations.DetSlower : Strings.Propagations.DetOnTime)</span>
                                 <div class="text-body-secondary small">
-                                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPace,
+                                    @F(Strings.Propagations.DetPace,
                                         pace.Compared, Labels.For(propagation.Type).ToLowerInvariant(), Labels.For(propagation.Medium),
                                         Labels.Stage(PropagationStage.Rooted, propagation.Type).ToLowerInvariant(),
                                         Plural.Of(pace.UsualDays, Strings.Propagations.Days_One, Strings.Propagations.Days_Other))
@@ -326,7 +336,7 @@ else
                         @if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } cormSize)
                         {
                             <dt>@Strings.Propagations.DetCormSize</dt>
-                            <dd>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMm, Lengths.Mm(cormSize))</dd>
+                            <dd>@F(Strings.Propagations.DetMm, Lengths.Mm(cormSize))</dd>
                         }
 
                         @if (propagation.Type == PropagationType.Seed && propagation.SeedsGerminated is { } up)
@@ -334,11 +344,11 @@ else
                             <dt>@Strings.Propagations.DetSeeds</dt>
                             <dd>
                                 @(propagation.GerminationRate is { } rate
-                                    ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetSeedsUpRate, up, propagation.InitialCount, Math.Round(rate * 100).ToString("0", CultureInfo.CurrentCulture))
-                                    : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetSeedsUp, up, propagation.InitialCount))
+                                    ? F(Strings.Propagations.DetSeedsUpRate, up, propagation.InitialCount, Math.Round(rate * 100).ToString("0", CultureInfo.CurrentCulture))
+                                    : F(Strings.Propagations.DetSeedsUp, up, propagation.InitialCount))
                                 @if (propagation.FirstGerminatedOn is { } first)
                                 {
-                                    <text> · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetFirstOn, Labels.Date(first))</text>
+                                    <text> · @F(Strings.Propagations.DetFirstOn, Labels.Date(first))</text>
                                 }
                             </dd>
                         }
@@ -349,13 +359,17 @@ else
                         <dt>@Strings.Propagations.EditGrowsIn</dt>
                         <dd>
                             @Labels.For(propagation.Medium)
+                            @if (propagation.Type == PropagationType.Cutting)
+                            {
+                                <div class="detail-sub"><GuideLink Guide="@GuideBook.Cutting" From="@GuideLinks.FromPropagation(propagation.Id)" /></div>
+                            }
                             @if (ContainerName is { } container)
                             {
                                 <text> · @container</text>
                             }
                             @if (Mix is { } mix)
                             {
-                                <div class="detail-sub">@string.Format(CultureInfo.CurrentCulture, mix.IsRetired ? Strings.Propagations.DetInMixRetired : Strings.Propagations.DetInMix, mix.Name)</div>
+                                <div class="detail-sub">@F(mix.IsRetired ? Strings.Propagations.DetInMixRetired : Strings.Propagations.DetInMix, mix.Name)</div>
                                 @if (!string.IsNullOrWhiteSpace(mix.Recipe))
                                 {
                                     <div class="detail-sub">@mix.Recipe</div>
@@ -412,7 +426,7 @@ else
                         @if (propagation.DormantSince is { } dormantSince)
                         {
                             <dt>@Strings.Propagations.CardDormant</dt>
-                            <dd>@(dormantSince == Today ? Strings.Propagations.DetSinceToday : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetSinceDate, Labels.Date(dormantSince), Plural.Of(propagation.DaysDormant(Today) ?? 0, Strings.Propagations.Days_One, Strings.Propagations.Days_Other)))</dd>
+                            <dd>@(dormantSince == Today ? Strings.Propagations.DetSinceToday : F(Strings.Propagations.DetSinceDate, Labels.Date(dormantSince), Plural.Of(propagation.DaysDormant(Today) ?? 0, Strings.Propagations.Days_One, Strings.Propagations.Days_Other)))</dd>
                         }
 
                         <PublicPageRow SubjectId="propagation.Id" />
@@ -453,7 +467,7 @@ else
                     @if (confirmDelete)
                     {
                         <p class="mb-2">
-                            @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetConfirmDelete, System.Net.WebUtility.HtmlEncode(propagation.DisplayName)))
+                            @((MarkupString)F(Strings.Propagations.DetConfirmDelete, System.Net.WebUtility.HtmlEncode(propagation.DisplayName)))
                         </p>
                         <button class="btn btn-danger btn-sm" @onclick="DeleteAsync">@Strings.Common.Delete</button>
                         <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
@@ -467,7 +481,7 @@ else
         </div>
 
         <div class="profile-history">
-            <div class="page-dock" role="group" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetAddTo, propagation.DisplayName)">
+            <div class="page-dock" role="group" aria-label="@F(Strings.Propagations.DetAddTo, propagation.DisplayName)">
                 @if (googleOn)
                 {
                     <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
@@ -498,7 +512,7 @@ else
                         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
                         <span class="dock-label">@Strings.Propagations.DetCare</span>
                     </button>
-                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
                     </button>
@@ -589,10 +603,14 @@ else
                             <label class="btn btn-outline-primary @(stage < propagation.Stage ? "passed" : null)" for="@id">@Labels.Stage(stage, propagation.Type)</label>
                         }
                     </div>
+                    @if (propagation.Type == PropagationType.Cutting)
+                    {
+                        <div class="mb-3"><GuideLink Guide="@GuideBook.Cutting" From="@GuideLinks.FromPropagation(propagation.Id)" /></div>
+                    }
 
                     <dl class="detail-list mb-2">
                         <dt>@Strings.Propagations.DetStarted</dt>
-                        <dd>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(propagation.StartedOn), propagation.DaysSinceStart(Today))</dd>
+                        <dd>@F(Strings.Propagations.DetDateDay, Labels.Date(propagation.StartedOn), propagation.DaysSinceStart(Today))</dd>
 
                         @if (propagation.Type == PropagationType.Seed)
                         {
@@ -600,7 +618,7 @@ else
                             <dd>
                                 @if (propagation.FirstGerminatedOn is { } germinated)
                                 {
-                                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(germinated), Math.Max(0, germinated.DayNumber - propagation.StartedOn.DayNumber))
+                                    @F(Strings.Propagations.DetDateDay, Labels.Date(germinated), Math.Max(0, germinated.DayNumber - propagation.StartedOn.DayNumber))
                                 }
                                 else
                                 {
@@ -614,7 +632,7 @@ else
                             <dd>
                                 @if (propagation.FirstRootOn is { } root)
                                 {
-                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=first-root">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)</a>
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=first-root">@F(Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)</a>
                                 }
                                 else
                                 {
@@ -627,7 +645,7 @@ else
                         <dd>
                             @if (propagation.FirstLeafOn is { } leaf)
                             {
-                                <a class="link-action" href="propagations/@propagation.Id/edit?field=first-leaf">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)</a>
+                                <a class="link-action" href="propagations/@propagation.Id/edit?field=first-leaf">@F(Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)</a>
                             }
                             else if (askLeafDay)
                             {
@@ -653,7 +671,7 @@ else
                             <dd>@Labels.Date(rootedOn)</dd>
                         }
                     </dl>
-                    <p class="form-text mb-3">@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetWrongDate, $"<a href=\"propagations/{propagation.Id}/edit\">{System.Net.WebUtility.HtmlEncode(Strings.Common.Edit)}</a>"))</p>
+                    <p class="form-text mb-3">@((MarkupString)F(Strings.Propagations.DetWrongDate, $"<a href=\"propagations/{propagation.Id}/edit\">{System.Net.WebUtility.HtmlEncode(Strings.Common.Edit)}</a>"))</p>
 
                     <div class="sheet-section">
                         <div class="d-flex gap-2">
@@ -671,7 +689,7 @@ else
                     @if (InPlantMedium)
                     {
                         <p class="form-text mb-3">
-                            @string.Format(CultureInfo.CurrentCulture, propagation.RemainingCount > 1 ? Strings.Propagations.DetPotUpEachMedium : Strings.Propagations.DetPotUpOneMedium, Labels.MediumWord(propagation.Medium))
+                            @F(propagation.RemainingCount > 1 ? Strings.Propagations.DetPotUpEachMedium : Strings.Propagations.DetPotUpOneMedium, Labels.MediumWord(propagation.Medium))
                             @Strings.Propagations.DetKeepsHistory
                         </p>
                     }
@@ -739,7 +757,7 @@ else
                         <input id="potup-name" class="form-control" @bind="up.Nickname" @bind:event="oninput" placeholder="@(propagation.BotanicalName ?? "")" />
                         @if (up.EffectiveMode == PotUpKind.Each && (up.Count > 1 || propagation.PottedUpCount > 0))
                         {
-                            <div class="form-text">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetNumbered, string.IsNullOrWhiteSpace(up.Nickname) ? "Coleus" : up.Nickname.Trim(), propagation.PottedUpCount + 1)</div>
+                            <div class="form-text">@F(Strings.Propagations.DetNumbered, string.IsNullOrWhiteSpace(up.Nickname) ? "Coleus" : up.Nickname.Trim(), propagation.PottedUpCount + 1)</div>
                         }
                     </div>
                     @if (up.EffectiveMode != PotUpKind.Into)
@@ -787,8 +805,8 @@ else
                     <div class="form-actions">
                         <button type="button" class="btn btn-primary" disabled="@(busy || !up.CanSave)" @onclick="PotUpAsync">
                             @(InPlantMedium
-                                ? (up.Count == 1 ? PotUpWord : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMakePlants, up.Count))
-                                : (up.Count == 1 ? PotUpWord : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPotUpN, up.Count)))
+                                ? (up.Count == 1 ? PotUpWord : F(Strings.Propagations.DetMakePlants, up.Count))
+                                : (up.Count == 1 ? PotUpWord : F(Strings.Propagations.DetPotUpN, up.Count)))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">@Strings.Common.Back</button>
                     </div>
@@ -833,7 +851,7 @@ else
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-danger" disabled="@(busy || !fail.CountIsValid)" @onclick="MarkFailedAsync">
-                            @(fail.Count == 1 ? Strings.Propagations.DetMarkAsFailed : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkNFailed, fail.Count))
+                            @(fail.Count == 1 ? Strings.Propagations.DetMarkAsFailed : F(Strings.Propagations.DetMarkNFailed, fail.Count))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">@Strings.Common.Back</button>
                     </div>
@@ -867,7 +885,7 @@ else
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-primary" disabled="@(busy || !giving.CountIsValid)" @onclick="GiveAwayAsync">
-                            @(giving.Count == 1 ? Strings.Propagations.DetMarkAsGiven : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkNGiven, giving.Count))
+                            @(giving.Count == 1 ? Strings.Propagations.DetMarkAsGiven : F(Strings.Propagations.DetMarkNGiven, giving.Count))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">@Strings.Common.Back</button>
                     </div>
@@ -896,7 +914,7 @@ else
                             <li>
                                 <button type="button" class="sheet-action" @onclick="OpenSwap">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" /></svg>
-                                    <span class="sheet-action-text"><b>@Strings.Propagations.EditSwap</b><small>@(propagation.SpareAvailable > 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetOffered, propagation.SpareAvailable) : Strings.Propagations.DetOfferSome)</small></span>
+                                    <span class="sheet-action-text"><b>@Strings.Propagations.EditSwap</b><small>@(propagation.SpareAvailable > 0 ? F(Strings.Propagations.DetOffered, propagation.SpareAvailable) : Strings.Propagations.DetOfferSome)</small></span>
                                 </button>
                             </li>
                         }
@@ -917,7 +935,7 @@ else
                             {
                                 <button type="button" class="sheet-action" disabled="@busy" @onclick="EndDormancyAsync">
                                     <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></svg>
-                                    <span class="sheet-action-text"><b>@Strings.Propagations.DetWokenUp</b><small>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDormantFor, DaysLabel(propagation.DaysDormant(Today)))</small></span>
+                                    <span class="sheet-action-text"><b>@Strings.Propagations.DetWokenUp</b><small>@F(Strings.Propagations.DetDormantFor, DaysLabel(propagation.DaysDormant(Today)))</small></span>
                                 </button>
                             }
                             else
@@ -936,7 +954,7 @@ else
                         <label class="form-label" for="spare-count">@Strings.Propagations.EditSpare</label>
                         <input id="spare-count" type="number" class="form-control" inputmode="numeric" min="0" max="@propagation.RemainingCount"
                                @bind="swapCount" />
-                        <div class="form-text">@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetSwapHint, propagation.RemainingCount, $"<a href=\"swap\">{System.Net.WebUtility.HtmlEncode(Strings.Propagations.ListSwapLink)}</a>"))</div>
+                        <div class="form-text">@((MarkupString)F(Strings.Propagations.DetSwapHint, propagation.RemainingCount, $"<a href=\"swap\">{System.Net.WebUtility.HtmlEncode(Strings.Propagations.ListSwapLink)}</a>"))</div>
                     </div>
                     <div class="form-actions">
                         <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SetSpareAsync">@Strings.Common.Save</button>
@@ -971,6 +989,11 @@ else
             }
         </Sheet>
     }
+}
+
+@if (identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" SubjectId="propagation?.Id" CanKeepPhoto="true" OnPicked="PickIdentifiedAsync" />
 }
 
 @code {
@@ -1076,15 +1099,15 @@ else
 
     private static string DifferenceText(FailedDifference difference) => difference switch
     {
-        MediumDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffMedium, Labels.For(d.Medium), d.Same, d.MostUsedCount, Labels.For(d.MostUsed)),
-        AidUsedDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffAidUsed, Labels.For(d.Aid), d.RootedWith),
-        AidNotUsedDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffAidNotUsed, Labels.For(d.Aid), d.RootedWith),
-        StartMonthDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffMonth,
+        MediumDifference d => F(Strings.Propagations.DetDiffMedium, Labels.For(d.Medium), d.Same, d.MostUsedCount, Labels.For(d.MostUsed)),
+        AidUsedDifference d => F(Strings.Propagations.DetDiffAidUsed, Labels.For(d.Aid), d.RootedWith),
+        AidNotUsedDifference d => F(Strings.Propagations.DetDiffAidNotUsed, Labels.For(d.Aid), d.RootedWith),
+        StartMonthDifference d => F(Strings.Propagations.DetDiffMonth,
             CareIntervals.MonthName(d.Month), d.Around,
             CareIntervals.MonthName(d.Month == 1 ? 12 : d.Month - 1), CareIntervals.MonthName(d.Month == 12 ? 1 : d.Month + 1),
             d.MostUsedCount, CareIntervals.MonthName(d.MostUsedMonth)),
-        WaterChangeDifference { DaysHere: { } here } d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffWater, here, d.DaysUsual, d.Compared),
-        WaterChangeDifference d => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDiffNoWater, d.Compared, d.DaysUsual),
+        WaterChangeDifference { DaysHere: { } here } d => F(Strings.Propagations.DetDiffWater, here, d.DaysUsual, d.Compared),
+        WaterChangeDifference d => F(Strings.Propagations.DetDiffNoWater, d.Compared, d.DaysUsual),
         _ => ""
     };
     private PropagationCareLatest? lastWatered;
@@ -1145,7 +1168,7 @@ else
 
     private static string DaysLabel(int? days) => days is null or 0 ? Strings.Propagations.DetSinceTodayLower : Plural.Of(days.Value, Strings.Propagations.DetForDays_One, Strings.Propagations.DetForDays_Other);
 
-    private string HowManyLeft => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetHowManyLeft, propagation!.RemainingCount);
+    private string HowManyLeft => F(Strings.Propagations.DetHowManyLeft, propagation!.RemainingCount);
 
     // Only the date, or "Not yet". Recording a milestone happens in the stage sheet.
     private RenderFragment MilestoneRow(string name, DateOnly? date, int? days, string field) => __builder =>
@@ -1156,7 +1179,7 @@ else
         <dd>
             @if (date is { } on)
             {
-                <a class="link-action" href="propagations/@propagation!.Id/edit?field=@field">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetDateDay, Labels.Date(on), days)</a>
+                <a class="link-action" href="propagations/@propagation!.Id/edit?field=@field">@F(Strings.Propagations.DetDateDay, Labels.Date(on), days)</a>
             }
             else
             {
@@ -1170,11 +1193,11 @@ else
         get
         {
             var p = propagation!;
-            var parts = new List<string> { string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetCountStarted, p.InitialCount) };
-            if (p.PottedUpCount > 0) parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetCountPotted, p.PottedUpCount));
-            if (p.GivenAwayCount > 0) parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetCountGiven, p.GivenAwayCount));
-            if (p.FailedCount > 0) parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetCountFailed, p.FailedCount));
-            if (p.IsActive && p.RemainingCount != p.InitialCount) parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardLeft, p.RemainingCount));
+            var parts = new List<string> { F(Strings.Propagations.DetCountStarted, p.InitialCount) };
+            if (p.PottedUpCount > 0) parts.Add(F(Strings.Propagations.DetCountPotted, p.PottedUpCount));
+            if (p.GivenAwayCount > 0) parts.Add(F(Strings.Propagations.DetCountGiven, p.GivenAwayCount));
+            if (p.FailedCount > 0) parts.Add(F(Strings.Propagations.DetCountFailed, p.FailedCount));
+            if (p.IsActive && p.RemainingCount != p.InitialCount) parts.Add(F(Strings.Propagations.CardLeft, p.RemainingCount));
             return string.Join(" · ", parts);
         }
     }
@@ -1215,8 +1238,57 @@ else
     // What common plants usually like, here only for the Pets row. Empty if it couldn't be read.
     private PlantCareBook careBook = PlantCareBook.Empty;
 
+    private bool identifyOffered;
+    private bool identifyOpen;
+
+    // "Find the name from a photo" under the name of an active propagation that has no name of its own or
+    // its parent's, or whose own name is unsure
+    private bool IdentifyWanted =>
+        propagation is { IsActive: true }
+        && (string.IsNullOrWhiteSpace(propagation.Genus)
+            ? parent is null || string.IsNullOrWhiteSpace(parent.Genus)
+            : IdentificationRules.NameWanted(propagation.Genus, propagation.NameQualifier));
+
+    // A name picked here is saved at once, as a guess. The photo, if the person kept it, goes on the history.
+    private async Task PickIdentifiedAsync(IdentifyPick pick)
+    {
+        if (propagation is null)
+            return;
+        busy = true;
+        try
+        {
+            var before = propagation.Copy();
+            var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+            genus ??= pick.Suggestion.Genus;
+            species ??= pick.Suggestion.Species;
+            propagation.Cultivar = IdentificationRules.CultivarAfterPick(before.Genus, before.Species, before.Cultivar, genus, species);
+            propagation.Genus = genus;
+            propagation.Species = species;
+            propagation.NameQualifier = IdentificationRules.QualifierAfterPick(before.NameQualifier);
+            await PropagationService.UpdateAsync(before, propagation, Labels.For(propagation));
+
+            message = null;
+            if (pick.PhotoInput is { } input)
+            {
+                var (photoMessage, _) = await SubjectPhotos.TakeAsync(input, propagation);
+                message = photoMessage;
+            }
+            historyVersion++;
+            await LoadAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            message = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
     private async Task LoadAsync()
     {
+        identifyOffered = await Identification.IsOfferedAsync();
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
         await Covers.EnsureLoadedAsync();
@@ -1306,10 +1378,10 @@ else
     };
 
     private static string WateredText(int daysAgo) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetWateredAgo, Labels.DaysAgo(daysAgo));
+        F(Strings.Propagations.DetWateredAgo, Labels.DaysAgo(daysAgo));
 
     private static string ChangedText(int daysAgo) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetChangedAgo, Labels.DaysAgo(daysAgo));
+        F(Strings.Propagations.DetChangedAgo, Labels.DaysAgo(daysAgo));
 
     private async Task CareLoggedAsync()
     {
@@ -1349,7 +1421,7 @@ else
             var hadFirstRoot = propagation.FirstRootOn is not null;
             await PropagationService.SetStageAsync(propagation, stage, Labels.For(propagation), seenToday: true);
             if (!hadFirstRoot && propagation.FirstRootOn is not null && propagation.DaysToFirstRoot is { } rootDay)
-                moment = new(string.Format(CultureInfo.CurrentCulture, propagation.Type == PropagationType.Seed ? Strings.Propagations.MomentFirstSeedling : Strings.Propagations.MomentFirstRoot, rootDay), propagation.DisplayName);
+                moment = new(F(propagation.Type == PropagationType.Seed ? Strings.Propagations.MomentFirstSeedling : Strings.Propagations.MomentFirstRoot, rootDay), propagation.DisplayName);
             message = null;
             historyVersion++;
             stageView = StageView.None;
@@ -1386,7 +1458,7 @@ else
             var hadFirstLeaf = propagation.FirstLeafOn is not null;
             await PropagationService.RecordMilestoneAsync(propagation, Milestone.FirstLeaf, Labels.For(propagation), sawLeafDay);
             if (!hadFirstLeaf && propagation.FirstLeafOn is not null && propagation.DaysToFirstLeaf is { } leafDays)
-                moment = new(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentFirstLeaf, leafDays), propagation.DisplayName);
+                moment = new(F(Strings.Propagations.MomentFirstLeaf, leafDays), propagation.DisplayName);
             message = null;
             historyVersion++;
             askLeafDay = false;
@@ -1517,7 +1589,7 @@ else
             await LoadAsync();
             madePlants = result.Plants;
             if (firstPotUp && madePlants.Count > 0 && propagation is { } potted)
-                moment = new(madePlants.Count == 1 ? Strings.Propagations.MomentNowPlant : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.MomentNowPlants, madePlants.Count),
+                moment = new(madePlants.Count == 1 ? Strings.Propagations.MomentNowPlant : F(Strings.Propagations.MomentNowPlants, madePlants.Count),
                     Plural.Of(potted.DaysSinceStart(Today), Strings.Propagations.MomentAfterDays_One, Strings.Propagations.MomentAfterDays_Other));
             if (result.LaterError is { } later)
             {
@@ -1525,14 +1597,14 @@ else
                 // The plants were saved before the step that failed, so they are found by their ids
                 madePlants = [.. allPlants.Where(p => form.PlantIds.Contains(p.Id))];
             }
-            message = madePlants.Count == 1 ? Strings.Propagations.DetPottedUpOne : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPottedUpMany, madePlants.Count);
+            message = madePlants.Count == 1 ? Strings.Propagations.DetPottedUpOne : F(Strings.Propagations.DetPottedUpMany, madePlants.Count);
             historyVersion++;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Potting up the propagation failed");
             madePlants = [];
-            message = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetPotUpFailed, ex.Message);
+            message = F(Strings.Propagations.DetPotUpFailed, ex.Message);
             stageView = StageView.None;
         }
         finally
@@ -1554,7 +1626,7 @@ else
             await LoadAsync();
             if (result.LaterError is { } later)
                 Logger.LogError(later, "A step after marking units as failed failed");
-            message = form.Count == 1 ? Strings.Propagations.DetMarkedFailedOne : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkedFailedMany, form.Count);
+            message = form.Count == 1 ? Strings.Propagations.DetMarkedFailedOne : F(Strings.Propagations.DetMarkedFailedMany, form.Count);
             historyVersion++;
             madePlants = [];
             stageView = StageView.None;
@@ -1563,7 +1635,7 @@ else
         {
             Logger.LogError(ex, "Marking units as failed failed");
             madePlants = [];
-            message = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkFailedFailed, ex.Message);
+            message = F(Strings.Propagations.DetMarkFailedFailed, ex.Message);
             stageView = StageView.None;
         }
         finally
@@ -1585,7 +1657,7 @@ else
             await LoadAsync();
             if (result.LaterError is { } later)
                 Logger.LogError(later, "A step after marking units as given away failed");
-            message = form.Count == 1 ? Strings.Propagations.DetMarkedGivenOne : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkedGivenMany, form.Count);
+            message = form.Count == 1 ? Strings.Propagations.DetMarkedGivenOne : F(Strings.Propagations.DetMarkedGivenMany, form.Count);
             historyVersion++;
             madePlants = [];
             // Offers to send whoever got it the story, where links are available
@@ -1595,7 +1667,7 @@ else
         {
             Logger.LogError(ex, "Marking units as given away failed");
             madePlants = [];
-            message = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.DetMarkGivenFailed, ex.Message);
+            message = F(Strings.Propagations.DetMarkGivenFailed, ex.Message);
             stageView = StageView.None;
         }
         finally

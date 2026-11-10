@@ -67,7 +67,7 @@ else
             var title = CareIntervals.Label(interval.Kind, ownName, feed);
 
             if (CareIntervals.CountsAsWatering(interval, CareLabels.Lookup(ownKinds.Values)))
-                return new Row(interval, title, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalOffCountsAsWatering, ownName));
+                return new Row(interval, title, F(Strings.Care.IntervalOffCountsAsWatering, ownName));
 
             var every = CareIntervals.EveryText(interval);
             var parts = new List<string> { char.ToUpperInvariant(every[0]) + every[1..] };
@@ -85,10 +85,9 @@ else
         var count = CareIntervals.PlantsIn(interval, plants, places).Count;
         return interval.Scope switch
         {
-            CareScope.Everywhere => string.Format(System.Globalization.CultureInfo.CurrentCulture,
-                interval.OnlySemiHydro ? Strings.Care.IntervalCoversSemiHydro : Strings.Care.IntervalCoversAll, count),
-            CareScope.Room => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversRoom, places.NameOf(interval.PlaceId) ?? Strings.Care.IntervalCoversARoom, count),
-            CareScope.Tag => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalCoversTag, interval.Tag, Labels.Plants(count)),
+            CareScope.Everywhere => F(interval.OnlySemiHydro ? Strings.Care.IntervalCoversSemiHydro : Strings.Care.IntervalCoversAll, count),
+            CareScope.Room => F(Strings.Care.IntervalCoversRoom, places.NameOf(interval.PlaceId) ?? Strings.Care.IntervalCoversARoom, count),
+            CareScope.Tag => F(Strings.Care.IntervalCoversTag, interval.Tag, Labels.Plants(count)),
             _ => Labels.Plants(count)
         };
     }

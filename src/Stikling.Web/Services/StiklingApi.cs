@@ -5,6 +5,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.JSInterop;
 using Stikling.Core.Notifications;
+using Stikling.Core.PlantFacts;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
 
@@ -141,6 +142,29 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         response.EnsureSuccessStatusCode();
         using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
         return document.RootElement.TryGetProperty("publicKey", out var key) ? key.GetString() : null;
+    }
+
+    /// <summary>
+    /// The short card about a species (or a genus, when <paramref name="species"/> is null): the
+    /// Wikipedia summary and a few facts from Trefle, which the server asks for. Needs no sign-in and
+    /// sends only the name. Nothing is stored on the device.
+    /// </summary>
+    /// <param name="language">"en" or "da".</param>
+    /// <exception cref="HttpRequestException">
+    /// The API couldn't be reached (<see cref="HttpRequestException.StatusCode"/> is null), or it
+    /// answered with an error, like 502 when Wikipedia failed.
+    /// </exception>
+    /// <exception cref="TaskCanceledException">The request timed out.</exception>
+    public async Task<PlantFacts> GetPlantFactsAsync(string genus, string? species, string language)
+    {
+        var query = $"plant-facts?genus={Uri.EscapeDataString(genus)}&language={Uri.EscapeDataString(language)}";
+        if (!string.IsNullOrWhiteSpace(species))
+            query += $"&species={Uri.EscapeDataString(species)}";
+
+        using var response = await http.GetAsync(query);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<PlantFacts>()
+            ?? throw new HttpRequestException("The plant facts answer was empty.");
     }
 
     /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>

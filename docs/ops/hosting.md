@@ -77,6 +77,26 @@ Changing the keys makes every device's subscription invalid, so people have to t
 
 Costs: the job runs about 2,900 times a month for a few seconds each, which is inside Container Apps' free grant. The Key Vault Standard tier charges per 10,000 operations, and the secret is only read when a revision of the API or a run of the job starts.
 
+## Turning on Trefle for the plant facts card
+
+The "About this species" card always asks Wikipedia. It only asks Trefle (trefle.io, data under CC BY 4.0) when the API has a token for it, and without one the card is Wikipedia only, so nothing breaks. The token is a secret, so it goes in the Key Vault by hand, the same way as the VAPID key above. Trefle's free plan is enough, and the API keeps answers for a week, so it asks little. Never put the token in the repository.
+
+1. Make an account on trefle.io and copy the token. Use a server token, not one for browsers.
+2. Store it: `az keyvault secret set --vault-name <vault> --name trefle-token --value <token>`.
+3. Set `plantFactsTrefleOn` to `true` in `infra/main.bicepparam`, commit it, and deploy the Bicep again. That adds the secret and `PlantFacts__TrefleToken` to the API.
+
+To turn it off, set it back to `false` and deploy again.
+
+## Turning on plant identification
+
+`POST /identify` answers 503 until the API has a Pl@ntNet key. The key is a secret, so it goes in the Key Vault by hand and never in the repository. Get a free key at my.plantnet.org. Its free plan allows 500 identifications a day, which is what `Identification:DailyLimitTotal` keeps to (each person gets `DailyLimitPerPerson`, 10). `<vault>` is the vault's name, found the way it is under notifications.
+
+1. Give yourself the right to write secrets, if you haven't (step 2 under notifications).
+2. Store the key: `az keyvault secret set --vault-name <vault> --name plantnet-api-key --value <key>`.
+3. Set `identificationOn` to `true` in `infra/main.bicepparam`, commit it, and deploy the Bicep. That adds the secret and `Identification__PlantNetApiKey` to the API.
+
+Turn it on only after step 2, since the container can't start a revision that points at a secret that isn't there. To turn it off again, set `identificationOn` back to `false` and deploy. The photo is passed on to Pl@ntNet and never stored. The API's client has no logging and Sentry drops breadcrumbs about Pl@ntNet, because the key is in the address of each request.
+
 ## Error reports
 
 Errors in the app and the API go to Sentry, so problems are seen without anyone writing in. The organization is on the free Developer plan, which has 5,000 errors a month and keeps 30 days of history. Its data is stored in the EU, which can only be chosen when the organization is created.

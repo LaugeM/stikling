@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Timeline;
 
@@ -110,7 +111,7 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
                 entryPhotos.Add(photo);
         }
 
-        var cleanText = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+        var cleanText = Clean(text);
         if (cleanText is null && entryPhotos.Count == 0)
             throw new ArgumentException(Strings.Propagations.ErrNoteNeedsText, nameof(text));
 

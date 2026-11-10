@@ -1,6 +1,5 @@
 @page "/add-photos"
 @layout WideLayout
-@using System.Globalization
 @using System.Net
 @implements IAsyncDisposable
 @inject ShareInbox Inbox
@@ -46,7 +45,7 @@ else if (waiting.Count == 0)
                 <p>@notice</p>
             }
             <div class="ap-sorted-links">
-                <a class="btn btn-primary" href="@SubjectThumb.LinkTo(done)">@string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.GoToSubject, NameOf(done))</a>
+                <a class="btn btn-primary" href="@SubjectThumb.LinkTo(done)">@F(Strings.AddPhotos.GoToSubject, NameOf(done))</a>
                 <a class="btn btn-outline-primary" href="">@Strings.AddPhotos.GoToToday</a>
             </div>
         </div>
@@ -82,7 +81,7 @@ else
                 {
                     var isTicked = ticked.Contains(photo.Id);
                     <button type="button" role="checkbox" aria-checked="@(isTicked ? "true" : "false")"
-                            aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.TileLabel, number)"
+                            aria-label="@F(Strings.AddPhotos.TileLabel, number)"
                             class="ap-tile @(isTicked ? "ticked" : "left-out")" disabled="@busy"
                             @onclick="() => Toggle(photo.Id)">
                         <img src="@photo.Url" alt="" />
@@ -218,8 +217,7 @@ else
 
             // The name is something a person typed, so it is encoded. The rest comes from the resource files
             var link = $"<a href=\"{SubjectThumb.LinkTo(subject)}\">{WebUtility.HtmlEncode(NameOf(subject))}</a>";
-            var text = string.Format(CultureInfo.CurrentCulture,
-                addedCount == 1 ? Strings.AddPhotos.Added_One : Strings.AddPhotos.Added_Other, addedCount, link);
+            var text = F(addedCount == 1 ? Strings.AddPhotos.Added_One : Strings.AddPhotos.Added_Other, addedCount, link);
             return new MarkupString(text);
         }
     }
@@ -229,7 +227,7 @@ else
         get
         {
             var link = $"<a href=\"help\">{WebUtility.HtmlEncode(Strings.AddPhotos.ShareMenuNoteLink)}</a>";
-            return new MarkupString(string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ShareMenuNote, link));
+            return new MarkupString(F(Strings.AddPhotos.ShareMenuNote, link));
         }
     }
 
@@ -267,7 +265,7 @@ else
         {
             Logger.LogError(ex, "Reading the share inbox failed");
             waiting ??= [];
-            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ReadFailed, ex.Message);
+            error = F(Strings.AddPhotos.ReadFailed, ex.Message);
         }
     }
 
@@ -296,7 +294,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to the share inbox failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.ChooseFailed, ex.Message);
+            error = F(Strings.AddPhotos.ChooseFailed, ex.Message);
         }
 
         allSorted = false;
@@ -338,7 +336,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding waiting photos failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.SaveFailed, ex.Message);
+            error = F(Strings.AddPhotos.SaveFailed, ex.Message);
         }
 
         busy = false;
@@ -360,7 +358,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Discarding waiting photos failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.AddPhotos.DiscardFailed, ex.Message);
+            error = F(Strings.AddPhotos.DiscardFailed, ex.Message);
         }
 
         busy = false;

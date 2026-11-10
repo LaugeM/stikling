@@ -1,5 +1,6 @@
 using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -147,7 +148,7 @@ public sealed class Plant : Entity
 
     /// <summary>Who it lives with, trimmed, or null when not said.</summary>
     [JsonIgnore]
-    public string? LivesWithName => string.IsNullOrWhiteSpace(LivesWith) ? null : LivesWith.Trim();
+    public string? LivesWithName => Clean(LivesWith);
 
     /// <summary>
     /// The day the status last changed: when it died, was given away or sold, or came back into the
@@ -432,15 +433,15 @@ public sealed class Plant : Entity
         var hasFor = !string.IsNullOrEmpty(forWhat);
         if (!hasTo && !hasFor) return null;
         if (Status == PlantStatus.Sold)
-            return !hasTo ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldFor, forWhat)
-                : hasFor ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldToFor, to, forWhat)
-                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSoldTo, to);
+            return !hasTo ? F(Strings.Plants.DepartureSoldFor, forWhat)
+                : hasFor ? F(Strings.Plants.DepartureSoldToFor, to, forWhat)
+                : F(Strings.Plants.DepartureSoldTo, to);
         if (Status == PlantStatus.GivenAway)
         {
-            if (!hasTo) return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureSwappedFor, forWhat);
+            if (!hasTo) return F(Strings.Plants.DepartureSwappedFor, forWhat);
             return hasFor
-                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureGivenToSwapped, to, forWhat)
-                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.DepartureGivenTo, to);
+                ? F(Strings.Plants.DepartureGivenToSwapped, to, forWhat)
+                : F(Strings.Plants.DepartureGivenTo, to);
         }
         return null;
     }
@@ -454,8 +455,8 @@ public sealed class Plant : Entity
         if (PaidText is not { } amount)
             return null;
         return string.IsNullOrWhiteSpace(Source)
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.PurchasePaid, amount)
-            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.PurchaseBoughtFrom, Source.Trim(), amount);
+            ? F(Strings.Plants.PurchasePaid, amount)
+            : F(Strings.Plants.PurchaseBoughtFrom, Source.Trim(), amount);
     }
 
     /// <summary>The price as written in a line, "150" or "79.5". Null unless it was purchased and a price is set.</summary>

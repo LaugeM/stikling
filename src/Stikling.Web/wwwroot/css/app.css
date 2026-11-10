@@ -277,7 +277,7 @@ h1 {
 .form-control:focus,
 .form-select:focus {
     border-color: var(--pa-green);
-    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
 .form-control::placeholder {
@@ -383,7 +383,7 @@ a.item-card:focus-visible {
 a.item-card:focus-visible,
 a.plant-tile:focus-visible,
 a.plant-name:focus-visible {
-    box-shadow: 0 0 0 0.2rem rgb(var(--bs-primary-rgb) / 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(var(--bs-primary-rgb), 0.25);
 }
 
 a.item-card,
@@ -1340,7 +1340,9 @@ img.framed {
 
 .detail-list {
     display: grid;
-    grid-template-columns: max-content 1fr;
+    /* The value column may shrink below its content (a plain 1fr won't), so a long link or word wraps
+       instead of widening the page. The label column only gives way when it passes half the width. */
+    grid-template-columns: fit-content(50%) minmax(0, 1fr);
     gap: 0.4rem 1rem;
     margin: 0;
 }
@@ -1348,10 +1350,12 @@ img.framed {
 .detail-list dt {
     font-weight: 500;
     color: var(--pa-muted);
+    overflow-wrap: anywhere;
 }
 
 .detail-list dd {
     margin: 0;
+    overflow-wrap: anywhere;
 }
 
 .detail-notes {
@@ -2326,6 +2330,65 @@ a.tag-label:hover {
 .name-result-sub {
     color: var(--pa-muted);
     font-size: 0.875rem;
+}
+
+/* The sheet that names a plant from a photo: the ways to pick a photo, then what came back */
+.identify-sheet {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.identify-button {
+    min-height: 2.75rem;
+    white-space: nowrap;
+}
+
+/* The camera button sits at the end of the name search; the input keeps its own height */
+.identify-group > .form-control {
+    min-height: 2.75rem;
+    min-width: 0;
+}
+
+/* "Find the name from a photo" under the name on a plant or propagation */
+.identify-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35em;
+    text-align: left;
+}
+
+.identify-link svg {
+    width: 1.1em;
+    height: 1.1em;
+    flex: none;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.identify-thumb {
+    padding: 0;
+    border: 0;
+}
+
+.identify-thumb:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.identify-heading {
+    margin: 0 0 0.5rem;
+    font-size: 0.95rem;
+    font-weight: 600;
+}
+
+.identify-credit {
+    margin: 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
 }
 
 /* Shared by Settings and the pages that came out of it */
@@ -4237,3 +4300,26 @@ tr.drop-target {
     border-radius: 999px;
 }
 
+/* The About this species sheet: the article's text, a few facts, and the credits in small type */
+.species-facts-text {
+    margin: 0 0 0.5rem;
+    line-height: 1.55;
+}
+
+.species-facts-list {
+    margin-block: 0.75rem;
+}
+
+.species-facts-credits {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    margin: 1rem 0 0;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+}
+
+.species-facts-credits a {
+    color: inherit;
+    text-decoration: underline;
+}

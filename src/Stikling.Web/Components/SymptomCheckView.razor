@@ -1,0 +1,196 @@
+@* What could it be?: the few likely causes for the signs someone picked, and what to look at for
+   each. It only reads what the app knows about the plant and saves nothing. The ranking and its
+   words are in Core (SymptomCheck, SymptomText), see docs/dev/symptom-check.md. *@
+@inject SymptomCheckService Check
+
+<div class="symptom-check">
+    <p class="symptom-intro">@Strings.Pests.SymptomIntro</p>
+
+    <div class="mb-3">
+        <span class="form-label d-block" id="@leavesLabelId">@Strings.Pests.SymptomQuestionLeaves</span>
+        <div class="btn-group segmented" role="radiogroup" aria-labelledby="@leavesLabelId">
+            @foreach (var (value, label) in LeavesChoices)
+            {
+                var id = $"{leavesName}-{value}";
+                <input type="radio" class="btn-check" name="@leavesName" id="@id" checked="@(leaves == value)" @onchange="() => leaves = value" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <span class="form-label d-block" id="@fastLabelId">@Strings.Pests.SymptomQuestionFast</span>
+        <div class="btn-group segmented" role="radiogroup" aria-labelledby="@fastLabelId">
+            @foreach (var (value, label) in FastChoices)
+            {
+                var id = $"{fastName}-{value}";
+                <input type="radio" class="btn-check" name="@fastName" id="@id" checked="@(speed == value)" @onchange="() => speed = value" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <span class="form-label d-block" id="@soilLabelId">@Strings.Pests.SymptomQuestionSoil</span>
+        <div class="btn-group segmented" role="radiogroup" aria-labelledby="@soilLabelId">
+            @foreach (var (value, label) in SoilChoices)
+            {
+                var id = $"{soilName}-{value}";
+                <input type="radio" class="btn-check" name="@soilName" id="@id" checked="@(soil == value)" @onchange="() => soil = value" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+        @if (context?.MeterDay is { } meterDay && context.SoilFromMeter == soil)
+        {
+            <p class="form-text mb-0">@SymptomText.FromMeter(meterDay)</p>
+        }
+    </div>
+
+    @if (context is { Lines.Count: > 0 })
+    {
+        <div class="mb-3" role="group" aria-labelledby="@knowsLabelId">
+            <span class="symptom-label" id="@knowsLabelId">@Strings.Pests.SymptomKnowsHeading</span>
+            <p class="form-text mt-0 mb-1">@Strings.Pests.SymptomKnowsHint</p>
+            @foreach (var line in context.Lines)
+            {
+                var kind = line.Kind;
+                <label class="symptom-fact">
+                    <input type="checkbox" class="form-check-input" checked="@(!unticked.Contains(kind))" @onchange="() => Toggle(kind)" />
+                    <span>@line.Text</span>
+                </label>
+            }
+        </div>
+    }
+
+    @if (context is not null)
+    {
+        var result = Result;
+        <div role="region" aria-live="polite" aria-labelledby="@causesLabelId">
+            <span class="symptom-label" id="@causesLabelId">@Strings.Pests.SymptomCausesHeading</span>
+            @if (result.NoClearCause)
+            {
+                <p class="symptom-none">@Strings.Pests.SymptomNoClear</p>
+                <ul class="symptom-checks">
+                    @foreach (var general in SymptomText.GeneralChecks)
+                    {
+                        <li>@general</li>
+                    }
+                </ul>
+            }
+            else
+            {
+                <ol class="symptom-causes">
+                    @foreach (var cause in result.Causes)
+                    {
+                        <li class="symptom-cause">
+                            <h3>@SymptomText.Name(cause.Kind)</h3>
+                            <span class="symptom-small-label">@Strings.Pests.SymptomLookAt</span>
+                            <ul class="symptom-checks">
+                                @foreach (var line in SymptomText.Checks(cause.Kind))
+                                {
+                                    <li>@line</li>
+                                }
+                            </ul>
+                            @if (cause.Kind == SymptomCauseKind.Pests)
+                            {
+                                <p class="symptom-meta"><a class="link-action" href="pests/new?plant=@Plant.Id">@Strings.Pests.SymptomOpenPestCase</a></p>
+                            }
+                            @if (WhyOf(cause) is { Length: > 0 } why)
+                            {
+                                <p class="symptom-meta"><span>@Strings.Pests.SymptomWhy</span> @why</p>
+                            }
+                            @if (cause.Sources.Count > 0)
+                            {
+                                <div class="symptom-meta">
+                                    <span>@Strings.Pests.SymptomSources</span>
+                                    <ul class="symptom-sources">
+                                        @foreach (var source in cause.Sources)
+                                        {
+                                            <li><a class="link-action" href="@SymptomSources.Url(source)" target="_blank" rel="noopener">@SymptomText.SourceTitle(source)</a></li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
+                        </li>
+                    }
+                </ol>
+            }
+        </div>
+    }
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-outline-primary" @onclick="() => OnBack.InvokeAsync()">@(BackLabel ?? Strings.Common.Back)</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required Plant Plant { get; set; }
+
+    /// <summary>The signs the person picked.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyCollection<ProblemSign> Signs { get; set; }
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    /// <summary>The text of the way back. "Back" without it.</summary>
+    [Parameter]
+    public string? BackLabel { get; set; }
+
+    private static readonly (WhichLeaves Value, string Label)[] LeavesChoices =
+    [
+        (WhichLeaves.Older, Strings.Pests.SymptomLeavesOlder), (WhichLeaves.Newest, Strings.Pests.SymptomLeavesNewest),
+        (WhichLeaves.AllOver, Strings.Pests.SymptomLeavesAllOver), (WhichLeaves.NotSure, Strings.Pests.SymptomNotSure)
+    ];
+
+    private static readonly (HowFast Value, string Label)[] FastChoices =
+    [
+        (HowFast.FewDays, Strings.Pests.SymptomFastFewDays), (HowFast.Weeks, Strings.Pests.SymptomFastWeeks),
+        (HowFast.NotSure, Strings.Pests.SymptomNotSure)
+    ];
+
+    private static readonly (SoilNow Value, string Label)[] SoilChoices =
+    [
+        (SoilNow.Wet, Strings.Pests.SymptomSoilWet), (SoilNow.Damp, Strings.Pests.SymptomSoilDamp),
+        (SoilNow.Dry, Strings.Pests.SymptomSoilDry), (SoilNow.NotSure, Strings.Pests.SymptomNotSure)
+    ];
+
+    private readonly string leavesLabelId = $"symptom-leaves-{Guid.NewGuid():N}";
+    private readonly string fastLabelId = $"symptom-fast-{Guid.NewGuid():N}";
+    private readonly string soilLabelId = $"symptom-soil-{Guid.NewGuid():N}";
+    private readonly string knowsLabelId = $"symptom-knows-{Guid.NewGuid():N}";
+    private readonly string causesLabelId = $"symptom-causes-{Guid.NewGuid():N}";
+    private readonly string leavesName = $"symptom-leaves-{Guid.NewGuid():N}";
+    private readonly string fastName = $"symptom-fast-{Guid.NewGuid():N}";
+    private readonly string soilName = $"symptom-soil-{Guid.NewGuid():N}";
+
+    private SymptomContext? context;
+    private WhichLeaves leaves;
+    private HowFast speed;
+    private SoilNow soil;
+    private readonly HashSet<SymptomFactKind> unticked = [];
+
+    protected override async Task OnInitializedAsync()
+    {
+        context = await Check.ForAsync(Plant);
+        if (context.SoilFromMeter is { } fromMeter)
+            soil = fromMeter;
+    }
+
+    private void Toggle(SymptomFactKind kind)
+    {
+        if (!unticked.Remove(kind))
+            unticked.Add(kind);
+    }
+
+    // Recalculated on every change, so unticking a fact moves the causes at once
+    private SymptomResult Result =>
+        SymptomCheck.Rank(Signs, leaves, speed, soil, context!.Facts.Without(unticked));
+
+    // The facts that moved a cause up, in the words of their lines
+    private string WhyOf(SymptomCause cause) =>
+        string.Join(" · ", cause.Because
+            .Select(kind => context!.Lines.FirstOrDefault(l => l.Kind == kind)?.Text)
+            .OfType<string>());
+}

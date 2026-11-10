@@ -6,6 +6,7 @@ using Stikling.Core.Products;
 using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Care;
 
@@ -353,8 +354,6 @@ public sealed class CareService(
         HistoryText.Set(recorded, [line], label);
         await timeline.AddAsync(recorded);
     }
-
-    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 
     // Rows without a name are dropped rather than refused, the way a blank soil mix row is
     private static List<ProductDose> Tidy(IReadOnlyList<ProductDose>? products) =>

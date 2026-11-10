@@ -1,17 +1,29 @@
-@* A search box that takes everyday or botanical names and fills in the fields under it, then the
+﻿@* A search box that takes everyday or botanical names and fills in the fields under it, then the
    genus, species and cultivar fields, with names to tap under the one being typed in. Chips
    rather than a datalist, which a phone won't show. Anything can still be typed. The chips keep
    the field focused when tapped (mousedown is cancelled), so the keyboard stays up. The search
    results don't: picking one is the end of the search, so the keyboard can go away. *@
 @implements IAsyncDisposable
+@using Stikling.Core.Identification
 @inject PlantNameService Names
+@inject IdentificationService Identification
 @inject IJSRuntime JS
 
 <div class="mb-3">
     <label class="form-label" for="@(IdPrefix)name-search">@Strings.Plants.NameWhatPlant</label>
-    <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="@Strings.Plants.NameSearchPlaceholder"
-           autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
-           @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
+    @* The same input and group element either way, so the search box isn't rebuilt when the offer turns up late *@
+    <div class="@(ShowIdentify && identifyOffered ? "input-group identify-group" : null)">
+        <input id="@(IdPrefix)name-search" type="search" class="form-control" value="@query" placeholder="@Strings.Plants.NameSearchPlaceholder"
+               autocomplete="off" spellcheck="false" enterkeyhint="search" aria-controls="@(IdPrefix)name-results"
+               @oninput="e => query = e.Value?.ToString()" @ref="searchInput" />
+        @if (ShowIdentify && identifyOffered)
+        {
+            <button type="button" class="btn btn-outline-primary icon-btn identify-button" title="@Strings.Identify.Button" aria-label="@Strings.Identify.Button" @onclick="() => identifyOpen = true">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                @Strings.Identify.ButtonShort
+            </button>
+        }
+    </div>
     @if (Found is { Count: > 0 } found)
     {
         <div id="@(IdPrefix)name-results" class="name-results" role="group" aria-label="@Strings.Plants.NameFound">
@@ -76,9 +88,13 @@
     }
     @if (everyday?.For(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier), Cultivar) is { } called)
     {
-        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameEveryday, called)</div>
+        <div class="form-text">@F(Strings.Plants.NameEveryday, called)</div>
     }
 </div>
+@if (ShowIdentify && identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" Photos="IdentifyPhotos" SubjectId="IdentifySubjectId" CanKeepPhoto="OnKeepPhoto.HasDelegate" OnPicked="PickIdentifiedAsync" />
+}
 @if (!unsureOpen)
 {
     <div class="mb-1">
@@ -144,6 +160,25 @@ else
     [Parameter]
     public EventCallback<string?> NoteChanged { get; set; }
 
+    /// <summary>Offers "Find the name from a photo". Only the plant and propagation forms turn it on.</summary>
+    [Parameter]
+    public bool ShowIdentify { get; set; }
+
+    /// <summary>The photos the form already has, which the identify sheet offers to use.</summary>
+    [Parameter]
+    public IReadOnlyList<Photo>? IdentifyPhotos { get; set; }
+
+    /// <summary>The saved plant or propagation, whose photos the sheet offers as well. Null for a new one.</summary>
+    [Parameter]
+    public Guid? IdentifySubjectId { get; set; }
+
+    /// <summary>
+    /// Called when a suggestion is picked with a photo that was taken or chosen in the sheet and should be
+    /// kept: the form saves it from the file input, which is not cleared before. Leave it out where there is no photo to keep.
+    /// </summary>
+    [Parameter]
+    public EventCallback<IdentifyPick> OnKeepPhoto { get; set; }
+
     [Parameter]
     public string GenusPlaceholder { get; set; } = Strings.Plants.NameGenusPlaceholder;
 
@@ -168,6 +203,8 @@ else
         return QualifierChanged.InvokeAsync(Qualifier);
     }
 
+    private bool identifyOffered;
+    private bool identifyOpen;
     private NameSuggester? suggester;
     private EverydayNameBook? everyday;
     private string? query;
@@ -182,6 +219,9 @@ else
     // The fields work straight away. Suggestions turn up once the names are read.
     protected override async Task OnInitializedAsync()
     {
+        // The camera button first, so the search box doesn't shrink after the names are read
+        if (ShowIdentify)
+            identifyOffered = await Identification.IsOfferedAsync();
         everyday = await Names.GetEverydayNamesAsync();
         suggester = await Names.GetSuggesterAsync();
     }
@@ -208,6 +248,24 @@ else
         await SetGenusAsync(found.Genus);
         await SetSpeciesAsync(found.Species);
         await SetCultivarAsync(found.Cultivar);
+    }
+
+    // Old names become current, like a found plant. The cultivar stays only when the species does. The
+    // qualifier and the note are left as they are, and the photo is kept after the name is filled in.
+    private async Task PickIdentifiedAsync(IdentifyPick pick)
+    {
+        var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+        genus ??= pick.Suggestion.Genus;
+        species ??= pick.Suggestion.Species;
+
+        var cultivar = IdentificationRules.CultivarAfterPick(Genus, Species, Cultivar, genus, species);
+        query = null;
+        await SetGenusAsync(genus);
+        await SetSpeciesAsync(species);
+        await SetCultivarAsync(cultivar);
+
+        if (pick.PhotoInput is not null && OnKeepPhoto.HasDelegate)
+            await OnKeepPhoto.InvokeAsync(pick);
     }
 
     private IReadOnlyList<NameSuggestion> Suggestions =>
@@ -247,18 +305,9 @@ else
 
     // "now <name>" after an old name, with the new name in italics
     private static MarkupString Now(string name) =>
-        (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameNow, "<i>" + System.Net.WebUtility.HtmlEncode(name) + "</i>");
+        (MarkupString)F(Strings.Plants.NameNow, "<i>" + System.Net.WebUtility.HtmlEncode(name) + "</i>");
 
     private RenderFragment Botanical(NameSuggestion r) => @<BotanicalName Genus="@r.Genus" Species="@r.Species" Cultivar="@r.Cultivar" />;
-
-    // A sentence with an element inside it: the element goes where {0} is
-    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
-    {
-        var at = format.IndexOf("{0}", StringComparison.Ordinal);
-        builder.AddContent(0, format[..at]);
-        builder.AddContent(1, inner);
-        builder.AddContent(2, format[(at + 3)..]);
-    };
 
     private bool SameGenus(string genus) => string.Equals(PlantNames.Genus(Genus), genus, StringComparison.OrdinalIgnoreCase);
 

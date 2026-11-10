@@ -58,19 +58,19 @@
                             </div>
                             <div class="plan-tools">
                                 <button type="button" class="plan-tool" disabled="@(index == 0)"
-                                        aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansMoveUp, index + 1))"
+                                        aria-label="@(F(Strings.Pests.PlansMoveUp, index + 1))"
                                         @onclick="() => MoveUp(index)">▲</button>
                                 <button type="button" class="plan-tool" disabled="@(index == draft.Steps.Count - 1)"
-                                        aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansMoveDown, index + 1))"
+                                        aria-label="@(F(Strings.Pests.PlansMoveDown, index + 1))"
                                         @onclick="() => MoveDown(index)">▼</button>
-                                <button type="button" class="plan-tool remove" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansRemoveStep, index + 1))"
+                                <button type="button" class="plan-tool remove" aria-label="@(F(Strings.Pests.PlansRemoveStep, index + 1))"
                                         @onclick="() => Remove(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                         </div>
 
                         @if (recipes.Count > 0)
                         {
-                            <div class="chip-row mb-2" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansRecipesForStep, index + 1))">
+                            <div class="chip-row mb-2" role="group" aria-label="@(F(Strings.Pests.PlansRecipesForStep, index + 1))">
                                 @foreach (var recipe in recipes)
                                 {
                                     <button type="button" class="chip @(step.RecipeId == recipe.Id ? "picked" : null)"
@@ -120,7 +120,7 @@
         @if (editing && confirming == draft.Id)
         {
             <div class="plan-confirm">
-                <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansDeleteConfirm, draft.Name)</p>
+                <p>@F(Strings.Pests.PlansDeleteConfirm, draft.Name)</p>
                 <div class="care-actions">
                     <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
                             @onclick="() => DeleteAsync(draft)">@Strings.Common.Delete</button>
@@ -215,7 +215,7 @@ else
             : step.What;
         what = string.IsNullOrWhiteSpace(what) ? Strings.Pests.CaseStep : what.Trim();
         return step.DaysAfter > 0
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PlansStepLater, what, Plural.Of(step.DaysAfter, Strings.Pests.CaseDay_One, Strings.Pests.CaseDay_Other))
+            ? F(Strings.Pests.PlansStepLater, what, Plural.Of(step.DaysAfter, Strings.Pests.CaseDay_One, Strings.Pests.CaseDay_Other))
             : what;
     }
 
@@ -308,11 +308,11 @@ else
             return;
 
         draft.Name = draft.Name?.Trim();
-        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+        draft.Notes = Clean(draft.Notes);
         foreach (var step in draft.Steps)
         {
-            step.What = string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
-            step.Notes = string.IsNullOrWhiteSpace(step.Notes) ? null : step.Notes.Trim();
+            step.What = Clean(step.What);
+            step.Notes = Clean(step.Notes);
         }
 
         errors = draft.Validate().ToList();

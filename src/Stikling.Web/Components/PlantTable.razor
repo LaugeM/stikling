@@ -85,9 +85,6 @@
     [Parameter]
     public EventCallback<SelectClick> OnToggle { get; set; }
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
     private bool cultivarShown => Columns.Contains((TableColumn)PlantColumn.Cultivar);
 
     private Task SortBy(TableColumn column) => SortChanged.InvokeAsync(CoreTable.Tap(Sort, column));

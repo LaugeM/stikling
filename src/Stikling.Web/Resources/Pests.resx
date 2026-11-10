@@ -1293,4 +1293,108 @@
     <value>Its photos stay on the plant's history.</value>
     <comment>Added to the question about removing a treatment or check that has photos.</comment>
   </data>
+  <data name="SymptomCheckButton" xml:space="preserve">
+    <value>What could it be?</value>
+    <comment>Button under the signs of a problem, and on a problem page. It opens a list of likely causes.</comment>
+  </data>
+  <data name="SymptomIntro" xml:space="preserve">
+    <value>Some likely causes for what you see, and what to look at. The app can't see the plant, so check before you change anything.</value>
+    <comment>First line of What could it be?</comment>
+  </data>
+  <data name="SymptomQuestionLeaves" xml:space="preserve">
+    <value>Which leaves?</value>
+    <comment>A question in What could it be?</comment>
+  </data>
+  <data name="SymptomLeavesOlder" xml:space="preserve">
+    <value>Older ones</value>
+    <comment>An answer to Which leaves? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomLeavesNewest" xml:space="preserve">
+    <value>Newest ones</value>
+    <comment>An answer to Which leaves? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomLeavesAllOver" xml:space="preserve">
+    <value>All over</value>
+    <comment>An answer to Which leaves? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomNotSure" xml:space="preserve">
+    <value>Not sure</value>
+    <comment>An answer to each question in What could it be? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomQuestionFast" xml:space="preserve">
+    <value>How fast did it come on?</value>
+    <comment>A question in What could it be?</comment>
+  </data>
+  <data name="SymptomFastFewDays" xml:space="preserve">
+    <value>A few days</value>
+    <comment>An answer to How fast did it come on? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomFastWeeks" xml:space="preserve">
+    <value>Weeks</value>
+    <comment>An answer to How fast did it come on? Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomQuestionSoil" xml:space="preserve">
+    <value>How is the soil a few centimetres down?</value>
+    <comment>A question in What could it be?</comment>
+  </data>
+  <data name="SymptomSoilWet" xml:space="preserve">
+    <value>Wet</value>
+    <comment>An answer about the soil. Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomSoilDamp" xml:space="preserve">
+    <value>Damp</value>
+    <comment>An answer about the soil. Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomSoilDry" xml:space="preserve">
+    <value>Dry</value>
+    <comment>An answer about the soil. Short, it sits in a row of buttons.</comment>
+  </data>
+  <data name="SymptomKnowsHeading" xml:space="preserve">
+    <value>What the app knows</value>
+    <comment>Heading over the facts about the plant that What could it be? uses. Each has a tick box.</comment>
+  </data>
+  <data name="SymptomKnowsHint" xml:space="preserve">
+    <value>Untick anything that isn't right.</value>
+    <comment>Under the heading What the app knows.</comment>
+  </data>
+  <data name="SymptomCausesHeading" xml:space="preserve">
+    <value>Likely causes</value>
+    <comment>Heading over the list of causes. The likeliest is first.</comment>
+  </data>
+  <data name="SymptomLookAt" xml:space="preserve">
+    <value>What to look at</value>
+    <comment>Small heading over the checks for a cause.</comment>
+  </data>
+  <data name="SymptomWhy" xml:space="preserve">
+    <value>Why it's listed:</value>
+    <comment>Followed by the facts about the plant that moved the cause up.</comment>
+  </data>
+  <data name="SymptomSources" xml:space="preserve">
+    <value>Sources:</value>
+    <comment>Followed by links to where the cause comes from.</comment>
+  </data>
+  <data name="SymptomOpenPestCase" xml:space="preserve">
+    <value>Open a pest case</value>
+    <comment>Link under the cause Pests.</comment>
+  </data>
+  <data name="SymptomNoClear" xml:space="preserve">
+    <value>These answers don't point to one cause. These are worth a look whatever it is:</value>
+    <comment>Shown when no cause stands out. A list of general checks follows.</comment>
+  </data>
+  <data name="SignGroupLeaves" xml:space="preserve">
+    <value>Leaves</value>
+    <comment>Small heading over the signs about the leaves.</comment>
+  </data>
+  <data name="SignGroupWhole" xml:space="preserve">
+    <value>Whole plant</value>
+    <comment>Small heading over the signs about the whole plant.</comment>
+  </data>
+  <data name="SignGroupStem" xml:space="preserve">
+    <value>Stem and roots</value>
+    <comment>Small heading over the signs about the stem and roots.</comment>
+  </data>
+  <data name="SignGroupOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>Small heading over the remaining signs.</comment>
+  </data>
 </root>

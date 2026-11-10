@@ -1,6 +1,5 @@
 @page "/propagations/new"
 @page "/propagations/{Id:guid}/edit"
-@using System.Globalization
 @inject PropagationForms Forms
 @inject ILogger<PropagationEdit> Logger
 @inject PropagationService PropagationService
@@ -84,7 +83,7 @@ else
             @if (NameCollapsed)
             {
                 <div class="d-flex align-items-center justify-content-between gap-2">
-                    <span>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditNamed, System.Net.WebUtility.HtmlEncode(propagation.DisplayName)))</span>
+                    <span>@((MarkupString)F(Strings.Propagations.EditNamed, System.Net.WebUtility.HtmlEncode(propagation.DisplayName)))</span>
                     <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => nameExpanded = true">@Strings.Propagations.EditChangeName</button>
                 </div>
             }
@@ -92,6 +91,7 @@ else
             {
                 <PlantNameFields @bind-Genus="propagation.Genus" @bind-Species="propagation.Species" @bind-Cultivar="propagation.Cultivar"
                                  @bind-Qualifier="propagation.NameQualifier" @bind-Note="propagation.NameNote"
+                                 ShowIdentify="true" IdentifyPhotos="photos" IdentifySubjectId="Id"
                                  GenusPlaceholder="@Strings.Propagations.EditGenusPlaceholder" SpeciesPlaceholder="@Strings.Propagations.EditSpeciesPlaceholder" CultivarPlaceholder="" />
                 <div class="mt-3">
                     <label class="form-label" for="nickname">@Strings.Propagations.EditNickname</label>
@@ -113,7 +113,7 @@ else
         @if (form!.LastTimeMatch is { } lastTime)
         {
             <div class="last-time d-flex align-items-center justify-content-between gap-2 mb-3">
-                <span>@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditLikeLast, LastTimeText(lastTime))</span>
+                <span>@F(Strings.Propagations.EditLikeLast, LastTimeText(lastTime))</span>
                 <button type="button" class="btn btn-outline-secondary btn-sm" @onclick="() => form.UseLastTime(lastTime)">@Strings.Propagations.EditUse</button>
             </div>
         }
@@ -142,7 +142,7 @@ else
                 @if (IsNew && propagation.Type is PropagationType.Offset or PropagationType.Division)
                 {
                     <div class="form-text">
-                        @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditOwnRoots,
+                        @((MarkupString)F(Strings.Propagations.EditOwnRoots,
                             $"<a href=\"{(propagation.ParentPlantId is { } parent ? $"plants/new?parent={parent}" : "plants/new")}\">{System.Net.WebUtility.HtmlEncode(Strings.Propagations.EditAddAsPlant)}</a>"))
                     </div>
                 }
@@ -302,7 +302,7 @@ else
                 @if (propagation.Type == PropagationType.Corm)
                 {
                     <div class="mb-3">
-                        <label class="form-label" for="corm-size">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditCormSize, Lengths.SmallUnitName)</label>
+                        <label class="form-label" for="corm-size">@F(Strings.Propagations.EditCormSize, Lengths.SmallUnitName)</label>
                         <LengthInput id="corm-size" class="form-control" Millimetres="true" min="0" @bind-Value="propagation.CormSizeMm" />
                         <div class="form-text">@Strings.Propagations.EditCormHint</div>
                     </div>
@@ -514,7 +514,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding waiting photos to a propagation failed");
-            photoStatus = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+            photoStatus = F(Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -617,7 +617,7 @@ else
         form!.ContainerText,
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? form!.Mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
-        propagation.DriedForHours is { } dried ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditDried, Drying.Shown(dried)) : null,
+        propagation.DriedForHours is { } dried ? F(Strings.Propagations.EditDried, Drying.Shown(dried)) : null,
         propagation.Experiment);
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
@@ -627,14 +627,14 @@ else
         <InputTextArea class="form-control" rows="3" @bind-Value="propagation!.Notes" aria-label="@Strings.Propagations.EditAbout" aria-describedby="about-help" />
     </div>;
 
-    private string? SwapSummary => propagation is { SpareAvailable: > 0 } ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardToSwap, propagation.SpareAvailable) : null;
+    private string? SwapSummary => propagation is { SpareAvailable: > 0 } ? F(Strings.Propagations.CardToSwap, propagation.SpareAvailable) : null;
 
     private string? SitterSummary => string.IsNullOrWhiteSpace(propagation?.SitterNote) ? null : Labels.Short(propagation.SitterNote);
 
     private string? ProgressSummary => propagation is null ? null : Joined(
         Labels.Stage(propagation.Stage, propagation.Type),
-        propagation.FirstRootOn is { } root ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditSummaryFirstRoot, Labels.Date(root)) : null,
-        propagation.FirstLeafOn is { } leaf ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditSummaryFirstLeaf, Labels.Date(leaf)) : null,
+        propagation.FirstRootOn is { } root ? F(Strings.Propagations.EditSummaryFirstRoot, Labels.Date(root)) : null,
+        propagation.FirstLeafOn is { } leaf ? F(Strings.Propagations.EditSummaryFirstLeaf, Labels.Date(leaf)) : null,
         propagation.PottedUpCount + propagation.FailedCount + propagation.GivenAwayCount > 0 ? PropagationService.Outcome(propagation) : null);
 
     private static bool HasSetup(Propagation p) =>
@@ -717,7 +717,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a propagation failed");
-            photoStatus = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+            photoStatus = F(Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -798,10 +798,10 @@ else
 
     private static string LastTimeText(Propagation p) => string.Join(", ", new[]
     {
-        string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditLastTypeIn, Lower(Labels.For(p.Type)), Lower(Labels.For(p.Medium))),
-        string.IsNullOrWhiteSpace(p.Container) ? null : p.Container.Trim(),
+        F(Strings.Propagations.EditLastTypeIn, Lower(Labels.For(p.Type)), Lower(Labels.For(p.Medium))),
+        Clean(p.Container),
         p.RootingAids.Count > 0 ? string.Join(", ", p.RootingAids.Order().Select(a => Lower(Labels.For(a)))) : null,
-        p.DriedForHours is { } hours ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.EditDried, Drying.Shown(hours)) : null
+        p.DriedForHours is { } hours ? F(Strings.Propagations.EditDried, Drying.Shown(hours)) : null
     }.OfType<string>());
 
     // Mid-sentence, but not LECA or PON
@@ -865,7 +865,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the propagation failed");
-            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSaveFailed, ex.Message)];
+            errors = [F(Strings.Propagations.ComposerSaveFailed, ex.Message)];
             showErrors = true;
         }
         finally

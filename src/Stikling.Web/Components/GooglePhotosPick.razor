@@ -22,7 +22,7 @@
         }
         else if (state == PickState.Fetching)
         {
-            <p class="composer-status" role="status">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.GoogleFetching, fetching, total)</p>
+            <p class="composer-status" role="status">@F(Strings.Shared.GoogleFetching, fetching, total)</p>
         }
         else
         {
@@ -151,7 +151,7 @@
         }
         catch (Exception ex) when (!disposed)
         {
-            await FinishAsync(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.GoogleSaveError, ex.Message));
+            await FinishAsync(F(Strings.Shared.GoogleSaveError, ex.Message));
         }
     }
 

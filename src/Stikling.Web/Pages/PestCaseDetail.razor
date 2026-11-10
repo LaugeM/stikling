@@ -34,7 +34,7 @@ else
         </div>
         <div class="min-w-0">
             <h1>@Labels.For(view.Case.Pest)</h1>
-            <p class="detail-sub">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseScopeFound, Labels.Scope(view), Labels.Date(view.Case.StartedOn))</p>
+            <p class="detail-sub">@F(Strings.Pests.CaseScopeFound, Labels.Scope(view), Labels.Date(view.Case.StartedOn))</p>
             @if (view.Case.IsOpen)
             {
                 <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>
@@ -45,7 +45,7 @@ else
             }
             @if (view.CleanDays is { } cleanDays)
             {
-                <p class="detail-sub mt-2 mb-0">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCleanDays, cleanDays, view.CleanTarget)</p>
+                <p class="detail-sub mt-2 mb-0">@F(Strings.Pests.CaseCleanDays, cleanDays, view.CleanTarget)</p>
             }
         </div>
     </header>
@@ -92,7 +92,7 @@ else
                 {
                     var open = photo;
                     <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[open.Id]"
-                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
+                            aria-label="@F(Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
                         <PhotoImage PhotoId="open.Id" />
                     </button>
                 }
@@ -194,7 +194,7 @@ else
     @if (view.Case.PlanStartedOn is not null && view.Case.PlanSteps.Count > 0)
     {
         <section class="detail-card">
-            <h2>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CasePlanHeading, view.Case.PlanName)</h2>
+            <h2>@F(Strings.Pests.CasePlanHeading, view.Case.PlanName)</h2>
             <ol class="plan-progress">
                 @for (var i = 0; i < view.Case.PlanSteps.Count; i++)
                 {
@@ -240,11 +240,11 @@ else
 
             @if (view.PlanDoneOn is { } doneOn)
             {
-                <p class="plan-progress-note">@(view.PlanDone ? Strings.Pests.CaseLastStepToday : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseLastStepFrom, Labels.Date(doneOn)))</p>
+                <p class="plan-progress-note">@(view.PlanDone ? Strings.Pests.CaseLastStepToday : F(Strings.Pests.CaseLastStepFrom, Labels.Date(doneOn)))</p>
             }
             else if (view.Case.PlanStoppedOn is { } stopped)
             {
-                <p class="plan-progress-note">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CasePlanStopped, Labels.Date(stopped))</p>
+                <p class="plan-progress-note">@F(Strings.Pests.CasePlanStopped, Labels.Date(stopped))</p>
             }
 
             @if (view.Case.PlanRunning)
@@ -276,7 +276,7 @@ else
             else if (view.Case.PlanRunning)
             {
                 <dt>@Strings.Pests.CaseTreating</dt>
-                <dd>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseFollowing, view.Case.PlanName)</dd>
+                <dd>@F(Strings.Pests.CaseFollowing, view.Case.PlanName)</dd>
             }
             else
             {
@@ -343,7 +343,7 @@ else
             }
             else if (!Trapped)
             {
-                <p class="text-body-secondary mb-0">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseTrapIntro, Labels.For(view.Case.Pest))</p>
+                <p class="text-body-secondary mb-0">@F(Strings.Pests.CaseTrapIntro, Labels.For(view.Case.Pest))</p>
             }
             else
             {
@@ -410,7 +410,7 @@ else
                                 {
                                     var open = photoId;
                                     <button type="button" class="log-photo" @onclick="() => viewerIndex = photoIndex[open]"
-                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
+                                            aria-label="@F(Strings.Pests.CaseOpenPhotoOf, PlantOf(open))">
                                         <PhotoImage PhotoId="open" />
                                     </button>
                                 }
@@ -466,7 +466,7 @@ else
                         {
                             <button type="button" class="btn btn-sm @(seen ? "btn-primary" : "btn-outline-primary")"
                                     aria-pressed="@(seen ? "true" : "false")"
-                                    aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
+                                    aria-label="@F(Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
                                     disabled="@busy" @onclick="() => ToggleSeenAsync(plant)">@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
                         }
                     </li>
@@ -494,7 +494,7 @@ else
                     <li @key="neighbour.Plant.Id">
                         <div class="neighbour-text">
                             <a href="plants/@neighbour.Plant.Id">@neighbour.Plant.DisplayName</a>
-                            <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseChecked, Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))) : Strings.Pests.CaseNeverChecked)</div>
+                            <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? F(Strings.Pests.CaseChecked, Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))) : Strings.Pests.CaseNeverChecked)</div>
                         </div>
                         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => CleanAsync(neighbour.Plant)">@Strings.Pests.CaseClean</button>
                         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => AddToCaseAsync(neighbour.Plant)">@Strings.Pests.CaseAddToCase</button>
@@ -686,7 +686,7 @@ else
         {
             await Treatments.SaveAsync(PestService.StartPlantCheck(plant, Today));
             await ReloadAsync();
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseNeighbourChecked, plant.DisplayName);
+            message = F(Strings.Pests.CaseNeighbourChecked, plant.DisplayName);
         }
         finally
         {
@@ -706,7 +706,7 @@ else
                 view.Case.PlantIds.Add(plant.Id);
             await Repository.SaveAsync(view.Case);
             await ReloadAsync();
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseNeighbourAdded, plant.DisplayName);
+            message = F(Strings.Pests.CaseNeighbourAdded, plant.DisplayName);
         }
         finally
         {
@@ -782,20 +782,20 @@ else
 
     private static string Caught(TrapCatch latest)
     {
-        var text = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaught, Plural.Of(latest.Caught, Strings.Pests.CaseNew_One, Strings.Pests.CaseNew_Other), Plural.Of(latest.Days, Strings.Pests.CaseDay_One, Strings.Pests.CaseDay_Other));
+        var text = F(Strings.Pests.CaseCaught, Plural.Of(latest.Caught, Strings.Pests.CaseNew_One, Strings.Pests.CaseNew_Other), Plural.Of(latest.Days, Strings.Pests.CaseDay_One, Strings.Pests.CaseDay_Other));
         return latest.PerWeek is { } perWeek
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaughtAbout, text, Math.Round(perWeek).ToString("0", System.Globalization.CultureInfo.CurrentCulture))
-            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCaughtPlain, text);
+            ? F(Strings.Pests.CaseCaughtAbout, text, Math.Round(perWeek).ToString("0", System.Globalization.CultureInfo.CurrentCulture))
+            : F(Strings.Pests.CaseCaughtPlain, text);
     }
 
     private string What(PestTreatment treatment) => treatment switch
     {
         { Skipped: true } => view?.Case.PlanSteps.FirstOrDefault(s => s.Id == treatment.PlanStepId) is { } skipped
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSkippedStep, StepName(skipped))
+            ? F(Strings.Pests.CaseSkippedStep, StepName(skipped))
             : Strings.Pests.CaseSkippedAStep,
         { Kind: PestTreatmentKind.Checked } => Strings.Pests.CaseWhatChecked,
         { Kind: PestTreatmentKind.TrapCount, OnTrap: { } onTrap } =>
-            treatment.NewTrap ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCountedTrapThenNew, onTrap) : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseCountedTrap, onTrap),
+            treatment.NewTrap ? F(Strings.Pests.CaseCountedTrapThenNew, onTrap) : F(Strings.Pests.CaseCountedTrap, onTrap),
         { Kind: PestTreatmentKind.TrapCount } => Strings.Pests.CasePutUpTrap,
         { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
         _ => Strings.Pests.CaseWhatTreated
@@ -824,7 +824,7 @@ else
             else
             {
                 await PestFound.MarkAsync(view.Case, plant, Today, treatments, Labels.English);
-                message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseMarkedSeen, plant.DisplayName);
+                message = F(Strings.Pests.CaseMarkedSeen, plant.DisplayName);
             }
             await ReloadAsync();
         }
@@ -963,7 +963,7 @@ else
             await Repository.SaveAsync(view.Case);
             following = false;
             await ReloadAsync();
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseFollowingMessage, plan.Name);
+            message = F(Strings.Pests.CaseFollowingMessage, plan.Name);
         }
         finally
         {
@@ -1028,7 +1028,7 @@ else
             await PutOffService.PutOffAsync(PutOffs.PlanStep(view.Case.Id, step.Id), moveTo);
             movingStep = null;
             await ReloadAsync();
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseStepMoved, Labels.Date(moveTo));
+            message = F(Strings.Pests.CaseStepMoved, Labels.Date(moveTo));
         }
         finally
         {

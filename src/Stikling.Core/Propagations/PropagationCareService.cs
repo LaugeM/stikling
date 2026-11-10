@@ -1,6 +1,6 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Propagations;
 
@@ -96,7 +96,7 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
     {
         PropagationCareKind.Watered => Strings.Propagations.CareWatered,
         PropagationCareKind.ChangedWater => Strings.Propagations.CareChangedWater,
-        PropagationCareKind.MoistureReading => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareMoisture, entry.Moisture),
+        PropagationCareKind.MoistureReading => F(Strings.Propagations.CareMoisture, entry.Moisture),
         _ => entry.Kind.ToString()
     };
 }

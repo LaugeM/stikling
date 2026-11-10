@@ -1,5 +1,4 @@
 @page "/deletion"
-@using System.Globalization
 @using System.Net
 @* How to delete what Stikling keeps. The live site also serves it as plain HTML at /deletion for Meta's check
    (tools/static-pages/render.cs and prepare-pages.py), so it renders from the text in Supplies.resx without
@@ -45,5 +44,5 @@
 
 @code {
     private static MarkupString Markup(string text, string inner) =>
-        new(string.Format(CultureInfo.CurrentCulture, text, inner));
+        new(F(text, inner));
 }

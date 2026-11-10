@@ -80,7 +80,7 @@
             var entry = PestService.StartTrapCount(Case, occurredOn);
             entry.OnTrap = onTrap;
             entry.NewTrap = newTrap;
-            entry.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+            entry.Notes = Clean(notes);
 
             if (entry.Validate(Today) is [var first, ..])
             {
@@ -94,7 +94,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the trap count failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TrapCountFailed, ex.Message);
+            error = F(Strings.Pests.TrapCountFailed, ex.Message);
         }
         finally
         {

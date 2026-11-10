@@ -36,7 +36,7 @@
     <p class="settings-hint">
         @if (lastBackup is { } date)
         {
-            <text>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupLastTaken, Labels.Date(date), Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber))</text>
+            <text>@F(Strings.Account.BackupLastTaken, Labels.Date(date), Labels.DaysAgo(TodayDate.DayNumber - date.DayNumber))</text>
         }
         else
         {
@@ -49,7 +49,7 @@
         <div class="confirm-card">
             <p>
                 <strong>@file.Name</strong><br />
-                @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupMade, Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)),
+                @F(Strings.Account.BackupMade, Labels.Date(DateOnly.FromDateTime(file.Data.ExportedAt.LocalDateTime)),
                     Labels.Plants(file.Data.Counts.Plants),
                     Plural.Of(file.Data.Counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
                     Plural.Of(file.Data.Counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other))
@@ -97,7 +97,7 @@
     </label>
     <div class="settings-actions">
         <button type="button" class="btn btn-outline-primary" disabled="@(busy || photoCount == 0)" @onclick="DownloadPhotosAsync">
-            @(gathering is { } g ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupGathering, g.Done, g.Total) : Strings.Account.BackupDownloadPhotos)
+            @(gathering is { } g ? F(Strings.Account.BackupGathering, g.Done, g.Total) : Strings.Account.BackupDownloadPhotos)
         </button>
     </div>
     @if (photoMessage is not null)
@@ -121,7 +121,7 @@
     @if (storage is { } estimate)
     {
         <p class="settings-hint">
-            @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupUsing, Labels.Bytes(estimate.Usage))
+            @F(Strings.Account.BackupUsing, Labels.Bytes(estimate.Usage))
         </p>
         @if (estimate.Persisted)
         {
@@ -206,7 +206,7 @@
         {
             var counts = await Backup.ExportAsync();
             lastBackup = TodayDate;
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupSaved, Labels.Plants(counts.Plants),
+            message = F(Strings.Account.BackupSaved, Labels.Plants(counts.Plants),
                 Plural.Of(counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
                 Plural.Of(counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other));
         }
@@ -239,7 +239,7 @@
             var summary = await Backup.DownloadPhotoFoldersAsync(new PhotoFolderOptions(includeGone, includeReferences), progress);
             photoMessage = summary.Added + summary.Skipped == 0
                 ? (includeGone && includeReferences ? Strings.Account.BackupNoPhotosToInclude : Strings.Account.BackupNoPhotosTick)
-                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupPhotosSaved, Plural.Of(summary.Added, Strings.Account.Photo_One, Strings.Account.Photo_Other))
+                : F(Strings.Account.BackupPhotosSaved, Plural.Of(summary.Added, Strings.Account.Photo_One, Strings.Account.Photo_Other))
                 + (summary.Skipped > 0
                     ? " " + Plural.Of(summary.Skipped, Strings.Account.BackupPhotosMissing_One, Strings.Account.BackupPhotosMissing_Other)
                     : "");
@@ -332,16 +332,16 @@
             message = summary switch
             {
                 { ChangedRecords: true } =>
-                    string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupRestored,
+                    F(Strings.Account.BackupRestored,
                         Plural.Of(summary.Added, Strings.Account.NewItem_One, Strings.Account.NewItem_Other), summary.Updated,
                         Plural.Of(summary.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other))
                     + (summary.BroughtBack > 0 ? " " + Plural.Of(summary.BroughtBack, Strings.Account.BackupBroughtBack_One, Strings.Account.BackupBroughtBack_Other) : "")
                     + (summary.Kept > 0 ? " " + Plural.Of(summary.Kept, Strings.Account.BackupUpToDate_One, Strings.Account.BackupUpToDate_Other) : ""),
-                { Photos: > 0 } => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupPicturesBack, Plural.Of(summary.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other)),
+                { Photos: > 0 } => F(Strings.Account.BackupPicturesBack, Plural.Of(summary.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other)),
                 _ => Strings.Account.BackupAlreadyHere
             };
             if (savedAs is not null)
-                message += " " + string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.BackupSavedAs, savedAs);
+                message += " " + F(Strings.Account.BackupSavedAs, savedAs);
         }
         catch (Exception ex)
         {

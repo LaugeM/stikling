@@ -1240,8 +1240,16 @@
     <value>Something's wrong with a plant. Where do I write it down?</value>
     <comment>Question in the "Pests and problems" part of the Help page.</comment>
   </data>
+  <data name="WhatCouldItBeQ" xml:space="preserve">
+    <value>What does What could it be? do?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="WhatCouldItBeA1" xml:space="preserve">
+    <value>Pick what you see under &lt;em&gt;Something's wrong&lt;/em&gt;, or open a problem, and tap &lt;em&gt;What could it be?&lt;/em&gt;. It lists up to three likely causes from what you picked, three quick questions and what the app knows about the plant, like a recent move or a meter reading. Each cause says what to check and where it comes from, and you can untick anything the app has wrong. It never tells you to water, feed, repot or treat, and it saves nothing.</value>
+    <comment>Answer to "What does What could it be? do?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
   <data name="SomethingSWrongWithPlantA1" xml:space="preserve">
-    <value>Open the plant, tap More, then &lt;em&gt;Something's wrong&lt;/em&gt;. Pick what you see, like yellow leaves or root rot, and add a note or a photo. Later, tap &lt;em&gt;How does it look?&lt;/em&gt; on the plant or the problem to say whether it's better, the same or worse and what you did. When it's over, say how it ended.</value>
+    <value>Open the plant, tap More, then &lt;em&gt;Something's wrong&lt;/em&gt;. Pick what you see, like yellow leaves, sticky leaves or root rot, and add a note or a photo. Later, tap &lt;em&gt;How does it look?&lt;/em&gt; on the plant or the problem to say whether it's better, the same or worse and what you did. When it's over, say how it ended.</value>
     <comment>Answer to "Something's wrong with a plant. Where do I write it down?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="SDifferenceBetweenProblemPestQ" xml:space="preserve">
@@ -1801,5 +1809,37 @@
   </data>
   <data name="KeepPlantOffMyPublicPageA2" xml:space="preserve">
     <value>A change reaches the page after the next sync. A plant that died, was given away or sold is never on the page, so there is nothing to hide.</value>
+  </data>
+  <data name="SpeciesFactsQ" xml:space="preserve">
+    <value>Where does About this species come from?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="SpeciesFactsA1" xml:space="preserve">
+    <value>From Wikipedia, with a few facts like the height from Trefle, an open plant database. The app asks Stikling's server for them only when you tap the link, and sends only the plant's name, so it needs a connection and works signed in or not. It is about the species, not your cultivar, and about the genus when that's all the plant has. Care advice is never taken from there.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
+  <data name="IdentifyFromPhotoQ" xml:space="preserve">
+    <value>Can Stikling tell me what plant it is?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="IdentifyFromPhotoA1" xml:space="preserve">
+    <value>Yes, from a photo. On the add plant and add propagation pages, tap the &lt;em&gt;Photo&lt;/em&gt; button at the end of the name search. On a plant or propagation whose name is missing or unsure, tap &lt;em&gt;Find the name from a photo&lt;/em&gt; under its name. Take a photo or pick one, and Stikling shows up to five suggestions with how good a match each is. Tap one to fill in the genus and species. Nothing is filled in until you tap. From a plant's page the name is saved as cf., since it is a guess, so set it to Sure when you know. It names the species, not the cultivar, so pick a cultivar in the name fields if you know it.</value>
+    <comment>Answer to "Can Stikling tell me what plant it is?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="IdentifyFromPhotoA2" xml:space="preserve">
+    <value>The photo is sent to Pl@ntNet, a plant identification service, and isn't kept. When you're signed in you can identify 10 a day. Without an account, add a free Pl@ntNet key of your own in Settings under Plants, and the photo goes straight from your device to Pl@ntNet.</value>
+    <comment>Second paragraph of the answer to "Can Stikling tell me what plant it is?" on the Help page.</comment>
+  </data>
+  <data name="GuidesQ" xml:space="preserve">
+    <value>Are there how-to guides in the app?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="GuidesA1" xml:space="preserve">
+    <value>Yes. Guides has short how-tos for taking a cutting, moving a plant to semi-hydro, watering through a wick and mixing soil. They work without a connection, and each says where it comes from. Where growers do something in different ways, a guide shows the common ways side by side and doesn't pick a best one. Most open from the place they are about, like a cutting, a plant that is moving to LECA or PON, a self-watering pot or Soil mixes, and you can also find them under Supplies and in Search.</value>
+    <comment>Answer to "Are there how-to guides in the app?" on the Help page.</comment>
+  </data>
+  <data name="GuidesLink" xml:space="preserve">
+    <value>Guides: how to take a cutting, move to semi-hydro and more</value>
+    <comment>Link at the top of the Help page that opens the list of guides.</comment>
   </data>
 </root>

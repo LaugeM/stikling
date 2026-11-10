@@ -50,7 +50,8 @@ else
         <fieldset>
             <legend>@Strings.PlantEdit.LegendName</legend>
             <PlantNameFields @bind-Genus="plant.Genus" @bind-Species="plant.Species" @bind-Cultivar="plant.Cultivar"
-                             @bind-Qualifier="plant.NameQualifier" @bind-Note="plant.NameNote" />
+                             @bind-Qualifier="plant.NameQualifier" @bind-Note="plant.NameNote"
+                             ShowIdentify="true" IdentifyPhotos="photos" IdentifySubjectId="Id" OnKeepPhoto="KeepIdentifiedPhotoAsync" />
             <div class="mt-3">
                 <label class="form-label" for="nickname">@Strings.PlantEdit.Nickname</label>
                 <InputText id="nickname" class="form-control" @bind-Value="plant.Nickname" placeholder="@Strings.PlantEdit.NicknamePlaceholder" />
@@ -334,6 +335,10 @@ else
                     {
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
+                    @if (plant.Medium is GrowingMedium.Leca or GrowingMedium.Pon)
+                    {
+                        <div class="mt-2"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant.Id)" NewTab="true" /></div>
+                    }
                     @if (form.OffersTransition)
                     {
                         <div class="form-check mt-2">
@@ -382,6 +387,10 @@ else
                                 <button type="button" class="chip @(outerWatering == PotWatering.Wick ? "picked" : null)"
                                         @onclick="() => plant.OuterPotWatering = PotWatering.Wick">@Strings.PlantEdit.OuterWateringWick</button>
                             </div>
+                            @if (outerWatering == PotWatering.Wick)
+                            {
+                                <div class="mt-2"><GuideLink Guide="@GuideBook.Wick" From="@GuideLinks.FromPlant(plant.Id)" NewTab="true" /></div>
+                            }
                         }
                     }
                 </div>
@@ -588,20 +597,6 @@ else
 }
 
 @code {
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
-    private static string H(string text) => System.Net.WebUtility.HtmlEncode(text);
-
-    private static string Link(string href, string text, string? cssClass = null) =>
-        $"<a{(cssClass is null ? "" : $" class=\"{cssClass}\"")} href=\"{href}\">{H(text)}</a>";
-
-    // Resource text with already encoded pieces (links, names) where {0}, {1} and so on are
-    private static MarkupString Html(string format, params string[] encoded) => (MarkupString)F(format, encoded);
-
     /// <summary>"a", "a and b", "a, b and c", for pieces that are already encoded.</summary>
     private static string JoinAnd(IEnumerable<string> parts)
     {
@@ -897,8 +892,8 @@ else
         if (form.IsNew && CopyOfId is null && WishId is null && ParentId is null && !string.IsNullOrWhiteSpace(GenusName))
         {
             plant.Genus = GenusName.Trim();
-            plant.Species = string.IsNullOrWhiteSpace(SpeciesName) ? null : SpeciesName.Trim();
-            plant.Cultivar = string.IsNullOrWhiteSpace(CultivarName) ? null : CultivarName.Trim();
+            plant.Species = Clean(SpeciesName);
+            plant.Cultivar = Clean(CultivarName);
         }
 
         var all = form.Plants;
@@ -947,6 +942,10 @@ else
 
         busy = false;
     }
+
+    // A photo identified from the name box and kept: saved from the sheet's file input, like one added below
+    private Task KeepIdentifiedPhotoAsync(IdentifyPick pick) =>
+        pick.PhotoInput is { } input ? AddPhotosAsync(input, pick.FromCamera) : Task.CompletedTask;
 
     private Task GoogleSavedAsync(PhotoSaveResult result)
     {

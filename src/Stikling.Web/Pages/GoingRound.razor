@@ -26,7 +26,7 @@
 @inject IPhotoRepository PhotoRepository
 @inject TimeProvider Time
 
-<PageTitle>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPageTitle, Title))</PageTitle>
+<PageTitle>@(F(Strings.Care.RoundPageTitle, Title))</PageTitle>
 
 @* No ReloadOnSync: like an edit page, the cards stay put while someone is going round *@
 
@@ -65,7 +65,7 @@ else if (cards.Count == 0)
         }
         else
         {
-            <p>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundNothingInRoom, Title))</p>
+            <p>@(F(Strings.Care.RoundNothingInRoom, Title))</p>
             <a class="btn btn-primary mt-3" href="plants">@Strings.Care.RoundGoToPlants</a>
         }
     </div>
@@ -74,7 +74,7 @@ else if (pos >= queue.Count)
 {
     var summary = GoingRoundLogic.Summarise(days);
     <div class="round-end">
-        <h1>@(IsDue || IsNext || IsBack ? Strings.Care.RoundAllDone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundRoomDone, Title))</h1>
+        <h1>@(IsDue || IsNext || IsBack ? Strings.Care.RoundAllDone : F(Strings.Care.RoundRoomDone, Title))</h1>
         <div class="round-tiles">
             @if (summary.Watered > 0)
             {
@@ -95,7 +95,7 @@ else if (pos >= queue.Count)
             @if (summary.Skipped > 0)
             {
                 <button type="button" class="btn btn-outline-primary" @onclick="GoThroughSkipped">
-                    @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundGoThroughSkipped, summary.Skipped))
+                    @(F(Strings.Care.RoundGoThroughSkipped, summary.Skipped))
                 </button>
             }
         </div>
@@ -112,7 +112,7 @@ else
         <div class="round-head">
             <h1>@Title</h1>
             <div class="round-counter">
-                <span class="round-position">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPosition, pos + 1, queue.Count))</span>
+                <span class="round-position">@(F(Strings.Care.RoundPosition, pos + 1, queue.Count))</span>
                 <button type="button" class="round-back" disabled="@(pos == 0 || busy)" @onclick="Back">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
                     @Strings.Common.Back
@@ -130,7 +130,7 @@ else
             <div class="round-photo">
                 @if (CoverOf(card.Subject) is { } coverId)
                 {
-                    <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundPhotoOf, card.Name))" />
+                    <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@(F(Strings.Care.RoundPhotoOf, card.Name))" />
                 }
                 else
                 {
@@ -419,13 +419,13 @@ else
             _ => Strings.Care.RoundNotToppedUp
         };
         parts.Add(CareSummary.Latest(careLogs, card.Subject.Id, kind, Today) is { } last
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, done, Labels.DaysAgo(last.DaysAgo))
+            ? F(done, Labels.DaysAgo(last.DaysAgo))
             : notYet);
 
         if (day.Reading is { } reading)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundReads, reading.Value));
+            parts.Add(F(Strings.Care.RoundReads, reading.Value));
         else if (CareSummary.LatestMoisture(careLogs, card.Subject.Id, Today) is { } latest)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo)));
+            parts.Add(F(Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo)));
 
         return string.Join(" · ", parts);
     }
@@ -464,7 +464,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "A step in the daily round failed");
-            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.RoundSaveFailed, ex.Message);
+            status = F(Strings.Care.RoundSaveFailed, ex.Message);
         }
         busy = false;
     }
@@ -533,7 +533,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a photo in the daily round failed");
-            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+            status = F(Strings.Care.PhotoRowFailed, ex.Message);
         }
         busy = false;
     }
@@ -560,7 +560,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a photo in the daily round failed");
-            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+            status = F(Strings.Care.PhotoRowFailed, ex.Message);
         }
         busy = false;
     }

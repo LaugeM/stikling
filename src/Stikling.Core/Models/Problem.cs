@@ -6,7 +6,7 @@ namespace Stikling.Core.Models;
 
 /// <summary>
 /// What someone sees wrong on a plant. A problem keeps these as text (see <see cref="Problem.Signs"/>),
-/// so the order here is only the order they are offered in.
+/// so the order here is only the order they are offered in. Other stays last.
 /// </summary>
 public enum ProblemSign
 {
@@ -20,6 +20,12 @@ public enum ProblemSign
     Sunburn,
     Leggy,
     Edema,
+    PaleLeaves,
+    PaleNewGrowth,
+    LostVariegation,
+    Speckled,
+    Sticky,
+    Curled,
     Other
 }
 

@@ -1,5 +1,4 @@
 @page "/rooms-and-tags/history/{Id:guid}"
-@using System.Globalization
 @using Stikling.Core.Problems
 @inject SpotHistoryService History
 @inject TimeProvider Time
@@ -21,7 +20,7 @@ else if (place is not { } found)
 }
 else
 {
-    <h1>@string.Format(CultureInfo.CurrentCulture, Strings.Shared.SpotHistoryTitle, found.Name)</h1>
+    <h1>@F(Strings.Shared.SpotHistoryTitle, found.Name)</h1>
 
     @if (found.Plants.Count == 0)
     {
@@ -81,7 +80,7 @@ else
         if (Lasted(stay) is { } days && days > 0)
         {
             var length = ProblemText.Duration(days);
-            parts.Add(stay.FromLogged ? length : string.Format(CultureInfo.CurrentCulture, Strings.Shared.SpotHistoryAtLeast, length));
+            parts.Add(stay.FromLogged ? length : F(Strings.Shared.SpotHistoryAtLeast, length));
         }
         parts.AddRange(stay.Spots);
         return string.Join(", ", parts);
@@ -89,7 +88,7 @@ else
 
     private static string Period(SpotStay stay)
     {
-        static string Text(string template, params object[] days) => string.Format(CultureInfo.CurrentCulture, template, days);
+        static string Text(string template, params object[] days) => F(template, days);
 
         return (stay.From, stay.To) switch
         {

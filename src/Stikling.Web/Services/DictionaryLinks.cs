@@ -5,6 +5,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Text;
 using Strings = Stikling.Web.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -84,7 +85,7 @@ public static class DictionaryLinks
 
     /// <summary>A sentence from the resource files with links and italic names in it. The arguments are made by <see cref="Anchor"/> and <see cref="Italic"/>.</summary>
     public static MarkupString Html(string format, params string[] markup) =>
-        (MarkupString)string.Format(CultureInfo.CurrentCulture, format, markup.Cast<object>().ToArray());
+        (MarkupString)F(format, markup.Cast<object>().ToArray());
 
     public static string Anchor(string href, string text, bool italic = false) =>
         $"<a class=\"link-action\" href=\"{WebUtility.HtmlEncode(href)}\">{(italic ? Italic(text) : WebUtility.HtmlEncode(text))}</a>";
@@ -94,7 +95,7 @@ public static class DictionaryLinks
     public static string CountsLine(int genera, int species) =>
         species == 0
             ? Plural.Of(genera, Strings.Dictionary.Genus_One, Strings.Dictionary.Genus_Other)
-            : string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CountsLine,
+            : F(Strings.Dictionary.CountsLine,
             Plural.Of(genera, Strings.Dictionary.Genus_One, Strings.Dictionary.Genus_Other),
             Plural.Of(species, Strings.Dictionary.Species_One, Strings.Dictionary.Species_Other));
 }

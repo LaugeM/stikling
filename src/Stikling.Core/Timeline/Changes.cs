@@ -2,6 +2,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 using static Stikling.Core.Timeline.HistoryText;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Timeline;
 
@@ -307,6 +308,4 @@ internal static class ChangeText
 
     private static bool SameText(string? a, string? b) =>
         string.Equals(Clean(a), Clean(b), StringComparison.OrdinalIgnoreCase);
-
-    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

@@ -5,7 +5,6 @@
 @inject ShelfPage Page
 @inject NavigationManager Navigation
 @inject TimeProvider Time
-@using System.Globalization
 
 <PageTitle>@Strings.Shelf.PhotoPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -41,7 +40,7 @@ else
                     <div class="shelf-box @(aspect >= 1 ? "landscape" : "portrait") @(markMode ? "marking" : null)"
                          style="--ar:@ratio" @ref="box" @onclick="TapPhotoAsync">
                         <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="shelf-image"
-                                    Alt="@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.PhotoAlt, placeName)" />
+                                    Alt="@F(Strings.Shelf.PhotoAlt, placeName)" />
 
                         @foreach (var m in view.Marks)
                         {
@@ -172,7 +171,7 @@ else
         </ul>
         @if (pickTotal > pickItems.Count)
         {
-            <p class="text-body-secondary small">@string.Format(CultureInfo.CurrentCulture, Strings.Shelf.PickMore, pickItems.Count)</p>
+            <p class="text-body-secondary small">@F(Strings.Shelf.PickMore, pickItems.Count)</p>
         }
     }
     <button type="button" class="btn btn-link mt-2" @onclick="() => PickOpenChanged(false)">@Strings.Common.Cancel</button>

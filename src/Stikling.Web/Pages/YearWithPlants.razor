@@ -22,13 +22,13 @@
 
 <a class="back-link" href="">@Strings.Layout.Today</a>
 <div class="page-heading year-heading">
-    <h1>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearHeading, year)</h1>
+    <h1>@F(Strings.Shared.YearHeading, year)</h1>
     @if (loaded && years.Count > 1)
     {
         <select class="form-select year-picker" aria-label="@Strings.Shared.YearPicker" @onchange="PickYear">
             @foreach (var option in years)
             {
-                <option value="@option" selected="@(option == year)">@(option == Time.Today().Year ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearSoFar, option) : option.ToString())</option>
+                <option value="@option" selected="@(option == year)">@(option == Time.Today().Year ? F(Strings.Shared.YearSoFar, option) : option.ToString())</option>
             }
         </select>
     }
@@ -41,7 +41,7 @@
 else if (summary is null || summary.IsEmpty)
 {
     <div class="empty-state">
-        <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearNothing, year)</p>
+        <p>@F(Strings.Shared.YearNothing, year)</p>
         <p class="text-body-secondary">@Strings.Shared.YearNothingHint</p>
         <a class="btn btn-primary mt-3" href="plants/new">@Strings.Shared.YearAddPlant</a>
     </div>
@@ -65,7 +65,7 @@ else
     var frontDrawn = drawn.GetValueOrDefault(front.Id);
     var remaining = Math.Min(2, cards.Count - 1 - index);
 
-    <div class="year-stage" tabindex="0" role="region" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearCardsLabel, year)" @ref="stage" @onkeydown="OnKeyAsync"
+    <div class="year-stage" tabindex="0" role="region" aria-label="@F(Strings.Shared.YearCardsLabel, year)" @ref="stage" @onkeydown="OnKeyAsync"
          style="@AspectStyle">
         <div class="year-row">
             <div class="year-slot">
@@ -133,7 +133,7 @@ else
             <span class="year-dot @(i == index ? "current" : "")"></span>
         }
     </div>
-    <p class="year-count" aria-live="polite">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.YearCount, index + 1, cards.Count)</p>
+    <p class="year-count" aria-live="polite">@F(Strings.Shared.YearCount, index + 1, cards.Count)</p>
     @if (CanSwap(front))
     {
         <p class="year-hint">@Strings.Shared.YearTapToSwap</p>
@@ -152,7 +152,7 @@ else
     {
         <div class="year-all">
             <button type="button" class="btn btn-link" disabled="@(busy || !AllDrawn)" @onclick="ShareAllAsync">
-                @string.Format(System.Globalization.CultureInfo.CurrentCulture, canShareAll ? Strings.Shared.YearShareAll : Strings.Shared.YearSaveAll, Included.Count)
+                @F(canShareAll ? Strings.Shared.YearShareAll : Strings.Shared.YearSaveAll, Included.Count)
             </button>
             @if (CanMakeVideo && !makingVideo && !VideoIsReady)
             {

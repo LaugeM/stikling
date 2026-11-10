@@ -4,6 +4,7 @@ using System.Globalization;
 using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Plants;
 
@@ -371,5 +372,5 @@ public static class PlantTable
         };
     }
 
-    private static string? Text(string? value) => string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+    private static string? Text(string? value) => Clean(value);
 }

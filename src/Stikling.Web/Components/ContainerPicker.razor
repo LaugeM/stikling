@@ -1,7 +1,6 @@
 @* What a propagation is in. A text box with the containers you have as chips under it, because a
    datalist is invisible on a phone. A name that isn't a container yet becomes one when the form is saved. *@
 
-@using System.Globalization
 
 <div class="container-picker">
     <label class="form-label" for="@Id">@Label</label>
@@ -27,7 +26,7 @@
     }
     else if (ContainerName.Clean(Value) is { } typed)
     {
-        <div class="form-text">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ContainerWillBeAdded, typed)</div>
+        <div class="form-text">@F(Strings.Propagations.ContainerWillBeAdded, typed)</div>
     }
 </div>
 

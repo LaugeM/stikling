@@ -23,6 +23,7 @@ The impeccable skill is for real design work, not a check on every change, since
 - **New kind of record** (a new IndexedDB store): follow every step in `docs/dev/new-record.md`. A missed step quietly leaves the records out of backups or sync.
 - **API or sync code** (`src/Stikling.Api`, `Core/Sync`, `SyncRunner`, how `db.js` saves records, or settings that differ between local and hosted): read `docs/dev/api.md` first. It has the auth rules every endpoint follows, how records and photos are stored, and how a sync runs.
 - **Sign-in, or testing while signed in** (Clerk, `account.js`, `AccountService`, `StiklingApi`, or checking a screen or a sync with an account): read `docs/dev/sign-in.md`.
+- **Guides** (`/guides`, `GuideBook`, `Guides.resx`): read `docs/dev/guides.md`. It is the checked text of each guide and where every part comes from, so a change to a guide is a change there too.
 - **Help page or front page** (adding or changing an answer, also for a feature change, `Help.razor`, `FrontPage.razor`): read `docs/dev/help-page.md`. They are also rendered without a browser.
 - **Testing with the real collection** (a change to stored data or restore, or a screen that needs a full collection to judge): read `docs/dev/test-collection.md` first.
 - **Build passes locally but fails in CI**: run `git status --ignored` first. The .NET gitignore template ignores `Backup*/`, and the exception for `src/Stikling.Core/Backup` is at the end of `.gitignore`.
@@ -77,6 +78,8 @@ When a change is something people using the app would notice, add a line for it 
 Plan on Opus. Once I approve a plan, don't ask me to switch models. Write a brief and hand the build to the `worker` agent (`.claude/agents/worker.md`), which runs on Sonnet 5.5, then check what it did. The `coordinate` skill has the steps, including how to write a brief the worker can finish without coming back with questions. A worker is cheaper than switching this session's model, which writes the whole planning conversation to the cache again.
 
 Build in this session instead when the change is one or two files, or when the work is mostly judgment, like a data migration or tuning a screen together with me. For a batch of small features that touch different parts of the app, suggest `/coordinate`, which runs workers in parallel.
+
+When starting or proposing another session, always set both its model and its effort. Use Sonnet 5.5 at medium for building and fixes, and low for docs and mechanical work. Left out, the effort is copied from this session, so a Sonnet session started from Opus on high also runs on high. A session can't be started above this session's own effort.
 
 ## Before opening a pull request
 

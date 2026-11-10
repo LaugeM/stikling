@@ -16,7 +16,7 @@
         var links = string.Join(", ", Clashes.Select(clash =>
             $"<a href=\"{(clash.IsPropagation ? "propagations" : "plants")}/{clash.Id}\">{System.Net.WebUtility.HtmlEncode(clash.Name)}</a>"));
         var format = Clashes.Count == 1 ? Strings.Plants.NumberClashOne : Strings.Plants.NumberClashMany;
-        return (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, format, links, System.Net.WebUtility.HtmlEncode(CollectionNumbers.Normalize(Code) ?? ""));
+        return (MarkupString)F(format, links, System.Net.WebUtility.HtmlEncode(CollectionNumbers.Normalize(Code) ?? ""));
     }
 
     [Parameter]

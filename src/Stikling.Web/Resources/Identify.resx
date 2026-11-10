@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Button" xml:space="preserve">
+    <value>Find the name from a photo</value>
+    <comment>Button under the name search on the plant and propagation forms. Opens the sheet that names the plant in a photo.</comment>
+  </data>
+  <data name="ButtonShort" xml:space="preserve">
+    <value>Photo</value>
+    <comment>Short label on the camera button joined to the name search.</comment>
+  </data>
+  <data name="SheetTitle" xml:space="preserve">
+    <value>What plant is this?</value>
+    <comment>Title of the sheet.</comment>
+  </data>
+  <data name="TakePhoto" xml:space="preserve">
+    <value>Take a photo</value>
+    <comment>Row in the sheet. Opens the camera.</comment>
+  </data>
+  <data name="ChoosePhoto" xml:space="preserve">
+    <value>Choose from gallery</value>
+    <comment>Row in the sheet. Picks one photo from the device.</comment>
+  </data>
+  <data name="OrPickOne" xml:space="preserve">
+    <value>Or use a photo you already have here</value>
+    <comment>Heading over the thumbnails of the photos of the plant or propagation being edited.</comment>
+  </data>
+  <data name="PhotoAlt" xml:space="preserve">
+    <value>Photo to identify</value>
+    <comment>Alt text of a thumbnail in the sheet.</comment>
+  </data>
+  <data name="Identifying" xml:space="preserve">
+    <value>Looking at your photo</value>
+    <comment>Shown while the photo is being identified.</comment>
+  </data>
+  <data name="ResultsHeading" xml:space="preserve">
+    <value>Could it be one of these?</value>
+    <comment>Heading over the suggestions.</comment>
+  </data>
+  <data name="MatchGood" xml:space="preserve">
+    <value>Good match</value>
+    <comment>How well a suggestion matches, shown under its name.</comment>
+  </data>
+  <data name="MatchPossible" xml:space="preserve">
+    <value>Possible</value>
+    <comment>How well a suggestion matches, shown under its name.</comment>
+  </data>
+  <data name="MatchLongShot" xml:space="preserve">
+    <value>Long shot</value>
+    <comment>How well a suggestion matches, shown under its name.</comment>
+  </data>
+  <data name="KeepPhoto" xml:space="preserve">
+    <value>Keep this photo on the plant</value>
+    <comment>Checkbox over the suggestions, on the plant form only.</comment>
+  </data>
+  <data name="SpeciesOnly" xml:space="preserve">
+    <value>Identification names the species, not the cultivar. Pick a cultivar in the name fields if you know it.</value>
+  </data>
+  <data name="Credit" xml:space="preserve">
+    <value>Identified by {0}</value>
+    <comment>{0} is the link Pl@ntNet.</comment>
+  </data>
+  <data name="CreditName" xml:space="preserve">
+    <value>Pl@ntNet</value>
+    <comment>The name of the service, linked to its site.</comment>
+  </data>
+  <data name="NeedsAccount" xml:space="preserve">
+    <value>Identification needs an account or a Pl@ntNet key of your own.</value>
+  </data>
+  <data name="NeedsAccountSignIn" xml:space="preserve">
+    <value>Sign in</value>
+    <comment>Link to the sign-in page.</comment>
+  </data>
+  <data name="NeedsAccountSettings" xml:space="preserve">
+    <value>Add a key in Settings</value>
+    <comment>Link to Settings.</comment>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Identifying needs a connection.</value>
+  </data>
+  <data name="NotAvailable" xml:space="preserve">
+    <value>Identification isn't available right now.</value>
+  </data>
+  <data name="PersonLimit" xml:space="preserve">
+    <value>You've used today's 10 identifications. Try again tomorrow.</value>
+  </data>
+  <data name="TotalLimit" xml:space="preserve">
+    <value>Today's identifications for everyone are used up. Try again tomorrow, or add a Pl@ntNet key of your own in Settings.</value>
+  </data>
+  <data name="KeyRejected" xml:space="preserve">
+    <value>Pl@ntNet didn't accept your key. Check it in Settings.</value>
+  </data>
+  <data name="KeyLimit" xml:space="preserve">
+    <value>Your Pl@ntNet key has used today's identifications.</value>
+  </data>
+  <data name="NoMatch" xml:space="preserve">
+    <value>No match found. A close-up of a leaf or a flower works best.</value>
+  </data>
+  <data name="Missing" xml:space="preserve">
+    <value>This photo isn't on this device yet. Open it once, then try again.</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Identification failed. Try again in a moment.</value>
+  </data>
+</root>

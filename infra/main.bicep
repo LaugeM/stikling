@@ -41,6 +41,12 @@ param apiMinReplicas int = 0
 @description('The public half of the VAPID keys for push notifications. Empty leaves them off: no job, and the API answers 503. Set it once the private key is in the Key Vault, see docs/ops/hosting.md.')
 param vapidPublicKey string = ''
 
+@description('Whether the API asks Trefle for the plant facts card. It needs the trefle-token secret in the Key Vault first, see docs/ops/hosting.md. Off, the card is Wikipedia only.')
+param plantFactsTrefleOn bool = false
+
+@description('Turns on plant identification: the API reads the Pl@ntNet key from the Key Vault secret plantnet-api-key. Leave it off until the secret is set, see docs/ops/hosting.md.')
+param identificationOn bool = false
+
 @description('The monthly spending that the budget warns about, in the subscription\'s currency, which is Danish kroner and not dollars.')
 param monthlyBudget int
 
@@ -71,6 +77,8 @@ module resources 'resources.bicep' = {
     apiMinReplicas: apiMinReplicas
     sentryDsn: sentryDsn
     vapidPublicKey: vapidPublicKey
+    plantFactsTrefleOn: plantFactsTrefleOn
+    identificationOn: identificationOn
   }
 }
 

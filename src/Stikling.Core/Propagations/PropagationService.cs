@@ -1,10 +1,10 @@
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
-using System.Globalization;
 using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Propagations;
 
@@ -268,7 +268,7 @@ public sealed class PropagationService(
         if (request.Date < propagation.StartedOn)
             throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         IReadOnlyList<string?> names = oneAny
-            ? [string.IsNullOrWhiteSpace(request.Nickname) ? null : request.Nickname.Trim()]
+            ? [Clean(request.Nickname)]
             : PotUpNames(request.Nickname, request.Count, propagation.PottedUpCount);
         // Worked out from the count as it is now, so a retry gives the same ones
         var codes = CollectionNumbers.PottedUpCodes(propagation, request.Count);
@@ -507,11 +507,11 @@ public sealed class PropagationService(
     {
         var parts = new List<string>(3);
         if (propagation.PottedUpCount > 0)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomePottedUp, propagation.PottedUpCount));
+            parts.Add(F(Strings.Propagations.OutcomePottedUp, propagation.PottedUpCount));
         if (propagation.GivenAwayCount > 0)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomeGivenAway, propagation.GivenAwayCount));
+            parts.Add(F(Strings.Propagations.OutcomeGivenAway, propagation.GivenAwayCount));
         if (propagation.FailedCount > 0)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.OutcomeFailed, propagation.FailedCount));
+            parts.Add(F(Strings.Propagations.OutcomeFailed, propagation.FailedCount));
         return parts.Count == 0 ? Strings.Propagations.OutcomeNothingYet : string.Join(", ", parts);
     }
 
@@ -560,6 +560,4 @@ public sealed class PropagationService(
         HistoryText.Set(entry, lines, label ?? (e => e.ToString()));
         return timeline.AddAsync(entry);
     }
-
-    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

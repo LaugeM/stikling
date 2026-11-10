@@ -1,5 +1,4 @@
 @page "/propagations/results"
-@using System.Globalization
 @inject IPropagationRepository Repository
 @inject RoomService RoomService
 @inject ITimelineRepository Timeline
@@ -17,7 +16,7 @@
 <details class="results-how">
     <summary>@Strings.Propagations.StatsHowTitle</summary>
     <p>
-        @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsHow, SmallSample)
+        @F(Strings.Propagations.StatsHow, SmallSample)
     </p>
 </details>
 
@@ -48,7 +47,7 @@ else
         <h2>@Strings.Propagations.StatsByMedium</h2>
         @if (acrossMediums.Count > 0)
         {
-            <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairMedium, Labels.List(acrossMediums))</p>
+            <p class="aid-note">@F(Strings.Propagations.StatsFairMedium, Labels.List(acrossMediums))</p>
         }
         <ul class="results-list">
             @foreach (var result in byMedium)
@@ -79,7 +78,7 @@ else
             <p class="aid-note">@Strings.Propagations.StatsAidsHow</p>
             @if (acrossAids.Count > 0)
             {
-                <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairAids, Labels.List(acrossAids))</p>
+                <p class="aid-note">@F(Strings.Propagations.StatsFairAids, Labels.List(acrossAids))</p>
             }
             <ul class="results-list">
                 @foreach (var result in byAid)
@@ -108,7 +107,7 @@ else
             <p class="aid-note">@Strings.Propagations.StatsDryingHow</p>
             @if (acrossDrying.Count > 0)
             {
-                <p class="aid-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsFairDrying, Labels.List(acrossDrying))</p>
+                <p class="aid-note">@F(Strings.Propagations.StatsFairDrying, Labels.List(acrossDrying))</p>
             }
             <ul class="results-list">
                 @foreach (var group in byDrying)
@@ -169,29 +168,29 @@ else
                 @* A full bar for 2 of 2 says the same thing a percentage would *@
                 @if (result.Decided >= SmallSample)
                 {
-                    <div class="result-bar" role="img" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsBarLabel, Percent(rate))">
+                    <div class="result-bar" role="img" aria-label="@F(Strings.Propagations.StatsBarLabel, Percent(rate))">
                         <span style="width: @(Percent(rate))"></span>
                     </div>
                 }
                 <div class="result-line">
                     @if (result.Decided < SmallSample)
                     {
-                        @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsMadeItSmall, result.Succeeded, result.Decided))
+                        @((MarkupString)F(Strings.Propagations.StatsMadeItSmall, result.Succeeded, result.Decided))
                     }
                     else
                     {
-                        @((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsMadeItPercent, Percent(rate), result.Succeeded, result.Decided))
+                        @((MarkupString)F(Strings.Propagations.StatsMadeItPercent, Percent(rate), result.Succeeded, result.Decided))
                     }
                     @if (result.Growing > 0)
                     {
-                        <span class="text-body-secondary"> · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsStillGoing, result.Growing)</span>
+                        <span class="text-body-secondary"> · @F(Strings.Propagations.StatsStillGoing, result.Growing)</span>
                     }
                 </div>
             }
             else
             {
                 <div class="result-line text-body-secondary">
-                    @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsNothingYet, result.Growing)
+                    @F(Strings.Propagations.StatsNothingYet, result.Growing)
                 </div>
             }
 
@@ -206,7 +205,7 @@ else
                     {
                         <span>@(seeds ? Plural.Of(Days(average), Strings.Propagations.StatsSproutedAvg_One, Strings.Propagations.StatsSproutedAvg_Other) : Plural.Of(Days(average), Strings.Propagations.StatsRootedAvg_One, Strings.Propagations.StatsRootedAvg_Other))</span>
                         <span class="text-body-secondary">
-                            · @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.StatsRange, result.FastestDaysToRoot, result.SlowestDaysToRoot, result.DaysToRoot.Count)
+                            · @F(Strings.Propagations.StatsRange, result.FastestDaysToRoot, result.SlowestDaysToRoot, result.DaysToRoot.Count)
                         </span>
                     }
                 }
@@ -234,7 +233,7 @@ else
             FailureStage.AfterRooting => Strings.Propagations.StatsLostAfter,
             _ => Strings.Propagations.StatsLost
         };
-        return string.Format(CultureInfo.CurrentCulture, format, reasons);
+        return F(format, reasons);
     }
 
     // Below this many units a percentage looks more certain than it is

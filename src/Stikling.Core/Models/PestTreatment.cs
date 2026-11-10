@@ -1,5 +1,6 @@
 using System.Text.Json.Serialization;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -101,7 +102,7 @@ public sealed class PestTreatment : Entity
         RecipeId = recipe.Id;
         What = recipe.Name?.Trim();
         Ingredients = recipe.CopyIngredients();
-        Method = string.IsNullOrWhiteSpace(recipe.Method) ? null : recipe.Method.Trim();
+        Method = Clean(recipe.Method);
     }
 
     public IReadOnlyList<string> Validate(DateOnly today)

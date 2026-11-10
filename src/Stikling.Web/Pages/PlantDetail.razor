@@ -36,6 +36,9 @@
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject ShareCardService Cards
+@inject IdentificationService Identification
+@inject SubjectPhotos SubjectPhotos
+@using Stikling.Core.Identification
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -95,6 +98,13 @@ else
                     else if (everyday?.For(plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar) is { } called)
                     {
                         <p class="detail-sub everyday-name">@called</p>
+                    }
+                    @if (identifyOffered && IdentifyWanted)
+                    {
+                        <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
+                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            @Strings.Identify.Button
+                        </button>
                     }
                     @if (plant.LivesElsewhere)
                     {
@@ -248,6 +258,7 @@ else
                             </li>
                         }
                     </ul>
+                    <div class="mb-2"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant.Id)" /></div>
                     @if (settled)
                     {
                         // Nothing to stop once it has settled
@@ -445,6 +456,7 @@ else
                             </dd>
                         }
                         <DictionaryLink Genus="@plant.Genus" Species="@plant.Species" Cultivar="@plant.Cultivar" Qualifier="@plant.NameQualifier" />
+                        <SpeciesFactsLink Genus="@plant.Genus" Species="@plant.KnownSpecies" Cultivar="@plant.Cultivar" />
 
                         @if (careBook.IsEmpty is false && !string.IsNullOrWhiteSpace(plant.Genus))
                         {
@@ -477,6 +489,10 @@ else
                                 <div class="detail-sub">
                                     @StandingIn(outer)
                                 </div>
+                                @if (plant.OuterPotWateringShown == PotWatering.Wick)
+                                {
+                                    <div class="detail-sub"><GuideLink Guide="@GuideBook.Wick" From="@GuideLinks.FromPlant(plant.Id)" /></div>
+                                }
                             }
 
                             @if (Mix is { } mix)
@@ -1386,7 +1402,8 @@ else
                     <label class="form-label" for="transition-weeks">@Strings.PlantDetail.TransitionWeeksLabel</label>
                     <input id="transition-weeks" type="number" class="form-control" min="1" max="52" inputmode="numeric" @bind="transitionWeeks" />
                 </div>
-                <div class="form-text mb-3">@Strings.PlantDetail.TransitionWeeksNote</div>
+                <div class="form-text mb-2">@Strings.PlantDetail.TransitionWeeksNote</div>
+                <div class="mb-3"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant!.Id)" /></div>
                 <div class="form-actions">
                     <button type="button" class="btn btn-primary" disabled="@(busy || transitionWeeks is < 1 or > 52)" @onclick="StartTransitionAsync">@Strings.PlantDetail.StartTracking</button>
                     <button type="button" class="btn btn-link" @onclick="() => more = More.Menu">@Strings.Common.Back</button>
@@ -1507,6 +1524,11 @@ else
     </Sheet>
 }
 
+@if (identifyOffered)
+{
+    <IdentifySheet @bind-Open="identifyOpen" SubjectId="plant?.Id" CanKeepPhoto="true" OnPicked="PickIdentifiedAsync" />
+}
+
 @code {
     [Parameter]
     public Guid Id { get; set; }
@@ -1521,6 +1543,12 @@ else
     /// </summary>
     [SupplyParameterFromQuery(Name = "tab")]
     public string? Tab { get; set; }
+
+    /// <summary>Set by the semi-hydro guide: opens the sheet that starts tracking the move to semi-hydro.</summary>
+    [SupplyParameterFromQuery(Name = "track")]
+    public bool Track { get; set; }
+
+    private Guid trackOpenedFor;
 
     /// <summary>A history entry, or with tab=care a care entry, to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "entry")]
@@ -1793,6 +1821,11 @@ else
         await LoadAsync();
         await RefreshGhostAsync();
         loaded = true;
+        if (Track && trackOpenedFor != Id && plant is { TransitionSince: null })
+        {
+            trackOpenedFor = Id;
+            OpenTransition();
+        }
     }
 
     private EverydayNameBook? everyday;
@@ -1851,8 +1884,40 @@ else
         return found;
     }
 
+    private bool identifyOffered;
+    private bool identifyOpen;
+
+    // "Find the name from a photo" under the name of an active plant whose name is missing or unsure
+    private bool IdentifyWanted =>
+        plant is { Status: PlantStatus.Active } && IdentificationRules.NameWanted(plant.Genus, plant.NameQualifier);
+
+    // A name picked here is saved at once, as a guess. The photo, if the person kept it, goes on the history.
+    private Task PickIdentifiedAsync(IdentifyPick pick) => ChangeAsync(async () =>
+    {
+        if (plant is null)
+            return;
+        var before = plant.Copy();
+        var (genus, species) = (await Names.GetDictionaryAsync()).Current(pick.Suggestion.Genus, pick.Suggestion.Species);
+        genus ??= pick.Suggestion.Genus;
+        species ??= pick.Suggestion.Species;
+        plant.Cultivar = IdentificationRules.CultivarAfterPick(before.Genus, before.Species, before.Cultivar, genus, species);
+        plant.Genus = genus;
+        plant.Species = species;
+        plant.NameQualifier = IdentificationRules.QualifierAfterPick(before.NameQualifier);
+        await PlantService.UpdateAsync(before, plant, Labels.For);
+
+        actionNote = null;
+        if (pick.PhotoInput is { } input)
+        {
+            var (message, _) = await SubjectPhotos.TakeAsync(input, plant);
+            actionNote = message;
+        }
+        await LoadAsync();
+    });
+
     private async Task LoadAsync()
     {
+        identifyOffered = await Identification.IsOfferedAsync();
         everyday = await Names.GetEverydayNamesAsync();
         careBook = await CommonCare.GetBookAsync();
         await Covers.EnsureLoadedAsync();
@@ -2239,20 +2304,6 @@ else
         ? Strings.PlantDetail.DaysLabelToday
         : F(days.Value, Strings.PlantDetail.DaysLabelFor_One, Strings.PlantDetail.DaysLabelFor_Other, days.Value);
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
-    private static string H(string text) => System.Net.WebUtility.HtmlEncode(text);
-
-    private static string Link(string href, string text, string? cssClass = null) =>
-        $"<a{(cssClass is null ? "" : $" class=\"{cssClass}\"")} href=\"{href}\">{H(text)}</a>";
-
-    // Resource text with already encoded pieces (links, names) where {0}, {1} and so on are
-    private static MarkupString Html(string format, params string[] encoded) => (MarkupString)F(format, encoded);
-
     private RenderFragment StandingIn(string outer)
     {
         RenderFragment inner = @<text>@PotPhotoFor(plant!.OuterPotId)@outer</text>;
@@ -2264,15 +2315,6 @@ else
         };
         return Around(format, inner);
     }
-
-    // A sentence with an element inside it: the element goes where {0} is
-    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
-    {
-        var at = format.IndexOf("{0}", StringComparison.Ordinal);
-        builder.AddContent(0, format[..at]);
-        builder.AddContent(1, inner);
-        builder.AddContent(2, format[(at + 3)..]);
-    };
 
     private void OpenMore(More what)
     {
@@ -2441,7 +2483,7 @@ else
     private async Task SavePestCheckAsync()
     {
         var entry = PestService.StartPlantCheck(plant!, since);
-        entry.Notes = string.IsNullOrWhiteSpace(checkNotes) ? null : checkNotes.Trim();
+        entry.Notes = Clean(checkNotes);
         if (entry.Validate(Today).Count > 0)
             return;
 

@@ -1,6 +1,5 @@
 @page "/plants/{Id:guid}/story"
 @layout WideLayout
-@using System.Globalization
 @using Stikling.Core.Plants
 @using Stikling.Core.Propagations
 @using Stikling.Core.Sharing
@@ -367,8 +366,6 @@
     }
 
     private static string Counted(int picked, int all) => F(Strings.PlantStory.PickedOf, picked, all);
-
-    private static string F(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
 
     private RenderFragment PrintButton => @<button type="button" class="btn btn-primary" disabled="@printing" @onclick="PrintAsync">
         @(printing ? Strings.PlantStory.GettingReady : Strings.Care.SitterPrint)

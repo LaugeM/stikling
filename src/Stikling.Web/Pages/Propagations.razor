@@ -22,7 +22,7 @@
     @if (all is { Count: > 0 })
     {
         <div class="d-flex align-items-baseline gap-2">
-            <span class="text-body-secondary small">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListShownOf, visible.Count, all.Count)</span>
+            <span class="text-body-secondary small">@F(Strings.Propagations.ListShownOf, visible.Count, all.Count)</span>
             <a class="btn btn-link btn-sm link-action phone-link" href="swap">@Strings.Propagations.ListSwapLink</a>
             <button type="button" class="btn btn-link btn-sm link-action phone-link" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
@@ -60,6 +60,7 @@ else if (all.Count == 0)
             <a class="btn btn-primary" href="propagations/new">@Strings.Propagations.ListStart</a>
         </div>
         <a class="first-run-help" href="help#propagations">@Strings.Propagations.ListHelpLink</a>
+        <div class="mt-2"><GuideLink Guide="@GuideBook.Cutting" From="propagations" /></div>
     </div>
 }
 else
@@ -147,20 +148,20 @@ else
                 {
                     var name = experiment.Name;
                     <button type="button" class="btn btn-link btn-sm link-action experiment-share"
-                            aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpShareLabel, name)"
+                            aria-label="@F(Strings.Propagations.ExpShareLabel, name)"
                             @onclick="() => OpenShareAsync(name)">@Strings.Shared.ShareButton</button>
                 }
             </div>
             @if (FairComparison.InExperiment(experiment, places) is var differing && FairComparison.IsMoreThanOne(differing))
             {
-                <p class="experiment-note">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListExperimentNotFair, Labels.List(differing))</p>
+                <p class="experiment-note">@F(Strings.Propagations.ListExperimentNotFair, Labels.List(differing))</p>
             }
             <ul class="item-list experiment-list">
                 @foreach (var entry in experiment.Entries)
                 {
                     <li>
                         <a class="experiment-row" href="propagations/@entry.Propagation.Id"
-                           aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListRowLabel, entry.Propagation.DisplayName, Labels.For(entry.Propagation.Medium))">
+                           aria-label="@F(Strings.Propagations.ListRowLabel, entry.Propagation.DisplayName, Labels.For(entry.Propagation.Medium))">
                             <span class="experiment-medium">@Labels.For(entry.Propagation.Medium)</span>
                             @if (entry.DaysToRoot is { } days)
                             {
@@ -169,7 +170,7 @@ else
                             else
                             {
                                 <span class="experiment-result">
-                                    @(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · @string.Format(CultureInfo.CurrentCulture, Strings.Labels.AgeDay, entry.DaysRunning)
+                                    @(Labels.Stage(entry.Propagation.Stage, entry.Propagation.Type)) · @F(Strings.Labels.AgeDay, entry.DaysRunning)
                                     @if (Pace(entry.Propagation) is { IsSlow: true })
                                     {
                                         <span class="pace-slow"> · @Strings.Propagations.ListSlow</span>
@@ -250,7 +251,7 @@ else
 {
     <div class="bulk-bar" role="region" aria-label="@Strings.Propagations.ListBulkLabel">
         <div class="bulk-row">
-            <span class="bulk-count">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListSelectedCount, selected.Count)</span>
+            <span class="bulk-count">@F(Strings.Propagations.ListSelectedCount, selected.Count)</span>
             <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(selected.Count == 0)"
                     @onclick="OpenLabels">@Strings.Propagations.ListLabels</button>
         </div>
@@ -277,7 +278,7 @@ else
     <div class="experiment-picture" style="@AspectStyle" aria-busy="@(drawn is null ? "true" : null)">
         @if (drawn is not null)
         {
-            <img src="@drawn.Url" alt="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardAlt, shareName)" />
+            <img src="@drawn.Url" alt="@F(Strings.Propagations.ExpCardAlt, shareName)" />
         }
     </div>
     @if (drawn is { Missing: > 0 })
@@ -406,11 +407,11 @@ else
     {
         var parts = new List<string>(3);
         if (propagation.Type == PropagationType.Corm && propagation.CormSizeMm is { } size)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneCorm, Lengths.Mm(size)));
+            parts.Add(F(Strings.Propagations.ListMilestoneCorm, Lengths.Mm(size)));
         if (propagation.DaysToFirstRoot is { } root)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneRoot, root));
+            parts.Add(F(Strings.Propagations.ListMilestoneRoot, root));
         if (propagation.DaysToFirstLeaf is { } leaf)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ListMilestoneLeaf, leaf));
+            parts.Add(F(Strings.Propagations.ListMilestoneLeaf, leaf));
         if (parts.Count == 0)
             return null;
         var text = string.Join(" · ", parts);

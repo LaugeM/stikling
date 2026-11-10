@@ -664,7 +664,7 @@
     <value>Privatliv</value>
   </data>
   <data name="PrivacyUpdated" xml:space="preserve">
-    <value>Sidst ændret 11. oktober 2026</value>
+    <value>Sidst ændret 6. november 2026</value>
   </data>
   <data name="PrivacyIntro" xml:space="preserve">
     <value>Stikling er en gratis app som jeg laver og driver som et hobbyprojekt. Jeg er &lt;a href="https://github.com/LaugeM"&gt;LaugeM på GitHub&lt;/a&gt;, og du kan skrive til mig på &lt;a href="mailto:support@stikling.app"&gt;support@stikling.app&lt;/a&gt;. Denne side fortæller hvad der sker med det du lægger i appen.</value>
@@ -701,6 +701,15 @@
   </data>
   <data name="PrivacyGoogle3" xml:space="preserve">
     <value>Stiklings brug af oplysninger, der modtages fra Googles API'er, overholder &lt;a href="https://developers.google.com/terms/api-services-user-data-policy"&gt;Google API Services User Data Policy&lt;/a&gt;, herunder kravene om begrænset brug (Limited Use).</value>
+  </data>
+  <data name="PrivacyIdentifyHeading" xml:space="preserve">
+    <value>Find navnet ud fra et billede</value>
+  </data>
+  <data name="PrivacyIdentify1" xml:space="preserve">
+    <value>Når du bruger "Find navnet ud fra et billede", bliver billedet du vælger sendt til Pl@ntNet, som finder ud af hvilken plante der er på det. Det går gennem Stikling-serveren, når du er logget ind, eller direkte fra din enhed til Pl@ntNet, hvis du har tilføjet din egen Pl@ntNet-nøgle i indstillingerne.</value>
+  </data>
+  <data name="PrivacyIdentify2" xml:space="preserve">
+    <value>Stikling-serveren sender billedet videre og gemmer det ikke. Den tæller bare, hvor mange billeder du har fået genkendt hver dag, så ingen bruger mere end deres del. Det gør Pl@ntNet heller ikke.</value>
   </data>
   <data name="PrivacyPublicHeading" xml:space="preserve">
     <value>Offentlige sider</value>
@@ -794,5 +803,11 @@
   </data>
   <data name="PrivacyPublic3" xml:space="preserve">
     <value>Hvis du er logget ind, kan du også slå én offentlig side til for hele din samling. Den viser dine planter som billeder med deres navne og, hvis du slår dem til, dine stiklinger, det der er til bytte, din ønskeliste (kun navne) og en historie for hver plante med billeder og milepæle. Den viser aldrig rum, priser, butikken eller personen en plante kom fra, tags, potter, pleje eller noter, og heller ikke planter der er døde eller væk. Søgemaskiner bliver bedt om ikke at vise den, medmindre du slår det til. Når du opgiver et navn til siden, gemmes kun en forvansket kode af det (en hash), så ingen andre kan tage navnet. Intet i den peger tilbage på dig.</value>
+  </data>
+  <data name="PrivacyFactsHeading" xml:space="preserve">
+    <value>Om denne art</value>
+  </data>
+  <data name="PrivacyFacts1" xml:space="preserve">
+    <value>Når du åbner Om denne art på en plante eller i ordbogen, sender appen plantens slægt og art til Stiklings server, som spørger Wikipedia og Trefle om den. Der sendes ikke noget om dig, din konto eller dine planter med, og der spørges ikke før du trykker på linket. Serveren gemmer svarene i nogle dage, så det samme navn ikke skal slås op igen, og husker ikke hvem der spurgte. Som ved de offentlige sider bruger den et øjeblik IP-adressen til at begrænse hvor ofte kortet kan hentes, og gemmer den ikke.</value>
   </data>
 </root>

@@ -59,10 +59,10 @@
     {
         <p class="text-body-secondary">@Strings.Shared.Loading</p>
     }
-    else if (results.IsEmpty && DictionaryCount == 0)
+    else if (results.IsEmpty && DictionaryCount == 0 && guideHits.Count == 0)
     {
         <div class="empty-state">
-            <p class="mb-1">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNothing, query.Trim())</p>
+            <p class="mb-1">@F(Strings.Shared.SearchNothing, query.Trim())</p>
             <p>@Strings.Shared.SearchNothingHint</p>
             <a class="btn btn-outline-primary mt-2 search-stop" href="@HelpHref">@Strings.Shared.SearchHelpButton</a>
         </div>
@@ -70,7 +70,7 @@
     else
     {
         var groups = results.NonEmpty.ToList();
-        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1 + (DictionaryCount > 0 ? 1 : 0);
+        var rows = groups.Count(g => g.Kind != SearchKind.Note) + 1 + (DictionaryCount > 0 ? 1 : 0) + (guideHits.Count > 0 ? 1 : 0);
         <div class="search-results @(results.Notes.Count > 0 ? "has-notes" : null)" style="--search-rows: @rows">
             @foreach (var (kind, items) in groups)
             {
@@ -87,7 +87,7 @@
                     @if (items.Count > Preview)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action search-more search-stop" aria-expanded="@(open ? "true" : "false")"
-                                @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchShowAll, items.Count))</button>
+                                @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : F(Strings.Shared.SearchShowAll, items.Count))</button>
                     }
                 </section>
             }
@@ -116,13 +116,33 @@
                 </section>
             }
 
+            @if (guideHits.Count > 0)
+            {
+                <section class="search-group" aria-labelledby="group-guides">
+                    <h2 class="section-label" id="group-guides">@Strings.Guides.SearchGroup · @guideHits.Count</h2>
+                    <ul class="item-list">
+                        @foreach (var guide in guideHits)
+                        {
+                            <li>
+                                <a class="item-card search-stop" href="@GuideLinks.Href(guide.Id)" @onclick="OpenedAsync">
+                                    <div class="item-text">
+                                        <div class="item-name">@GuideLinks.Text(guide.TitleKey)</div>
+                                        <div class="item-meta">@GuideLinks.Text(guide.RowKey)</div>
+                                    </div>
+                                </a>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+
             <section class="search-group" aria-labelledby="group-help">
                 <h2 class="section-label" id="group-help">@Strings.Shared.SearchHelpGroup</h2>
                 <ul class="item-list">
                     <li>
                         <a class="item-card search-stop" href="@HelpHref">
                             <div class="item-text">
-                                <div class="item-name">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchHelpFor, query.Trim())</div>
+                                <div class="item-name">@F(Strings.Shared.SearchHelpFor, query.Trim())</div>
                             </div>
                         </a>
                     </li>
@@ -161,6 +181,8 @@
     private IReadOnlyList<DictionaryHit> nameHits = [];
 
     private int DictionaryCount => groupHits.Count + nameHits.Count;
+
+    private IReadOnlyList<Guide> guideHits = [];
 
     private bool Searching => !string.IsNullOrWhiteSpace(query);
 
@@ -211,6 +233,7 @@
         results = index?.Find(query) ?? SearchResults.Empty;
 
         var text = query.Trim();
+        guideHits = GuideLinks.Matching(text);
         if (dictionaryBrowser is null || suggester is null || text.Length == 0)
         {
             groupHits = [];

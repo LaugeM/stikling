@@ -102,7 +102,7 @@ else
                 }
                 @if (item.PlantIds.Count > 0)
                 {
-                    <div class="form-text mb-2">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditPicked, item.PlantIds.Count)</div>
+                    <div class="form-text mb-2">@F(Strings.Pests.CaseEditPicked, item.PlantIds.Count)</div>
                 }
                 @if (shown.Count == 0)
                 {
@@ -132,7 +132,7 @@ else
                                     var seen = item.FoundOnPlantIds.Contains(plant.Id);
                                     <button type="button" class="btn btn-sm seen-toggle @(seen ? "btn-primary" : "btn-outline-primary")"
                                             aria-pressed="@(seen ? "true" : "false")"
-                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
+                                            aria-label="@F(Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
                                             @onclick="() => ToggleSeen(plant.Id)" @onclick:preventDefault @onclick:stopPropagation>@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
                                 }
                             </label>
@@ -159,7 +159,7 @@ else
                                 <li @key="plant.Id">
                                     <div class="neighbour-text">@plant.DisplayName</div>
                                     <button type="button" class="btn btn-outline-primary btn-sm"
-                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditRemoveSeen, plant.DisplayName)"
+                                            aria-label="@F(Strings.Pests.CaseEditRemoveSeen, plant.DisplayName)"
                                             @onclick="() => ToggleSeen(plant.Id)">@Strings.Common.Remove</button>
                                 </li>
                             }
@@ -211,7 +211,7 @@ else
             }
             else if (FollowingPlan)
             {
-                <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CaseEditFollowing, item.PlanName)</div>
+                <div class="form-text">@F(Strings.Pests.CaseEditFollowing, item.PlanName)</div>
             }
             else
             {
@@ -440,7 +440,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the pest case failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message)];
+            errors = [F(Strings.Pests.CouldntSave, ex.Message)];
         }
         finally
         {

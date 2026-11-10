@@ -84,7 +84,7 @@ else if (step == Step.Result && result is not null)
                     @foreach (var skipped in result.Skipped)
                     {
                         <div class="import-row">
-                            <div class="import-name">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportRowName, skipped.Line, skipped.Name)</div>
+                            <div class="import-name">@F(Strings.Account.ImportRowName, skipped.Line, skipped.Name)</div>
                             <div class="import-meta">@skipped.Reason</div>
                         </div>
                     }
@@ -145,7 +145,7 @@ else if (sheet is not null)
                                     <optgroup label="@Strings.Account.ImportYourFields">
                                         @if (NewFieldName(c) is { } offered)
                                         {
-                                            <option value="@NewFieldValue" selected="@(targets[c] is { IsNew: true })">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportNewField, offered)</option>
+                                            <option value="@NewFieldValue" selected="@(targets[c] is { IsNew: true })">@F(Strings.Account.ImportNewField, offered)</option>
                                         }
                                         @foreach (var field in liveFields)
                                         {
@@ -164,11 +164,11 @@ else if (sheet is not null)
                                             <option value="@kind" selected="@(target.Kind == kind)">@KindName(kind)</option>
                                         }
                                     </select>
-                                    <div class="import-meta">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportMakesField, target.Name)</div>
+                                    <div class="import-meta">@F(Strings.Account.ImportMakesField, target.Name)</div>
                                 }
                                 else
                                 {
-                                    <div class="import-meta">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportGoesIntoField, target.Name)</div>
+                                    <div class="import-meta">@F(Strings.Account.ImportGoesIntoField, target.Name)</div>
                                 }
                             }
                         </div>
@@ -202,7 +202,7 @@ else if (sheet is not null)
 
             <div class="form-bar import-next">
                 <button type="button" class="btn btn-primary" disabled="@(rows.Count == 0)" @onclick="() => GoTo(Step.Plants)">
-                    @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportNextCheck, Labels.Plants(rows.Count))
+                    @F(Strings.Account.ImportNextCheck, Labels.Plants(rows.Count))
                 </button>
             </div>
         </section>
@@ -240,12 +240,12 @@ else if (sheet is not null)
                                 }
                                 @if (TypedName(index) is { } typed)
                                 {
-                                    <span class="import-meta">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportFrom, typed)</span>
+                                    <span class="import-meta">@F(Strings.Account.ImportFrom, typed)</span>
                                 }
                                 <span class="import-meta">@MetaLine(row)</span>
                                 @if (!string.IsNullOrWhiteSpace(row.Draft.Notes))
                                 {
-                                    <span class="import-meta import-about">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportAboutIt, row.Draft.Notes.ReplaceLineEndings(" · "))</span>
+                                    <span class="import-meta import-about">@F(Strings.Account.ImportAboutIt, row.Draft.Notes.ReplaceLineEndings(" · "))</span>
                                 }
                                 @if (row.LooksLikeYours)
                                 {
@@ -253,7 +253,7 @@ else if (sheet is not null)
                                 }
                                 @if (row.CantAdd is { } reason)
                                 {
-                                    <span class="import-cant">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportCantAdd, LowerFirst(reason))</span>
+                                    <span class="import-cant">@F(Strings.Account.ImportCantAdd, LowerFirst(reason))</span>
                                 }
                                 @foreach (var problem in row.Problems)
                                 {
@@ -272,7 +272,7 @@ else if (sheet is not null)
                                  aria-valuemin="0" aria-valuemax="@addTotal" aria-valuenow="@addDone">
                                 <span style="@BarStyle"></span>
                             </div>
-                            <p class="import-progress-text" aria-live="polite">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportAddingProgress, addDone, addTotal)</p>
+                            <p class="import-progress-text" aria-live="polite">@F(Strings.Account.ImportAddingProgress, addDone, addTotal)</p>
                         </div>
                     }
                     else
@@ -282,7 +282,7 @@ else if (sheet is not null)
                             <div class="alert alert-danger" role="alert">@error</div>
                         }
                         <button type="button" class="btn btn-primary" disabled="@(ticked.Count == 0)" @onclick="AddAsync">
-                            @(ticked.Count == 0 ? Strings.Account.ImportTickToAdd : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportAddPlants, Labels.Plants(ticked.Count)))
+                            @(ticked.Count == 0 ? Strings.Account.ImportTickToAdd : F(Strings.Account.ImportAddPlants, Labels.Plants(ticked.Count)))
                         </button>
                         <button type="button" class="btn btn-link import-back" @onclick="() => GoTo(Step.Columns)">@Strings.Account.ImportBackToColumns</button>
                     }
@@ -395,11 +395,11 @@ else if (sheet is not null)
     {
         get
         {
-            var parts = new List<string> { string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportTicked, ticked.Count, rows.Count) };
+            var parts = new List<string> { F(Strings.Account.ImportTicked, ticked.Count, rows.Count) };
             if (LooksLikeCount > 0)
                 parts.Add(Plural.Of(LooksLikeCount, Strings.Account.ImportLooksLike_One, Strings.Account.ImportLooksLike_Other));
             if (CantAddCount > 0)
-                parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.ImportCantAddCount, CantAddCount));
+                parts.Add(F(Strings.Account.ImportCantAddCount, CantAddCount));
             return string.Join(" · ", parts);
         }
     }

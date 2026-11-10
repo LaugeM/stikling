@@ -17,22 +17,40 @@
         <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
     }
 
+    @if (checking)
+    {
+        <SymptomCheckView Plant="Plant" Signs="signs" BackLabel="@Strings.Common.Back" OnBack="() => checking = false" />
+    }
+    else
+    {
     @if (Mode == ProblemSheetMode.Open)
     {
         <div class="mb-3" role="group" aria-labelledby="@signsLabelId">
             <span class="form-label d-block" id="@signsLabelId">@Strings.Pests.SheetWhatDoYouSee</span>
-            <div class="chip-row">
-                @foreach (var sign in Enum.GetValues<ProblemSign>())
-                {
-                    var chosen = sign;
-                    var on = signs.Contains(sign);
-                    <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
-                            @onclick="() => Toggle(signs, chosen)">@ProblemText.Sign(sign)</button>
-                }
-            </div>
+            @for (var group = 0; group < SignGroups.Length; group++)
+            {
+                var (heading, groupSigns) = SignGroups[group];
+                var headingId = $"{signsLabelId}-{group}";
+                <div class="sign-group" role="group" aria-labelledby="@headingId">
+                    <span class="sign-group-label" id="@headingId">@heading</span>
+                    <div class="chip-row">
+                        @foreach (var sign in groupSigns)
+                        {
+                            var chosen = sign;
+                            var on = signs.Contains(sign);
+                            <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")"
+                                    @onclick="() => Toggle(signs, chosen)">@ProblemText.Sign(sign)</button>
+                        }
+                    </div>
+                </div>
+            }
+            @if (signs.Count > 0)
+            {
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="() => checking = true">@Strings.Pests.SymptomCheckButton</button>
+            }
             @if (Problem is null)
             {
-                <p class="form-text mb-0">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetBugsQuestion, $"<a href=\"pests/new?plant={Plant.Id}\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.SheetOpenPestCase)}</a>"))</p>
+                <p class="form-text mb-0">@((MarkupString)F(Strings.Pests.SheetBugsQuestion, $"<a href=\"pests/new?plant={Plant.Id}\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.SheetOpenPestCase)}</a>"))</p>
             }
         </div>
 
@@ -150,6 +168,7 @@
             <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="AskDeleteAsync">@Strings.Pests.SheetDeleteUpdateButton</button>
         }
     </div>
+    }
 </div>
 
 @code {
@@ -201,6 +220,20 @@
     private ElementReference galleryInput;
 
     private const string DraftKey = "problem-draft-photos";
+
+    // The signs under four small headings, so eighteen choices read as a few short lists
+    private static readonly (string Heading, ProblemSign[] Signs)[] SignGroups =
+    [
+        (Strings.Pests.SignGroupLeaves,
+            [ProblemSign.YellowLeaves, ProblemSign.BrownTips, ProblemSign.Spots, ProblemSign.PaleLeaves, ProblemSign.Speckled,
+             ProblemSign.Sticky, ProblemSign.Curled, ProblemSign.LostVariegation, ProblemSign.LeafDrop]),
+        (Strings.Pests.SignGroupWhole, [ProblemSign.Drooping, ProblemSign.Leggy, ProblemSign.PaleNewGrowth]),
+        (Strings.Pests.SignGroupStem, [ProblemSign.MushyStem, ProblemSign.RootRot]),
+        (Strings.Pests.SignGroupOther, [ProblemSign.Sunburn, ProblemSign.Edema, ProblemSign.Other])
+    ];
+
+    // Showing What could it be? in place of the form. Everything in the form is kept meanwhile.
+    private bool checking;
 
     private readonly HashSet<ProblemSign> signs = [];
     private readonly HashSet<ProblemAction> did = [];
@@ -298,7 +331,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a problem failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Pests.SheetPhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -384,7 +417,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a problem failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message);
+            error = F(Strings.Pests.CouldntSave, ex.Message);
         }
         busy = false;
     }
@@ -409,7 +442,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting a problem update failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntDelete, ex.Message);
+            error = F(Strings.Pests.CouldntDelete, ex.Message);
         }
         busy = false;
     }

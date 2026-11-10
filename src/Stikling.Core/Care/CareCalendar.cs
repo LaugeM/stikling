@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Care;
 
@@ -41,7 +42,7 @@ public sealed class CareCalendar
 
     /// <summary>The sentence read out for the grid.</summary>
     public string Summary =>
-        CareText.F(Strings.Care.CalendarSummary, Times(Waterings), Times(Feeds),
+        F(Strings.Care.CalendarSummary, Times(Waterings), Times(Feeds),
             Plural.Of(Readings, Strings.Care.CalendarReadings_One, Strings.Care.CalendarReadings_Other));
 
     private static string Times(int n) => Plural.Of(n, Strings.Care.CalendarTimes_One, Strings.Care.CalendarTimes_Other);

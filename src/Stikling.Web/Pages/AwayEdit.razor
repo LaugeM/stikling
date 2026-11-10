@@ -1,6 +1,5 @@
 @page "/away/new"
 @page "/away/{Id:guid}"
-@using System.Globalization
 @inject AwayService AwayService
 @inject ILogger<AwayEdit> Logger
 @inject NavigationManager Navigation
@@ -77,7 +76,7 @@ else
                         <InputDate id="until" class="form-control" @bind-Value="until" aria-describedby="until-help" />
                     </div>
                 }
-                <div class="form-text" id="until-help">@string.Format(CultureInfo.CurrentCulture, Strings.Care.AwayEditAsksAgainOn, Stikling.Core.Away.SitterSheetText.LongDay(End))</div>
+                <div class="form-text" id="until-help">@F(Strings.Care.AwayEditAsksAgainOn, Stikling.Core.Away.SitterSheetText.LongDay(End))</div>
             }
         </fieldset>
 
@@ -221,7 +220,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the away time failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.AwayEditSaveFailed, ex.Message)];
+            errors = [F(Strings.Care.AwayEditSaveFailed, ex.Message)];
         }
         finally
         {
@@ -243,7 +242,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting the away time failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.AwayEditDeleteFailed, ex.Message)];
+            errors = [F(Strings.Care.AwayEditDeleteFailed, ex.Message)];
             confirmDelete = false;
         }
         finally

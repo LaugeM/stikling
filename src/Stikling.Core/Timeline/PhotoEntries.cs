@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Timeline;
 
@@ -16,7 +17,7 @@ public static class PhotoEntries
         if (photos.Count == 0)
             return [];
 
-        var text = string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        var text = Clean(note);
         var groups = text is null
             ? photos.GroupBy(p => time.LocalDay(p.TakenAt)).Select(g => g.ToList())
             : [photos.ToList()];

@@ -7,7 +7,6 @@
 @inject ITreatmentPlanRepository PlanRepository
 @inject IPestCaseRepository PestCaseRepository
 @inject IPlantRepository PlantRepository
-@using System.Globalization
 @inject ProblemService ProblemService
 @inject SellerService SellerService
 @inject Stikling.Core.Orders.OrderService OrderService
@@ -34,6 +33,9 @@
     </SettingsRow>
     <SettingsRow Href="soil-mixes" Title="@Strings.Supplies.SuppliesSoilMixes" Detail="@MixSummary">
         <Icon><path d="M7 3.5h10l1.5 3.5v12.5a1.5 1.5 0 0 1-1.5 1.5H7a1.5 1.5 0 0 1-1.5-1.5V7Z" /><path d="M5.5 7h13" /><path d="M9 13.5h6M9 17h4" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="guides" Title="@Strings.Guides.Title" Detail="@Strings.Guides.SuppliesRowDetail">
+        <Icon><path d="M12 6.500C10.500 5 8 4.500 4.500 4.500v13c3.500 0 6 .5 7.500 2 1.500-1.500 4-2 7.500-2v-13c-3.500 0-6 .5-7.500 2Z" /><path d="M12 6.500v13" /></Icon>
     </SettingsRow>
     <SettingsRow Href="products" Title="@Strings.Supplies.SuppliesProducts" Detail="@ProductSummary">
         <Icon><path d="M10 3h4v3l1.5 2.5V20a1 1 0 0 1-1 1h-5a1 1 0 0 1-1-1V8.5L10 6Z" /><path d="M8.5 13h7" /></Icon>
@@ -98,7 +100,7 @@
 
     private string OrdersDetail => ordersOnTheWay == 0
         ? Strings.Orders.SuppliesOrdersNone
-        : string.Format(CultureInfo.CurrentCulture, Strings.Orders.SuppliesOrdersOnTheWay, ordersOnTheWay);
+        : F(Strings.Orders.SuppliesOrdersOnTheWay, ordersOnTheWay);
 
     private string SellersDetail =>
         sellers == 0 ? Strings.Supplies.SellersNone : Plural.Of(sellers, Strings.Supplies.Seller_One, Strings.Supplies.Seller_Other);
@@ -115,7 +117,7 @@
 
             var parts = new List<string>();
             if (plain.Count > 0)
-                parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotsFree,
+                parts.Add(F(Strings.Supplies.PotsFree,
                     Plural.Of(plain.Sum(p => p.Here), Strings.Supplies.Pot_One, Strings.Supplies.Pot_Other), plain.Sum(p => p.Free)));
             if (boxes > 0)
                 parts.Add(Plural.Of(boxes, Strings.Supplies.Container_One, Strings.Supplies.Container_Other));
@@ -128,7 +130,7 @@
     {
         0 => Strings.Supplies.MixesNone,
         _ when mixes.Any(m => m.Mix.IsRetired) =>
-            string.Format(CultureInfo.CurrentCulture, Strings.Supplies.MixesRetired,
+            F(Strings.Supplies.MixesRetired,
                 Plural.Of(mixes.Count, Strings.Supplies.Mix_One, Strings.Supplies.Mix_Other), mixes.Count(m => m.Mix.IsRetired)),
         var count => Plural.Of(count, Strings.Supplies.Mix_One, Strings.Supplies.Mix_Other)
     };
@@ -141,14 +143,14 @@
     /// <summary>"2 open", or what a case is for when none are open, and "1 problem" for the open problems.</summary>
     private string PestSummary => pestCases.Count(c => c.IsOpen) switch
     {
-        0 when openProblems > 0 && pestCases.Count > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ProblemsPart),
-        0 when openProblems > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoCases, ProblemsPart),
-        0 when pestCases.Count > 0 => string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ""),
+        0 when openProblems > 0 && pestCases.Count > 0 => F(Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ProblemsPart),
+        0 when openProblems > 0 => F(Strings.Supplies.PestsNoCases, ProblemsPart),
+        0 when pestCases.Count > 0 => F(Strings.Supplies.PestsNoneOpenResolved, pestCases.Count, ""),
         0 => Strings.Supplies.PestsNeverOpen,
-        var open => string.Format(CultureInfo.CurrentCulture, open == 1 ? Strings.Supplies.PestsOpen_One : Strings.Supplies.PestsOpen_Other, open, ProblemsPart)
+        var open => F(open == 1 ? Strings.Supplies.PestsOpen_One : Strings.Supplies.PestsOpen_Other, open, ProblemsPart)
     };
 
-    private string ProblemsPart => openProblems == 0 ? "" : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProblemsPart,
+    private string ProblemsPart => openProblems == 0 ? "" : F(Strings.Supplies.ProblemsPart,
         Plural.Of(openProblems, Strings.Supplies.Problem_One, Strings.Supplies.Problem_Other));
 
     private string PlanSummary =>

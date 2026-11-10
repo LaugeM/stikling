@@ -5,7 +5,6 @@
    to plain HTML for search engines and llms.txt (tools/static-pages/render.cs), without a browser, so
    calls into JavaScript stay in OnAfterRenderAsync. *@
 @implements IAsyncDisposable
-@using System.Globalization
 @using System.Net
 @inject IJSRuntime JS
 @inject AccountService Account
@@ -32,6 +31,8 @@
         </div>
     </div>
 }
+
+<p class="help-guides"><GuideLink Text="@Strings.Help.GuidesLink" /></p>
 
 <nav class="help-toc" aria-label="@Strings.Help.TopicsNav">
     @foreach (var (id, title) in topics)
@@ -72,7 +73,7 @@
 
     <details class="help-item">
         <summary>@Strings.Help.WhereSettingsQ</summary>
-        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.WhereSettingsA1, Account.IsAvailable ? Strings.Help.WhereSettingsA1Variant : ""))</p>
+        <p>@(F(Strings.Help.WhereSettingsA1, Account.IsAvailable ? Strings.Help.WhereSettingsA1Variant : ""))</p>
     </details>
 
     <details class="help-item">
@@ -91,12 +92,12 @@
     <details class="help-item">
         <summary>@Strings.Help.UseOnComputerQ</summary>
         <p>@Strings.Help.UseOnComputerA1</p>
-        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.UseOnComputerA2, Account.IsAvailable ? Strings.Help.UseOnComputerA2Variant : Strings.Help.UseOnComputerA2Variant2))</p>
+        <p>@(F(Strings.Help.UseOnComputerA2, Account.IsAvailable ? Strings.Help.UseOnComputerA2Variant : Strings.Help.UseOnComputerA2Variant2))</p>
     </details>
 
     <details class="help-item">
         <summary>@Strings.Help.WorkWithoutSignalQ</summary>
-        <p>@(string.Format(CultureInfo.CurrentCulture, Strings.Help.WorkWithoutSignalA1, Account.IsAvailable ? Strings.Help.WorkWithoutSignalA1Variant : ""))</p>
+        <p>@(F(Strings.Help.WorkWithoutSignalA1, Account.IsAvailable ? Strings.Help.WorkWithoutSignalA1Variant : ""))</p>
     </details>
 
     <details class="help-item">
@@ -107,6 +108,12 @@
     <details class="help-item">
         <summary>@Strings.Help.SearchEverythingAtOnceQ</summary>
         <p>@((MarkupString)Strings.Help.SearchEverythingAtOnceA1)</p>
+    </details>
+
+    <details class="help-item" id="guides">
+        <summary>@Strings.Help.GuidesQ</summary>
+        <p>@Strings.Help.GuidesA1</p>
+        <p><GuideLink Text="@Strings.Guides.LinkAll" /></p>
     </details>
 
     <details class="help-item">
@@ -246,7 +253,7 @@
 
     <details class="help-item">
         <summary>@Strings.Help.WhoSeePlantsQ</summary>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.WhoSeePlantsA1, Account.IsAvailable ? Strings.Help.WhoSeePlantsA1Variant : Strings.Help.WhoSeePlantsA1Variant2))</p>
+        <p>@((MarkupString)F(Strings.Help.WhoSeePlantsA1, Account.IsAvailable ? Strings.Help.WhoSeePlantsA1Variant : Strings.Help.WhoSeePlantsA1Variant2))</p>
     </details>
 </section>
 
@@ -256,6 +263,12 @@
     <details class="help-item">
         <summary>@Strings.Help.AddLotPlantsAtOnceQ</summary>
         <p>@((MarkupString)Strings.Help.AddLotPlantsAtOnceA1)</p>
+    </details>
+
+    <details class="help-item">
+        <summary>@Strings.Help.IdentifyFromPhotoQ</summary>
+        <p>@((MarkupString)Strings.Help.IdentifyFromPhotoA1)</p>
+        <p>@Strings.Help.IdentifyFromPhotoA2</p>
     </details>
 
     <details class="help-item">
@@ -531,6 +544,10 @@
         <summary>@Strings.Help.HappensWhenUnpackOrderQ</summary>
         <p>@((MarkupString)Strings.Help.HappensWhenUnpackOrderA1)</p>
     </details>
+    <details class="help-item">
+        <summary>@Strings.Help.SpeciesFactsQ</summary>
+        <p>@Strings.Help.SpeciesFactsA1</p>
+    </details>
 </section>
 
 <section class="help-section" id="propagations">
@@ -600,11 +617,11 @@
 
     <details class="help-item">
         <summary>@Strings.Help.LECAPONSphagnumCormRiserQ</summary>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA1, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Leca))))</p>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA2, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Pon))))</p>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA3, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Sphagnum))))</p>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA4, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.CormRiser))))</p>
-        <p>@((MarkupString)string.Format(CultureInfo.CurrentCulture, Strings.Help.LECAPONSphagnumCormRiserA5, WebUtility.HtmlEncode(Labels.Explain(PropagationType.AirLayer))))</p>
+        <p>@((MarkupString)F(Strings.Help.LECAPONSphagnumCormRiserA1, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Leca))))</p>
+        <p>@((MarkupString)F(Strings.Help.LECAPONSphagnumCormRiserA2, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Pon))))</p>
+        <p>@((MarkupString)F(Strings.Help.LECAPONSphagnumCormRiserA3, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.Sphagnum))))</p>
+        <p>@((MarkupString)F(Strings.Help.LECAPONSphagnumCormRiserA4, WebUtility.HtmlEncode(Labels.Explain(GrowingMedium.CormRiser))))</p>
+        <p>@((MarkupString)F(Strings.Help.LECAPONSphagnumCormRiserA5, WebUtility.HtmlEncode(Labels.Explain(PropagationType.AirLayer))))</p>
     </details>
 
     <details class="help-item">
@@ -906,6 +923,11 @@
     <details class="help-item">
         <summary>@Strings.Help.SomethingSWrongWithPlantQ</summary>
         <p>@((MarkupString)Strings.Help.SomethingSWrongWithPlantA1)</p>
+    </details>
+
+    <details class="help-item">
+        <summary>@Strings.Help.WhatCouldItBeQ</summary>
+        <p>@((MarkupString)Strings.Help.WhatCouldItBeA1)</p>
     </details>
 
     <details class="help-item">

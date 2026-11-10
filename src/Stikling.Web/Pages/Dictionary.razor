@@ -1,12 +1,11 @@
 @page "/dictionary"
 @layout WideLayout
 @implements IDisposable
-@using System.Globalization
 @inject DictionaryService Service
 @inject PlantNameService Names
 @inject NavigationManager Navigation
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, Strings.Dictionary.Title)</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, Strings.Dictionary.Title)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="settings?section=about">@Strings.Dictionary.BackToSettings</a>
@@ -66,7 +65,7 @@ else
     else if (groupHits.Count == 0 && familyHits.Count == 0 && nameHits.Count == 0)
     {
         <div class="empty-state">
-            <p class="mb-1">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.SearchNothing, query.Trim())</p>
+            <p class="mb-1">@F(Strings.Dictionary.SearchNothing, query.Trim())</p>
             <button type="button" class="btn btn-outline-primary mt-2" @onclick="ClearSearch">@Strings.Dictionary.SearchClear</button>
         </div>
     }
@@ -169,7 +168,7 @@ else
     {
         var line = DictionaryLinks.CountsLine(group.Genera, group.Species);
         var have = browser!.GeneraIn(group.Group).Sum(g => owned.Genus(g.Name));
-        return have > 0 ? $"{line} · {string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHaveShort, have)}" : line;
+        return have > 0 ? $"{line} · {F(Strings.Dictionary.YouHaveShort, have)}" : line;
     }
 
     private void OnInput(ChangeEventArgs e)

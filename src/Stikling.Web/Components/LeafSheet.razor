@@ -201,7 +201,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a leaf failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Pests.SheetPhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -255,7 +255,7 @@
         {
             Restore(before);
             Logger.LogError(ex, "Saving a leaf failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message);
+            error = F(Strings.Pests.CouldntSave, ex.Message);
         }
         busy = false;
     }
@@ -284,7 +284,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Removing a leaf failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntDelete, ex.Message);
+            error = F(Strings.Pests.CouldntDelete, ex.Message);
         }
         busy = false;
     }

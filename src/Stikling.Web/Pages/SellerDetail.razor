@@ -6,7 +6,7 @@
 @inject NavigationManager Navigation
 @inject Stikling.Core.Orders.OrderService OrderService
 
-<PageTitle>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerPageTitle, seller?.Name ?? Strings.Supplies.SellerFallbackName)</PageTitle>
+<PageTitle>@F(Strings.Supplies.SellerPageTitle, seller?.Name ?? Strings.Supplies.SellerFallbackName)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="sellers">@Strings.Supplies.SellerBack</a>
@@ -120,7 +120,7 @@ else
                 {
                     <li>
                         <a class="seller-thing" href="orders/@order.Order.Id">
-                            <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, order.IsOnTheWay ? Strings.Orders.SellerOrderOnTheWay : Strings.Orders.SellerOrderArrived, Labels.Date(order.Order.OrderedOn))</span>
+                            <span>@F(order.IsOnTheWay ? Strings.Orders.SellerOrderOnTheWay : Strings.Orders.SellerOrderArrived, Labels.Date(order.Order.OrderedOn))</span>
                             <span class="seller-thing-note">@Labels.Plants(order.ItemCount)</span>
                         </a>
                     </li>
@@ -176,7 +176,7 @@ else
                     }
                 </select>
                 <div class="form-text">
-                    @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerMergeHint, seller.Name)
+                    @F(Strings.Supplies.SellerMergeHint, seller.Name)
                 </div>
             </div>
             <div class="care-actions">
@@ -187,7 +187,7 @@ else
         else if (mode == Mode.Deleting)
         {
             <p>
-                @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellerDeleteConfirm, seller.Name)
+                @F(Strings.Supplies.SellerDeleteConfirm, seller.Name)
             </p>
             <div class="care-actions">
                 <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>

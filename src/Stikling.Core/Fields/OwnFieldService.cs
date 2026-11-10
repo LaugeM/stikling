@@ -1,6 +1,7 @@
 using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Fields;
 
@@ -64,7 +65,7 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
         if (renamed.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
         if ((await fields.GetAllAsync()).Any(f => f.Id != id && SameName(f.Name, trimmed)))
-            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldDuplicate, trimmed));
+            throw new InvalidOperationException(F(Strings.Shared.FieldDuplicate, trimmed));
 
         await fields.SaveAsync(renamed);
     }
@@ -128,7 +129,7 @@ public sealed class OwnFieldService(IOwnFieldRepository fields, IPlantRepository
         if (target.Length == 0)
             throw new InvalidOperationException(Strings.Shared.FieldChoiceEmpty);
         if (target.Length > OwnField.MaxNameLength)
-            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldChoiceLong, OwnField.MaxNameLength));
+            throw new InvalidOperationException(F(Strings.Shared.FieldChoiceLong, OwnField.MaxNameLength));
 
         var changed = field.Copy();
         var index = changed.Choices.FindIndex(c => SameName(c, from));

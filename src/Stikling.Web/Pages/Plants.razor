@@ -73,8 +73,8 @@ else if (all.Count == 0)
             <a class="btn btn-primary" href="plants/new">@Strings.Plants.AddAPlant</a>
         </div>
         <p class="first-run-more">
-            @WithLink(Strings.Plants.ListEmptyImport, "plants/import", Strings.Plants.ListEmptyImportLink)
-            @WithLink(Strings.Plants.ListEmptyWishlist, "wishlist", Strings.Plants.ListEmptyWishlistLink)
+            @Html(Strings.Plants.ListEmptyImport, Link("plants/import", Strings.Plants.ListEmptyImportLink))
+            @Html(Strings.Plants.ListEmptyWishlist, Link("wishlist", Strings.Plants.ListEmptyWishlistLink))
         </p>
         <a class="first-run-help" href="help#plants">@Strings.Plants.ListMoreInHelp</a>
     </div>
@@ -666,16 +666,6 @@ else
     [SupplyParameterFromQuery(Name = "genus")]
     public string? GenusFilter { get; set; }
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
-    // A sentence with a link in it: the link goes where {0} is
-    private static MarkupString WithLink(string format, string href, string text) =>
-        (MarkupString)F(format, $"<a href=\"{href}\">{System.Net.WebUtility.HtmlEncode(text)}</a>");
-
     private static (StatusFilter Value, string Label)[] statusOptions =>
     [
         (StatusFilter.Active, Labels.For(PlantStatus.Active)),
@@ -1039,7 +1029,7 @@ else
     {
         groups = sort switch
         {
-            PlantSort.Genus => PlantGroups.Split(visible, p => string.IsNullOrWhiteSpace(p.Genus) ? null : p.Genus.Trim()),
+            PlantSort.Genus => PlantGroups.Split(visible, p => Clean(p.Genus)),
             PlantSort.Room => PlantGroups.Split(visible, p => places.RoomOf(p.PlaceId)?.Name),
             _ => null
         };

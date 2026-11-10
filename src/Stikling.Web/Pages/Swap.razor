@@ -132,7 +132,7 @@ else
                 <div class="swap-picture" aria-busy="@(drawn.ContainsKey(spec.Id) ? null : "true")">
                     @if (drawn.TryGetValue(spec.Id, out var picture))
                     {
-                        <img src="@picture.Url" alt="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapPictureAlt, number, specs.Count)" />
+                        <img src="@picture.Url" alt="@F(Strings.Shared.SwapPictureAlt, number, specs.Count)" />
                     }
                 </div>
             }
@@ -225,7 +225,7 @@ else
         @if (tagged.Count > 0)
         {
             <section class="swap-convert" aria-labelledby="swap-convert-title">
-                <h2 id="swap-convert-title" class="swap-convert-title">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapConvertTitle, Labels.Plants(tagged.Count))</h2>
+                <h2 id="swap-convert-title" class="swap-convert-title">@F(Strings.Shared.SwapConvertTitle, Labels.Plants(tagged.Count))</h2>
                 <p>@Plural.Of(tagged.Count, Strings.Shared.SwapConvertBody_One, Strings.Shared.SwapConvertBody_Other)</p>
                 <div class="swap-convert-actions">
                     <button type="button" class="btn btn-primary swap-choice" disabled="@busy" @onclick="() => ConvertAsync(SpareMark.CuttingsToSpare)">@Strings.Shared.SwapConvertCuttings</button>
