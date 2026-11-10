@@ -58,7 +58,7 @@ else
                 {
                     var day = Labels.Date(Time.LocalDay(tile.Photo.TakenAt));
                     <li>
-                        <a class="shelf-tile" href="shelf/@tile.Photo.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shelf.TileLabel, day)">
+                        <a class="shelf-tile" href="shelf/@tile.Photo.Id" aria-label="@F(Strings.Shelf.TileLabel, day)">
                             <span class="shelf-tile-photo">
                                 <PhotoImage PhotoId="tile.Photo.Id" Framed="false" />
                             </span>

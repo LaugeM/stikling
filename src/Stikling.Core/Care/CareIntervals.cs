@@ -4,6 +4,7 @@ using Stikling.Core.Rooms;
 using Stikling.Core.Text;
 using Stikling.Core.Today;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Care;
 
@@ -256,7 +257,7 @@ public static class CareIntervals
     /// <summary>"Fertilise with Aroid feed", "Repot", or the own kind's name.</summary>
     public static string Label(CareKind kind, string? ownKindName, string? feedName)
     {
-        var feed = string.IsNullOrWhiteSpace(feedName) ? null : feedName.Trim();
+        var feed = Clean(feedName);
         var what = !string.IsNullOrWhiteSpace(ownKindName)
             ? ownKindName.Trim()
             : kind switch
@@ -270,7 +271,7 @@ public static class CareIntervals
                 CareKind.Harvested => Strings.Care.LabelHarvest,
                 _ => Strings.Care.LabelCare
             };
-        return feed is null ? what : CareText.F(Strings.Care.LabelWithFeed, what, feed);
+        return feed is null ? what : F(Strings.Care.LabelWithFeed, what, feed);
     }
 
     /// <summary>"every 2 weeks", "every week", "every day".</summary>
@@ -283,13 +284,13 @@ public static class CareIntervals
             IntervalUnit.Months => (Strings.Care.EveryMonth, Strings.Care.EveryMonths),
             _ => (Strings.Care.EveryYear, Strings.Care.EveryYears)
         };
-        return interval.Every == 1 ? one : CareText.F(many, interval.Every);
+        return interval.Every == 1 ? one : F(many, interval.Every);
     }
 
     /// <summary>"April to October", or null for the whole year.</summary>
     public static string? MonthsText(CareInterval interval) =>
         interval is { FromMonth: { } from, ToMonth: { } to }
-            ? CareText.F(Strings.Care.MonthsFromTo, MonthName(from), MonthName(to))
+            ? F(Strings.Care.MonthsFromTo, MonthName(from), MonthName(to))
             : null;
 
     public static string MonthName(int month) =>

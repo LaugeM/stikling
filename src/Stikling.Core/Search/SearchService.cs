@@ -15,6 +15,7 @@ using Stikling.Core.Text;
 using Stikling.Core.Timeline;
 using Stikling.Core.Wishlist;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Search;
 
@@ -95,15 +96,15 @@ public sealed class SearchService(
     private static SearchIndex.Doc PlantDoc(Plant plant, Func<string?, string?, string?, string?>? everyday, IReadOnlyList<OwnField> textFields)
     {
         var item = new SearchItem(SearchKind.Plant, plant.Id, plant.DisplayName, Subtitle(plant.Nickname, plant.BotanicalName),
-            plant.LivesElsewhere ? (plant.LivesWithName is { } whose ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchLivesWith, whose) : Strings.Shared.SearchNotYours) : null,
+            plant.LivesElsewhere ? (plant.LivesWithName is { } whose ? F(Strings.Shared.SearchLivesWith, whose) : Strings.Shared.SearchNotYours) : null,
             !plant.InCollection && !plant.LivesElsewhere, $"plants/{plant.Id}");
         var names = Names(plant.DisplayName, plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameNote, plant.BotanicalName,
             everyday?.Invoke(plant.Genus, PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar));
 
         List<SearchIndex.Extra> before =
-            [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchTag, tag)))];
+            [.. PlantTags.Normalize(plant.Tags).Select(tag => new SearchIndex.Extra(Has(tag), F(Strings.Shared.SearchTag, tag)))];
         if (CollectionNumbers.Normalize(plant.CollectionNumber) is { } code)
-            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNumber, code)));
+            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), F(Strings.Shared.SearchNumber, code)));
         foreach (var field in textFields)
             if (plant.OwnFields.TryGetValue(field.Id, out var value) && !string.IsNullOrWhiteSpace(value))
                 before.Add(new SearchIndex.Extra(Has(value), $"{field.Name} {value}"));
@@ -121,7 +122,7 @@ public sealed class SearchService(
 
         List<SearchIndex.Extra> before = [];
         if (CollectionNumbers.Normalize(propagation.CollectionNumber) is { } code)
-            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNumber, code)));
+            before.Add(new SearchIndex.Extra(word => CollectionNumbers.MatchesSearch(code, word), F(Strings.Shared.SearchNumber, code)));
         return new(item, names, Extras(propagation.Notes, [.. before]));
     }
 
@@ -182,7 +183,7 @@ public sealed class SearchService(
         {
             docs.Add(PlaceDoc(room, room.IsSpot ? Strings.Shared.SearchSpot : Strings.Shared.SearchRoom));
             foreach (var spot in places.SpotsIn(room.Id))
-                docs.Add(PlaceDoc(spot, string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchSpotIn, room.Name)));
+                docs.Add(PlaceDoc(spot, F(Strings.Shared.SearchSpotIn, room.Name)));
         }
 
         return docs;

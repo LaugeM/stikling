@@ -1,9 +1,8 @@
 @page "/dictionary/cultivar/{Genus}/{Name}"
 @layout WideLayout
-@using System.Globalization
 @inject DictionaryService Dictionary
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, entry is null ? Strings.Dictionary.Title : $"{entry.Name} · {entry.Genus}")</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, entry is null ? Strings.Dictionary.Title : $"{entry.Name} · {entry.Genus}")</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 @if (browser is null)

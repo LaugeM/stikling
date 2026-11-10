@@ -1,8 +1,8 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Text;
 using Strings = Stikling.Web.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -44,5 +44,4 @@ public static class PlantGivenText
         return list.Count <= 1 ? string.Concat(list) : F(Strings.PlantDetail.ListAnd, string.Join(", ", list.SkipLast(1)), list[^1]);
     }
 
-    private static string F(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
 }

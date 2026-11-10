@@ -173,26 +173,26 @@ else
                 <span>@Labels.ScopeAndCount(view)</span>
                 @if (view.CleanDays is { } cleanDays)
                 {
-                    <span>· @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsCleanDays, cleanDays, view.CleanTarget)</span>
+                    <span>· @F(Strings.Pests.PestsCleanDays, cleanDays, view.CleanTarget)</span>
                 }
             </div>
             <div class="item-meta">
                 @if (view.DaysUntilDue is not null)
                 {
                     <span class="pest-due @(view.IsDue ? "now" : null)">@Labels.Due(view)</span>
-                    <span>· @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsFoundDue, Labels.Date(view.Case.StartedOn))</span>
+                    <span>· @F(Strings.Pests.PestsFoundDue, Labels.Date(view.Case.StartedOn))</span>
                 }
                 else if (view.PlanDoneOn is not null)
                 {
-                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsPlanDoneFound, Labels.Date(view.Case.StartedOn))</span>
+                    <span>@F(Strings.Pests.PestsPlanDoneFound, Labels.Date(view.Case.StartedOn))</span>
                 }
                 else if (view.Case.ResolvedOn is { } on)
                 {
-                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsResolvedOn, Labels.Date(on))</span>
+                    <span>@F(Strings.Pests.PestsResolvedOn, Labels.Date(on))</span>
                 }
                 else
                 {
-                    <span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.PestsFound, Labels.Date(view.Case.StartedOn))</span>
+                    <span>@F(Strings.Pests.PestsFound, Labels.Date(view.Case.StartedOn))</span>
                 }
             </div>
         </div>

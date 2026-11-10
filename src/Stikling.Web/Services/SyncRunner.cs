@@ -6,6 +6,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -312,7 +313,7 @@ public sealed class SyncRunner(
         {
             // Nothing else may stop the app, since nothing waits for a sync that runs by itself
             logger.LogError(e, "Syncing failed");
-            Problem = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.SyncSomethingWrong, e.Message);
+            Problem = F(Strings.Account.SyncSomethingWrong, e.Message);
             if (LastSynced is null)
                 firstSyncFailed = true;
         }

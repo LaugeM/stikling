@@ -3,6 +3,7 @@ using Microsoft.JSInterop;
 using Stikling.Core.Identification;
 using Stikling.Core.Names;
 using Stikling.Core.Sync;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -42,7 +43,7 @@ public sealed class IdentificationService(
 
     /// <summary>Saves the key, or removes it when the text is empty.</summary>
     public Task SetKeyAsync(string? key) =>
-        files.SetAsync(KeyName, string.IsNullOrWhiteSpace(key) ? null : key.Trim());
+        files.SetAsync(KeyName, Clean(key));
 
     /// <summary>True when the button is worth showing: there is somewhere to sign in, or a key of the person's own.</summary>
     public async Task<bool> IsOfferedAsync() => account.IsAvailable || await GetKeyAsync() is not null;

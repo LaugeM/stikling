@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Today;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Pests;
 
@@ -81,7 +82,7 @@ public static class PlanProgress
         if (step.RecipeId is { } id && recipes?.FirstOrDefault(r => r.Id == id && !r.IsDeleted) is { } recipe)
             draft.Use(recipe);
         else
-            draft.What = string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
+            draft.What = Clean(step.What);
 
         return draft;
     }

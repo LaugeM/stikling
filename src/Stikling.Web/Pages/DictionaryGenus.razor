@@ -4,7 +4,7 @@
 @inject DictionaryService Dictionary
 @inject PlantRegionService Regions
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, entry?.Name ?? Strings.Dictionary.Title)</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, entry?.Name ?? Strings.Dictionary.Title)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 @if (browser is null)
@@ -82,7 +82,7 @@ else
             @if (entry.Species.Count > 0)
             {
                 <section class="dict-section" aria-labelledby="dict-species">
-                    <h2 class="section-label" id="dict-species">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.SpeciesHeading, shownSpecies.Count)</h2>
+                    <h2 class="section-label" id="dict-species">@F(Strings.Dictionary.SpeciesHeading, shownSpecies.Count)</h2>
                     @if (entry.Species.Count > FilterFrom)
                     {
                         <div class="search-box">
@@ -92,7 +92,7 @@ else
                     }
                     @if (shownSpecies.Count == 0)
                     {
-                        <p class="text-body-secondary">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.FilterNothing, filter.Trim())</p>
+                        <p class="text-body-secondary">@F(Strings.Dictionary.FilterNothing, filter.Trim())</p>
                     }
                     else
                     {
@@ -109,7 +109,7 @@ else
                                     </span>
                                     @if (owned.Species(entry.Name, species.Name) is > 0 and var have)
                                     {
-                                        <span class="dict-have">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHave, have)</span>
+                                        <span class="dict-have">@F(Strings.Dictionary.YouHave, have)</span>
                                     }
                                 </a>
                             </ItemTemplate>
@@ -122,7 +122,7 @@ else
             @if (entry.Cultivars.Count > 0)
             {
                 <section class="dict-section" aria-labelledby="dict-cultivars">
-                    <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
+                    <h2 class="section-label" id="dict-cultivars">@F(Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
                     <div class="dict-rows">
                         <VirtualGrid Items="cultivars" RowSize="RowSize">
 <ItemTemplate Context="cultivar">
@@ -242,7 +242,7 @@ else
             var names = RegionNames.Of(found.Areas);
             parts.Add(names.Count <= 2
                 ? string.Join(", ", names)
-                : string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.RangeShort, string.Join(", ", names.Take(2)), names.Count - 2));
+                : F(Strings.Dictionary.RangeShort, string.Join(", ", names.Take(2)), names.Count - 2));
         }
 
         return parts.Count == 0 ? null : string.Join(" · ", parts);

@@ -1,7 +1,6 @@
 @* Adding a photo or a note to a plant's or propagation's history, from the buttons at the bottom
    of its page. Photo opens the device's own choice of camera or gallery straight away, then this
    sheet asks for an optional note and the day. *@
-@using System.Globalization
 @inject ITimelineRepository Entries
 @inject ILogger<EntryComposer> Logger
 @inject TimelineService TimelineService
@@ -200,7 +199,7 @@
     {
         0 => Strings.Propagations.ComposerTitleNote,
         1 => Strings.Propagations.ComposerTitlePhoto,
-        var n => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerTitlePhotos, n)
+        var n => F(Strings.Propagations.ComposerTitlePhotos, n)
     };
 
     // The one day the picked photos were taken on, when it's the same for all of them
@@ -235,7 +234,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to an entry failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+            error = F(Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -258,7 +257,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a photo from the camera to an entry failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+            error = F(Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
 
         CloseIfEmpty();
@@ -318,7 +317,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving photos picked from Google Photos failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
+            error = F(Strings.Propagations.ComposerSavePhotosFailed, ex.Message);
         }
         CloseIfEmpty();
     }
@@ -356,7 +355,7 @@
         {
             if (photos.Count > 0)
             {
-                var text = string.IsNullOrWhiteSpace(noteText) ? null : noteText.Trim();
+                var text = Clean(noteText);
                 await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn);
                 if (CoverPhotoId is null)
                     await OnCoverChanged.InvokeAsync(PhotoEntries.Cover(photos).Id);
@@ -385,7 +384,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the entry failed");
-            error = string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerSaveFailed, ex.Message);
+            error = F(Strings.Propagations.ComposerSaveFailed, ex.Message);
         }
         busy = false;
     }
@@ -434,7 +433,7 @@
     private string TakenText(DateOnly day) =>
         day == Today ? Strings.Propagations.ComposerTakenToday
         : day == Today.AddDays(-1) ? Strings.Propagations.ComposerTakenYesterday
-        : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ComposerTakenOn, Labels.Date(day));
+        : F(Strings.Propagations.ComposerTakenOn, Labels.Date(day));
 
     /// <summary>Photos picked but never added belong to nothing, so they go when the page does.</summary>
     public async ValueTask DisposeAsync()

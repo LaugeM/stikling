@@ -1,4 +1,3 @@
-using System.Globalization;
 using Stikling.Core.Care;
 using Stikling.Core.Lights;
 using Stikling.Core.Models;
@@ -8,6 +7,7 @@ using Stikling.Core.Timeline;
 using Stikling.Core.Text;
 using Stikling.Core.Today;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Away;
 
@@ -121,7 +121,7 @@ public static class SitterSheetBuilder
             sheet.Layout, Title,
             HeaderLine(span, visits.Count > 0 ? sheet.Visits : VisitPattern.None, onSheet.Count(x => x.Item.IsPlant), cuttings),
             span?.From, span?.Until,
-            string.IsNullOrWhiteSpace(sheet.GeneralNote) ? null : sheet.GeneralNote.Trim(),
+            Clean(sheet.GeneralNote),
             BoxFor(sheet, ownWords, differing, topsUp),
             visits, groups, byVisit, candidates, due, anyPace, !sheet.HidePhotos);
     }
@@ -144,7 +144,7 @@ public static class SitterSheetBuilder
         string? how = null;
         if (item.Form == WateringForm.Reservoir)
             how = item.Entity is Plant { ReservoirFillCm: { } fill }
-                ? CareText.F(Strings.Care.SitterTopUpReservoirTo, Lengths.Cm(fill))
+                ? F(Strings.Care.SitterTopUpReservoirTo, Lengths.Cm(fill))
                 : Strings.Care.SitterTopUpReservoir;
         else if (item.Form == WateringForm.InWater)
             how = Strings.Care.SitterTopUpWater;
@@ -153,7 +153,7 @@ public static class SitterSheetBuilder
 
         string? meter = null;
         if (sheet.HasMeter && item.IsPlant && item.Form == WateringForm.TopWatered)
-            meter = CareText.F(Strings.Care.SitterMeterAt, ((Plant)item.Entity).WaterAt ?? Plant.DefaultWaterAt);
+            meter = F(Strings.Care.SitterMeterAt, ((Plant)item.Entity).WaterAt ?? Plant.DefaultWaterAt);
 
         var pace = item.IsPlant ? PaceOf(item.Guess) : null;
         string paceLine;
@@ -162,9 +162,9 @@ public static class SitterSheetBuilder
         else if (!item.IsPlant)
             paceLine = Strings.Care.SitterPaceEveryVisit;
         else if (pace is { } topUp && item.Form == WateringForm.Reservoir)
-            paceLine = CareText.F(Strings.Care.SitterPaceReservoir, topUp.UsualDays);
+            paceLine = F(Strings.Care.SitterPaceReservoir, topUp.UsualDays);
         else if (pace is { } known)
-            paceLine = CareText.F(Strings.Care.SitterPaceKnown, known.UsualDays);
+            paceLine = F(Strings.Care.SitterPaceKnown, known.UsualDays);
         else
             paceLine = Strings.Care.SitterPaceUnknown;
 
@@ -260,7 +260,7 @@ public static class SitterSheetBuilder
             var where = string.IsNullOrWhiteSpace(sheet.MeterWhere) ? null : sheet.MeterWhere.Trim().TrimEnd('.');
             check =
             [
-                where is null ? Strings.Care.SitterMeter : CareText.F(Strings.Care.SitterMeterIn, where),
+                where is null ? Strings.Care.SitterMeter : F(Strings.Care.SitterMeterIn, where),
                 Lengths.IsInches ? Strings.Care.SitterNoReading_Inches : Strings.Care.SitterNoReading
             ];
         }
@@ -291,7 +291,7 @@ public static class SitterSheetBuilder
     {
         var parts = new List<string>();
         if (span is not null)
-            parts.Add(CareText.F(Strings.Care.SitterDates, SitterSheetText.Day(span.From), SitterSheetText.Day(span.Until)));
+            parts.Add(F(Strings.Care.SitterDates, SitterSheetText.Day(span.From), SitterSheetText.Day(span.Until)));
 
         if (plants > 0)
             parts.Add(Plural.Of(plants, Strings.Care.SitterPlants_One, Strings.Care.SitterPlants_Other));

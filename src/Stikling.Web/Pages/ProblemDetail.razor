@@ -174,7 +174,7 @@ else
     @if (past.Count > 0)
     {
         <section class="problem-before" aria-labelledby="problem-before-title">
-            <h2 id="problem-before-title">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.ProblemBefore, BeforeSign)</h2>
+            <h2 id="problem-before-title">@F(Strings.Pests.ProblemBefore, BeforeSign)</h2>
             <p class="problem-before-hint">@Strings.Pests.ProblemBeforeHint</p>
             <ul class="item-list">
                 @foreach (var earlier in past.Take(5))
@@ -446,7 +446,7 @@ else
         {
             var before = plant!.Copy();
             plant.Status = PlantStatus.Died;
-            plant.CauseOfDeath = string.IsNullOrWhiteSpace(cause) ? null : cause.Trim();
+            plant.CauseOfDeath = Clean(cause);
             await PlantService.UpdateAsync(before, plant, Labels.For);
             sheet = Shown.None;
             status = Strings.Pests.ProblemMarkedDied;

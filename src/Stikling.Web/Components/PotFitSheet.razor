@@ -1,6 +1,5 @@
 @* Which of the free outer pots a nursery pot would go in, from the pots on the page or from a width typed
    in a shop. It only compares the sizes already entered and stores nothing. *@
-@using System.Globalization
 @using Stikling.Core.Text
 
 <Sheet Title="@Strings.Supplies.PotFitTitle" Open="Open" OpenChanged="OpenChanged">
@@ -21,7 +20,7 @@
     @if (Typing)
     {
         <div class="mb-3">
-            <label class="form-label" for="pot-fit-width">@string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotsAcrossTop, Lengths.UnitName)</label>
+            <label class="form-label" for="pot-fit-width">@F(Strings.Supplies.PotsAcrossTop, Lengths.UnitName)</label>
             <LengthInput id="pot-fit-width" class="form-control" min="0" @bind-Value="typedWidth" />
         </div>
     }
@@ -152,14 +151,14 @@
         {
             result.Tight
                 ? Strings.Supplies.PotFitTight
-                : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotFitSpare, Lengths.Cm(result.SpareCm))
+                : F(Strings.Supplies.PotFitSpare, Lengths.Cm(result.SpareCm))
         };
         if (result.OpeningIsOutside)
             parts.Add(Strings.Supplies.PotFitOutside);
         if (result.BottomTighter)
             parts.Add(Strings.Supplies.PotFitBottomTighter);
         if (result.TallerByCm is { } taller)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Supplies.PotFitTaller, Lengths.Cm(taller)));
+            parts.Add(F(Strings.Supplies.PotFitTaller, Lengths.Cm(taller)));
         return string.Join(" ", parts);
     }
 }

@@ -24,7 +24,7 @@ else if (unavailable)
 else
 {
     <p class="account-note">
-        @((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.SignInIntro, $"<a href=\"privacy\">{Strings.Account.SignInPrivacyLink}</a>"))
+        @((MarkupString)F(Strings.Account.SignInIntro, $"<a href=\"privacy\">{Strings.Account.SignInPrivacyLink}</a>"))
     </p>
     @if (loading)
     {

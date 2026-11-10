@@ -3,6 +3,7 @@ using System.Text;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Wishlist;
 
@@ -28,7 +29,7 @@ public static class WishlistText
             if (options.Notes && wish.Notes?.Trim() is { Length: > 0 } notes)
                 text.Append("\n  ").Append(notes.ReplaceLineEndings(" "));
             if (options.MostToPay && wish.MostToPay is { } price)
-                text.Append("\n  ").Append(string.Format(CultureInfo.CurrentCulture, Strings.Shared.WishlistTextWouldPay, price.ToString("0.##", CultureInfo.InvariantCulture)));
+                text.Append("\n  ").Append(F(Strings.Shared.WishlistTextWouldPay, price.ToString("0.##", CultureInfo.InvariantCulture)));
         }
 
         if (options.AppLine)

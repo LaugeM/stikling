@@ -88,7 +88,7 @@
     }
     @if (everyday?.For(Genus, PlantNames.SpeciesToLookUp(Species, Qualifier), Cultivar) is { } called)
     {
-        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameEveryday, called)</div>
+        <div class="form-text">@F(Strings.Plants.NameEveryday, called)</div>
     }
 </div>
 @if (ShowIdentify && identifyOffered)
@@ -305,18 +305,9 @@ else
 
     // "now <name>" after an old name, with the new name in italics
     private static MarkupString Now(string name) =>
-        (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NameNow, "<i>" + System.Net.WebUtility.HtmlEncode(name) + "</i>");
+        (MarkupString)F(Strings.Plants.NameNow, "<i>" + System.Net.WebUtility.HtmlEncode(name) + "</i>");
 
     private RenderFragment Botanical(NameSuggestion r) => @<BotanicalName Genus="@r.Genus" Species="@r.Species" Cultivar="@r.Cultivar" />;
-
-    // A sentence with an element inside it: the element goes where {0} is
-    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
-    {
-        var at = format.IndexOf("{0}", StringComparison.Ordinal);
-        builder.AddContent(0, format[..at]);
-        builder.AddContent(1, inner);
-        builder.AddContent(2, format[(at + 3)..]);
-    };
 
     private bool SameGenus(string genus) => string.Equals(PlantNames.Genus(Genus), genus, StringComparison.OrdinalIgnoreCase);
 

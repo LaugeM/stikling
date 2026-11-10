@@ -83,7 +83,7 @@ else if (plants.Count == 0 && propagations.Count == 0)
 else
 {
     <p class="today-counts">
-        @Labels.Plants(plants.Count(p => p.InCollection)) · @Plural.Of(active.Count, Strings.Care.TodayPropagationsGoing_One, Strings.Care.TodayPropagationsGoing_Other)@(monthResult is null ? "" : " · " + string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayPottedUp, monthResult.PottedUp, monthResult.Total))
+        @Labels.Plants(plants.Count(p => p.InCollection)) · @Plural.Of(active.Count, Strings.Care.TodayPropagationsGoing_One, Strings.Care.TodayPropagationsGoing_Other)@(monthResult is null ? "" : " · " + F(Strings.Care.TodayPottedUp, monthResult.PottedUp, monthResult.Total))
     </p>
 
     @if (exampleLoaded)
@@ -97,7 +97,7 @@ else
             }
             else
             {
-                <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayExampleIs, ExampleName))</span>
+                <span>@(F(Strings.Care.TodayExampleIs, ExampleName))</span>
                 <button type="button" class="btn btn-outline-primary" @onclick="() => confirmingRemoval = true">@Strings.Common.Remove</button>
             }
         </div>
@@ -110,7 +110,7 @@ else
     @if (upcoming is not null)
     {
         <div class="reminder">
-            <span><b>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAwayFrom, TextCulture.Date(upcoming.From, Strings.Care.TodayLongDayFormat)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
+            <span><b>@(F(Strings.Care.TodayAwayFrom, TextCulture.Date(upcoming.From, Strings.Care.TodayLongDayFormat)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
             <a class="btn btn-outline-primary" href="sitter-sheet">@Strings.Care.TodaySitterSheet</a>
         </div>
     }
@@ -142,7 +142,7 @@ else
             <p class="away-note">
                 @(isAway
                     ? Strings.Care.TodayNothingAsksAway
-                    : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayNothingAsksQuiet, TextCulture.Date(span.Until, Strings.Care.TodayLongDayFormat)))
+                    : F(Strings.Care.TodayNothingAsksQuiet, TextCulture.Date(span.Until, Strings.Care.TodayLongDayFormat)))
             </p>
             <div class="away-actions">
                 <button type="button" class="btn btn-primary" disabled="@awayBusy" @onclick="ImBackAsync">@Strings.Care.TodayImBack</button>
@@ -250,7 +250,7 @@ else
                                     <span class="pest-due now">@Labels.Due(view)</span>
                                     @if (view.Step is { } step)
                                     {
-                                        <span>· @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayStep, view.StepNumber, view.StepCount))@(StepWhat(step) is { } what ? $" · {what}" : "")</span>
+                                        <span>· @(F(Strings.Care.TodayStep, view.StepNumber, view.StepCount))@(StepWhat(step) is { } what ? $" · {what}" : "")</span>
                                     }
                                     <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
@@ -305,7 +305,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@Labels.For(view.Case.Pest)</div>
                                 <div class="item-meta">
-                                    <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayDoneWith, view.Case.PlanName))</span>
+                                    <span>@(F(Strings.Care.TodayDoneWith, view.Case.PlanName))</span>
                                     <span>· @Labels.ScopeAndCount(view)</span>
                                 </div>
                             </div>
@@ -359,7 +359,7 @@ else
                                     </div>
                                 </div>
                             </a>
-                            <div class="look-again-buttons" role="group" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayHowDoesItLook, item.Plant.DisplayName))">
+                            <div class="look-again-buttons" role="group" aria-label="@(F(Strings.Care.TodayHowDoesItLook, item.Plant.DisplayName))">
                                 @foreach (var trend in Enum.GetValues<ProblemTrend>())
                                 {
                                     var picked = trend;
@@ -387,7 +387,7 @@ else
                         <a class="item-card" href="orders/@arriving.OrderId?unpack=1">
                             <div class="item-thumb" aria-hidden="true"><svg viewBox="0 0 24 24"><ParcelIcon /></svg></div>
                             <div class="item-text">
-                                <div class="item-name">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, arriving.IsToday ? Strings.Orders.TodayArriving : Strings.Orders.TodayExpected, arriving.SellerName, Labels.Day(arriving.ExpectedOn)))</div>
+                                <div class="item-name">@(F(arriving.IsToday ? Strings.Orders.TodayArriving : Strings.Orders.TodayExpected, arriving.SellerName, Labels.Day(arriving.ExpectedOn)))</div>
                             </div>
                         </a>
                     </li>
@@ -410,7 +410,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@plant.DisplayName</div>
                                 <div class="item-meta">
-                                    <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayQuarantineMeta, Plural.Of(plant.DaysInQuarantine(Today) ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other)))</span>
+                                    <span>@(F(Strings.Care.TodayQuarantineMeta, Plural.Of(plant.DaysInQuarantine(Today) ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other)))</span>
                                 </div>
                             </div>
                         </a>
@@ -435,7 +435,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@plant.DisplayName</div>
                                 <div class="item-meta">
-                                    <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayNothingNew, Plural.Of((Today.DayNumber - lastNews.DayNumber) / 7, Strings.Care.TodayWeeks_One, Strings.Care.TodayWeeks_Other)))</span>
+                                    <span>@(F(Strings.Care.TodayNothingNew, Plural.Of((Today.DayNumber - lastNews.DayNumber) / 7, Strings.Care.TodayWeeks_One, Strings.Care.TodayWeeks_Other)))</span>
                                 </div>
                             </div>
                         </a>
@@ -665,11 +665,11 @@ else
             <h2>@memory.Heading</h2>
             <div class="memory-photos">
                 <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayMemoryAlt, memory.Plant.DisplayName, Labels.Date(Time.LocalDay(memory.Old.TakenAt))))" /></div>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Old.Id" Alt="@(F(Strings.Care.TodayMemoryAlt, memory.Plant.DisplayName, Labels.Date(Time.LocalDay(memory.Old.TakenAt))))" /></div>
                     <figcaption>@Labels.Date(Time.LocalDay(memory.Old.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Old.TakenAt)))</figcaption>
                 </figure>
                 <figure>
-                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayMemoryAlt, memory.Plant.DisplayName, Labels.Date(Time.LocalDay(memory.Newest.TakenAt))))" /></div>
+                    <div class="memory-photo"><PhotoImage PhotoId="memory.Newest.Id" Alt="@(F(Strings.Care.TodayMemoryAlt, memory.Plant.DisplayName, Labels.Date(Time.LocalDay(memory.Newest.TakenAt))))" /></div>
                     <figcaption>@Labels.Date(Time.LocalDay(memory.Newest.TakenAt))@PhotoDayCount.Suffix(PhotoDayCount.PlantAge(memory.Plant, Time.LocalDay(memory.Newest.TakenAt)))</figcaption>
                 </figure>
             </div>
@@ -690,7 +690,7 @@ else
     {
         <section class="today-section anniversary">
             <h2>@(anniversaries.Count == 1
-                    ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAnniversary_One, anniversaries[0].Plant.DisplayName)
+                    ? F(Strings.Care.TodayAnniversary_One, anniversaries[0].Plant.DisplayName)
                     : Plural.Of(anniversaries.Count, Strings.Care.TodayAnniversary_One, Strings.Care.TodayAnniversary_Other))</h2>
             <p class="anniversary-plants">
                 @for (var i = 0; i < Math.Min(anniversaries.Count, AnniversariesListed); i++)
@@ -704,7 +704,7 @@ else
                 }
                 @if (anniversaries.Count > AnniversariesListed)
                 {
-                    <text> · </text><span>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayAnniversaryMore, anniversaries.Count - AnniversariesListed)</span>
+                    <text> · </text><span>@F(Strings.Care.TodayAnniversaryMore, anniversaries.Count - AnniversariesListed)</span>
                 }
             </p>
             <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="DismissAnniversariesAsync">@Strings.Care.TodayAnniversaryDismiss</button>
@@ -721,7 +721,7 @@ else
                     <li @key="note.Entry.Id">
                         <a class="coming-back-name" href="@(note.Entry.SubjectType == SubjectType.Plant ? "plants" : "propagations")/@note.Entry.SubjectId">@note.Name</a>
                         <p class="coming-back-text">@note.Entry.Text</p>
-                        <p class="coming-back-written">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayWritten, Labels.Date(Time.LocalDay(note.Entry.OccurredAt))))</p>
+                        <p class="coming-back-written">@(F(Strings.Care.TodayWritten, Labels.Date(Time.LocalDay(note.Entry.OccurredAt))))</p>
                         <div class="coming-back-actions">
                             <button type="button" class="btn btn-primary btn-sm" @onclick="() => NoteDoneAsync(note.Entry)">@Strings.Common.Done</button>
                             <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => NoteAgainAsync(note.Entry)">@Strings.Care.TodayAgainNextYear</button>
@@ -735,7 +735,7 @@ else
     @if (yearTitle is not null)
     {
         <section class="today-section year-section">
-            <h2>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayYear, yearSeason))</h2>
+            <h2>@(F(Strings.Care.TodayYear, yearSeason))</h2>
             <div class="year-promo">
                 <div class="year-thumb" aria-hidden="true">
                     @if (yearUrl is not null)
@@ -767,7 +767,7 @@ else
                         </div>
                         <div class="item-text">
                             <div class="item-name">@Plural.Of(sections.PhotosDue.Count, Strings.Care.TodayPhotosToTake_One, Strings.Care.TodayPhotosToTake_Other)</div>
-                            <div class="item-meta">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayPhotosFor, TextCulture.Date(Today, Strings.Care.TodayMonthFormat)))</div>
+                            <div class="item-meta">@(F(Strings.Care.TodayPhotosFor, TextCulture.Date(Today, Strings.Care.TodayMonthFormat)))</div>
                         </div>
                         <svg class="round-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m6 9 6 6 6-6" /></svg>
                     </button>
@@ -858,7 +858,7 @@ else
         if (suggested.Propagations > 0)
             parts.Add(Plural.Of(suggested.Propagations, Strings.Care.TodayPropagations_One, Strings.Care.TodayPropagations_Other));
         if (sections.WateringOn && DailyRound.DueIn(suggested.Room.Id, sections.WateringDue, data.Places) is > 0 and var due)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayRoundDue, due));
+            parts.Add(F(Strings.Care.TodayRoundDue, due));
         return string.Join(" · ", parts);
     }
 
@@ -918,7 +918,7 @@ else
 
     // The same kind of line is under Water, under Care when nothing waits for water, and under Worth a look
     private string NextRoundLine(NextRoundCount round, string one, string other) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, round.Count == 1 ? one : other, NextRoundName(round.Day), round.Count);
+        F(round.Count == 1 ? one : other, NextRoundName(round.Day), round.Count);
 
     private string? NextRoundWaterLine => sections.NextRound is { } round
         ? NextRoundLine(round, Strings.Care.TodayNextRoundPlants_One, Strings.Care.TodayNextRoundPlants_Other) : null;
@@ -972,7 +972,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Logging care from an interval failed");
-            careError = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareLogFailed, ex.Message);
+            careError = F(Strings.Care.TodayCareLogFailed, ex.Message);
         }
     }
 
@@ -1004,7 +1004,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Undoing care from an interval failed");
-            careError = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareUndoFailed, ex.Message);
+            careError = F(Strings.Care.TodayCareUndoFailed, ex.Message);
         }
     }
 
@@ -1012,7 +1012,7 @@ else
         PutOffAsync(PutOffs.Interval(request.Item.Interval.Id, request.Item.Plant.Id, request.Item.Last), Today.AddDays(request.Days));
 
     // What the step uses, for the line under the pest on Today. The recipe's name is already in What.
-    private static string? StepWhat(PlanStep step) => string.IsNullOrWhiteSpace(step.What) ? null : step.What.Trim();
+    private static string? StepWhat(PlanStep step) => Clean(step.What);
 
     // Everything listed as due right now, which is also the number on the app icon
     private int DueCount =>
@@ -1227,9 +1227,9 @@ else
         var from = TextCulture.Date(span.From, Strings.Care.DayMonthLongFormat);
         var until = TextCulture.Date(span.Until, Strings.Care.DayMonthLongFormat);
         return visitDates.Count > 0
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBarLabelVisits, from, until, dayNumber, total,
+            ? F(Strings.Care.TodayBarLabelVisits, from, until, dayNumber, total,
                 Plural.Of(visitDates.Count, Strings.Care.TodayVisits_One, Strings.Care.TodayVisits_Other))
-            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBarLabel, from, until, dayNumber, total);
+            : F(Strings.Care.TodayBarLabel, from, until, dayNumber, total);
     }
 
     private async Task ImBackAsync()
@@ -1283,16 +1283,16 @@ else
         {
             case BackReason.Pest:
                 <span class="pest-due now">@Labels.For(row.Pest!.Value)</span>
-                <span> · @(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBackCase, TextCulture.Date(row.CaseStart!.Value, Strings.Care.DayMonthLongFormat)))</span>
+                <span> · @(F(Strings.Care.TodayBackCase, TextCulture.Date(row.CaseStart!.Value, Strings.Care.DayMonthLongFormat)))</span>
                 break;
             case BackReason.InWater:
                 <span>@Plural.Of(row.DaysSinceLogged ?? 0, Strings.Care.TodayBackInWater_One, Strings.Care.TodayBackInWater_Other)</span>
                 break;
             case BackReason.PastPace:
-                <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBackPace, Plural.Of(row.UsualDays ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other), Plural.Of(row.DaysSince ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other)))</span>
+                <span>@(F(Strings.Care.TodayBackPace, Plural.Of(row.UsualDays ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other), Plural.Of(row.DaysSince ?? 0, Strings.Care.TodayDays_One, Strings.Care.TodayDays_Other)))</span>
                 break;
             default:
-                <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayBackFlagged, row.FlagReason, Labels.DaysAgo(Today.DayNumber - (row.FlagSince ?? Today).DayNumber)))</span>
+                <span>@(F(Strings.Care.TodayBackFlagged, row.FlagReason, Labels.DaysAgo(Today.DayNumber - (row.FlagSince ?? Today).DayNumber)))</span>
                 break;
         }
     };
@@ -1447,7 +1447,7 @@ else
         return TodayBoard.DaysSinceBackup(last, Today) switch
         {
             null => Strings.Care.TodayNoBackup,
-            >= 30 and var days => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayLastBackup, Labels.DaysAgo(days)),
+            >= 30 and var days => F(Strings.Care.TodayLastBackup, Labels.DaysAgo(days)),
             _ => null
         };
     }
@@ -1457,7 +1457,7 @@ else
     private string LastSeen(PropagationCheck check) =>
         check.DaysSince >= check.Propagation.DaysSinceStart(Today)
             ? Strings.Care.TodayNoNotes
-            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayLastSeen, Labels.DaysAgo(check.DaysSince));
+            : F(Strings.Care.TodayLastSeen, Labels.DaysAgo(check.DaysSince));
 
     private string NameOf(TimelineEntry entry) => names[entry.SubjectId];
 

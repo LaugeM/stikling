@@ -31,7 +31,7 @@
         @if (Leaves.Count > Fewer && !showAll)
         {
             <p class="family-hint">
-                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAll = true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.LeafShowAll, Leaves.Count)</button>
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => showAll = true">@F(Strings.Shared.LeafShowAll, Leaves.Count)</button>
             </p>
         }
     </section>

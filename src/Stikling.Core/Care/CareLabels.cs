@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Care;
 
@@ -24,7 +25,7 @@ public static class CareLabels
         // Follows the app language, so the name stored on the entry isn't used
         if (CareKinds.IsReservoirReading(entry))
             return entry.ReservoirLevel is { } level
-                ? CareText.F(Strings.Care.ReservoirReadingNamed, ReservoirLevels.Text(level).ToLower(System.Globalization.CultureInfo.CurrentCulture))
+                ? F(Strings.Care.ReservoirReadingNamed, ReservoirLevels.Text(level).ToLower(System.Globalization.CultureInfo.CurrentCulture))
                 : Strings.Care.ReservoirReadingName;
 
         if (entry.OwnKindId is { } id)

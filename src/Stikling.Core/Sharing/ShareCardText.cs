@@ -1,8 +1,8 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sharing;
 
@@ -189,7 +189,7 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
 
     private static string Days(int days) => Plural.Of(days, Strings.Propagations.ShareDays_One, Strings.Propagations.ShareDays_Other);
 
-    private static string Format(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
+    private static string Format(string format, params object[] args) => F(format, args);
 
     private static string? Capital(string? text) =>
         string.IsNullOrEmpty(text) ? null : char.ToUpperInvariant(text[0]) + text[1..];

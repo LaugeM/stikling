@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Lights;
 
@@ -14,7 +15,7 @@ public sealed class GrowLightService(IGrowLightRepository lights)
     public async Task SaveAsync(GrowLight light)
     {
         light.Name = light.Name?.Trim() ?? "";
-        light.Notes = string.IsNullOrWhiteSpace(light.Notes) ? null : light.Notes.Trim();
+        light.Notes = Clean(light.Notes);
         var errors = light.Validate();
         if (errors.Count > 0)
             throw new InvalidOperationException(errors[0]);

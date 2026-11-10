@@ -3,6 +3,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Labels;
 
@@ -23,7 +24,7 @@ public sealed record LabelContent(string? Number, string Name, string? Botanical
         CollectionNumbers.Normalize(plant.CollectionNumber),
         plant.DisplayName,
         BotanicalIfDifferent(plant.BotanicalName, plant.DisplayName),
-        plant.AcquiredOn is { } acquired ? string.Format(CultureInfo.CurrentCulture, Strings.Shared.LabelGot, Got(acquired)) : null);
+        plant.AcquiredOn is { } acquired ? F(Strings.Shared.LabelGot, Got(acquired)) : null);
 
     public static LabelContent For(Propagation propagation) => new(
         CollectionNumbers.Normalize(propagation.CollectionNumber),
@@ -31,7 +32,7 @@ public sealed record LabelContent(string? Number, string Name, string? Botanical
         BotanicalIfDifferent(propagation.BotanicalName, propagation.DisplayName),
         propagation.StartedOn == default
             ? null
-            : string.Format(CultureInfo.CurrentCulture, Strings.Shared.LabelStarted, TextCulture.Date(propagation.StartedOn, Strings.Shared.LabelDayFormat)));
+            : F(Strings.Shared.LabelStarted, TextCulture.Date(propagation.StartedOn, Strings.Shared.LabelDayFormat)));
 
     private static string? BotanicalIfDifferent(string? botanical, string name) =>
         string.IsNullOrWhiteSpace(botanical) || string.Equals(botanical.Trim(), name.Trim(), StringComparison.OrdinalIgnoreCase)

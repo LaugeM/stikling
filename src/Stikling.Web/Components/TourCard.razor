@@ -13,7 +13,7 @@
     <section class="tour-card" role="region" aria-label="@Strings.Care.TourRegion">
         @if (!state.IsClosing)
         {
-            <p class="tour-count">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TourCount, state.Number, state.Count))</p>
+            <p class="tour-count">@(F(Strings.Care.TourCount, state.Number, state.Count))</p>
         }
         <h2 class="tour-title" tabindex="-1" @ref="title">@step.Title</h2>
         <div aria-live="polite">

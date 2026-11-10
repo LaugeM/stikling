@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -260,13 +261,13 @@ public static class Doses
     public static string Text(decimal amount, DoseUnit unit, decimal per = 1, WaterUnit perUnit = WaterUnit.Litres) =>
         per == 1 && perUnit == WaterUnit.Litres
             ? $"{Number(amount)} {Symbol(unit)}/L"
-            : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.DoseRate, Measured(amount, unit), Number(per), Symbol(perUnit));
+            : F(Strings.Supplies.DoseRate, Measured(amount, unit), Number(per), Symbol(perUnit));
 
     /// <summary>"4 ml", "1.5 g", "3 drops": an amount to measure out.</summary>
     public static string Measured(decimal amount, DoseUnit unit) => unit switch
     {
         DoseUnit.Grams => $"{Number(amount)} g",
-        DoseUnit.Drops => string.Format(CultureInfo.CurrentCulture, amount == 1 ? Strings.Supplies.DoseDrops_One : Strings.Supplies.DoseDrops_Other, Number(amount)),
+        DoseUnit.Drops => F(amount == 1 ? Strings.Supplies.DoseDrops_One : Strings.Supplies.DoseDrops_Other, Number(amount)),
         _ => $"{Number(amount)} ml"
     };
 

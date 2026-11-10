@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Care;
 
@@ -55,7 +56,7 @@ public sealed class OwnCareKindService(IOwnCareKindRepository kinds, ICareLogRep
         if (kind.Name == trimmed)
             return;
         if ((await kinds.GetAllAsync()).Any(k => k.Id != id && SameName(k.Name, trimmed)))
-            throw new InvalidOperationException(CareText.F(Strings.Care.KindNameTaken, trimmed));
+            throw new InvalidOperationException(F(Strings.Care.KindNameTaken, trimmed));
 
         kind.Name = trimmed;
         await kinds.SaveAsync(kind);

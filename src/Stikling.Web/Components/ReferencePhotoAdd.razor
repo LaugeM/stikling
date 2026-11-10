@@ -41,7 +41,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a reference photo failed");
-            message = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ReferencePhotoFailed, ex.Message);
+            message = F(Strings.Plants.ReferencePhotoFailed, ex.Message);
         }
 
         busy = false;

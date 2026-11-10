@@ -60,22 +60,22 @@
                         var ingredient = draft.Ingredients[index];
                         <li class="mix-row">
                             <input class="form-control mix-name" placeholder="@Strings.Supplies.MixesIngredientPlaceholder" autocomplete="off"
-                                   aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesIngredientN, index + 1)" value="@ingredient.Name"
+                                   aria-label="@F(Strings.Supplies.MixesIngredientN, index + 1)" value="@ingredient.Name"
                                    @oninput="e => ingredient.Name = e.Value?.ToString() ?? string.Empty" />
                             @if (draft.Unit != MixUnit.None)
                             {
                                 <input class="form-control mix-amount" type="number" inputmode="decimal"
-                                       min="0" step="any" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesHowMuch, Some(ingredient))"
+                                       min="0" step="any" aria-label="@F(Strings.Supplies.MixesHowMuch, Some(ingredient))"
                                        @bind="ingredient.Amount" />
                             }
                             <div class="mix-tools">
                                 <button type="button" class="mix-tool" disabled="@(index == 0)"
-                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesMoveUp, Some(ingredient))"
+                                        aria-label="@F(Strings.Supplies.MixesMoveUp, Some(ingredient))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="mix-tool" disabled="@(index == draft.Ingredients.Count - 1)"
-                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesMoveDown, Some(ingredient))"
+                                        aria-label="@F(Strings.Supplies.MixesMoveDown, Some(ingredient))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="mix-tool remove" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesRemove, Some(ingredient))"
+                                <button type="button" class="mix-tool remove" aria-label="@F(Strings.Supplies.MixesRemove, Some(ingredient))"
                                         @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                         </li>
@@ -225,7 +225,7 @@ else
                             }
                             @if (use.Mix.RetiredOn is { } retired)
                             {
-                                <div class="mix-recipe">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesLastMixed, Labels.Date(retired))</div>
+                                <div class="mix-recipe">@F(Strings.Supplies.MixesLastMixed, Labels.Date(retired))</div>
                             }
                             <div class="care-actions">
                                 @if (use.Mix.CanMeasureOut)
@@ -296,7 +296,7 @@ else
     private static string PlantCount(MixUse use) =>
         use.Plants == 0
             ? Strings.Supplies.MixesNoPlantsInIt
-            : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PlantCountInUse, Labels.Plants(use.Plants));
+            : F(Strings.Supplies.PlantCountInUse, Labels.Plants(use.Plants));
 
     /// <summary>What saving does to the plants already in the mix, said before it happens.</summary>
     private string EditWarning => Plural.Of(plantsInMix, Strings.Supplies.MixesEditWarning_One, Strings.Supplies.MixesEditWarning_Other);
@@ -304,7 +304,7 @@ else
     private string CopyHint => Plural.Of(plantsInMix, Strings.Supplies.MixesCopyHint_One, Strings.Supplies.MixesCopyHint_Other);
 
     private string DeleteWarning(MixUse use) => confirmingPlants == 0
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.MixesDeleteConfirm, use.Mix.Name)
+        ? F(Strings.Supplies.MixesDeleteConfirm, use.Mix.Name)
         : Plural.Of(confirmingPlants, Strings.Supplies.MixesDeleteInUse_One, Strings.Supplies.MixesDeleteInUse_Other);
 
     private async Task TogglePlantsAsync(MixUse use)

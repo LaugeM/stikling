@@ -101,13 +101,13 @@ else
         </div>
     }
 
-    <Sheet Title="@(asking is { } title ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WeekMarkTitle, DayInText(title.Day)) : "")"
+    <Sheet Title="@(asking is { } title ? F(Strings.Care.WeekMarkTitle, DayInText(title.Day)) : "")"
            Open="asking is not null" OpenChanged="open => { if (!open) asking = null; }">
         @if (asking is { } day)
         {
             <p>@(day.Day == Today
                     ? Strings.Care.WeekMarkToday
-                    : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.WeekMarkLater, DayInText(day.Day)))</p>
+                    : F(Strings.Care.WeekMarkLater, DayInText(day.Day)))</p>
             @if (day.Day != Today && day.Water.Count > 0)
             {
                 <p class="text-body-secondary">@Strings.Care.WeekMarkWaterNote</p>
@@ -208,7 +208,7 @@ else
         if (marked.Failure is { } failure)
         {
             Logger.LogError(failure, "Marking a day of the week ahead as done failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareLogFailed, failure.Message);
+            error = F(Strings.Care.TodayCareLogFailed, failure.Message);
         }
         asking = null;
         await RefreshAsync();
@@ -229,7 +229,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Undoing a day of the week ahead failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayCareUndoFailed, ex.Message);
+            error = F(Strings.Care.TodayCareUndoFailed, ex.Message);
         }
         await RefreshAsync();
         busy = false;

@@ -1,13 +1,12 @@
 @* A name found in the plant dictionary, as a row that opens its page: the botanical name, and under it the
    everyday name, or what an old name is now *@
-@using System.Globalization
 
 <a class="item-card @Class" href="@Hit.Href" @onclick="OnOpen">
     <span class="item-text">
         @if (Hit.Name.Formerly is { } old)
         {
             <span class="item-name"><i class="hit-name">@old</i></span>
-            <span class="item-meta">@string.Format(CultureInfo.CurrentCulture, Strings.Plants.NameNow, PlantNames.Botanical(Hit.Name.Genus, Hit.Name.Species, Hit.Name.Cultivar))</span>
+            <span class="item-meta">@F(Strings.Plants.NameNow, PlantNames.Botanical(Hit.Name.Genus, Hit.Name.Species, Hit.Name.Cultivar))</span>
         }
         else
         {

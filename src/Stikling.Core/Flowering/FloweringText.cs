@@ -2,6 +2,7 @@ using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Flowering;
 
@@ -44,9 +45,7 @@ public static class FloweringText
 
     /// <summary>"In bud since 3 Mar" or "In flower since 10 Apr", for a flowering that is still going.</summary>
     public static string Since(FloweringStage stage, LooseDate since, int contextYear) =>
-        string.Format(
-            CultureInfo.CurrentCulture,
-            stage == FloweringStage.Buds ? Strings.Pests.SinceInBud : Strings.Pests.SinceInFlower,
+        F(stage == FloweringStage.Buds ? Strings.Pests.SinceInBud : Strings.Pests.SinceInFlower,
             Date(since, contextYear));
 
     /// <summary>What a flowering reads as, without its year. Every date is named so nothing is guessed.</summary>
@@ -61,19 +60,17 @@ public static class FloweringText
 
         var parts = new List<string>();
         if (period.Buds is { } buds)
-            parts.Add(string.Format(CultureInfo.CurrentCulture, Strings.Pests.DescribeSpike, Date(buds, year)));
+            parts.Add(F(Strings.Pests.DescribeSpike, Date(buds, year)));
 
         if (period.InFlower is { } flowers)
         {
             parts.Add(period.Done is { } end
-                ? string.Format(CultureInfo.CurrentCulture, Strings.Pests.DescribeInFlowerTo, Date(flowers, year), Date(end, year))
-                : string.Format(CultureInfo.CurrentCulture, Strings.Pests.DescribeInFlowerFrom, Date(flowers, year)));
+                ? F(Strings.Pests.DescribeInFlowerTo, Date(flowers, year), Date(end, year))
+                : F(Strings.Pests.DescribeInFlowerFrom, Date(flowers, year)));
         }
         else if (period.Done is { } done)
         {
-            parts.Add(string.Format(
-                CultureInfo.CurrentCulture,
-                period.Buds is null ? Strings.Pests.DescribeDoneFlowering : Strings.Pests.DescribeDone,
+            parts.Add(F(period.Buds is null ? Strings.Pests.DescribeDoneFlowering : Strings.Pests.DescribeDone,
                 Date(done, year)));
         }
 
@@ -92,8 +89,8 @@ public static class FloweringText
     {
         var list = years.Order().Select(y => y.ToString(CultureInfo.InvariantCulture)).ToList();
         return list.Count <= 1
-            ? string.Format(CultureInfo.CurrentCulture, Strings.Pests.InYearsOne, string.Concat(list))
-            : string.Format(CultureInfo.CurrentCulture, Strings.Pests.InYearsMany, string.Join(", ", list.SkipLast(1)), list[^1]);
+            ? F(Strings.Pests.InYearsOne, string.Concat(list))
+            : F(Strings.Pests.InYearsMany, string.Join(", ", list.SkipLast(1)), list[^1]);
     }
 
     /// <summary>"2024", "June 2024" or "12 Jun 2024", the way <see cref="LooseDate.Text"/> reads but in the app's language.</summary>

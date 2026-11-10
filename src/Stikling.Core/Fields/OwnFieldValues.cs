@@ -2,6 +2,7 @@ using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
 using System.Globalization;
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Fields;
 
@@ -39,7 +40,7 @@ public static class OwnFieldValues
             default:
                 if (text.Length > MaxTextLength)
                 {
-                    error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldTextLong, MaxTextLength);
+                    error = F(Strings.Shared.FieldTextLong, MaxTextLength);
                     return null;
                 }
                 return text;

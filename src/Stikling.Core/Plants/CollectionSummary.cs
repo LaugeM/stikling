@@ -1,8 +1,8 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Rooms;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Plants;
 
@@ -21,7 +21,7 @@ public sealed record LongestHeld(Plant Plant, DateOnly Since, bool YearOnly, boo
         var length = months >= 12 ? Plural.Of(months / 12, Strings.Plants.LongestYears_One, Strings.Plants.LongestYears_Other)
             : months >= 1 ? Plural.Of(months, Strings.Plants.LongestMonths_One, Strings.Plants.LongestMonths_Other)
             : Strings.Plants.LongestLessThanMonth;
-        return string.Format(CultureInfo.CurrentCulture, Strings.Plants.LongestSince, since, length);
+        return F(Strings.Plants.LongestSince, since, length);
     }
 }
 
@@ -63,8 +63,6 @@ public sealed record CollectionSummary(
             live.Count(p => p.RootedOn?.Year == today.Year),
             live.Count > 0);
     }
-
-    private static string? Clean(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
     // Biggest first, then by name, with the plants that have none at the end
     private static IReadOnlyList<CountRow> Rows<TKey>(

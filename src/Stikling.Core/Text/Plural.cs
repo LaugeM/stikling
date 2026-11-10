@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.RegularExpressions;
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Text;
 
@@ -12,7 +13,7 @@ namespace Stikling.Core.Text;
 public static class Plural
 {
     public static string Of(int count, string one, string other) =>
-        string.Format(CultureInfo.CurrentCulture, count == 1 ? one : other, count);
+        F(count == 1 ? one : other, count);
 }
 
 /// <summary>The one place that decides which culture dates and times are written in.</summary>

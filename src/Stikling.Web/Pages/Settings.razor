@@ -89,7 +89,7 @@
                 </p>
                 @if (Translators is { } translators)
                 {
-                    <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.TranslatedBy, translators)</p>
+                    <p class="settings-hint">@F(Strings.Settings.TranslatedBy, translators)</p>
                 }
             }
             <label class="theme-label @(Language.Offered.Count > 1 ? "mt-4" : null)" for="lengths">@Strings.Settings.Lengths</label>
@@ -240,7 +240,7 @@
                 <span class="input-group-text">@Strings.Settings.PotUpWarnBefore</span>
                 <LengthInput @key="(potUpWarnKey, Lengths.Unit)" id="pot-up-warn" class="form-control"
                              Value="potUpWarnCm" ValueChanged="SetPotUpWarnCmAsync" />
-                <span class="input-group-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.PotUpWarnAfter, Lengths.UnitName)</span>
+                <span class="input-group-text">@F(Strings.Settings.PotUpWarnAfter, Lengths.UnitName)</span>
             </div>
             <p class="settings-hint">
                 @Strings.Settings.PotUpWarnHint
@@ -326,7 +326,7 @@
                 }
                 else if (notifyDaysChoice == NotifyDays.RoundDays)
                 {
-                    <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NotifyYourRoundDays, string.Join(", ", roundDays.Select(Labels.DayShort)))</p>
+                    <p class="settings-hint">@F(Strings.Settings.NotifyYourRoundDays, string.Join(", ", roundDays.Select(Labels.DayShort)))</p>
                 }
                 <p class="settings-hint">
                     @Strings.Settings.NotifyOnHint
@@ -504,10 +504,10 @@
             await Numbering.ApplyAsync(plan);
             numberingMessage = (plan.Plants.Count, plan.Cuttings.Count) switch
             {
-                (> 0, > 0) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedBoth,
+                (> 0, > 0) => F(Strings.Settings.NumberedBoth,
                     Labels.Plants(plan.Plants.Count), CuttingCount(plan.Cuttings.Count)),
-                (> 0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedPlants, Labels.Plants(plan.Plants.Count)),
-                (_, > 0) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.NumberedCuttings, CuttingCount(plan.Cuttings.Count)),
+                (> 0, _) => F(Strings.Settings.NumberedPlants, Labels.Plants(plan.Plants.Count)),
+                (_, > 0) => F(Strings.Settings.NumberedCuttings, CuttingCount(plan.Cuttings.Count)),
                 _ => null
             };
             numberingOpen = false;
@@ -544,7 +544,7 @@
         (28, Weeks(4))
     ];
 
-    private string EverydayHint => string.Format(System.Globalization.CultureInfo.CurrentCulture, System.Net.WebUtility.HtmlEncode(Strings.Settings.EverydayHint),
+    private string EverydayHint => F(System.Net.WebUtility.HtmlEncode(Strings.Settings.EverydayHint),
         System.Net.WebUtility.HtmlEncode(everydayLanguage == EverydayNameLanguage.Danish ? "Svigermors tunge" : "Snake plant"),
         "<i>Dracaena trifasciata</i>");
 
@@ -857,7 +857,7 @@
         intervalCount == 0 ? Strings.Settings.CareIntervalsNone : Plural.Of(intervalCount, Strings.Settings.Interval_One, Strings.Settings.Interval_Other);
 
     private string KindsOfCareLine =>
-        ownKindCount == 0 ? Strings.Settings.KindsOfCareNone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.KindsOfCareCount, ownKindCount);
+        ownKindCount == 0 ? Strings.Settings.KindsOfCareNone : F(Strings.Settings.KindsOfCareCount, ownKindCount);
 
     /// <summary>"3 rooms, 5 tags", for the line under the link to rooms and tags.</summary>
     private string RoomsAndTagsLine =>
@@ -866,7 +866,7 @@
             (0, 0) => Strings.Settings.RoomsAndTagsNone,
             (_, 0) => Rooms(roomCount),
             (0, _) => Tags(tagCount),
-            _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.RoomsAndTagsBoth, Rooms(roomCount), Tags(tagCount))
+            _ => F(Strings.Settings.RoomsAndTagsBoth, Rooms(roomCount), Tags(tagCount))
         };
 
     private static string Rooms(int count) => Plural.Of(count, Strings.Settings.Room_One, Strings.Settings.Room_Other);
@@ -875,7 +875,7 @@
 
     private string BackupLine =>
         lastBackup is { } date
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.LastBackup,
+            ? F(Strings.Settings.LastBackup,
                 Labels.Date(date), Labels.DaysAgo(Time.Today().DayNumber - date.DayNumber))
             : Strings.Settings.NoBackup;
 
@@ -1006,8 +1006,8 @@
     {
         (true, _) => Strings.Settings.Syncing,
         (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date =>
-            string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.SyncedAt, Labels.Time(at)),
-        (_, { } at) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Settings.SyncedOn,
+            F(Strings.Settings.SyncedAt, Labels.Time(at)),
+        (_, { } at) => F(Strings.Settings.SyncedOn,
             Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))),
         _ => Strings.Settings.NotSynced
     };

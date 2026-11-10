@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Plants;
 
@@ -129,7 +130,7 @@ public sealed record PlantFilter(
     private string? RoomOf(Plant plant) => (RoomName ?? PlaceName)?.Invoke(plant.PlaceId);
 
     private static string? GenusOf(Plant plant) =>
-        string.IsNullOrWhiteSpace(plant.Genus) ? null : plant.Genus.Trim();
+        Clean(plant.Genus);
 
     private bool MatchesGenus(Plant plant) =>
         WithoutGenus ? GenusOf(plant) is null

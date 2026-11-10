@@ -1,9 +1,8 @@
 @page "/dictionary/family/{Name}"
 @layout WideLayout
-@using System.Globalization
 @inject DictionaryService Dictionary
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, found?.Name ?? Strings.Dictionary.Title)</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, found?.Name ?? Strings.Dictionary.Title)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 @* page-full: on a wide screen the page takes the whole width beside the menu *@
@@ -39,7 +38,7 @@ else
     <p class="settings-hint">
         @DictionaryLinks.CountsLine(family.Genera, family.Species)@if (have > 0)
         {
-            <text> · @string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHaveShort, have)</text>
+            <text> · @F(Strings.Dictionary.YouHaveShort, have)</text>
         }
     </p>
     <p class="settings-hint mb-3">@DictionaryLinks.Html(Strings.Dictionary.PartOf, DictionaryLinks.Anchor(DictionaryLinks.Group(family.Group), DictionaryLinks.Label(family.Group)))</p>

@@ -19,12 +19,12 @@
     @if (precision == DatePrecision.Year)
     {
         <input class="form-control mt-2" type="number" inputmode="numeric" min="1900" max="@Today.Year"
-               step="1" placeholder="@Strings.Plants.DateYearPlaceholder" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Plants.DateYearLabel, Label)" @key="precision"
+               step="1" placeholder="@Strings.Plants.DateYearPlaceholder" aria-label="@F(Strings.Plants.DateYearLabel, Label)" @key="precision"
                value="@Value?.Year" @onchange="SetAsync" />
     }
     else if (precision == DatePrecision.Month)
     {
-        <input class="form-control mt-2" type="month" max="@Text(Today, "yyyy-MM")" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Plants.DateMonthLabel, Label)"
+        <input class="form-control mt-2" type="month" max="@Text(Today, "yyyy-MM")" aria-label="@F(Strings.Plants.DateMonthLabel, Label)"
                @key="precision" value="@Value?.Start.ToString("yyyy-MM")" @onchange="SetAsync" />
     }
     else

@@ -2,6 +2,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Today;
 
@@ -43,10 +44,10 @@ public static class TodayNotice
         var holding = sections.Holding;
 
         if (holding)
-            parts.Add(CareText.F(Strings.Care.NoticeBackToLookOver, sections.BackRows.Count));
+            parts.Add(F(Strings.Care.NoticeBackToLookOver, sections.BackRows.Count));
 
         if (sections.RoundSuggestion is { } round)
-            parts.Add(CareText.F(Strings.Care.NoticeGoRound, round.Room.Name));
+            parts.Add(F(Strings.Care.NoticeGoRound, round.Room.Name));
 
         Count(parts, sections.DueTreatments.Count, Strings.Care.NoticeTreatmentDue_One, Strings.Care.NoticeTreatmentDue_Other);
         Count(parts, sections.DueChecks.Count, Strings.Care.NoticeCheck_One, Strings.Care.NoticeCheck_Other);
@@ -82,7 +83,7 @@ public static class TodayNotice
 
         // "and 1 more" would be no shorter than the part it stands for
         if (parts.Count > MostParts + 1)
-            parts = [.. parts.Take(MostParts), CareText.F(Strings.Care.NoticeAndMore, parts.Count - MostParts)];
+            parts = [.. parts.Take(MostParts), F(Strings.Care.NoticeAndMore, parts.Count - MostParts)];
         return string.Join(" · ", parts);
     }
 
@@ -98,8 +99,8 @@ public static class TodayNotice
         if (count == 0)
             return;
         if (kind is null)
-            parts.Add(count == 1 ? CareText.F(one, name()) : CareText.F(many, count));
+            parts.Add(count == 1 ? F(one, name()) : F(many, count));
         else
-            parts.Add(count == 1 ? CareText.F(one, kind, name()) : CareText.F(many, kind, count));
+            parts.Add(count == 1 ? F(one, kind, name()) : F(many, kind, count));
     }
 }

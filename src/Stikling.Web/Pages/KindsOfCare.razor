@@ -62,7 +62,7 @@ else
 
     @if (confirmingRemove && editing is not null)
     {
-        <p>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsRemoveConfirm, editing.Name))</p>
+        <p>@(F(Strings.Care.KindsRemoveConfirm, editing.Name))</p>
         <div class="care-actions">
             <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
             <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">@Strings.Common.Cancel</button>
@@ -125,7 +125,7 @@ else
             CareKind.Fertilised => Strings.Care.KindsUseFeed,
             _ => Strings.Care.KindsUseNeither
         };
-        return kind.OnHistory ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsUseOnHistory, counts) : counts;
+        return kind.OnHistory ? F(Strings.Care.KindsUseOnHistory, counts) : counts;
     }
 
     private void StartNew()
@@ -171,7 +171,7 @@ else
                 var trimmed = name.Trim();
                 if (kinds.FirstOrDefault(k => string.Equals(k.Name.Trim(), trimmed, StringComparison.CurrentCultureIgnoreCase)) is { } existing)
                 {
-                    error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.KindsAlreadyHave, existing.Name);
+                    error = F(Strings.Care.KindsAlreadyHave, existing.Name);
                     return;
                 }
                 await KindService.AddAsync(name, countsAs, onHistory);
@@ -183,7 +183,7 @@ else
                 await KindService.SetOnHistoryAsync(editing.Id, onHistory);
                 var changed = await KindService.SetCountsAsAsync(editing.Id, countsAs, countsChanged && alsoChange);
                 if (countsChanged && alsoChange && changed < entryCount)
-                    message = string.Format(System.Globalization.CultureInfo.CurrentCulture, entryCount == 1 ? Strings.Care.KindsChanged_One : Strings.Care.KindsChanged_Other, changed, entryCount);
+                    message = F(entryCount == 1 ? Strings.Care.KindsChanged_One : Strings.Care.KindsChanged_Other, changed, entryCount);
             }
 
             sheetOpen = false;

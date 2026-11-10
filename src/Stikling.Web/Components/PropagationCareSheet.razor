@@ -100,9 +100,9 @@
     private string ButtonText(PropagationCareKind kind) => (kind, occurredOn == Today) switch
     {
         (PropagationCareKind.ChangedWater, true) => Strings.Propagations.CareChangedWaterToday,
-        (PropagationCareKind.ChangedWater, false) => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareChangedWaterOn, Labels.Date(occurredOn)),
+        (PropagationCareKind.ChangedWater, false) => F(Strings.Propagations.CareChangedWaterOn, Labels.Date(occurredOn)),
         (_, true) => Strings.Propagations.CareWateredToday,
-        _ => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CareWateredOn, Labels.Date(occurredOn))
+        _ => F(Strings.Propagations.CareWateredOn, Labels.Date(occurredOn))
     };
 
     private void DateChanged(ChangeEventArgs e)

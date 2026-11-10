@@ -8,6 +8,7 @@ using Stikling.Core.Propagations;
 using Stikling.Core.Rooms;
 using Stikling.Core.SoilMixes;
 using Strings = Stikling.Web.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -29,9 +30,9 @@ public static class Labels
     /// </summary>
     public static string StatusOf(Plant plant, string? pottedWith = null) =>
         plant.LivesElsewhere
-            ? (plant.LivesWithName is { } owner ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.StatusLivesWith, owner) : Strings.Labels.StatusNotYours)
+            ? (plant.LivesWithName is { } owner ? F(Strings.Labels.StatusLivesWith, owner) : Strings.Labels.StatusNotYours)
             : plant.Status == PlantStatus.Active && plant.PottedWithPlantId is not null
-            ? (string.IsNullOrWhiteSpace(pottedWith) ? Strings.Labels.StatusPottedWithOther : string.Format(CultureInfo.CurrentCulture, Strings.Labels.StatusPottedWith, pottedWith))
+            ? (string.IsNullOrWhiteSpace(pottedWith) ? Strings.Labels.StatusPottedWithOther : F(Strings.Labels.StatusPottedWith, pottedWith))
             : For(plant.Status);
 
     public static string For(PlantOrigin origin) => origin switch
@@ -168,7 +169,7 @@ public static class Labels
         var names = things.Select(For).ToList();
         return names.Count <= 1
             ? string.Concat(names)
-            : string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.ListAnd, string.Join(", ", names.SkipLast(1)), names[^1]);
+            : F(Strings.PlantDetail.ListAnd, string.Join(", ", names.SkipLast(1)), names[^1]);
     }
 
     public static string For(ComparedThing thing) => thing switch
@@ -274,7 +275,7 @@ public static class Labels
     /// <summary>The pest on a plant's badge: "Spider mites seen" when the pest was seen on this plant, the pest alone otherwise.</summary>
     public static string PestBadge(PestCase item, Guid plantId) =>
         PestService.IsFoundOn(item, plantId)
-            ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.PestSeen, For(item.Pest))
+            ? F(Strings.Labels.PestSeen, For(item.Pest))
             : For(item.Pest);
 
     /// <summary>"Living room · 4 plants", or just "2 plants" when the case covers picked plants.</summary>
@@ -298,7 +299,7 @@ public static class Labels
             ? Plural.Of(-daysUntil, Strings.Labels.CheckOverdue_One, Strings.Labels.CheckOverdue_Other)
             : Plural.Of(-daysUntil, Strings.Labels.DueOverdue_One, Strings.Labels.DueOverdue_Other),
         1 => check ? Strings.Labels.CheckDueTomorrow : Strings.Labels.DueTomorrow,
-        _ => string.Format(CultureInfo.CurrentCulture, check ? Strings.Labels.CheckDueInDays : Strings.Labels.DueInDays, daysUntil)
+        _ => F(check ? Strings.Labels.CheckDueInDays : Strings.Labels.DueInDays, daysUntil)
     };
 
     /// <summary>Stage names. Seeds get their own words: sown, germinating, sprouted.</summary>
@@ -388,7 +389,7 @@ public static class Labels
 
     /// <summary>"3× corm · LECA".</summary>
     public static string Summary(Propagation propagation) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Labels.PropagationSummary,
+        F(Strings.Labels.PropagationSummary,
             propagation.InitialCount, For(propagation.Type).ToLowerInvariant(), For(propagation.Medium));
 
     /// <summary>"started today" / "day 24".</summary>
@@ -396,16 +397,16 @@ public static class Labels
         propagation.DaysSinceStart(today) switch
         {
             0 => Strings.Labels.AgeStartedToday,
-            var days => string.Format(CultureInfo.CurrentCulture, Strings.Labels.AgeDay, days)
+            var days => F(Strings.Labels.AgeDay, days)
         };
 
     /// <summary>"12.4 MB", for the storage line in Settings.</summary>
     public static string Bytes(long bytes) => bytes switch
     {
-        < 1024 => string.Format(CultureInfo.CurrentCulture, "{0} B", bytes),
-        < 1024 * 1024 => string.Format(CultureInfo.CurrentCulture, "{0:0.#} KB", bytes / 1024d),
-        < 1024L * 1024 * 1024 => string.Format(CultureInfo.CurrentCulture, "{0:0.#} MB", bytes / (1024d * 1024)),
-        _ => string.Format(CultureInfo.CurrentCulture, "{0:0.##} GB", bytes / (1024d * 1024 * 1024))
+        < 1024 => F("{0} B", bytes),
+        < 1024 * 1024 => F("{0:0.#} KB", bytes / 1024d),
+        < 1024L * 1024 * 1024 => F("{0:0.#} MB", bytes / (1024d * 1024)),
+        _ => F("{0:0.##} GB", bytes / (1024d * 1024 * 1024))
     };
 
     /// <summary>"soil" in the middle of a line, but LECA and PON stay in capitals.</summary>
@@ -417,13 +418,13 @@ public static class Labels
     {
         <= 0 => Strings.Labels.DaysAgoToday,
         1 => Strings.Labels.DaysAgoYesterday,
-        _ => string.Format(CultureInfo.CurrentCulture, Strings.Labels.DaysAgoMany, days)
+        _ => F(Strings.Labels.DaysAgoMany, days)
     };
 
     /// <summary>"from March" for a month, "from Sat 17 Oct" for a day, for a flag set for later.</summary>
     public static string FlagFrom(LooseDate from) => from.Precision == DatePrecision.Day
-        ? string.Format(CultureInfo.CurrentCulture, Strings.Labels.FlagFromDay, Format(from.Start, Strings.Labels.DayFormat))
-        : string.Format(CultureInfo.CurrentCulture, Strings.Labels.FlagFromMonth, Format(from.Start, Strings.Labels.MonthFormat));
+        ? F(Strings.Labels.FlagFromDay, Format(from.Start, Strings.Labels.DayFormat))
+        : F(Strings.Labels.FlagFromMonth, Format(from.Start, Strings.Labels.MonthFormat));
 
     /// <summary>
     /// "Usually likes bright indirect · dry out fully · rests in winter, kept drier": the needs the care file
@@ -441,7 +442,7 @@ public static class Labels
         var rest = fills.Contains(LikesField.Rest) && care.Rest is { } r ? For(r) : null;
         if (season is not null || rest is not null)
             parts.Add(string.Join(", ", new[] { season, rest }.OfType<string>()));
-        return string.Format(CultureInfo.CurrentCulture, Strings.Labels.UsuallyLikes, string.Join(" · ", parts));
+        return F(Strings.Labels.UsuallyLikes, string.Join(" · ", parts));
     }
 
     private static string Lower(string text) => char.ToLowerInvariant(text[0]) + text[1..];
@@ -525,9 +526,9 @@ public static class Labels
         var here = use switch
         {
             { Here: 0 } => null,
-            { InUse: 0 } => use.Here == 1 ? Strings.Labels.UseFree : string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseAllFree, use.Here),
-            { Free: 0 } => use.Here == 1 ? Strings.Labels.UseInUse : string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseAllInUse, use.Here),
-            _ => string.Format(CultureInfo.CurrentCulture, Strings.Labels.UseSome, use.InUse, use.Here, use.Free)
+            { InUse: 0 } => use.Here == 1 ? Strings.Labels.UseFree : F(Strings.Labels.UseAllFree, use.Here),
+            { Free: 0 } => use.Here == 1 ? Strings.Labels.UseInUse : F(Strings.Labels.UseAllInUse, use.Here),
+            _ => F(Strings.Labels.UseSome, use.InUse, use.Here, use.Free)
         };
         var gone = use.Gone == 0 ? null : Plural.Of(use.Gone, Strings.Labels.UseGone_One, Strings.Labels.UseGone_Other);
         return string.Join(", ", new[] { here, gone }.OfType<string>());
@@ -599,5 +600,5 @@ public static class Labels
 
     /// <summary>Said under the ingredients when the percentages do not reach 100. Never blocks a save.</summary>
     public static string PercentTotal(decimal total) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Labels.PercentTotal, SoilMix.Number(total));
+        F(Strings.Labels.PercentTotal, SoilMix.Number(total));
 }

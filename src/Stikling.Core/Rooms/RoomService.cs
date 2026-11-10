@@ -2,6 +2,7 @@ using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Rooms;
 
@@ -147,7 +148,7 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         var held = (await plants.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id))
             + (await propagations.GetAllAsync()).Count(p => !p.IsDeleted && all.IsIn(p.PlaceId, place.Id));
         if (held > 0)
-            throw new InvalidOperationException(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.PlaceNotEmpty, place.Name));
+            throw new InvalidOperationException(F(Strings.Shared.PlaceNotEmpty, place.Name));
 
         if (!place.IsSpot)
         {

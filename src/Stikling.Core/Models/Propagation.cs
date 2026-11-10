@@ -1,7 +1,7 @@
-using System.Globalization;
 using System.Text.Json.Serialization;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -200,7 +200,7 @@ public sealed class Propagation : Entity
                     PropagationType.Leaf => Strings.Propagations.ListOfLeaf,
                     _ => Strings.Propagations.ListOfOther
                 };
-                return string.Format(CultureInfo.CurrentCulture, of, botanical);
+                return F(of, botanical);
             }
 
             return Type switch
@@ -357,7 +357,7 @@ public sealed class Propagation : Entity
         if (!IsActive)
             throw new InvalidOperationException(Strings.Propagations.ErrFinished);
         if (!CanTake(count))
-            throw new ArgumentOutOfRangeException(nameof(count), count, string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ErrChooseBetween, RemainingCount));
+            throw new ArgumentOutOfRangeException(nameof(count), count, F(Strings.Propagations.ErrChooseBetween, RemainingCount));
     }
 
     /// <summary>
@@ -398,7 +398,7 @@ public sealed class Propagation : Entity
         if (InitialCount < 1)
             errors.Add(Strings.Propagations.ErrStartWithOne);
         else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount)
-            errors.Add(string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ErrCountLowerThanUsed, PottedUpCount + FailedCount + GivenAwayCount));
+            errors.Add(F(Strings.Propagations.ErrCountLowerThanUsed, PottedUpCount + FailedCount + GivenAwayCount));
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add(Strings.Propagations.ErrRootedBeforeStart);
         if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)

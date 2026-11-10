@@ -152,7 +152,7 @@ Text people see never goes in a Razor page or a C# file. Add it to the file for 
 `_Imports.razor` already has the alias. In a C# file, add `using Strings = Stikling.Web.Resources;`.
 
 - Name the key for what the text is, in PascalCase, not for the English words of a long sentence. Add a `<comment>` in the English file when a translator needs to know where it shows or what `{0}` is.
-- Text with values uses placeholders and `string.Format(CultureInfo.CurrentCulture, Strings.X.Y, a, b)`. Never build a sentence out of pieces that are translated separately.
+- Text with values uses placeholders and `F(Strings.X.Y, a, b)` from `Stikling.Core.Text.Format`, which formats in the current culture. Razor files have it through `_Imports.razor`. A C# file adds `using static Stikling.Core.Text.Format;`. Don't write a local copy. Never build a sentence out of pieces that are translated separately.
 - For a count, use two keys, `Thing_One` and `Thing_Other`, and `Plural.Of(count, Strings.X.Thing_One, Strings.X.Thing_Other)`.
 - Text made in `Stikling.Core`, like a care suggestion or a line of the plant-sitter sheet, goes in `src/Stikling.Core/Resources` the same way and is used through `using Strings = Stikling.Core.Resources;`. Counts use `Plural.Of` from `Stikling.Core.Text`. The Core tests run with English text, so a test can still check the English wording.
 - Dates go through `Labels.Date` and the other date methods in `Labels`, which pick the patterns from `Labels.resx`. English keeps its own look ("19 Sep 2026"), any other language uses its culture's names.

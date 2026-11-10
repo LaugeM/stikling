@@ -1,7 +1,6 @@
 @* The shape of a genus, species or cultivar page in the plant dictionary: who it is and what you have of it on
    the left, and what is under it (species, cultivars, old names) on the right. On a phone the two buttons sit
    in a bar above the navigation, like the plant page's. On a wide screen the bar sits under the name. *@
-@using System.Globalization
 @inject CoverPhotos Covers
 
 <div class="profile-layout">
@@ -13,7 +12,7 @@
             </div>
         </header>
 
-        <div class="page-dock" role="group" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.DockLabel, Name)">
+        <div class="page-dock" role="group" aria-label="@F(Strings.Dictionary.DockLabel, Name)">
             <a class="btn btn-primary icon-btn" href="@DictionaryLinks.AddHref("plants/new", Genus, Species, Cultivar)">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
                 @Strings.Dictionary.AddAsPlant

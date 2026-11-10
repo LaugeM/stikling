@@ -1,8 +1,8 @@
-using System.Globalization;
 using Strings = Stikling.Core.Resources;
 using System.Text.Json.Serialization;
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sharing;
 
@@ -170,7 +170,7 @@ public static class SharePage
         var seed = p.Type == PropagationType.Seed;
         var milestones = new List<Mark>
         {
-            new(p.StartedOn, 0, string.Format(CultureInfo.CurrentCulture, seed ? Strings.Propagations.MarkSown : Strings.Propagations.MarkStarted, ShareCardText.MediumPhrase(p.Medium)))
+            new(p.StartedOn, 0, F(seed ? Strings.Propagations.MarkSown : Strings.Propagations.MarkStarted, ShareCardText.MediumPhrase(p.Medium)))
         };
         if (p.FirstRootOn is { } root)
             milestones.Add(new Mark(root, 1, Strings.Propagations.MarkFirstRoot));

@@ -38,7 +38,7 @@
 
                     @if (row.Ticked)
                     {
-                        <div class="btn-group segmented w-100 mt-2" role="radiogroup" aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackBecomes, row.Item.DisplayName)">
+                        <div class="btn-group segmented w-100 mt-2" role="radiogroup" aria-label="@F(Strings.Orders.UnpackBecomes, row.Item.DisplayName)">
                             <input type="radio" class="btn-check" name="@(id)-as" id="@(id)-plant" checked="@(row.As == UnpackAs.Plant)" @onchange="() => row.As = UnpackAs.Plant" />
                             <label class="btn btn-outline-primary" for="@(id)-plant">@Strings.Orders.UnpackPlant</label>
                             <input type="radio" class="btn-check" name="@(id)-as" id="@(id)-cutting" checked="@(row.As == UnpackAs.Cutting)" @onchange="() => row.As = UnpackAs.Cutting" />
@@ -139,7 +139,7 @@
     private bool busy;
     private List<string> errors = [];
 
-    private string Title => string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackTitle, View.SellerName);
+    private string Title => F(Strings.Orders.UnpackTitle, View.SellerName);
 
     private int TickedCount => rows.Count(r => r.Ticked);
 
@@ -147,7 +147,7 @@
 
     private string ButtonText => TickedCount == 0 && CanSave
         ? Strings.Common.Save
-        : string.Format(CultureInfo.CurrentCulture, Plural.Of(TickedCount, Strings.Orders.UnpackButton_One, Strings.Orders.UnpackButton_Other), TickedCount);
+        : F(Plural.Of(TickedCount, Strings.Orders.UnpackButton_One, Strings.Orders.UnpackButton_Other), TickedCount);
 
     protected override async Task OnParametersSetAsync()
     {
@@ -214,7 +214,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Unpacking an order failed");
-            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.UnpackError, ex.Message)];
+            errors = [F(Strings.Orders.UnpackError, ex.Message)];
         }
         finally
         {

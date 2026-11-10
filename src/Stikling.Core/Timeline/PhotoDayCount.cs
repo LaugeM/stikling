@@ -1,7 +1,7 @@
-using System.Globalization;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Timeline;
 
@@ -17,7 +17,7 @@ public static class PhotoDayCount
 
     /// <summary>"day 24" for a photo of a propagation, or null without a day.</summary>
     public static string? DayLabel(DateOnly? start, DateOnly taken) =>
-        Day(start, taken) is { } day ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.PhotoDay, day) : null;
+        Day(start, taken) is { } day ? F(Strings.Propagations.PhotoDay, day) : null;
 
     /// <summary>What goes after the date, " · day 24" or " · 1 yr 2 mo", or nothing when there is no text.</summary>
     public static string Suffix(string? age) => age is null ? "" : $" · {age}";
@@ -53,8 +53,8 @@ public static class PhotoDayCount
         }
         var years = months / 12;
         var rest = months % 12;
-        return years == 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeMonths, rest)
-            : rest == 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeYears, years)
-            : string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AgeYearsMonths, years, rest);
+        return years == 0 ? F(Strings.Propagations.AgeMonths, rest)
+            : rest == 0 ? F(Strings.Propagations.AgeYears, years)
+            : F(Strings.Propagations.AgeYearsMonths, years, rest);
     }
 }

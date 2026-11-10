@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Rooms;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Propagations;
 

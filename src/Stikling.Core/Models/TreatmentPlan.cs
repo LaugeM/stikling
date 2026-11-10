@@ -1,5 +1,6 @@
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -65,9 +66,7 @@ public sealed class TreatmentPlan : Entity
         var days = Steps.Sum(s => s.DaysAfter);
         var steps = Plural.Of(Steps.Count, Strings.Pests.PlanSteps_One, Strings.Pests.PlanSteps_Other);
         return days > 0
-            ? string.Format(
-                System.Globalization.CultureInfo.CurrentCulture,
-                Strings.Pests.PlanSummary,
+            ? F(Strings.Pests.PlanSummary,
                 steps,
                 Plural.Of(days, Strings.Pests.DurationDay_One, Strings.Pests.DurationDay_Other))
             : steps;

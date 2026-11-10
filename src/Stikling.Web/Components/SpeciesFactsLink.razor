@@ -42,7 +42,7 @@
         // Worked out on the side and set all at once. Clearing the names first would take the row, and
         // an open sheet with it, off the page while the dictionary loads
         var dictionary = await Names.GetDictionaryAsync();
-        var now = dictionary.Current(Genus.Trim(), string.IsNullOrWhiteSpace(Species) ? null : Species.Trim());
+        var now = dictionary.Current(Genus.Trim(), Clean(Species));
         var newLanguage = (await Names.GetEverydayNamesAsync()).Language;
 
         // A name the server would refuse (like "deliciosa var. borsigiana") falls back to the genus, and

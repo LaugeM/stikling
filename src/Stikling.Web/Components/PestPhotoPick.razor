@@ -169,7 +169,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a pest case failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Pests.SheetPhotosFailed, ex.Message);
         }
 
         busy = false;

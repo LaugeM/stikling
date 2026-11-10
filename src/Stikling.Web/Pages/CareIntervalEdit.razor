@@ -1,6 +1,5 @@
 @page "/care-intervals/new"
 @page "/care-intervals/{Id:guid}"
-@using System.Globalization
 @inject ICareIntervalRepository Repository
 @inject ILogger<CareIntervalEdit> Logger
 @inject IPlantRepository PlantRepository
@@ -187,7 +186,7 @@ else
                 <p class="text-body-secondary mb-1">@(item.OnlySemiHydro ? Strings.Care.IntervalEditSemiHydro : Strings.Care.IntervalEditEveryPlant)</p>
             }
 
-            <p class="covers-count" aria-live="polite">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditCoversNow, Labels.Plants(Covered.Count)))</p>
+            <p class="covers-count" aria-live="polite">@(F(Strings.Care.IntervalEditCoversNow, Labels.Plants(Covered.Count)))</p>
         </fieldset>
 
         <fieldset>
@@ -334,7 +333,7 @@ else
         if (item is not null)
         {
             offReason = CareIntervals.CountsAsWatering(item, CareLabels.Lookup(allOwn))
-                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditOff, allOwn.First(k => k.Id == item.OwnKindId).Name)
+                ? F(Strings.Care.IntervalEditOff, allOwn.First(k => k.Id == item.OwnKindId).Name)
                 : null;
             room = places.NameOf(item.PlaceId);
             partOfYear = item.HasMonths;
@@ -407,7 +406,7 @@ else
     private IReadOnlyList<Plant> Covered => item is null ? [] : CareIntervals.PlantsIn(Draft, plants, places);
 
     private string MonthsLine =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, toMonth < fromMonth ? Strings.Care.IntervalEditMonthsOverNewYear : Strings.Care.IntervalEditMonths,
+        F(toMonth < fromMonth ? Strings.Care.IntervalEditMonthsOverNewYear : Strings.Care.IntervalEditMonths,
             CareIntervals.MonthName(fromMonth), CareIntervals.MonthName(toMonth));
 
     // "First due 1 November", or the range when the plants differ
@@ -419,10 +418,10 @@ else
                 return null;
 
             if (first == last)
-                return string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDue, Day(first));
+                return F(Strings.Care.IntervalEditFirstDue, Day(first));
             return first.Month == last.Month && first.Year == last.Year
-                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDueSameMonth, first.Day, Day(last))
-                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditFirstDueRange, Day(first), Day(last));
+                ? F(Strings.Care.IntervalEditFirstDueSameMonth, first.Day, Day(last))
+                : F(Strings.Care.IntervalEditFirstDueRange, Day(first), Day(last));
         }
     }
 
@@ -443,7 +442,7 @@ else
             item.ToMonth = partOfYear ? toMonth : null;
             if (!item.IsFeed)
                 item.FeedId = null;
-            item.Notes = string.IsNullOrWhiteSpace(item.Notes) ? null : item.Notes.Trim();
+            item.Notes = Clean(item.Notes);
 
             errors = item.Validate().ToList();
             if (errors.Count > 0)
@@ -455,7 +454,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the care interval failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditSaveFailed, ex.Message)];
+            errors = [F(Strings.Care.IntervalEditSaveFailed, ex.Message)];
         }
         finally
         {
@@ -477,7 +476,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting the care interval failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.IntervalEditDeleteFailed, ex.Message)];
+            errors = [F(Strings.Care.IntervalEditDeleteFailed, ex.Message)];
             confirmingDelete = false;
         }
         finally

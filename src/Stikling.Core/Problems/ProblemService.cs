@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Problems;
 
@@ -381,6 +382,4 @@ public sealed class ProblemService(
         entry.OccurredAt = time.MomentOn(day);
         await timeline.UpdateAsync(entry);
     }
-
-    private static string? Clean(string? note) => string.IsNullOrWhiteSpace(note) ? null : note.Trim();
 }

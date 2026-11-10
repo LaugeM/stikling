@@ -1,13 +1,12 @@
 @page "/orders/{Id:guid}"
 @layout WideLayout
-@using System.Globalization
 @using Stikling.Core.Orders
 @inject OrderService OrderService
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject NavigationManager Navigation
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailPageTitle, view?.SellerName ?? "")</PageTitle>
+<PageTitle>@F(Strings.Orders.DetailPageTitle, view?.SellerName ?? "")</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="orders">@Strings.Orders.DetailBack</a>
@@ -71,7 +70,7 @@ else
             </dl>
             @if (view.ShippingEach is { } each)
             {
-                <p class="order-each">@string.Format(CultureInfo.CurrentCulture, Strings.Orders.ShippingEach, Labels.Money(each))</p>
+                <p class="order-each">@F(Strings.Orders.ShippingEach, Labels.Money(each))</p>
             }
         }
     }
@@ -135,24 +134,16 @@ else
         {
             var ordered = Labels.DayMonth(view!.Order.OrderedOn);
             if (view.IsOnTheWay && view.Order.ExpectedOn is { } expected)
-                return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrderedExpected, ordered, Labels.Day(expected));
+                return F(Strings.Orders.DetailOrderedExpected, ordered, Labels.Day(expected));
             if (!view.IsOnTheWay && view.ArrivedOn is { } arrivedOn)
-                return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrderedArrived, ordered, Labels.DayMonth(arrivedOn));
-            return string.Format(CultureInfo.CurrentCulture, Strings.Orders.DetailOrdered, ordered);
+                return F(Strings.Orders.DetailOrderedArrived, ordered, Labels.DayMonth(arrivedOn));
+            return F(Strings.Orders.DetailOrdered, ordered);
         }
     }
 
     private RenderFragment SellerLink => view!.SellerId is { } sellerId
         ? @<a href="sellers/@sellerId">@view.SellerName</a>
         : @<text>@view.SellerName</text>;
-
-    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
-    {
-        var at = format.IndexOf("{0}", StringComparison.Ordinal);
-        builder.AddContent(0, format[..at]);
-        builder.AddContent(1, inner);
-        builder.AddContent(2, format[(at + 3)..]);
-    };
 
     private static RenderFragment ItemName(OrderItem item) => item.Genus is { Length: > 0 }
         ? @<BotanicalName Genus="@item.Genus" Species="@item.Species" Cultivar="@item.Cultivar" />

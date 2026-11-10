@@ -2,7 +2,6 @@
    on Today until it's cleared, here or from Today itself. Shows nothing while there is no flag
    and none is being written. A flag can be set for later, and then stays off Today until its
    month or day, shown here in muted colours. *@
-@using System.Globalization
 @inject TimeProvider Time
 
 @if (Editing)
@@ -10,7 +9,7 @@
     <section class="attention-panel" aria-label="@Strings.Propagations.AttentionLabel">
         <label class="form-label" for="@inputId">@Strings.Propagations.AttentionWhat</label>
         <input id="@inputId" class="form-control" @bind="reason" @bind:event="oninput"
-               placeholder="@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AttentionPlaceholder, Suggestions.FirstOrDefault()?.ToLowerInvariant())" />
+               placeholder="@F(Strings.Propagations.AttentionPlaceholder, Suggestions.FirstOrDefault()?.ToLowerInvariant())" />
         <div class="chip-row mt-2" role="group" aria-label="@Strings.Propagations.AttentionSuggestions">
             @foreach (var suggestion in Suggestions)
             {
@@ -166,7 +165,7 @@ else if (Current is { } flag)
             var culture = TextCulture.ForDates;
             var options = new List<(string Value, string Label)>();
             if (NextRoundDay is { } round)
-                options.Add((RoundChoice, string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AttentionNextRoundDay, TextCulture.Date(round, Strings.Propagations.AttentionRoundDayFormat))));
+                options.Add((RoundChoice, F(Strings.Propagations.AttentionNextRoundDay, TextCulture.Date(round, Strings.Propagations.AttentionRoundDayFormat))));
             var first = new DateOnly(Today.Year, Today.Month, 1).AddMonths(1);
             for (var i = 0; i < MonthsOffered; i++)
             {
@@ -196,7 +195,7 @@ else if (Current is { } flag)
             : null;
     }
 
-    private string Since(Attention flag) => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.AttentionSince, Labels.DaysAgo(flag.DaysSince(Time.Today())));
+    private string Since(Attention flag) => F(Strings.Propagations.AttentionSince, Labels.DaysAgo(flag.DaysSince(Time.Today())));
 
     private Task OpenAsync() => EditingChanged.InvokeAsync(true);
 

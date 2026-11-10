@@ -597,20 +597,6 @@ else
 }
 
 @code {
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
-    private static string H(string text) => System.Net.WebUtility.HtmlEncode(text);
-
-    private static string Link(string href, string text, string? cssClass = null) =>
-        $"<a{(cssClass is null ? "" : $" class=\"{cssClass}\"")} href=\"{href}\">{H(text)}</a>";
-
-    // Resource text with already encoded pieces (links, names) where {0}, {1} and so on are
-    private static MarkupString Html(string format, params string[] encoded) => (MarkupString)F(format, encoded);
-
     /// <summary>"a", "a and b", "a, b and c", for pieces that are already encoded.</summary>
     private static string JoinAnd(IEnumerable<string> parts)
     {
@@ -906,8 +892,8 @@ else
         if (form.IsNew && CopyOfId is null && WishId is null && ParentId is null && !string.IsNullOrWhiteSpace(GenusName))
         {
             plant.Genus = GenusName.Trim();
-            plant.Species = string.IsNullOrWhiteSpace(SpeciesName) ? null : SpeciesName.Trim();
-            plant.Cultivar = string.IsNullOrWhiteSpace(CultivarName) ? null : CultivarName.Trim();
+            plant.Species = Clean(SpeciesName);
+            plant.Cultivar = Clean(CultivarName);
         }
 
         var all = form.Plants;

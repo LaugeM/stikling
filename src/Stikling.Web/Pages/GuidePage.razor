@@ -118,7 +118,7 @@ else
     }
 
     private static string Back(string name) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.BackTo, name);
+        F(Strings.Guides.BackTo, name);
 
     private static (string? Kind, Guid? Id) SplitFrom(string? from)
     {
@@ -245,12 +245,12 @@ else
             }
             else if (plant.TransitionSince is { } since && !plant.TransitionSettled)
             {
-                <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackMoving, plant.DisplayName, Labels.Date(since))
+                <p>@F(Strings.Guides.TrackMoving, plant.DisplayName, Labels.Date(since))
                     <a href="plants/@plant.Id">@Strings.Guides.TrackMovingLink</a></p>
             }
             else if (plant.TransitionSince is null)
             {
-                <a class="btn btn-primary guide-track" href="plants/@plant.Id?track=true">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Guides.TrackStart, plant.DisplayName)</a>
+                <a class="btn btn-primary guide-track" href="plants/@plant.Id?track=true">@F(Strings.Guides.TrackStart, plant.DisplayName)</a>
             }
         </section>
         }

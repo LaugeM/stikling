@@ -43,8 +43,6 @@
         highest <= 0 ? "2%" : $"{Math.Max(2, point.PerWeek!.Value / highest * 100).ToString("0.#", CultureInfo.InvariantCulture)}%";
 
     private string Description =>
-        string.Format(
-            CultureInfo.CurrentCulture,
-            Strings.Pests.TrapChartDescription,
-            string.Join(", ", points.Select(p => string.Format(CultureInfo.CurrentCulture, Strings.Pests.TrapChartPoint, Rounded(p), Labels.Date(p.On)))));
+        F(Strings.Pests.TrapChartDescription,
+            string.Join(", ", points.Select(p => F(Strings.Pests.TrapChartPoint, Rounded(p), Labels.Date(p.On)))));
 }

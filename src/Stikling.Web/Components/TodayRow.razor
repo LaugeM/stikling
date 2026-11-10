@@ -130,7 +130,7 @@
     {
         1 => Strings.Care.TodayRowTomorrow,
         7 => Strings.Care.TodayRowWeek,
-        _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.TodayRowDays, days)
+        _ => F(Strings.Care.TodayRowDays, days)
     };
 
     private Task PutOffAsync(int days) => RunAsync(() => OnPutOff.InvokeAsync(days));

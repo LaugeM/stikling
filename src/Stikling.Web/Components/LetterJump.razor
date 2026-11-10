@@ -7,7 +7,7 @@
     @foreach (var target in Letters)
     {
         <button type="button" data-letter="@target.Letter" data-target="@target.TargetId"
-                aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.LetterJumpTo, target.Letter)" disabled="@(target.TargetId is null)">@target.Letter</button>
+                aria-label="@F(Strings.Plants.LetterJumpTo, target.Letter)" disabled="@(target.TargetId is null)">@target.Letter</button>
     }
     <span class="letter-bubble" aria-hidden="true" hidden @ref="bubble"></span>
 </nav>

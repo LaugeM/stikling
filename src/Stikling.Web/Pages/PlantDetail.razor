@@ -2303,20 +2303,6 @@ else
         ? Strings.PlantDetail.DaysLabelToday
         : F(days.Value, Strings.PlantDetail.DaysLabelFor_One, Strings.PlantDetail.DaysLabelFor_Other, days.Value);
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
-    private static string H(string text) => System.Net.WebUtility.HtmlEncode(text);
-
-    private static string Link(string href, string text, string? cssClass = null) =>
-        $"<a{(cssClass is null ? "" : $" class=\"{cssClass}\"")} href=\"{href}\">{H(text)}</a>";
-
-    // Resource text with already encoded pieces (links, names) where {0}, {1} and so on are
-    private static MarkupString Html(string format, params string[] encoded) => (MarkupString)F(format, encoded);
-
     private RenderFragment StandingIn(string outer)
     {
         RenderFragment inner = @<text>@PotPhotoFor(plant!.OuterPotId)@outer</text>;
@@ -2328,15 +2314,6 @@ else
         };
         return Around(format, inner);
     }
-
-    // A sentence with an element inside it: the element goes where {0} is
-    private static RenderFragment Around(string format, RenderFragment inner) => builder =>
-    {
-        var at = format.IndexOf("{0}", StringComparison.Ordinal);
-        builder.AddContent(0, format[..at]);
-        builder.AddContent(1, inner);
-        builder.AddContent(2, format[(at + 3)..]);
-    };
 
     private void OpenMore(More what)
     {
@@ -2505,7 +2482,7 @@ else
     private async Task SavePestCheckAsync()
     {
         var entry = PestService.StartPlantCheck(plant!, since);
-        entry.Notes = string.IsNullOrWhiteSpace(checkNotes) ? null : checkNotes.Trim();
+        entry.Notes = Clean(checkNotes);
         if (entry.Validate(Today).Count > 0)
             return;
 
