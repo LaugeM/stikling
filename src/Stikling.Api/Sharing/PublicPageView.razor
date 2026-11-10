@@ -31,7 +31,8 @@
                     <ul class="pp-wall">
                         @foreach (var tile in plants.Tiles)
                         {
-                            <PublicTileView Tile="tile" Context="Context" />
+                            <PublicTileView Tile="tile" Context="Context"
+                                            Sizes="@(ReferenceEquals(tile, plants.Tiles[0]) ? ShareImage.WallFirstSizes : ShareImage.WallSizes)" />
                         }
                     </ul>
                     @if (plants.Total > plants.Tiles.Count)
@@ -72,7 +73,8 @@
                         <ul class="@(Context.Layout == PublicPageLayout.Shelves ? "pp-shelf" : "pp-grid")">
                             @foreach (var tile in part.Tiles)
                             {
-                                <PublicTileView Tile="tile" Context="Context" />
+                                <PublicTileView Tile="tile" Context="Context"
+                                                Sizes="@(Context.Layout == PublicPageLayout.Shelves ? ShareImage.ShelfSizes : ShareImage.GridSizes)" />
                             }
                         </ul>
                     }

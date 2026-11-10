@@ -15,12 +15,16 @@
     [Parameter, EditorRequired] public PublicTile Tile { get; set; } = null!;
     [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
 
+    /// <summary>How wide the tile shows in this layout, for picking the thumbnail or the full photo.</summary>
+    [Parameter, EditorRequired] public string Sizes { get; set; } = null!;
+
     private RenderFragment Inner => __builder =>
     {
         <span class="pp-photo">
             @if (Tile.Cover is { } cover)
             {
-                <img src="@Context.LinkPrefix/photos/@cover.Id/@(Context.Thumbnails.Contains(cover.Id) ? "thumb" : "full")" alt=""
+                <img src="@Context.LinkPrefix/photos/@cover.Id/full" alt=""
+                     srcset="@ShareImage.SrcSet(Context.LinkPrefix, cover, Context.Thumbnails.Contains(cover.Id))" sizes="@Sizes"
                      loading="lazy" style="@Position(cover)">
             }
             else

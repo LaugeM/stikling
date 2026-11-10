@@ -42,7 +42,9 @@
             <ul class="@(Context.Layout == PublicPageLayout.PhotoWall ? "pp-wall" : "pp-grid")">
                 @foreach (var tile in Part.Tiles)
                 {
-                    <PublicTileView Tile="tile" Context="Context" />
+                    <PublicTileView Tile="tile" Context="Context"
+                                    Sizes="@(Context.Layout != PublicPageLayout.PhotoWall ? ShareImage.GridSizes
+                                        : ReferenceEquals(tile, Part.Tiles[0]) ? ShareImage.WallFirstSizes : ShareImage.WallSizes)" />
                 }
             </ul>
         }

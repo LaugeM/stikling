@@ -959,7 +959,7 @@ public class PublicPageTests(ApiFactory api)
         var robots = await client.GetAsync("/robots.txt");
 
         Assert.Equal(HttpStatusCode.OK, status);
-        Assert.Contains($"src=\"/@{name}/photos/{photo}/thumb\"", html);
+        Assert.Contains($"srcset=\"/@{name}/photos/{photo}/thumb ", html);
         Assert.Contains($"href=\"/@{name}/plants/{plant}\"", html);
         Assert.Equal(HttpStatusCode.OK, plantsStatus);
         Assert.Equal(HttpStatusCode.OK, storyStatus);
