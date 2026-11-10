@@ -1,0 +1,98 @@
+@using Stikling.Core.Models
+@using Stikling.Core.Sharing
+<!DOCTYPE html>
+<html lang="@Context.Language">
+<head>
+    <PublicHead Context="Context" Heading="@PublicPageText.PageTitle(Page.Title)"
+                Line="@Page.Line" Image="Page.Image" />
+</head>
+<body>
+    <main class="pp">
+        <header class="pp-head">
+            <h1>@Page.Title</h1>
+            @if (Page.Line is not null)
+            {
+                <p class="line">@Page.Line</p>
+            }
+            <p class="counts">@PublicCollectionPage.CountsLine(Page)</p>
+        </header>
+
+        @if (Context.Layout == PublicPageLayout.PhotoWall)
+        {
+            <PublicLinkBar Context="Context" />
+            @if (Page.Parts.FirstOrDefault(p => p.Kind == PublicPartKind.Plants) is { } plants)
+            {
+                @if (plants.Tiles.Count == 0)
+                {
+                    <p class="pp-empty">@PublicPageText.NothingYet</p>
+                }
+                else
+                {
+                    <ul class="pp-wall">
+                        @foreach (var tile in plants.Tiles)
+                        {
+                            <PublicTileView Tile="tile" Context="Context" />
+                        }
+                    </ul>
+                    @if (plants.Total > plants.Tiles.Count)
+                    {
+                        <p class="pp-more"><a href="@Context.LinkPrefix/plants">@PublicPageText.SeeAll(plants.Total)</a></p>
+                    }
+                }
+            }
+        }
+        else
+        {
+            @foreach (var part in Page.Parts)
+            {
+                var plantsOnLongPage = Context.Layout == PublicPageLayout.LongPage && part.Kind == PublicPartKind.Plants;
+                <section class="pp-part">
+                    <div class="pp-part-head">
+                        <h2>@PublicCollectionPage.PartName(part.Kind)</h2>
+                        @if (Context.Layout == PublicPageLayout.Shelves && part.Total > Shown(part))
+                        {
+                            <a href="@Context.LinkPrefix/@PublicPagePaths.Segment(part.Kind)">@PublicPageText.SeeAll(part.Total)</a>
+                        }
+                    </div>
+                    @if (part.Kind == PublicPartKind.Wishlist)
+                    {
+                        <ul class="pp-lines">
+                            @foreach (var line in part.Lines)
+                            {
+                                <li>@line</li>
+                            }
+                        </ul>
+                    }
+                    else if (part.Tiles.Count == 0)
+                    {
+                        <p class="pp-empty">@PublicPageText.NothingYet</p>
+                    }
+                    else
+                    {
+                        <ul class="@(Context.Layout == PublicPageLayout.Shelves ? "pp-shelf" : "pp-grid")">
+                            @foreach (var tile in part.Tiles)
+                            {
+                                <PublicTileView Tile="tile" Context="Context" />
+                            }
+                        </ul>
+                    }
+                    @if (Context.Layout == PublicPageLayout.LongPage && part.Total > Shown(part))
+                    {
+                        <p class="pp-more"><a href="@Context.LinkPrefix/@PublicPagePaths.Segment(part.Kind)">@(plantsOnLongPage ? PublicPageText.SeeAllPlants(part.Total) : PublicPageText.SeeAll(part.Total))</a></p>
+                    }
+                </section>
+            }
+        }
+
+        <PublicFooter Context="Context" />
+    </main>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired] public PublicPageModel Page { get; set; } = null!;
+
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    private static int Shown(PublicPart part) => part.Kind == PublicPartKind.Wishlist ? part.Lines.Count : part.Tiles.Count;
+}

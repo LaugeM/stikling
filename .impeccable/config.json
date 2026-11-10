@@ -33,6 +33,24 @@
         ],
         "createdAt": "2026-10-10T11:04:35.437Z",
         "reason": "Claude triage: the page's CSS lives in ShareStyles.cs, where h1 is 1.75rem over a 1rem body, and the h2 is a deliberate small uppercase date label, so the hierarchy isn't flat"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/Stikling.Api/Sharing/PublicPageView.razor"
+        ],
+        "createdAt": "2026-11-06T16:54:55.009Z",
+        "reason": "Claude triage: the sizes live in PublicPageStyles.cs/ShareStyles.cs (C# strings the detector can't see); h1 2rem (2.5rem wide), h2 1.25rem, body 1rem, per DESIGN.md"
+      },
+      {
+        "rule": "flat-type-hierarchy",
+        "value": "*",
+        "files": [
+          "src/Stikling.Api/Sharing/PublicStoryView.razor"
+        ],
+        "createdAt": "2026-11-06T16:54:55.247Z",
+        "reason": "Claude triage: the sizes live in PublicPageStyles.cs/ShareStyles.cs (C# strings the detector can't see); h1 2rem (2.5rem wide), h2 1.25rem, body 1rem, per DESIGN.md"
       }
     ]
   }

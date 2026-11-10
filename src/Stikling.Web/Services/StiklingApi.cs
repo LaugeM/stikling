@@ -23,7 +23,7 @@ public sealed record MeCollection(Guid Id, string Name, string Role);
 /// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
 /// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer, IPublicPageServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -255,6 +255,85 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         {
             return ShareOutcome<TResult>.Failure(Strings.Account.ShareUnreachable, offline: true);
         }
+    }
+
+    // The public collection page. A call that fails comes back with its status, since the page chooses its
+    // own words by it. The one thing the API says in words of its own is which rule a name broke.
+
+    public async Task<ShareOutcome<PublicPageInfo?>> GetAsync(Guid collectionId) =>
+        await PublicPageCallAsync<PublicPageInfo?>(HttpMethod.Get, $"collections/{collectionId}/public-page", null, notFoundIsEmpty: true);
+
+    public async Task<ShareOutcome<PublicPageInfo>> TurnOnAsync(Guid collectionId, TurnOnPublicPageRequest request) =>
+        Required(await PublicPageCallAsync<PublicPageInfo?>(HttpMethod.Post, $"collections/{collectionId}/public-page", request));
+
+    public async Task<ShareOutcome<PublicPageInfo>> UpdateAsync(Guid collectionId, UpdatePublicPageRequest request) =>
+        Required(await PublicPageCallAsync<PublicPageInfo?>(HttpMethod.Put, $"collections/{collectionId}/public-page", request));
+
+    public async Task<ShareOutcome<PublicPageInfo>> SetNameAsync(Guid collectionId, SetPublicPageNameRequest request) =>
+        Required(await PublicPageCallAsync<PublicPageInfo?>(HttpMethod.Put, $"collections/{collectionId}/public-page/name", request));
+
+    public async Task<ShareOutcome<bool>> TurnOffAsync(Guid collectionId)
+    {
+        var result = await PublicPageCallAsync<object?>(HttpMethod.Delete, $"collections/{collectionId}/public-page", null, hasBody: false);
+        return result.Ok ? ShareOutcome<bool>.Success(true) : ShareOutcome<bool>.Failure(result.Problem!, result.Offline, result.Status);
+    }
+
+    private static ShareOutcome<PublicPageInfo> Required(ShareOutcome<PublicPageInfo?> result) =>
+        !result.Ok ? ShareOutcome<PublicPageInfo>.Failure(result.Problem!, result.Offline, result.Status, result.NameProblem)
+        : result.Value is { } page ? ShareOutcome<PublicPageInfo>.Success(page)
+        : ShareOutcome<PublicPageInfo>.Failure(Strings.Account.ShareEmptyAnswer);
+
+    private async Task<ShareOutcome<T?>> PublicPageCallAsync<T>(
+        HttpMethod method, string path, object? body, bool hasBody = true, bool notFoundIsEmpty = false)
+    {
+        try
+        {
+            using var request = await RequestAsync(method, path);
+            if (body is not null)
+                request.Content = JsonContent.Create(body, body.GetType());
+            using var response = await http.SendAsync(request);
+            if (notFoundIsEmpty && response.StatusCode == HttpStatusCode.NotFound)
+                return ShareOutcome<T?>.Success(default);
+            if (!response.IsSuccessStatusCode)
+            {
+                var status = (int)response.StatusCode;
+                return ShareOutcome<T?>.Failure($"The API answered {status}.", status: status, nameProblem: await NameProblemOfAsync(response));
+            }
+
+            return hasBody
+                ? ShareOutcome<T?>.Success(await response.Content.ReadFromJsonAsync<T>())
+                : ShareOutcome<T?>.Success(default);
+        }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return ShareOutcome<T?>.Failure(Strings.Account.ShareSignInRanOut, status: 401);
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException or JsonException)
+        {
+            return ShareOutcome<T?>.Failure(Strings.Account.ShareUnreachable, offline: true);
+        }
+    }
+
+    // A refused name carries the rule it broke as text in the problem details' "problem"
+    private static async Task<NameProblem?> NameProblemOfAsync(HttpResponseMessage response)
+    {
+        if (response.StatusCode != HttpStatusCode.BadRequest)
+            return null;
+
+        try
+        {
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            if (document.RootElement.TryGetProperty("problem", out var problem)
+                && problem.ValueKind == JsonValueKind.String
+                && Enum.TryParse<NameProblem>(problem.GetString(), ignoreCase: true, out var found))
+                return found;
+        }
+        catch (Exception e) when (e is JsonException or HttpRequestException)
+        {
+            // Then it is some other 400
+        }
+
+        return null;
     }
 
     // The API explains a refusal in "detail", or for a field that is too long in "errors"

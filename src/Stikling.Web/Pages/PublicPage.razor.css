@@ -1,0 +1,154 @@
+/* Each group of settings is a section with a quiet label, like the groups of Settings */
+.pp-section {
+    margin-top: 1.5rem;
+}
+
+.pp-label {
+    display: block;
+    margin: 0 0 0.4rem;
+    font-family: var(--pa-font-body, inherit);
+    font-size: 0.85rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+.pp-sublabel {
+    margin-top: 1rem;
+}
+
+/* The address is the point of the page, so it is set large and can be selected by hand */
+.pp-address {
+    margin: 0 0 0.25rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.35rem;
+    font-weight: 600;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+    user-select: all;
+}
+
+.pp-actions {
+    margin-top: 0.5rem;
+}
+
+.pp-also {
+    margin-top: 0.5rem;
+    overflow-wrap: anywhere;
+}
+
+.pp-current-name {
+    margin: 0;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+/* Before the page is on: what it means that everything is public, in clay since the plants are */
+.pp-note {
+    margin: 1rem 0;
+    padding: 0.85rem 1rem;
+    background: var(--pa-clay-soft);
+    border-radius: 0.75rem;
+}
+
+.pp-note p {
+    margin: 0;
+}
+
+.pp-note p + p {
+    margin-top: 0.25rem;
+}
+
+.pp-name .form-control,
+.pp-fields .form-control,
+.settings-actions .btn {
+    min-height: 2.75rem;
+}
+
+.pp-name .input-group-text {
+    overflow-wrap: anywhere;
+}
+
+.pp-fields {
+    display: grid;
+    gap: 1rem;
+    max-width: 36rem;
+}
+
+.pp-error {
+    margin: 0.5rem 0 0;
+    font-size: 0.9rem;
+    color: var(--pa-alert);
+}
+
+/* The three layouts are cards to pick from, side by side where there is room */
+.pp-looks {
+    display: grid;
+    gap: 0.5rem;
+    grid-template-columns: 1fr;
+}
+
+@media (min-width: 40rem) {
+    .pp-looks {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+.pp-look {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    padding: 0.75rem 0.9rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    cursor: pointer;
+}
+
+.pp-look.picked {
+    border-color: var(--pa-green);
+    box-shadow: inset 0 0 0 1px var(--pa-green);
+    background: var(--pa-green-soft);
+}
+
+.pp-look:has(input:focus-visible) {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.pp-look-name {
+    font-weight: 600;
+}
+
+.pp-look-hint {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.pp-switch {
+    margin-bottom: 0.9rem;
+}
+
+.pp-switch .form-check {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    min-height: 2.75rem;
+    padding-left: 0;
+}
+
+.pp-switch .form-check-input {
+    float: none;
+    flex: none;
+    margin: 0;
+}
+
+.pp-switch .settings-hint {
+    margin-top: 0;
+}
+
+/* A select is a touch target like the buttons */
+.pp-order {
+    min-height: 2.75rem;
+}

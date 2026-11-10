@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="DefaultTitle" xml:space="preserve">
+    <value>A plant collection</value>
+    <comment>The title of a public collection page when its owner hasn't written one.</comment>
+  </data>
+  <data name="PartPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of the plants on a public collection page, and in its link bar.</comment>
+  </data>
+  <data name="PartCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+    <comment>Heading of the cuttings on a public collection page.</comment>
+  </data>
+  <data name="PartSwap" xml:space="preserve">
+    <value>Up for swap</value>
+    <comment>Heading of what is up for swap on a public collection page.</comment>
+  </data>
+  <data name="PartWishlist" xml:space="preserve">
+    <value>Wishlist</value>
+    <comment>Heading of the wishlist on a public collection page.</comment>
+  </data>
+  <data name="Plants_One" xml:space="preserve">
+    <value>{0} plant</value>
+    <comment>Under the title of a public collection page. {0} is the number.</comment>
+  </data>
+  <data name="Plants_Other" xml:space="preserve">
+    <value>{0} plants</value>
+  </data>
+  <data name="Cuttings_One" xml:space="preserve">
+    <value>{0} cutting</value>
+    <comment>Under the title of a public collection page. {0} is the number.</comment>
+  </data>
+  <data name="Cuttings_Other" xml:space="preserve">
+    <value>{0} cuttings</value>
+  </data>
+  <data name="Photo_One" xml:space="preserve">
+    <value>{0} photo</value>
+    <comment>Under the name on the story of a plant or cutting. {0} is the number.</comment>
+  </data>
+  <data name="Photo_Other" xml:space="preserve">
+    <value>{0} photos</value>
+  </data>
+  <data name="SwapCuttingCaption" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>Under a cutting that is up for swap. {0} is how many, {1} is its stage, like rooted.</comment>
+  </data>
+  <data name="SeeAll" xml:space="preserve">
+    <value>See all {0}</value>
+    <comment>Link to the page of a whole part. {0} is a number, or a number with the word, like 84 plants.</comment>
+  </data>
+  <data name="BackTo" xml:space="preserve">
+    <value>Back to {0}</value>
+    <comment>Link at the top of a page under a public collection page. {0} is its title.</comment>
+  </data>
+  <data name="Previous" xml:space="preserve">
+    <value>Previous</value>
+    <comment>Link to the previous numbered page.</comment>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+    <comment>Link to the next numbered page.</comment>
+  </data>
+  <data name="PageOf" xml:space="preserve">
+    <value>Page {0} of {1}</value>
+    <comment>Between the links to the previous and next page.</comment>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>{0} on Stikling</value>
+    <comment>The title of the browser tab. {0} is the title of the page.</comment>
+  </data>
+  <data name="PartPageTitle" xml:space="preserve">
+    <value>{0} · {1} on Stikling</value>
+    <comment>The title of the browser tab on a part page. {0} is the part, like Cuttings, {1} is the title of the page.</comment>
+  </data>
+  <data name="Description" xml:space="preserve">
+    <value>A plant collection kept in Stikling, a free app for your plants and cuttings.</value>
+    <comment>What a link to the page says when its owner hasn't written a line.</comment>
+  </data>
+  <data name="NothingYet" xml:space="preserve">
+    <value>Nothing to show here yet.</value>
+    <comment>When a part of the page has nothing in it.</comment>
+  </data>
+  <data name="FooterAbout" xml:space="preserve">
+    <value>Kept in Stikling, a free app for your plants and cuttings.</value>
+    <comment>Bottom of a public page.</comment>
+  </data>
+  <data name="StartYourOwn" xml:space="preserve">
+    <value>Start your own</value>
+    <comment>Button at the bottom of a public page.</comment>
+  </data>
+  <data name="LastUpdated" xml:space="preserve">
+    <value>Last updated {0}.</value>
+    <comment>Bottom of a public page. {0} is a date.</comment>
+  </data>
+  <data name="ReportPage" xml:space="preserve">
+    <value>Report this page</value>
+    <comment>Link at the bottom of a public page that writes an email.</comment>
+  </data>
+  <data name="ReportSubject" xml:space="preserve">
+    <value>Report a public page</value>
+    <comment>The subject of the email to report a public page.</comment>
+  </data>
+  <data name="DateFormat" xml:space="preserve">
+    <value>d MMM yyyy</value>
+    <comment>A .NET date pattern, not text. The day, the short month and the year.</comment>
+  </data>
+</root>

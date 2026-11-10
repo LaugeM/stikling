@@ -9,13 +9,16 @@ namespace Stikling.Core.Sharing;
 /// <param name="Value">What came back. Not set when the call failed.</param>
 /// <param name="Problem">The server's own explanation, or a plain one when it couldn't be reached. Null when it worked.</param>
 /// <param name="Offline">True when the server couldn't be reached, as opposed to turning the call away.</param>
-public sealed record ShareOutcome<T>(T? Value, string? Problem = null, bool Offline = false)
+/// <param name="Status">The HTTP status the server answered with when it turned the call away, for the calls that choose their own words by it. 0 when it wasn't asked or couldn't be reached.</param>
+/// <param name="NameProblem">Why the server refused a public page name, when it said.</param>
+public sealed record ShareOutcome<T>(T? Value, string? Problem = null, bool Offline = false, int Status = 0, NameProblem? NameProblem = null)
 {
     public bool Ok => Problem is null;
 
     public static ShareOutcome<T> Success(T value) => new(value);
 
-    public static ShareOutcome<T> Failure(string problem, bool offline = false) => new(default, problem, offline);
+    public static ShareOutcome<T> Failure(string problem, bool offline = false, int status = 0, NameProblem? nameProblem = null) =>
+        new(default, problem, offline, status, nameProblem);
 }
 
 /// <summary>The share link endpoints of the API, as the signed-in person.</summary>

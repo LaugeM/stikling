@@ -1,0 +1,188 @@
+@page "/settings/public-page/{Kind}"
+@using System.Globalization
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject IPhotoRepository PhotoRepository
+@inject PublicPageService PublicPages
+@inject NavigationManager Nav
+
+@* The plants (or cuttings) the public page could show, each with a switch, and the photos of one to hide
+   one by one. Hiding is saved on the record itself, so it syncs like any other change and reaches the
+   page after the next sync. *@
+
+<PageTitle>@Heading</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings/public-page">@Strings.PublicPage.Heading</a>
+<h1>@Heading</h1>
+<p class="settings-hint ppi-sync">@Strings.PublicPage.ItemsSync</p>
+
+@if (items is null)
+{
+    <p class="settings-hint" role="status">@Strings.PublicPage.Loading</p>
+}
+else if (items.Count == 0)
+{
+    <p class="settings-hint">@(Cuttings ? Strings.PublicPage.ItemsEmptyCuttings : Strings.PublicPage.ItemsEmptyPlants)</p>
+}
+else
+{
+    <label class="visually-hidden" for="ppi-search">@Strings.PublicPage.ItemsSearch</label>
+    <input id="ppi-search" type="search" class="form-control ppi-search" placeholder="@Strings.PublicPage.ItemsSearch" @bind="search" @bind:event="oninput" />
+
+    @if (Visible.Count == 0)
+    {
+        <p class="settings-hint">@Strings.PublicPage.ItemsNoMatch</p>
+    }
+    else
+    {
+        <ul class="ppi-list">
+            @foreach (var item in Visible)
+            {
+                var hiddenPhotos = HiddenPhotos(item.Id);
+                <li class="ppi-row" @key="item.Id">
+                    <button type="button" class="ppi-main" @onclick="() => OpenPhotosAsync(item)">
+                        <SubjectThumb Subject="item" />
+                        <span class="ppi-text">
+                            <span class="ppi-name">@NameOf(item)</span>
+                            <span class="ppi-state @(IsHidden(item) ? "hidden" : null)">@StateLine(item, hiddenPhotos)</span>
+                        </span>
+                    </button>
+                    <div class="form-check form-switch ppi-switch">
+                        <input class="form-check-input" type="checkbox" role="switch" checked="@(!IsHidden(item))"
+                               aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.ShowOnPage, NameOf(item))"
+                               @onchange="e => SetShownAsync(item, e.Value is true)" />
+                    </div>
+                </li>
+            }
+        </ul>
+    }
+}
+
+<Sheet Title="@(openItem is null ? "" : NameOf(openItem))" Open="openItem is not null" OpenChanged="CloseSheet">
+    @if (openItem is not null)
+    {
+        @if (openPhotos.Count == 0)
+        {
+            <p class="settings-hint">@Strings.PublicPage.PhotosNone</p>
+        }
+        else
+        {
+            <p class="settings-hint ppi-photos-hint">@Strings.PublicPage.PhotosHint</p>
+            <div class="ppi-photos">
+                @foreach (var photo in openPhotos)
+                {
+                    var shown = !photo.HiddenFromPublicPage;
+                    <button type="button" role="checkbox" aria-checked="@(shown ? "true" : "false")"
+                            aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.PhotoFrom, Labels.Date(DateOnly.FromDateTime(photo.TakenAt.ToLocalTime().DateTime)))"
+                            class="ppi-photo @(shown ? "shown" : "left-out")" @onclick="() => TogglePhotoAsync(photo)">
+                        <PhotoImage PhotoId="photo.Id" Framed="false" />
+                        @if (shown)
+                        {
+                            <svg class="ppi-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 12.5l4 4 8-9" /></svg>
+                        }
+                    </button>
+                }
+            </div>
+        }
+    }
+</Sheet>
+
+@code {
+    [Parameter]
+    public string Kind { get; set; } = "";
+
+    private bool Cuttings => Kind == "cuttings";
+
+    private string Heading => Cuttings ? Strings.PublicPage.ItemsCuttingsHeading : Strings.PublicPage.ItemsPlantsHeading;
+
+    private List<Entity>? items;
+    private Dictionary<Guid, int> hiddenCounts = [];
+    private string search = "";
+    private Entity? openItem;
+    private IReadOnlyList<Photo> openPhotos = [];
+
+    private IReadOnlyList<Entity> Visible =>
+        [.. items!.Where(i => search.Length == 0 || NameOf(i).Contains(search.Trim(), StringComparison.CurrentCultureIgnoreCase))];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Kind is not ("plants" or "cuttings"))
+        {
+            Nav.NavigateTo("settings/public-page", replace: true);
+            return;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        if (Cuttings)
+        {
+            items = [.. (await PropagationRepository.GetAllAsync())
+                .Where(PublicCollectionPage.CouldShowPropagation)
+                .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+        }
+        else
+        {
+            items = [.. (await PlantRepository.GetAllAsync())
+                .Where(PublicCollectionPage.CouldShowPlant)
+                .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+        }
+
+        var photos = await PhotoRepository.GetOfKindAsync(Cuttings ? SubjectType.Propagation : SubjectType.Plant);
+        hiddenCounts = photos
+            .Where(p => PublicCollectionPage.CouldShowPhoto(p) && p.HiddenFromPublicPage)
+            .GroupBy(p => p.SubjectId)
+            .ToDictionary(g => g.Key, g => g.Count());
+    }
+
+    private static string NameOf(Entity item) => item switch
+    {
+        Plant plant => plant.DisplayName,
+        Propagation propagation => propagation.DisplayName,
+        _ => ""
+    };
+
+    private static bool IsHidden(Entity item) => item switch
+    {
+        Plant plant => plant.HiddenFromPublicPage,
+        Propagation propagation => propagation.HiddenFromPublicPage,
+        _ => false
+    };
+
+    private int HiddenPhotos(Guid id) => hiddenCounts.GetValueOrDefault(id);
+
+    private static string StateLine(Entity item, int hiddenPhotos) =>
+        IsHidden(item) ? Strings.PublicPage.StateHidden
+        : hiddenPhotos > 0 ? Plural.Of(hiddenPhotos, Strings.PublicPage.PhotosHidden_One, Strings.PublicPage.PhotosHidden_Other)
+        : Strings.PublicPage.StateOn;
+
+    private async Task SetShownAsync(Entity item, bool shown)
+    {
+        if (item is Plant plant)
+            await PublicPages.SetPlantHiddenAsync(plant, !shown);
+        else if (item is Propagation propagation)
+            await PublicPages.SetPropagationHiddenAsync(propagation, !shown);
+    }
+
+    private async Task OpenPhotosAsync(Entity item)
+    {
+        // Reference photos are the plant's pot or label, never part of its story
+        openPhotos = [.. (await PhotoRepository.GetForAsync(item.Id)).Where(PublicCollectionPage.CouldShowPhoto)];
+        openItem = item;
+    }
+
+    private void CloseSheet(bool open)
+    {
+        if (!open)
+            openItem = null;
+    }
+
+    private async Task TogglePhotoAsync(Photo photo)
+    {
+        await PublicPages.SetPhotoHiddenAsync(photo, !photo.HiddenFromPublicPage);
+        hiddenCounts[photo.SubjectId] = openPhotos.Count(p => p.HiddenFromPublicPage);
+    }
+}

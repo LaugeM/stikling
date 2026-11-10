@@ -1,0 +1,17 @@
+@using Stikling.Core.Sharing
+<footer class="foot">
+    <p>@PublicPageText.FooterAbout</p>
+    <p><a class="start" href="@ShareStyles.AppUrl">@PublicPageText.StartYourOwn</a></p>
+    <p class="meta">
+        @PublicPageText.LastUpdated(Context.UpdatedDay)
+        <a href="@ReportLink">@PublicPageText.ReportPage</a>
+    </p>
+</footer>
+
+@code {
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    private string ReportLink =>
+        "mailto:support@stikling.app?subject=" + Uri.EscapeDataString(PublicPageText.ReportSubject)
+        + "&body=" + Uri.EscapeDataString(Context.PageUrl);
+}

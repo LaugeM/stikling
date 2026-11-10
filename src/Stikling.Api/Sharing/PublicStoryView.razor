@@ -1,0 +1,106 @@
+@using Stikling.Core.Sharing
+<!DOCTYPE html>
+<html lang="@Context.Language">
+<head>
+    <PublicHead Context="Context" Heading="@PublicPageText.PageTitle(Story.Name)"
+                Line="@Story.Line" Image="Story.Cover" />
+</head>
+<body>
+    <main class="page">
+        <p><a class="pp-back" href="@(Context.LinkPrefix)">@PublicPageText.BackTo(Context.Title)</a></p>
+        @if (Story.Cover is { } top)
+        {
+            <img class="cover" src="@Image(top, "full")" alt=""
+                 width="@(top.Width > 0 ? top.Width : null)" height="@(top.Height > 0 ? top.Height : null)"
+                 style="@Position(top)" fetchpriority="high">
+        }
+        <header class="head">
+            <h1>@Story.Name</h1>
+            @if (Story.Latin is not null || Story.Cultivar is not null)
+            {
+                <p class="latin">
+                    @if (Story.Latin is not null)
+                    {
+                        <i>@Story.Latin</i>
+                    }
+                    @if (Story.Latin is not null && Story.Cultivar is not null)
+                    {
+                        @(" ")
+                    }
+                    @if (Story.Cultivar is not null)
+                    {
+                        <text>'@Story.Cultivar'</text>
+                    }
+                </p>
+            }
+            @if (Story.Line is not null)
+            {
+                <p class="line">@Story.Line</p>
+            }
+            @if (Counts is not null)
+            {
+                <p class="counts">@Counts</p>
+            }
+        </header>
+
+        @if (Story.Items.Count > 0)
+        {
+            <ol class="history">
+                @foreach (var item in Story.Items)
+                {
+                    @if (item.Kind == ShareItemKind.Milestone)
+                    {
+                        <li class="milestone">
+                            <span class="when">@When(item)</span>
+                            <span class="what">@item.Text</span>
+                        </li>
+                    }
+                    else
+                    {
+                        <li>
+                            <h2 class="when">@When(item)</h2>
+                            @if (item.Photos.Count > 0)
+                            {
+                                var single = item.Photos.Count == 1;
+                                <ul class="photos @(single ? "single" : null)">
+                                    @foreach (var photo in item.Photos)
+                                    {
+                                        <li>
+                                            <a href="@Image(photo, "full")">
+                                                <img src="@Image(photo, single || !Context.Thumbnails.Contains(photo.Id) ? "full" : "thumb")" alt=""
+                                                     loading="lazy" style="@Position(photo)">
+                                            </a>
+                                        </li>
+                                    }
+                                </ul>
+                            }
+                        </li>
+                    }
+                }
+            </ol>
+        }
+
+        <PublicFooter Context="Context" />
+    </main>
+</body>
+</html>
+
+@code {
+    [Parameter, EditorRequired] public SharePageModel Story { get; set; } = null!;
+
+    [Parameter, EditorRequired] public PublicPageContext Context { get; set; } = null!;
+
+    private string? Counts => Story.PhotoCount > 0
+        ? PublicPageText.Photos(Story.PhotoCount)
+        : null;
+
+    private string Image(SharePhoto photo, string size) => $"{Context.LinkPrefix}/photos/{photo.Id}/{size}";
+
+    private static string When(SharePageItem item) =>
+        PublicPageText.Date(item.Day) + item.DayCount;
+
+    private static string? Position(SharePhoto photo) =>
+        photo.Frame is { } frame
+            ? FormattableString.Invariant($"object-position: {frame.X * 100:0.#}% {frame.Y * 100:0.#}%")
+            : null;
+}

@@ -1,0 +1,150 @@
+.ppi-sync {
+    margin-top: -0.25rem;
+}
+
+.ppi-search {
+    min-height: 2.75rem;
+    margin-top: 1rem;
+}
+
+/* One block divided by hairlines, like the rows of Settings */
+.ppi-list {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    overflow: hidden;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.ppi-row {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-right: 0.9rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.ppi-row:first-child {
+    border-top: 0;
+}
+
+.ppi-main {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    padding: 0.6rem 0 0.6rem 0.75rem;
+    border: 0;
+    background: none;
+    color: inherit;
+    text-align: start;
+}
+
+.ppi-main:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.ppi-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.ppi-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ppi-state {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.ppi-state.hidden {
+    color: var(--pa-clay);
+}
+
+.ppi-switch {
+    flex: none;
+    min-height: 2.75rem;
+    margin: 0;
+    padding-left: 0;
+    display: flex;
+    align-items: center;
+}
+
+.ppi-switch .form-check-input {
+    float: none;
+    margin: 0;
+}
+
+.ppi-photos-hint {
+    margin-top: 0;
+    margin-bottom: 0.75rem;
+}
+
+/* The photos in a grid, where a tap hides one or shows it again */
+.ppi-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(5rem, 1fr));
+    gap: 0.5rem;
+}
+
+.ppi-photo {
+    position: relative;
+    aspect-ratio: 1;
+    padding: 0;
+    overflow: hidden;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+}
+
+.ppi-photo ::deep img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.ppi-photo.shown {
+    border-color: var(--pa-green);
+    outline: 2px solid var(--pa-green);
+    outline-offset: 1px;
+}
+
+.ppi-photo.left-out {
+    border-style: dashed;
+}
+
+.ppi-photo.left-out ::deep img {
+    opacity: 0.35;
+}
+
+.ppi-photo:focus-visible {
+    outline: 2px solid var(--pa-green-dark);
+    outline-offset: 2px;
+}
+
+.ppi-tick {
+    position: absolute;
+    top: 0.25rem;
+    right: 0.25rem;
+    width: 1.25rem;
+    height: 1.25rem;
+    padding: 0.15rem;
+    border-radius: 50%;
+    background: var(--pa-green);
+    fill: none;
+    stroke: #fff;
+    stroke-width: 3;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}

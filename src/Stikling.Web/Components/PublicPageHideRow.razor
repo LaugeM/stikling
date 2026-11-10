@@ -1,0 +1,49 @@
+@* The "On your public page" row in a plant's or propagation's Details, while the collection's public page is on.
+   The switch hides the plant or cutting from it. Only for what the page could show: a plant that died or left,
+   or the example plant, never is on it, so there is nothing to switch. *@
+@implements IDisposable
+@inject PublicPageService PublicPages
+
+@if (PublicPages.Page is not null && Shown is { } shown)
+{
+    <dt>@Strings.PublicPage.OnYourPage</dt>
+    <dd>
+        @* The whole label is the touch target, so the small switch is easy to hit *@
+        <label class="form-check form-switch hide-row-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="@id" checked="@shown" aria-describedby="@(id)-hint"
+                   @onchange="e => SetShownAsync(e.Value is true)" />
+            <span class="visually-hidden">@Strings.PublicPage.OnYourPage</span>
+        </label>
+        <div class="form-text" id="@(id)-hint">@Strings.PublicPage.ItemsSync</div>
+    </dd>
+}
+
+@code {
+    private readonly string id = $"on-public-page-{Guid.NewGuid():N}";
+
+    /// <summary>The <see cref="Plant"/> or <see cref="Propagation"/> whose Details this is.</summary>
+    [Parameter, EditorRequired]
+    public required Entity Subject { get; set; }
+
+    // Null where the page could not show it
+    private bool? Shown => Subject switch
+    {
+        Plant plant when PublicCollectionPage.CouldShowPlant(plant) => !plant.HiddenFromPublicPage,
+        Propagation propagation when PublicCollectionPage.CouldShowPropagation(propagation) => !propagation.HiddenFromPublicPage,
+        _ => null
+    };
+
+    protected override void OnInitialized() => PublicPages.Changed += OnChanged;
+
+    private void OnChanged() => _ = InvokeAsync(StateHasChanged);
+
+    private async Task SetShownAsync(bool shown)
+    {
+        if (Subject is Plant plant)
+            await PublicPages.SetPlantHiddenAsync(plant, !shown);
+        else if (Subject is Propagation propagation)
+            await PublicPages.SetPropagationHiddenAsync(propagation, !shown);
+    }
+
+    public void Dispose() => PublicPages.Changed -= OnChanged;
+}

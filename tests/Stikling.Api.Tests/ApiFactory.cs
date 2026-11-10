@@ -123,6 +123,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         ["Clerk:Authority"] = Issuer,
         ["AppOrigins:0"] = AppOrigin,
         ["Share:BaseUrl"] = ShareBaseUrl,
+        ["Share:SitemapCacheMinutes"] = "0",
         ["Notifications:VapidPublicKey"] = Vapid.Public,
         ["Notifications:VapidPrivateKey"] = Vapid.Private,
         ["Identification:PlantNetApiKey"] = PlantNetKey,

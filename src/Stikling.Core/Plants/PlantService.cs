@@ -361,6 +361,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         await plants.SaveAsync(plant);
     }
 
+    /// <summary>Keeps a plant off the public collection page, or lets it show again. Nothing goes on the history.</summary>
+    public async Task SetHiddenFromPublicPageAsync(Plant plant, bool hidden)
+    {
+        if (plant.HiddenFromPublicPage == hidden)
+            return;
+        plant.HiddenFromPublicPage = hidden;
+        await plants.SaveAsync(plant);
+    }
+
     /// <summary>
     /// Adds the same tags to several plants, e.g. "For swap" before a plant swap, and records
     /// it on each plant's history. Returns how many plants got something new.

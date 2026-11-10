@@ -165,6 +165,33 @@ public static class ExportEndpoints
                     l.LeftOutPhotoIds,
                     l.TimeZone,
                 }), cancel);
+
+            // The public page of the whole collection, with its settings. What it says is built from the records above.
+            var pages = await db.PublicPages.AsNoTracking()
+                .Where(p => p.CollectionId == collectionId)
+                .OrderBy(p => p.CreatedAt)
+                .ToListAsync(cancel);
+            if (pages.Count > 0)
+                await WriteJsonAsync(zip, $"collections/{collectionId}/publicPages.json", pages.Select(p => new
+                {
+                    p.Id,
+                    p.Token,
+                    p.CreatedAt,
+                    p.UpdatedAt,
+                    p.TurnedOffAt,
+                    p.Name,
+                    p.Title,
+                    p.Line,
+                    Layout = p.Layout.ToString(),
+                    Order = p.Order.ToString(),
+                    p.ShowPropagations,
+                    p.ShowSwap,
+                    p.ShowWishlist,
+                    p.ShowStories,
+                    p.Searchable,
+                    p.Language,
+                    p.TimeZone,
+                }), cancel);
         }
     }
 
@@ -246,6 +273,8 @@ public static class ExportEndpoints
                           the rest is removed from the server when it's deleted.
           shareLinks.json The pages you shared with a link, and their settings. Left out if you
                           have none.
+          publicPages.json The public page of the whole collection, and its settings. Left out
+                          if you never turned it on.
           photos/         Your photos. The file name is the photo's id. A file ending in -small
                           is the thumbnail.
 

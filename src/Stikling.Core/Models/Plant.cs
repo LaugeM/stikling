@@ -361,6 +361,9 @@ public sealed class Plant : Entity
     /// <summary>Pinned to the top of the plant list.</summary>
     public bool Favourite { get; set; }
 
+    /// <summary>Kept off the public collection page. Everything shows on it unless this is set, and it never stands for anything else.</summary>
+    public bool HiddenFromPublicPage { get; set; }
+
     /// <summary>Something it needs doing, which keeps it on Today until cleared. Null when nothing is.</summary>
     public Attention? Attention { get; set; }
 

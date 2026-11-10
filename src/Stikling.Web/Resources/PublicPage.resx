@@ -1,0 +1,302 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="RowTitle" xml:space="preserve">
+    <value>Public page</value>
+    <comment>Title of the row in Settings, under Account, that opens the public page settings.</comment>
+  </data>
+  <data name="RowDetailUnknown" xml:space="preserve">
+    <value>Open to check</value>
+    <comment>Under the row when the app doesn't know yet whether the page is on.</comment>
+  </data>
+  <data name="RowDetailNeedsAccount" xml:space="preserve">
+    <value>Needs an account</value>
+    <comment>Under the row when nobody is signed in.</comment>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Public page</value>
+    <comment>Browser tab title of the public page settings.</comment>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>Public page</value>
+    <comment>Heading of the public page settings. Also the name of the link back from the lists of hidden plants and cuttings.</comment>
+  </data>
+  <data name="SignedOut" xml:space="preserve">
+    <value>A public page needs an account, so the server can show it.</value>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Try again</value>
+  </data>
+  <data name="OffIntro" xml:space="preserve">
+    <value>A page anyone can open, with the plants in this collection. Looking at it needs no account.</value>
+  </data>
+  <data name="OffNoteHeading" xml:space="preserve">
+    <value>Every plant becomes public unless you hide it.</value>
+    <comment>Bold line of the note shown before the page is turned on.</comment>
+  </data>
+  <data name="OffNoteText" xml:space="preserve">
+    <value>New plants show up on it by themselves. You can hide any plant, cutting or photo afterwards.</value>
+  </data>
+  <data name="NeverLabel" xml:space="preserve">
+    <value>Never shown</value>
+  </data>
+  <data name="NeverText" xml:space="preserve">
+    <value>Rooms, prices, the shop or person a plant came from, tags, pots, care, notes, and plants that died or left.</value>
+  </data>
+  <data name="TurnOn" xml:space="preserve">
+    <value>Turn on public page</value>
+  </data>
+  <data name="TurningOn" xml:space="preserve">
+    <value>Turning on…</value>
+  </data>
+  <data name="AddressLabel" xml:space="preserve">
+    <value>Address</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+    <comment>Button that copies the address of the page.</comment>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
+    <comment>Link that opens the public page in a new tab.</comment>
+  </data>
+  <data name="AlsoOpensAt" xml:space="preserve">
+    <value>It also opens at {0}.</value>
+    <comment>{0} is the long address of the page, which keeps working after it gets a name.</comment>
+  </data>
+  <data name="NameHeading" xml:space="preserve">
+    <value>Name</value>
+  </data>
+  <data name="PickName" xml:space="preserve">
+    <value>Pick a name</value>
+  </data>
+  <data name="ChangeName" xml:space="preserve">
+    <value>Change name</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Name</value>
+    <comment>Label of the field for the name.</comment>
+  </data>
+  <data name="NameHint" xml:space="preserve">
+    <value>A name you give up can't be used again, by you or anyone, and its address stops working.</value>
+  </data>
+  <data name="RemoveName" xml:space="preserve">
+    <value>Remove name</value>
+  </data>
+  <data name="RemoveNameConfirm" xml:space="preserve">
+    <value>Remove the name @{0}? A name you give up can't be used again, by you or anyone, and its address stops working.</value>
+    <comment>{0} is the name.</comment>
+  </data>
+  <data name="NameTooShort" xml:space="preserve">
+    <value>Use at least {0} characters.</value>
+    <comment>{0} is the fewest characters a name can have.</comment>
+  </data>
+  <data name="NameTooLong" xml:space="preserve">
+    <value>Use at most {0} characters.</value>
+    <comment>{0} is the most characters a name can have.</comment>
+  </data>
+  <data name="NameCharacters" xml:space="preserve">
+    <value>Use only the letters a to z, digits and hyphens.</value>
+  </data>
+  <data name="NameHyphens" xml:space="preserve">
+    <value>A hyphen can't be first or last, or come twice in a row.</value>
+  </data>
+  <data name="NameReserved" xml:space="preserve">
+    <value>That name is reserved. Try another.</value>
+  </data>
+  <data name="TitleLabel" xml:space="preserve">
+    <value>Title</value>
+  </data>
+  <data name="TitlePlaceholder" xml:space="preserve">
+    <value>A plant collection</value>
+    <comment>Shown in the empty title field. The page uses the same words when no title is set.</comment>
+  </data>
+  <data name="LineLabel" xml:space="preserve">
+    <value>Line</value>
+    <comment>The sentence under the title.</comment>
+  </data>
+  <data name="LinePlaceholder" xml:space="preserve">
+    <value>A sentence under the title</value>
+  </data>
+  <data name="LookHeading" xml:space="preserve">
+    <value>Look</value>
+  </data>
+  <data name="LayoutLabel" xml:space="preserve">
+    <value>Layout</value>
+  </data>
+  <data name="LayoutShelves" xml:space="preserve">
+    <value>Shelves</value>
+  </data>
+  <data name="LayoutShelvesHint" xml:space="preserve">
+    <value>A row for each part, swiped sideways</value>
+  </data>
+  <data name="LayoutLongPage" xml:space="preserve">
+    <value>One long page</value>
+  </data>
+  <data name="LayoutLongPageHint" xml:space="preserve">
+    <value>Each part under the one before</value>
+  </data>
+  <data name="LayoutPhotoWall" xml:space="preserve">
+    <value>Photo wall</value>
+  </data>
+  <data name="LayoutPhotoWallHint" xml:space="preserve">
+    <value>Photos edge to edge, names on them</value>
+  </data>
+  <data name="OrderLabel" xml:space="preserve">
+    <value>Order</value>
+  </data>
+  <data name="OrderNewest" xml:space="preserve">
+    <value>Newest first</value>
+  </data>
+  <data name="OrderName" xml:space="preserve">
+    <value>A to Z</value>
+  </data>
+  <data name="OnPageHeading" xml:space="preserve">
+    <value>On the page</value>
+  </data>
+  <data name="ShowCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+  </data>
+  <data name="ShowCuttingsHint" xml:space="preserve">
+    <value>Cuttings that are still going</value>
+  </data>
+  <data name="ShowStories" xml:space="preserve">
+    <value>Plant stories</value>
+  </data>
+  <data name="ShowStoriesHint" xml:space="preserve">
+    <value>Tapping a plant opens its photos and milestones. Notes are never shown.</value>
+  </data>
+  <data name="ShowSwap" xml:space="preserve">
+    <value>Up for swap</value>
+  </data>
+  <data name="ShowSwapHint" xml:space="preserve">
+    <value>What your swap list shows</value>
+  </data>
+  <data name="ShowWishlist" xml:space="preserve">
+    <value>Wishlist</value>
+  </data>
+  <data name="ShowWishlistHint" xml:space="preserve">
+    <value>Names only, never prices or where to find them</value>
+  </data>
+  <data name="HiddenHeading" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="HiddenPlants" xml:space="preserve">
+    <value>Plants</value>
+  </data>
+  <data name="HiddenCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+  </data>
+  <data name="HiddenDetail" xml:space="preserve">
+    <value>{0} shown, {1} hidden</value>
+    <comment>{0} is how many show on the page, {1} how many are hidden from it.</comment>
+  </data>
+  <data name="SearchHeading" xml:space="preserve">
+    <value>Search engines</value>
+  </data>
+  <data name="SearchSwitch" xml:space="preserve">
+    <value>Let search engines list it</value>
+  </data>
+  <data name="SearchHint" xml:space="preserve">
+    <value>Off unless you turn it on. Once your page is in search results, it can take weeks to drop out again after you turn this off.</value>
+  </data>
+  <data name="TurnOffButton" xml:space="preserve">
+    <value>Turn off public page</value>
+  </data>
+  <data name="TurnOffConfirm" xml:space="preserve">
+    <value>The address stops working for good, and its name can't be used again. Turning it on again makes a new address.</value>
+  </data>
+  <data name="Saved" xml:space="preserve">
+    <value>Saved</value>
+  </data>
+  <data name="ErrorBadRequest" xml:space="preserve">
+    <value>The server didn't take that. Check the words and try again.</value>
+  </data>
+  <data name="ErrorNotAllowed" xml:space="preserve">
+    <value>Only someone who can edit this collection can change its public page.</value>
+  </data>
+  <data name="ErrorNameTaken" xml:space="preserve">
+    <value>That name is taken. Try another.</value>
+  </data>
+  <data name="ErrorTooOften" xml:space="preserve">
+    <value>You've changed this too often today. Try again tomorrow.</value>
+  </data>
+  <data name="ErrorNotSetUp" xml:space="preserve">
+    <value>Public pages aren't set up on the server yet.</value>
+  </data>
+  <data name="ErrorOffline" xml:space="preserve">
+    <value>Can't reach the server. Try again when you're online.</value>
+  </data>
+  <data name="ErrorOther" xml:space="preserve">
+    <value>Something went wrong. Try again.</value>
+  </data>
+  <data name="ItemsPlantsHeading" xml:space="preserve">
+    <value>Plants on the page</value>
+  </data>
+  <data name="ItemsCuttingsHeading" xml:space="preserve">
+    <value>Cuttings on the page</value>
+  </data>
+  <data name="ItemsSync" xml:space="preserve">
+    <value>Changes reach the page after the next sync.</value>
+  </data>
+  <data name="ItemsSearch" xml:space="preserve">
+    <value>Search</value>
+    <comment>Label of the search field above the list of plants or cuttings the page could show.</comment>
+  </data>
+  <data name="ItemsEmptyPlants" xml:space="preserve">
+    <value>No plants that the page can show yet.</value>
+  </data>
+  <data name="ItemsEmptyCuttings" xml:space="preserve">
+    <value>No cuttings that the page can show yet.</value>
+  </data>
+  <data name="ItemsNoMatch" xml:space="preserve">
+    <value>Nothing matches.</value>
+  </data>
+  <data name="StateOn" xml:space="preserve">
+    <value>On the page</value>
+  </data>
+  <data name="StateHidden" xml:space="preserve">
+    <value>Hidden</value>
+  </data>
+  <data name="PhotosHidden_One" xml:space="preserve">
+    <value>{0} photo hidden</value>
+  </data>
+  <data name="PhotosHidden_Other" xml:space="preserve">
+    <value>{0} photos hidden</value>
+  </data>
+  <data name="ShowOnPage" xml:space="preserve">
+    <value>Show {0} on the page</value>
+    <comment>Label of the switch on a row. {0} is the name of the plant or cutting.</comment>
+  </data>
+  <data name="PhotosHint" xml:space="preserve">
+    <value>Tap a photo to hide it from the page or show it again.</value>
+  </data>
+  <data name="PhotosNone" xml:space="preserve">
+    <value>No photos to show or hide.</value>
+  </data>
+  <data name="PhotoFrom" xml:space="preserve">
+    <value>Photo from {0}</value>
+    <comment>{0} is the date the photo was taken.</comment>
+  </data>
+  <data name="OnYourPage" xml:space="preserve">
+    <value>On your public page</value>
+    <comment>Row in the Details of a plant or cutting, with a switch.</comment>
+  </data>
+</root>

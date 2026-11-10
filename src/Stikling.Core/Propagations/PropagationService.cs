@@ -474,6 +474,15 @@ public sealed class PropagationService(
         await propagations.SaveAsync(propagation);
     }
 
+    /// <summary>Keeps a propagation off the public collection page, or lets it show again. Nothing goes on the history.</summary>
+    public async Task SetHiddenFromPublicPageAsync(Propagation propagation, bool hidden)
+    {
+        if (propagation.HiddenFromPublicPage == hidden)
+            return;
+        propagation.HiddenFromPublicPage = hidden;
+        await propagations.SaveAsync(propagation);
+    }
+
     public Task DeleteAsync(Guid id) => propagations.DeleteAsync(id);
 
     /// <summary>
