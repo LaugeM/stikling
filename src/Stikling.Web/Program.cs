@@ -165,6 +165,8 @@ builder.Services.AddScoped<AccountService>();
 builder.Services.AddScoped<StiklingApi>();
 builder.Services.AddScoped<IShareLinkServer>(services => services.GetRequiredService<StiklingApi>());
 builder.Services.AddScoped<ShareLinkService>();
+builder.Services.AddScoped<IPublicPageServer>(services => services.GetRequiredService<StiklingApi>());
+builder.Services.AddScoped<PublicPageService>();
 builder.Services.AddScoped<SharedCopies>();
 builder.Services.AddScoped<IShareCopySource>(services => services.GetRequiredService<SharedCopies>());
 builder.Services.AddScoped<IReceivedPhotos>(services => services.GetRequiredService<SharedCopies>());

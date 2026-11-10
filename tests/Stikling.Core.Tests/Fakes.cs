@@ -1152,6 +1152,88 @@ internal sealed class FakeShareLinkServer : IShareLinkServer
     }
 }
 
+/// <summary>The public page endpoints for one collection, keeping its page in memory.</summary>
+internal sealed class FakePublicPageServer : IPublicPageServer
+{
+    private int made;
+
+    /// <summary>The page that is on, or null.</summary>
+    public PublicPageInfo? Page { get; set; }
+
+    /// <summary>When set, every call fails with this status.</summary>
+    public int? FailWith { get; set; }
+
+    /// <summary>Makes a failure look like the server couldn't be reached.</summary>
+    public bool Offline { get; set; }
+
+    public List<UpdatePublicPageRequest> Updates { get; } = [];
+
+    public List<SetPublicPageNameRequest> Names { get; } = [];
+
+    public List<TurnOnPublicPageRequest> TurnedOn { get; } = [];
+
+    private ShareOutcome<T>? Failed<T>() =>
+        FailWith is { } status ? ShareOutcome<T>.Failure($"Status {status}", Offline, Offline ? 0 : status) : null;
+
+    /// <summary>A page made on another device.</summary>
+    public PublicPageInfo Add() => Page = new PublicPageInfo(
+        Guid.NewGuid(), $"https://share.example/token{made++}", null, null, null, null,
+        PublicPageLayout.Shelves, PublicPageOrder.Newest, true, false, false, false, false, "en", DateTimeOffset.UnixEpoch);
+
+    public Task<ShareOutcome<PublicPageInfo?>> GetAsync(Guid collectionId) =>
+        Task.FromResult(Failed<PublicPageInfo?>() ?? ShareOutcome<PublicPageInfo?>.Success(Page));
+
+    public Task<ShareOutcome<PublicPageInfo>> TurnOnAsync(Guid collectionId, TurnOnPublicPageRequest request)
+    {
+        if (Failed<PublicPageInfo>() is { } failed)
+            return Task.FromResult(failed);
+
+        TurnedOn.Add(request);
+        return Task.FromResult(ShareOutcome<PublicPageInfo>.Success(Page ?? (Page = Add() with { Language = request.Language ?? "en" })));
+    }
+
+    public Task<ShareOutcome<PublicPageInfo>> UpdateAsync(Guid collectionId, UpdatePublicPageRequest request)
+    {
+        if (Failed<PublicPageInfo>() is { } failed)
+            return Task.FromResult(failed);
+
+        Updates.Add(request);
+        Page = Page! with
+        {
+            Title = request.Title,
+            Line = request.Line,
+            Layout = request.Layout,
+            Order = request.Order,
+            ShowPropagations = request.ShowPropagations,
+            ShowSwap = request.ShowSwap,
+            ShowWishlist = request.ShowWishlist,
+            ShowStories = request.ShowStories,
+            Searchable = request.Searchable,
+            Language = request.Language ?? Page.Language
+        };
+        return Task.FromResult(ShareOutcome<PublicPageInfo>.Success(Page));
+    }
+
+    public Task<ShareOutcome<PublicPageInfo>> SetNameAsync(Guid collectionId, SetPublicPageNameRequest request)
+    {
+        if (Failed<PublicPageInfo>() is { } failed)
+            return Task.FromResult(failed);
+
+        Names.Add(request);
+        Page = Page! with { Name = request.Name, NamedUrl = request.Name is null ? null : $"https://share.example/@{request.Name}" };
+        return Task.FromResult(ShareOutcome<PublicPageInfo>.Success(Page));
+    }
+
+    public Task<ShareOutcome<bool>> TurnOffAsync(Guid collectionId)
+    {
+        if (Failed<bool>() is { } failed)
+            return Task.FromResult(failed);
+
+        Page = null;
+        return Task.FromResult(ShareOutcome<bool>.Success(true));
+    }
+}
+
 internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);

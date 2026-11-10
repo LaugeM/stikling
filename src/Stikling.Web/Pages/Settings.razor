@@ -4,6 +4,7 @@
 @using Stikling.Core.Settings
 @using Stikling.Core.Sync
 @inject ThemeService Theme
+@inject PublicPageService PublicPages
 @inject LanguageService Language
 @inject DisplayPreferences Display
 @inject ErrorReports ErrorReports
@@ -67,6 +68,7 @@
                     {
                         <SettingsRow Href="sign-in" Title="@Strings.Settings.SignIn" Detail="@Strings.Settings.SignInDetail" />
                     }
+                    <SettingsRow Href="settings/public-page" Title="@Strings.PublicPage.RowTitle" Detail="@PublicPageLine" />
                 </div>
             </section>
         }
@@ -1007,6 +1009,13 @@
         accountUnreachable = false;
         await InvokeAsync(StateHasChanged);
     }
+
+    /// <summary>"Off", or the address of the page without https://.</summary>
+    private string PublicPageLine =>
+        account is not { SignedIn: true } ? Strings.PublicPage.RowDetailNeedsAccount
+        : PublicPages.Page is { } page ? (page.NamedUrl ?? page.Url).Replace("https://", "", StringComparison.OrdinalIgnoreCase)
+        : PublicPages.Known ? Strings.Common.Off
+        : Strings.PublicPage.RowDetailUnknown;
 
     public void Dispose()
     {

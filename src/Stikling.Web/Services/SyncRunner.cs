@@ -27,6 +27,7 @@ public sealed class SyncRunner(
     ILogger<SyncRunner> logger,
     PlantNameService names,
     ShareLinkService shares,
+    PublicPageService publicPage,
     DeviceFiles files,
     NotificationService notifications,
     IJSRuntime js,
@@ -332,6 +333,7 @@ public sealed class SyncRunner(
             {
                 signedIn = false;
                 shares.Clear();
+                publicPage.Clear();
                 return;
             }
 
@@ -351,6 +353,7 @@ public sealed class SyncRunner(
 
             // Never throws, so a problem with the links can't stop the photos
             await shares.RefreshAsync(collection.Id);
+            await publicPage.RefreshAsync(collection.Id);
 
             // The records are in, so the first sync's notice can go while the photos carry on
             StatusChanged?.Invoke();
@@ -454,6 +457,7 @@ public sealed class SyncRunner(
         CollectionId = null;
         notOnServer.Clear();
         shares.Clear();
+        publicPage.Clear();
         StatusChanged?.Invoke();
     }
 

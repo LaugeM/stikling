@@ -1,0 +1,506 @@
+@page "/settings/public-page"
+@implements IDisposable
+@using System.Globalization
+@inject AccountService Accounts
+@inject SyncRunner Sync
+@inject PublicPageService PublicPages
+@inject ShareCardService Cards
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject NavigationManager Nav
+
+@* The settings of the public collection page. The page itself lives on the server and is drawn there, so
+   nothing here is saved on the device: every change goes to the server through PublicPageService. What
+   is hidden from it is saved on the plants, cuttings and photos themselves (see PublicPageItems). *@
+
+<PageTitle>@Strings.PublicPage.PageTitle</PageTitle>
+<ReloadOnSync Reload="LoadCountsAsync" />
+
+<a class="back-link" href="settings?section=account">@Strings.Account.BackToSettings</a>
+<h1>@Strings.PublicPage.Heading</h1>
+
+@if (!hintRead)
+{
+    @* Nothing until it's known whether anyone is signed in *@
+}
+else if (!signedIn)
+{
+    <p class="settings-hint">@Strings.PublicPage.SignedOut</p>
+    <div class="settings-actions">
+        <a class="btn btn-primary" href="sign-in">@Strings.Account.AccountSignIn</a>
+    </div>
+}
+else if (!PublicPages.Known)
+{
+    @if (loading)
+    {
+        <p class="settings-hint" role="status">@Strings.PublicPage.Loading</p>
+    }
+    else
+    {
+        <p class="settings-hint" role="status">@(failure ?? Strings.PublicPage.ErrorOffline)</p>
+        <div class="settings-actions">
+            <button type="button" class="btn btn-outline-primary" @onclick="LoadAsync">@Strings.PublicPage.TryAgain</button>
+        </div>
+    }
+}
+else if (PublicPages.Page is not { } page)
+{
+    <p>@Strings.PublicPage.OffIntro</p>
+    <div class="pp-note">
+        <p><strong>@Strings.PublicPage.OffNoteHeading</strong></p>
+        <p>@Strings.PublicPage.OffNoteText</p>
+    </div>
+    <div class="pp-label">@Strings.PublicPage.NeverLabel</div>
+    <p>@Strings.PublicPage.NeverText</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="TurnOnAsync">@(busy ? Strings.PublicPage.TurningOn : Strings.PublicPage.TurnOn)</button>
+    </div>
+    @Message
+}
+else
+{
+    <section class="pp-section" aria-labelledby="pp-address-label">
+        <div class="pp-label" id="pp-address-label">@Strings.PublicPage.AddressLabel</div>
+        <p class="pp-address">@Address(page)</p>
+        <div class="settings-actions pp-actions">
+            <button type="button" class="btn btn-primary" @onclick="() => CopyAsync(page)">@Strings.PublicPage.Copy</button>
+            <a class="btn btn-outline-primary" href="@Address(page)" target="_blank" rel="noopener">@Strings.PublicPage.Open</a>
+        </div>
+        @if (copied)
+        {
+            <p class="settings-hint" role="status">@Strings.PublicPage.Copied</p>
+        }
+        @if (page.NamedUrl is not null)
+        {
+            <p class="settings-hint pp-also">@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.AlsoOpensAt, page.Url)</p>
+        }
+    </section>
+
+    <section class="pp-section">
+        <h2 class="pp-label">@Strings.PublicPage.NameHeading</h2>
+        @if (editingName)
+        {
+            <label class="visually-hidden" for="pp-name">@Strings.PublicPage.NameLabel</label>
+            <div class="input-group pp-name">
+                <span class="input-group-text">@NamePrefix(page)</span>
+                <input id="pp-name" class="form-control" maxlength="@(PublicPageRules.MaxNameLength + 1)" autocapitalize="none" autocomplete="off" spellcheck="false"
+                       aria-describedby="pp-name-hint" aria-invalid="@(NameProblemNow is null ? null : "true")"
+                       @bind="nameText" @bind:event="oninput" disabled="@busy" />
+            </div>
+            @if (NameProblemNow is { } problem)
+            {
+                <p class="pp-error" role="alert">@NameWords(problem)</p>
+            }
+            <p class="settings-hint" id="pp-name-hint">@Strings.PublicPage.NameHint</p>
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" disabled="@(busy || NormalizedName is null || NameProblemNow is not null || NormalizedName == page.Name)"
+                        @onclick="SaveNameAsync">@Strings.Common.Save</button>
+                <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => editingName = false">@Strings.Common.Cancel</button>
+            </div>
+        }
+        else if (confirmingRemoveName)
+        {
+            <div class="confirm-card confirm-card-danger">
+                <p>@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.RemoveNameConfirm, page.Name)</p>
+                <div class="settings-actions">
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="RemoveNameAsync">@Strings.PublicPage.RemoveName</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => confirmingRemoveName = false">@Strings.Common.Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            @if (page.Name is not null)
+            {
+                <p class="pp-current-name">@("@" + page.Name)</p>
+            }
+            <div class="settings-actions pp-actions">
+                <button type="button" class="btn btn-outline-primary" @onclick="StartNaming">@(page.Name is null ? Strings.PublicPage.PickName : Strings.PublicPage.ChangeName)</button>
+                @if (page.Name is not null)
+                {
+                    <button type="button" class="btn btn-link text-danger" @onclick="() => { confirmingRemoveName = true; message = null; }">@Strings.PublicPage.RemoveName</button>
+                }
+            </div>
+        }
+    </section>
+
+    @* Starts over when a save failed, so the controls show what the page really has *@
+    <div @key="controlsVersion">
+        <section class="pp-section">
+            <div class="pp-fields">
+                <div>
+                    <label class="pp-label" for="pp-title">@Strings.PublicPage.TitleLabel</label>
+                    <input id="pp-title" class="form-control" maxlength="@PublicPageRules.MaxTitleLength" placeholder="@Strings.PublicPage.TitlePlaceholder"
+                           @bind="title" @bind:event="oninput" @onchange="SaveWordsAsync" />
+                </div>
+                <div>
+                    <label class="pp-label" for="pp-line">@Strings.PublicPage.LineLabel</label>
+                    <input id="pp-line" class="form-control" maxlength="@PublicPageRules.MaxLineLength" placeholder="@Strings.PublicPage.LinePlaceholder"
+                           @bind="line" @bind:event="oninput" @onchange="SaveWordsAsync" />
+                </div>
+            </div>
+        </section>
+
+        <section class="pp-section">
+            <h2 class="pp-label">@Strings.PublicPage.LookHeading</h2>
+            <div class="pp-label pp-sublabel" id="pp-layout-label">@Strings.PublicPage.LayoutLabel</div>
+            <div class="pp-looks" role="radiogroup" aria-labelledby="pp-layout-label">
+                @foreach (var (value, name, hint) in Layouts())
+                {
+                    <label class="pp-look @(page.Layout == value ? "picked" : null)">
+                        <input type="radio" class="visually-hidden" name="pp-layout" checked="@(page.Layout == value)"
+                               @onchange="() => ChangeAsync(page with { Layout = value })" />
+                        <span class="pp-look-name">@name</span>
+                        <span class="pp-look-hint">@hint</span>
+                    </label>
+                }
+            </div>
+            <label class="pp-label pp-sublabel" for="pp-order">@Strings.PublicPage.OrderLabel</label>
+            <select id="pp-order" class="form-select w-auto" @onchange="e => ChangeAsync(page with { Order = Enum.Parse<PublicPageOrder>(e.Value?.ToString() ?? nameof(PublicPageOrder.Newest)) })">
+                <option value="@nameof(PublicPageOrder.Newest)" selected="@(page.Order == PublicPageOrder.Newest)">@Strings.PublicPage.OrderNewest</option>
+                <option value="@nameof(PublicPageOrder.Name)" selected="@(page.Order == PublicPageOrder.Name)">@Strings.PublicPage.OrderName</option>
+            </select>
+        </section>
+
+        <section class="pp-section">
+            <h2 class="pp-label">@Strings.PublicPage.OnPageHeading</h2>
+            @Switch("pp-cuttings", Strings.PublicPage.ShowCuttings, Strings.PublicPage.ShowCuttingsHint, page.ShowPropagations, on => ChangeAsync(page with { ShowPropagations = on }))
+            @Switch("pp-stories", Strings.PublicPage.ShowStories, Strings.PublicPage.ShowStoriesHint, page.ShowStories, on => ChangeAsync(page with { ShowStories = on }))
+            @Switch("pp-swap", Strings.PublicPage.ShowSwap, Strings.PublicPage.ShowSwapHint, page.ShowSwap, on => ChangeAsync(page with { ShowSwap = on }))
+            @Switch("pp-wishlist", Strings.PublicPage.ShowWishlist, Strings.PublicPage.ShowWishlistHint, page.ShowWishlist, on => ChangeAsync(page with { ShowWishlist = on }))
+        </section>
+
+        <section class="pp-section">
+            <h2 class="pp-label">@Strings.PublicPage.HiddenHeading</h2>
+            <div class="settings-rows">
+                <SettingsRow Href="settings/public-page/plants" Title="@Strings.PublicPage.HiddenPlants"
+                             Detail="@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.HiddenDetail, shownPlants, hiddenPlants)" />
+                @if (page.ShowPropagations)
+                {
+                    <SettingsRow Href="settings/public-page/cuttings" Title="@Strings.PublicPage.HiddenCuttings"
+                                 Detail="@string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.HiddenDetail, shownCuttings, hiddenCuttings)" />
+                }
+            </div>
+        </section>
+
+        <section class="pp-section">
+            <h2 class="pp-label">@Strings.PublicPage.SearchHeading</h2>
+            @Switch("pp-search", Strings.PublicPage.SearchSwitch, Strings.PublicPage.SearchHint, page.Searchable, on => ChangeAsync(page with { Searchable = on }))
+        </section>
+    </div>
+
+    @Message
+
+    <section class="pp-section">
+        @if (confirmingOff)
+        {
+            <div class="confirm-card confirm-card-danger">
+                <p>@Strings.PublicPage.TurnOffConfirm</p>
+                <div class="settings-actions">
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="TurnOffAsync">@Strings.PublicPage.TurnOffButton</button>
+                    <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => confirmingOff = false">@Strings.Common.Cancel</button>
+                </div>
+            </div>
+        }
+        else
+        {
+            <button type="button" class="btn btn-outline-danger" disabled="@busy" @onclick="() => { confirmingOff = true; message = null; }">@Strings.PublicPage.TurnOffButton</button>
+        }
+    </section>
+}
+
+@code {
+    private bool hintRead;
+    private bool signedIn;
+    private bool loading;
+    private bool busy;
+    private bool copied;
+    private bool saved;
+    private string? failure;
+    private string? message;
+    private bool editingName;
+    private bool confirmingRemoveName;
+    private bool confirmingOff;
+    private string nameText = "";
+    private string title = "";
+    private string line = "";
+    private Guid? wordsFor;
+    private int controlsVersion;
+    private int shownPlants;
+    private int hiddenPlants;
+    private int shownCuttings;
+    private int hiddenCuttings;
+
+    private string? NormalizedName => PublicPageRules.NormalizeName(nameText);
+
+    private NameProblem? NameProblemNow => NormalizedName is { } name ? PublicPageRules.CheckName(name) : null;
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!Accounts.IsAvailable)
+        {
+            Nav.NavigateTo("settings?section=account", replace: true);
+            return;
+        }
+
+        PublicPages.Changed += OnPageChanged;
+        signedIn = await Accounts.WasSignedInAsync();
+        hintRead = true;
+        TakeWords();
+        if (signedIn)
+        {
+            await LoadCountsAsync();
+            await LoadAsync();
+        }
+    }
+
+    // What the server says is asked for each time the page opens, so another device's changes show. The
+    // page that was known from the last sync shows meanwhile.
+    private async Task LoadAsync()
+    {
+        loading = !PublicPages.Known;
+        failure = null;
+        var result = await PublicPages.LoadAsync();
+        if (!result.Ok && result.Offline)
+        {
+            // The collection isn't known until a sync has run
+            await Sync.SyncNowAsync();
+            result = await PublicPages.LoadAsync();
+        }
+
+        loading = false;
+        if (!result.Ok)
+            failure = Words(result.Offline, result.Status, result.NameProblem);
+        TakeWords();
+    }
+
+    private async Task LoadCountsAsync()
+    {
+        var plants = await PlantRepository.GetAllAsync();
+        var cuttings = await PropagationRepository.GetAllAsync();
+        shownPlants = plants.Count(p => PublicCollectionPage.CouldShowPlant(p) && !p.HiddenFromPublicPage);
+        hiddenPlants = plants.Count(p => PublicCollectionPage.CouldShowPlant(p) && p.HiddenFromPublicPage);
+        shownCuttings = cuttings.Count(p => PublicCollectionPage.CouldShowPropagation(p) && !p.HiddenFromPublicPage);
+        hiddenCuttings = cuttings.Count(p => PublicCollectionPage.CouldShowPropagation(p) && p.HiddenFromPublicPage);
+    }
+
+    // The fields start from the page, and again when a different page turns up
+    private void TakeWords()
+    {
+        if (PublicPages.Page is not { } page || wordsFor == page.Id)
+            return;
+
+        wordsFor = page.Id;
+        title = page.Title ?? "";
+        line = page.Line ?? "";
+    }
+
+    private void OnPageChanged() => _ = InvokeAsync(() =>
+    {
+        TakeWords();
+        StateHasChanged();
+    });
+
+    private RenderFragment Message => @<text>
+        @if (message is not null)
+        {
+            <p class="pp-error" role="alert">@message</p>
+        }
+        else if (saved)
+        {
+            <p class="settings-hint" role="status">@Strings.PublicPage.Saved</p>
+        }
+    </text>;
+
+    private RenderFragment Switch(string id, string label, string hint, bool on, Func<bool, Task> changed) => @<div class="pp-switch">
+        <div class="form-check form-switch">
+            <input class="form-check-input" type="checkbox" role="switch" id="@id" checked="@on" aria-describedby="@(id)-hint"
+                   @onchange="e => changed(e.Value is true)" />
+            <label class="form-check-label" for="@id">@label</label>
+        </div>
+        <div class="settings-hint" id="@(id)-hint">@hint</div>
+    </div>;
+
+    private IEnumerable<(PublicPageLayout Value, string Name, string Hint)> Layouts() =>
+    [
+        (PublicPageLayout.Shelves, Strings.PublicPage.LayoutShelves, Strings.PublicPage.LayoutShelvesHint),
+        (PublicPageLayout.LongPage, Strings.PublicPage.LayoutLongPage, Strings.PublicPage.LayoutLongPageHint),
+        (PublicPageLayout.PhotoWall, Strings.PublicPage.LayoutPhotoWall, Strings.PublicPage.LayoutPhotoWallHint),
+    ];
+
+    private static string Address(PublicPageInfo page) => page.NamedUrl ?? page.Url;
+
+    // The part of the address in front of the name, like share.stikling.app/@
+    private static string NamePrefix(PublicPageInfo page) =>
+        Uri.TryCreate(page.Url, UriKind.Absolute, out var uri) ? $"{uri.Authority}/@" : "@";
+
+    private string NameWords(NameProblem problem) => problem switch
+    {
+        NameProblem.TooShort => string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.NameTooShort, PublicPageRules.MinNameLength),
+        NameProblem.TooLong => string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.NameTooLong, PublicPageRules.MaxNameLength),
+        NameProblem.Characters => Strings.PublicPage.NameCharacters,
+        NameProblem.Hyphens => Strings.PublicPage.NameHyphens,
+        _ => Strings.PublicPage.NameReserved
+    };
+
+    // The app's own words for what the server answered
+    private string Words(bool offline, int status, NameProblem? nameProblem) =>
+        offline ? Strings.PublicPage.ErrorOffline
+        : status switch
+        {
+            400 when nameProblem is { } problem => NameWords(problem),
+            400 => Strings.PublicPage.ErrorBadRequest,
+            401 => Strings.Account.ShareSignInRanOut,
+            403 => Strings.PublicPage.ErrorNotAllowed,
+            409 => Strings.PublicPage.ErrorNameTaken,
+            429 => Strings.PublicPage.ErrorTooOften,
+            503 => Strings.PublicPage.ErrorNotSetUp,
+            _ => Strings.PublicPage.ErrorOther
+        };
+
+    private void ClearMessages()
+    {
+        message = null;
+        saved = false;
+        copied = false;
+    }
+
+    private async Task TurnOnAsync()
+    {
+        busy = true;
+        ClearMessages();
+        try
+        {
+            var result = await PublicPages.TurnOnAsync(TimeZoneInfo.Local.Id, CultureInfo.CurrentUICulture.Name);
+            if (!result.Ok)
+                message = Words(result.Offline, result.Status, result.NameProblem);
+            TakeWords();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task CopyAsync(PublicPageInfo page)
+    {
+        ClearMessages();
+        copied = await Cards.CopyTextAsync(Address(page));
+        if (!copied)
+            message = Strings.Propagations.PassOnCopyFailed;
+    }
+
+    // Everything but the name is saved whole, so a change is made on a copy of the page
+    private async Task ChangeAsync(PublicPageInfo changed)
+    {
+        ClearMessages();
+        var result = await PublicPages.UpdateAsync(changed, TimeZoneInfo.Local.Id, CultureInfo.CurrentUICulture.Name);
+        if (result.Ok)
+        {
+            saved = true;
+            return;
+        }
+
+        message = Words(result.Offline, result.Status, result.NameProblem);
+        PutControlsBack();
+    }
+
+    private async Task SaveWordsAsync()
+    {
+        if (PublicPages.Page is not { } page)
+            return;
+
+        var cleanTitle = ShareLinkRules.Clean(title);
+        var cleanLine = ShareLinkRules.Clean(line);
+        if (cleanTitle == ShareLinkRules.Clean(page.Title) && cleanLine == ShareLinkRules.Clean(page.Line))
+            return;
+
+        await ChangeAsync(page with { Title = cleanTitle, Line = cleanLine });
+    }
+
+    private void PutControlsBack()
+    {
+        if (PublicPages.Page is { } page)
+        {
+            title = page.Title ?? "";
+            line = page.Line ?? "";
+        }
+
+        controlsVersion++;
+    }
+
+    private void StartNaming()
+    {
+        ClearMessages();
+        nameText = PublicPages.Page?.Name ?? "";
+        editingName = true;
+    }
+
+    private async Task SaveNameAsync()
+    {
+        busy = true;
+        ClearMessages();
+        try
+        {
+            var result = await PublicPages.SetNameAsync(nameText);
+            if (result.Ok)
+            {
+                editingName = false;
+                saved = true;
+            }
+            else
+            {
+                message = Words(result.Offline, result.Status, result.NameProblem);
+            }
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RemoveNameAsync()
+    {
+        busy = true;
+        ClearMessages();
+        try
+        {
+            var result = await PublicPages.SetNameAsync(null);
+            if (result.Ok)
+                confirmingRemoveName = false;
+            else
+                message = Words(result.Offline, result.Status, result.NameProblem);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task TurnOffAsync()
+    {
+        busy = true;
+        ClearMessages();
+        try
+        {
+            var result = await PublicPages.TurnOffAsync();
+            if (result.Ok)
+            {
+                confirmingOff = false;
+                editingName = false;
+                wordsFor = null;
+            }
+            else
+            {
+                message = Words(result.Offline, result.Status, result.NameProblem);
+            }
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    public void Dispose() => PublicPages.Changed -= OnPageChanged;
+}

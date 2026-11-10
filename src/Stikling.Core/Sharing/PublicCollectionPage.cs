@@ -131,15 +131,24 @@ public static class PublicCollectionPage
     private static readonly DateOnly AnyDay = new(2000, 1, 1);
 
     /// <summary>A plant is on the page when it is here, active and not hidden. The example plants never are.</summary>
-    public static bool ShowsPlant(Plant plant) =>
-        !plant.IsDeleted && plant.Status == PlantStatus.Active && !plant.HiddenFromPublicPage && !ExampleFamily.PlantIds.Contains(plant.Id);
+    public static bool ShowsPlant(Plant plant) => CouldShowPlant(plant) && !plant.HiddenFromPublicPage;
 
     /// <summary>A cutting is on the page when it is still going and not hidden. This ignores whether the Cuttings part is on.</summary>
-    public static bool ShowsPropagation(Propagation propagation) =>
-        !propagation.IsDeleted && propagation.IsActive && !propagation.HiddenFromPublicPage && !ExampleFamily.PropagationIds.Contains(propagation.Id);
+    public static bool ShowsPropagation(Propagation propagation) => CouldShowPropagation(propagation) && !propagation.HiddenFromPublicPage;
 
     /// <summary>A photo is on the page when it is of the plant itself and not hidden. Whether its image is on the server is for the API to check.</summary>
-    public static bool ShowsPhoto(Photo photo) => !photo.IsDeleted && !photo.IsReference && !photo.HiddenFromPublicPage;
+    public static bool ShowsPhoto(Photo photo) => CouldShowPhoto(photo) && !photo.HiddenFromPublicPage;
+
+    /// <summary>Whether the page could show the plant if it were not hidden. The app lists these for the owner to hide.</summary>
+    public static bool CouldShowPlant(Plant plant) =>
+        !plant.IsDeleted && plant.Status == PlantStatus.Active && !ExampleFamily.PlantIds.Contains(plant.Id);
+
+    /// <summary>Whether the page could show the cutting if it were not hidden.</summary>
+    public static bool CouldShowPropagation(Propagation propagation) =>
+        !propagation.IsDeleted && propagation.IsActive && !ExampleFamily.PropagationIds.Contains(propagation.Id);
+
+    /// <summary>Whether the page could show the photo if it were not hidden.</summary>
+    public static bool CouldShowPhoto(Photo photo) => !photo.IsDeleted && !photo.IsReference;
 
     /// <summary>The title as it is shown: the cleaned one, or the app's own words.</summary>
     public static string TitleOf(string? title) => ShareLinkRules.Clean(title) ?? Strings.PublicPage.DefaultTitle;

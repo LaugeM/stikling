@@ -1776,4 +1776,30 @@
     <value>Yes. Under Rooms and tags in Settings, History on a room or spot lists the plants that have stood there, for how long, and whether each is still there, moved on, died there or left from there. It comes from the room changes in each plant's history, so nothing extra has to be entered. History lines keep the name a room had at the time, so a stay from before a rename shows when another line says which room the old name was. A plant added with no move logged counts from the day it was added. The list only says what happened and doesn't rate the place.</value>
     <comment>Answer to "Can I see which plants have stood in a room?" on the Help page.</comment>
   </data>
+  <data name="CanIShowMyWholeCollectionQ" xml:space="preserve">
+    <value>Can I show my whole collection?</value>
+    <comment>Question about the public collection page.</comment>
+  </data>
+  <data name="CanIShowMyWholeCollectionA1" xml:space="preserve">
+    <value>Yes, on a public page. It is one page for the whole collection that anyone with the address can open, without an account. You need an account to turn it on, and you have to be able to edit the collection. Turn it on in Settings, under Account, with Public page.</value>
+  </data>
+  <data name="CanIShowMyWholeCollectionA2" xml:space="preserve">
+    <value>It shows your plants as photos with their names. Every plant that is still in your collection shows unless you hide it, and new plants show up by themselves. You can also show your cuttings, what is up for swap, your wishlist (names only) and a story for each plant with its photos and milestones. It never shows rooms, prices, the shop or person a plant came from, tags, pots, care or notes, and never plants that died or left.</value>
+  </data>
+  <data name="CanIShowMyWholeCollectionA3" xml:space="preserve">
+    <value>You pick the layout (shelves, one long page or a photo wall), the order, a title and a line under it. You can also give the page a name, so the address becomes share.stikling.app/@yourname. A name you give up can't be used again, by you or anyone, and its address stops working.</value>
+  </data>
+  <data name="CanIShowMyWholeCollectionA4" xml:space="preserve">
+    <value>Search engines are asked not to list the page, unless you turn on Let search engines list it. Once the page is in search results it can take weeks to drop out again. Turning the page off ends it for good: the address stops working and turning it on again makes a new one.</value>
+  </data>
+  <data name="KeepPlantOffMyPublicPageQ" xml:space="preserve">
+    <value>How do I keep a plant off my public page?</value>
+    <comment>Question about hiding things from the public collection page.</comment>
+  </data>
+  <data name="KeepPlantOffMyPublicPageA1" xml:space="preserve">
+    <value>Hide it. In Settings, under Account, open Public page and then Plants (or Cuttings) under Hidden, and turn the plant off. Tap a plant in that list to hide single photos. While the page is on, a plant's or cutting's Details also has an On your public page switch.</value>
+  </data>
+  <data name="KeepPlantOffMyPublicPageA2" xml:space="preserve">
+    <value>A change reaches the page after the next sync. A plant that died, was given away or sold is never on the page, so there is nothing to hide.</value>
+  </data>
 </root>
