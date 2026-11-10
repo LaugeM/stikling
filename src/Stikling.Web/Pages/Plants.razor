@@ -45,11 +45,11 @@
             </button>
             @* On a wide screen the links above are in the filters' block below, and these two take over from the round buttons *@
             <a class="btn btn-outline-primary btn-sm icon-btn heading-add" href="add-photos">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                 @Strings.AddPhotos.EntryLabel
             </a>
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="plants/new">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
                 @Strings.Plants.AddAPlant
             </a>
         </div>
@@ -103,7 +103,7 @@ else
                 @Strings.Plants.ListWishlist
             </a>
             <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="4" width="16" height="16" rx="3" /><path d="m8.5 12.2 2.4 2.4 4.6-5" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.CheckBox</svg>
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
         </div>
@@ -646,10 +646,10 @@ else
 else
 {
     <a class="fab fab-small" href="add-photos" aria-label="@Strings.AddPhotos.EntryLabel" title="@Strings.AddPhotos.EntryLabel">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
     </a>
     <a class="fab" href="plants/new" aria-label="@Strings.Plants.AddAPlant" title="@Strings.Plants.AddAPlant">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
 }
 

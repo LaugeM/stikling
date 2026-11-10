@@ -5,7 +5,7 @@
     <div class="viewer" role="dialog" aria-modal="true" aria-label="@Strings.Shared.PhotoViewerLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
             <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))@(Caption?.Invoke(photo) is { Length: > 0 } caption ? $" · {caption}" : null)</span>
-            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+            <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
         </div>
 
         @if (framing)
@@ -18,8 +18,8 @@
                 <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="@Strings.Shared.PhotoViewerAlt" />
                 @if (PhotoList.Count > 1)
                 {
-                    <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="@Strings.Shared.PhotoViewerPrevious"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg></button>
-                    <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="@Strings.Shared.PhotoViewerNext"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg></button>
+                    <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="@Strings.Shared.PhotoViewerPrevious"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg></button>
+                    <button type="button" class="viewer-nav next" @onclick="() => Move(1)" aria-label="@Strings.Shared.PhotoViewerNext"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg></button>
                 }
             </div>
 

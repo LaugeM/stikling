@@ -3,7 +3,7 @@
 @if (guide is not null || (Guide.Length == 0 && Text is not null))
 {
     <a class="guide-link" href="@(guide is null ? GuideLinks.Index : GuideLinks.Href(guide.Id, From))" target="@(NewTab ? "_blank" : null)" rel="@(NewTab ? "noopener" : null)">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 6.500C10.500 5 8 4.500 4.500 4.500v13c3.500 0 6 .5 7.500 2 1.500-1.500 4-2 7.500-2v-13c-3.500 0-6 .5-7.500 2Z" /><path d="M12 6.500v13" /></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Book</svg>
         <span>@(Text ?? GuideLinks.Text(guide!.LinkKey))</span>
     </a>
 }

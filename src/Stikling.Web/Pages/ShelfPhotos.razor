@@ -27,7 +27,7 @@ else
         }
         @* Takes over from the round add button on a wide screen *@
         <button type="button" class="btn btn-primary btn-sm icon-btn heading-add" @onclick="OpenAdd">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
             @Strings.Shelf.AddPhoto
         </button>
     </div>
@@ -72,7 +72,7 @@ else
 }
 
 <button type="button" class="fab" @onclick="OpenAdd" aria-label="@Strings.Shelf.AddPhoto" title="@Strings.Shelf.AddPhoto">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
 </button>
 
 <Sheet Title="@Strings.Shelf.AddTitle" @bind-Open="addOpen">
@@ -83,13 +83,13 @@ else
     }
     <div class="composer-row mt-3">
         <label class="btn btn-outline-primary btn-sm icon-btn @(CanAdd ? null : "disabled")" for="shelf-camera">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
             @Strings.Shelf.AddCamera
         </label>
         <input id="shelf-camera" type="file" accept="image/*" capture="environment" class="visually-hidden"
                @ref="cameraInput" @onchange="() => AddAsync(cameraInput)" disabled="@(!CanAdd)" />
         <label class="btn btn-outline-primary btn-sm icon-btn @(CanAdd ? null : "disabled")" for="shelf-gallery">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Photo</svg>
             @Strings.Shelf.AddGallery
         </label>
         <input id="shelf-gallery" type="file" accept="image/*" multiple class="visually-hidden"

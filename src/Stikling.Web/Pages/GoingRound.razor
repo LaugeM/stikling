@@ -114,7 +114,7 @@ else
             <div class="round-counter">
                 <span class="round-position">@(F(Strings.Care.RoundPosition, pos + 1, queue.Count))</span>
                 <button type="button" class="round-back" disabled="@(pos == 0 || busy)" @onclick="Back">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m15 5-7 7 7 7" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg>
                     @Strings.Common.Back
                 </button>
             </div>
@@ -137,11 +137,11 @@ else
                     <div class="round-photo-empty @(plant is null ? "propagation" : null)" aria-hidden="true">
                         @if (plant is null)
                         {
-                            <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+                            <svg viewBox="0 0 24 24">@Icons.Feed</svg>
                         }
                         else
                         {
-                            <svg viewBox="0 0 24 24"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+                            <svg viewBox="0 0 24 24">@Icons.Sprout</svg>
                         }
                     </div>
                 }
@@ -192,7 +192,7 @@ else
                                     disabled="@busy" @onclick="WaterAsync">
                                 @if (day.WateredId is not null)
                                 {
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                                 }
                                 @WateringText.DoneLabel(waterForm)
                             </button>
@@ -201,7 +201,7 @@ else
                                 disabled="@busy" @onclick="LookedOverAsync">
                             @if (day.LookedOverId is not null)
                             {
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                             }
                             @Strings.Care.RoundTileLookedOver
                         </button>
@@ -211,11 +211,11 @@ else
                         <label class="round-text-btn @(busy ? "disabled" : null)" for="round-photo-input">
                             @if (day.Photo)
                             {
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                             }
                             else
                             {
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                             }
                             @Strings.Care.RoundPhoto
                             @if (day.Photo)
@@ -228,13 +228,13 @@ else
                         @if (cameraAvailable && hasPhoto.Contains(card.Subject.Id))
                         {
                             <button type="button" class="round-text-btn" disabled="@busy" @onclick="() => cameraOpen = true">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="3.5" width="19" height="17" rx="3" stroke-dasharray="2.5 3" opacity="0.7" /><path d="M7 10.5h2l1-1.5h4l1 1.5h2V16H7Z" /><circle cx="12" cy="13" r="1.7" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.EmptyPhoto</svg>
                                 @Strings.Camera.SameAngle
                             </button>
                         }
                         <button type="button" class="round-text-btn" disabled="@busy" @onclick="Skip">
                             @Strings.Care.RoundSkip
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m9 6 6 6-6 6" /></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRightSmall</svg>
                         </button>
                     </div>
 

@@ -62,7 +62,7 @@
 else if (Current is { } flag)
 {
     <div class="attention-note @(Waiting is not null ? "waiting" : null)">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
+        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Flag</svg>
         <div class="attention-text">
             <span class="attention-reason">@flag.Reason</span>
             <span class="attention-since">@(Waiting is { } from ? Labels.FlagFrom(from) : Since(flag))</span>

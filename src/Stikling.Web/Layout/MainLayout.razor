@@ -28,10 +28,10 @@
         </a>
         <div class="header-actions">
         <NavLink class="settings-link" href="search" aria-label="@Strings.Layout.Search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Search</svg>
         </NavLink>
         <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : Strings.Layout.Settings)">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Settings</svg>
             @if (Sync.HasProblem)
             {
                 <span class="settings-link-dot" aria-hidden="true"></span>
@@ -66,7 +66,7 @@
         </a>
         @* A quiet field rather than a tab, since it works from anywhere. The / key opens it too. *@
         <NavLink class="app-nav-search" href="search">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="7" /><path d="M20 20l-4-4" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Search</svg>
             <span>@Strings.Layout.Search</span>
             <kbd aria-hidden="true">/</kbd>
         </NavLink>
@@ -75,23 +75,23 @@
             <span>@Strings.Layout.Today</span>
         </NavLink>
         <NavLink class="app-nav-link" href="plants">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9" /><path d="M12 12C12 7 8 4 4 4c0 4 3 8 8 8Z" /><path d="M12 14c0-4 3-7 8-7 0 4-3 7-8 7Z" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
             <span>@Strings.Layout.Plants</span>
         </NavLink>
         <NavLink class="app-nav-link" href="propagations">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Feed</svg>
             <span>@Strings.Layout.Propagate</span>
         </NavLink>
         @if (pestTab)
         {
             <NavLink class="app-nav-link" href="pests">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pest</svg>
                 <span>@Strings.Layout.Pests</span>
             </NavLink>
         }
         @* Without its own tab, Pests is reached from Supplies, so that tab shows where you are *@
         <NavLink class="@($"app-nav-link {(!pestTab && OnPestsPage ? "active" : null)}")" href="supplies">
-            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.5 4.5h15v3.5h-15Z" /><path d="M6 8l1.5 11a1.5 1.5 0 0 0 1.5 1.3h6a1.5 1.5 0 0 0 1.5-1.3L18 8" /></svg>
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pot</svg>
             <span>@Strings.Layout.Supplies</span>
         </NavLink>
         @* Only in the side menu on a wide screen: a sixth tab would crowd the bottom bar, and on a phone Settings and Search lead here *@
@@ -106,7 +106,7 @@
                 <kbd aria-hidden="true">?</kbd>
             </NavLink>
             <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3" /><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1Z" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Settings</svg>
                 <span>@Strings.Layout.Settings</span>
                 @if (Sync.HasProblem)
                 {
