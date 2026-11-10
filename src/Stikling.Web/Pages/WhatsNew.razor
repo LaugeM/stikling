@@ -14,7 +14,7 @@
 <p class="whats-new-version">
     @if (AppVersion.Date is { } date)
     {
-        <text>@string.Format(CultureInfo.CurrentCulture, Strings.WhatsNew.YoureOnVersion, date)</text>
+        <text>@F(Strings.WhatsNew.YoureOnVersion, date)</text>
         @if (AppVersion.Commit is { } commit)
         {
             <text> </text><a class="whats-new-commit" href="https://github.com/LaugeM/stikling/commit/@commit" target="_blank" rel="noopener">(@AppVersion.ShortCommit)</a>

@@ -62,7 +62,7 @@
     else if (results.IsEmpty && DictionaryCount == 0 && guideHits.Count == 0)
     {
         <div class="empty-state">
-            <p class="mb-1">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchNothing, query.Trim())</p>
+            <p class="mb-1">@F(Strings.Shared.SearchNothing, query.Trim())</p>
             <p>@Strings.Shared.SearchNothingHint</p>
             <a class="btn btn-outline-primary mt-2 search-stop" href="@HelpHref">@Strings.Shared.SearchHelpButton</a>
         </div>
@@ -87,7 +87,7 @@
                     @if (items.Count > Preview)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action search-more search-stop" aria-expanded="@(open ? "true" : "false")"
-                                @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchShowAll, items.Count))</button>
+                                @onclick="() => ToggleGroup(kind)">@(open ? Strings.Shared.SearchShowFewer : F(Strings.Shared.SearchShowAll, items.Count))</button>
                     }
                 </section>
             }
@@ -142,7 +142,7 @@
                     <li>
                         <a class="item-card search-stop" href="@HelpHref">
                             <div class="item-text">
-                                <div class="item-name">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SearchHelpFor, query.Trim())</div>
+                                <div class="item-name">@F(Strings.Shared.SearchHelpFor, query.Trim())</div>
                             </div>
                         </a>
                     </li>

@@ -2,6 +2,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sharing;
 
@@ -55,7 +56,7 @@ public static class SwapTiles
             var count = group.Sum(p => p.SpareAvailable);
             var (id, frame) = CoverOf(group.Select(p => (p.DisplayName, p.CoverPhotoId)));
             tiles.Add(new SwapTile(group.Key.Name,
-                string.Format(System.Globalization.CultureInfo.CurrentCulture, count == 1 ? Strings.Shared.SwapTileCuttings_One : Strings.Shared.SwapTileCuttings_Other, count, SwapLists.StageText(group.Key.Stage)),
+                F(count == 1 ? Strings.Shared.SwapTileCuttings_One : Strings.Shared.SwapTileCuttings_Other, count, SwapLists.StageText(group.Key.Stage)),
                 "propagation", id, frame));
         }
 
@@ -66,7 +67,7 @@ public static class SwapTiles
             .Select(g =>
             {
                 var (id, frame) = CoverOf(g.Select(p => (p.DisplayName, p.CoverPhotoId)));
-                var detail = onRequest ? Strings.Shared.SwapListOnRequest : g.Count() > 1 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapTilePlants, g.Count()) : Strings.Shared.SwapTilePlant;
+                var detail = onRequest ? Strings.Shared.SwapListOnRequest : g.Count() > 1 ? F(Strings.Shared.SwapTilePlants, g.Count()) : Strings.Shared.SwapTilePlant;
                 return new SwapTile(SwapLists.WithNumber(g.Key.Number, g.Key.Name), detail, "plant", id, frame);
             });
 

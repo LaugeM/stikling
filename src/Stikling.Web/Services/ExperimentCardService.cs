@@ -1,9 +1,9 @@
-using System.Globalization;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
 using Strings = Stikling.Web.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -55,7 +55,7 @@ public sealed class ExperimentCardService(IJSRuntime js) : IAsyncDisposable
         var shown = result.Rows.Take(MaxRows(format)).ToList();
         var left = result.Rows.Count - shown.Count;
         return new ExperimentCardSpec(PictureId, format, kicker, result.Name,
-            left > 0 ? string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardMore, left) : null,
+            left > 0 ? F(Strings.Propagations.ExpCardMore, left) : null,
             [.. shown.Select(row => new ExperimentCardRow(Labels.For(row.Medium), ResultText(row), row.AverageDays,
                 row.PhotoId is { } id ? new SwapCardPhoto(id, row.Frame) : null))]);
     }
@@ -63,9 +63,9 @@ public sealed class ExperimentCardService(IJSRuntime js) : IAsyncDisposable
     // "4 of 4, 21 days", or "0 of 4" when no batch has rooted
     private static string ResultText(ExperimentResultRow row) => row.AverageDays switch
     {
-        null => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardResult, row.Rooted, row.Total),
-        1 => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardResultDays_One, row.Rooted, row.Total, 1),
-        var days => string.Format(CultureInfo.CurrentCulture, Strings.Propagations.ExpCardResultDays_Other, row.Rooted, row.Total, days),
+        null => F(Strings.Propagations.ExpCardResult, row.Rooted, row.Total),
+        1 => F(Strings.Propagations.ExpCardResultDays_One, row.Rooted, row.Total, 1),
+        var days => F(Strings.Propagations.ExpCardResultDays_Other, row.Rooted, row.Total, days),
     };
 
     /// <summary>"stikling-alocasia-corm-test-result.jpg"</summary>

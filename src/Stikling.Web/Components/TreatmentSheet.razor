@@ -20,7 +20,7 @@
     @if (Step is not null)
     {
         <div class="form-text mb-2">
-            @string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TreatStep, StepNumber, Case.PlanSteps.Count, Case.PlanName)
+            @F(Strings.Pests.TreatStep, StepNumber, Case.PlanSteps.Count, Case.PlanName)
             @if (!string.IsNullOrWhiteSpace(Step.Notes))
             {
                 @Step.Notes
@@ -91,7 +91,7 @@
 
     @if (!Check && loaded && recipes.Count == 0)
     {
-        <div class="form-text">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TreatMakeRecipe, $"<a href=\"treatment-recipes\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.TreatRecipesLink)}</a>"))</div>
+        <div class="form-text">@((MarkupString)F(Strings.Pests.TreatMakeRecipe, $"<a href=\"treatment-recipes\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.TreatRecipesLink)}</a>"))</div>
     }
 
     <div class="mt-2">
@@ -255,7 +255,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the treatment failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.TrapCountFailed, ex.Message);
+            error = F(Strings.Pests.TrapCountFailed, ex.Message);
         }
         finally
         {
@@ -263,5 +263,4 @@
         }
     }
 
-    private static string? Clean(string? s) => string.IsNullOrWhiteSpace(s) ? null : s.Trim();
 }

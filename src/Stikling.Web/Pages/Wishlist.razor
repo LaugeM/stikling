@@ -106,7 +106,7 @@ else
                             <div class="wish-choice" role="group" aria-label="@Strings.Orders.WishOnAnOrder">
                                 @foreach (var order in ordersOnTheWay)
                                 {
-                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => AddToOrderAsync(wish, order)">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Orders.WishOrderFrom, order.SellerName)</button>
+                                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => AddToOrderAsync(wish, order)">@F(Strings.Orders.WishOrderFrom, order.SellerName)</button>
                                 }
                                 <a class="btn btn-outline-primary btn-sm" href="orders/new?wish=@wish.Id">@Strings.Orders.ListNew</a>
                             </div>
@@ -115,13 +115,13 @@ else
                     else if (onOrder.TryGetValue(wish.Id, out var wishOrder))
                     {
                         <div class="wish-actions">
-                            <a class="btn btn-link btn-sm wish-on-order" href="orders/@wishOrder.OrderId">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Orders.WishOnOrderFrom, wishOrder.SellerName)</a>
+                            <a class="btn btn-link btn-sm wish-on-order" href="orders/@wishOrder.OrderId">@F(Strings.Orders.WishOnOrderFrom, wishOrder.SellerName)</a>
                         </div>
                     }
                     else
                     {
                         <div class="wish-actions">
-                            <button type="button" class="btn btn-outline-primary btn-sm" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistGotItLabel, wish.DisplayName)" @onclick="() => choosing = wish.Id">@Strings.Shared.WishlistGotIt</button>
+                            <button type="button" class="btn btn-outline-primary btn-sm" aria-label="@F(Strings.Shared.WishlistGotItLabel, wish.DisplayName)" @onclick="() => choosing = wish.Id">@Strings.Shared.WishlistGotIt</button>
                         </div>
                     }
                 </div></li>
@@ -145,15 +145,15 @@ else
                                 <div class="item-sub-plain">@sub</div>
                             }
                             <div class="item-meta wraps">
-                                @(wish.GotOn is { } gotOn ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistGotOn, Labels.Date(gotOn)) : "")
+                                @(wish.GotOn is { } gotOn ? F(Strings.Shared.WishlistGotOn, Labels.Date(gotOn)) : "")
                             </div>
                         </a>
                         <div class="wish-actions">
                             @if (BecameLink(wish) is var (href, label, kind))
                             {
-                                <a class="btn btn-outline-primary btn-sm" href="@href" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistSeeLabel, label)">@kind</a>
+                                <a class="btn btn-outline-primary btn-sm" href="@href" aria-label="@F(Strings.Shared.WishlistSeeLabel, label)">@kind</a>
                             }
-                            <button type="button" class="btn btn-link btn-sm" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistPutBackLabel, wish.DisplayName)" @onclick="() => PutBackAsync(wish)">@Strings.Shared.WishlistPutBack</button>
+                            <button type="button" class="btn btn-link btn-sm" aria-label="@F(Strings.Shared.WishlistPutBackLabel, wish.DisplayName)" @onclick="() => PutBackAsync(wish)">@Strings.Shared.WishlistPutBack</button>
                         </div>
                     </div></li>
                 }
@@ -212,7 +212,7 @@ else
     </div>
     <div class="form-check form-switch mb-3">
         <input type="checkbox" class="form-check-input" id="share-app" role="switch" @bind="shareApp" />
-        <label class="form-check-label" for="share-app">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistShareApp, WishlistText.AppLine)</label>
+        <label class="form-check-label" for="share-app">@F(Strings.Shared.WishlistShareApp, WishlistText.AppLine)</label>
     </div>
     <pre class="wish-preview" aria-label="@Strings.Shared.WishlistSharePreview">@ShareText</pre>
     <div class="d-flex align-items-center gap-3">
@@ -302,7 +302,7 @@ else
         if (wish.BotanicalName is null)
             return null;
         var called = dictionary?.EverydayNames.For(wish.Genus, wish.Species, wish.Cultivar);
-        return !string.IsNullOrWhiteSpace(called) ? called : string.IsNullOrWhiteSpace(wish.Name) ? null : wish.Name.Trim();
+        return !string.IsNullOrWhiteSpace(called) ? called : Clean(wish.Name);
     }
 
     private static string MetaFor(Wish wish)
@@ -311,7 +311,7 @@ else
         if (!string.IsNullOrWhiteSpace(wish.FoundAt))
             parts.Add(wish.FoundAt.Trim());
         if (wish.MostToPay is { } price)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishlistUpTo, price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)));
+            parts.Add(F(Strings.Shared.WishlistUpTo, price.ToString("0.##", System.Globalization.CultureInfo.InvariantCulture)));
         if (!string.IsNullOrWhiteSpace(wish.Notes))
             parts.Add(wish.Notes.Trim());
         return string.Join(" · ", parts);

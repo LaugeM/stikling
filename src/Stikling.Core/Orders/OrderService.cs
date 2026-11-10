@@ -3,6 +3,7 @@ using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 using Stikling.Core.Sellers;
 using Stikling.Core.Wishlist;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Orders;
 
@@ -279,8 +280,6 @@ public sealed class OrderService(
 
         return new UnpackResult(plantIds, propagationIds);
     }
-
-    private static string? Clean(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
 
     /// <summary>Marks an item as not in the box, or takes the mark off. An item that became a plant can't be marked.</summary>
     public async Task SetDidNotComeAsync(Guid itemId, bool didNotCome)

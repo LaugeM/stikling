@@ -67,7 +67,7 @@
 
     private string PerLabel => Label is null
         ? Strings.Supplies.DoseForWaterDefault
-        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.DoseForWater, Label.ToLowerInvariant());
+        : F(Strings.Supplies.DoseForWater, Label.ToLowerInvariant());
 
     private decimal? AmountValue
     {

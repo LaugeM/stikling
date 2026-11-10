@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Wishlist;
 
@@ -12,8 +13,8 @@ public sealed record WishHave(int Same, string? AnotherOf)
 {
     /// <summary>"You have 2" or "You have another Monstera deliciosa". Null when you have nothing like it.</summary>
     public string? Describe() =>
-        Same > 0 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishHaveSame, Same)
-        : AnotherOf is not null ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.WishHaveAnother, AnotherOf)
+        Same > 0 ? F(Strings.Shared.WishHaveSame, Same)
+        : AnotherOf is not null ? F(Strings.Shared.WishHaveAnother, AnotherOf)
         : null;
 }
 

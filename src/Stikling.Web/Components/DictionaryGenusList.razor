@@ -1,6 +1,5 @@
 @* The genera of a group or a family as rows, A to Z, with a letter strip down the side when the list is long.
    Used by the group page and the family page. *@
-@using System.Globalization
 
 <ul class="item-list list-grid dict-genera @(showLetters ? "has-letters" : null)">
     @foreach (var genus in Genera)
@@ -14,7 +13,7 @@
                 </span>
                 @if (have > 0)
                 {
-                    <span class="dict-have">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.YouHave, have)</span>
+                    <span class="dict-have">@F(Strings.Dictionary.YouHave, have)</span>
                 }
             </a>
         </li>

@@ -1,9 +1,9 @@
-using System.Globalization;
 using System.Text;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Away;
 
@@ -76,7 +76,7 @@ public static class SitterSheetText
             foreach (var visit in sheet.ByVisit)
             {
                 text.AppendLine();
-                text.AppendLine(CareText.F(Strings.Care.SitterTextVisit, LongDay(visit.Date), visit.Count));
+                text.AppendLine(F(Strings.Care.SitterTextVisit, LongDay(visit.Date), visit.Count));
                 foreach (var group in visit.Groups)
                 {
                     text.AppendLine(group.Heading);
@@ -95,20 +95,20 @@ public static class SitterSheetText
                 text.AppendLine();
                 text.AppendLine(subject.Species is { } species ? $"{subject.Label} ({species})" : subject.Label);
                 if (subject.Place is { } place)
-                    text.AppendLine(CareText.F(Strings.Care.SitterTextWhere, place));
+                    text.AppendLine(F(Strings.Care.SitterTextWhere, place));
                 if (subject.How is { } how)
-                    text.AppendLine(CareText.F(Strings.Care.SitterTextHow, how));
+                    text.AppendLine(F(Strings.Care.SitterTextHow, how));
                 if (subject.Meter is { } meter)
                     text.AppendLine(meter);
                 if (subject.Pace is { } pace)
                     text.AppendLine(pace);
                 if (subject.Note is { } subjectNote)
-                    text.AppendLine(CareText.F(Strings.Care.SitterTextNote, subjectNote));
+                    text.AppendLine(F(Strings.Care.SitterTextNote, subjectNote));
 
                 if (subject.CheckNote is { } check)
                     text.AppendLine(check);
                 else if (sheet.Layout == SheetLayout.Labels)
-                    text.AppendLine(CareText.F(Strings.Care.SitterTextCheckOn, string.Join(", ", subject.Visits.Select(LongDay))));
+                    text.AppendLine(F(Strings.Care.SitterTextCheckOn, string.Join(", ", subject.Visits.Select(LongDay))));
             }
         }
 

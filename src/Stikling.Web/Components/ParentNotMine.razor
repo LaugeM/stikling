@@ -75,7 +75,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a parent that isn't yours failed");
-            errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.PlantDetail.CouldntSave, ex.Message)];
+            errors = [F(Strings.PlantDetail.CouldntSave, ex.Message)];
         }
         finally
         {

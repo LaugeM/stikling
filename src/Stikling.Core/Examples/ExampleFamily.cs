@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Examples;
 
@@ -124,7 +125,7 @@ public static class ExampleFamily
             FromPropagationId = FirstCuttingId,
             CoverPhotoId = YoungPlantPhotoId,
             CreatedAt = NoonOn(Ago(28)),
-            Notes = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Examples.YoungNotes, MotherNickname)
+            Notes = F(Strings.Examples.YoungNotes, MotherNickname)
         };
 
         Propagation Cutting(Guid id, string nickname, int startedAgo) => new()

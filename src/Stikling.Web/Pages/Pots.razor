@@ -193,7 +193,7 @@
                     <LengthInput id="pot-rim" class="form-control" min="0" Millimetres="true" @bind-Value="draft.RimMm" />
                     @if (draft.InsideTopCm is { } inside)
                     {
-                        <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideResult, Lengths.Cm(inside))</div>
+                        <div class="form-text">@F(Strings.Supplies.PotsInsideResult, Lengths.Cm(inside))</div>
                     }
                     <div class="form-text">@Strings.Supplies.PotsRimHint</div>
                 </div>
@@ -294,7 +294,7 @@ else
                                 @if (covers.GetValueOrDefault(use.Pot.Id) is { } cover)
                                 {
                                     <button type="button" class="pot-thumb" @onclick="() => OpenPhotosAsync(use.Pot)"
-                                            aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)">
+                                            aria-label="@F(Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)">
                                         <PhotoImage PhotoId="cover.Id" />
                                     </button>
                                 }
@@ -503,11 +503,8 @@ else
     private static bool Same(string? a, string? b) =>
         string.Equals(a?.Trim(), b?.Trim(), StringComparison.OrdinalIgnoreCase);
 
-    private static string F(string format, params object[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
     private static string SizeText(Pot pot) => pot.TopCm is { } top
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSizeCm, Lengths.Cm(top))
+        ? F(Strings.Supplies.PotsSizeCm, Lengths.Cm(top))
         : Strings.Supplies.PotsNoSize;
 
     /// <summary>The muted line beside a pot: what it's made of, and anything unusual about it.</summary>
@@ -515,13 +512,13 @@ else
     {
         var parts = new List<string> { Labels.For(pot.Material) };
         if (pot.SelfWatering is { } watering)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsSelfWatering, Labels.For(watering).ToLowerInvariant()));
+            parts.Add(F(Strings.Supplies.PotsSelfWatering, Labels.For(watering).ToLowerInvariant()));
         if (pot.HasRim)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsRimMm, Lengths.Mm(pot.RimMm!.Value)));
+            parts.Add(F(Strings.Supplies.PotsRimMm, Lengths.Mm(pot.RimMm!.Value)));
         if (pot.InsideTopCm is { } inside)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsInsideCm, Lengths.Cm(inside)));
+            parts.Add(F(Strings.Supplies.PotsInsideCm, Lengths.Cm(inside)));
         if (pot.HeightCm is { } height)
-            parts.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsTallCm, Lengths.Cm(height)));
+            parts.Add(F(Strings.Supplies.PotsTallCm, Lengths.Cm(height)));
         return string.Join(" · ", parts);
     }
 
@@ -607,7 +604,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a new pot failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Supplies.PotsPhotosFailed, ex.Message);
         }
         finally
         {
@@ -650,7 +647,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a pot failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.PotsPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Supplies.PotsPhotosFailed, ex.Message);
         }
         finally
         {

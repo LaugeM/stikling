@@ -96,7 +96,7 @@
                                value="@TextOf(nutrient)" @oninput="e => texts[nutrient] = e.Value?.ToString() ?? string.Empty" />
                         <span class="input-group-text">%</span>
                     </div>
-                    <button type="button" class="nutrient-remove" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
+                    <button type="button" class="nutrient-remove" aria-label="@F(Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
                             @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                 </div>
             }
@@ -300,7 +300,7 @@ else
                 continue;
             if (!decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var percent))
             {
-                errors = [string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.ProductNumberError, Labels.For(nutrient))];
+                errors = [F(Strings.Supplies.ProductNumberError, Labels.For(nutrient))];
                 showErrors = true;
                 return false;
             }
@@ -312,12 +312,12 @@ else
 
     /// <summary>"used on 4 plants, last 12 Sep 2026".</summary>
     private static string Used(ProductUse use) => use.LastUsed is { } last
-        ? string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductUsed, Labels.Plants(use.Plants), Labels.Date(last))
+        ? F(Strings.Supplies.ProductUsed, Labels.Plants(use.Plants), Labels.Date(last))
         : Strings.Supplies.ProductNotLogged;
 
     private static string DeleteWarning(ProductUse use) => use.Plants == 0
-        ? string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductDeleteConfirm, use.Product.Name)
-        : string.Format(CultureInfo.CurrentCulture, Strings.Supplies.ProductDeleteLogged, use.Product.Name, Labels.Plants(use.Plants));
+        ? F(Strings.Supplies.ProductDeleteConfirm, use.Product.Name)
+        : F(Strings.Supplies.ProductDeleteLogged, use.Product.Name, Labels.Plants(use.Plants));
 
     private void StartNew()
     {
@@ -350,7 +350,7 @@ else
             return;
 
         draft.Name = draft.Name?.Trim();
-        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+        draft.Notes = Clean(draft.Notes);
 
         if (!TryReadNutrients(draft))
             return;

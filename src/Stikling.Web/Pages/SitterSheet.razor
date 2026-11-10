@@ -1,6 +1,5 @@
 @page "/sitter-sheet"
 @implements IDisposable
-@using System.Globalization
 @* The page has the model's name, so the model is called by another *@
 @using SheetChoices = Stikling.Core.Models.SitterSheet
 @inject SitterSheetService SheetService
@@ -49,7 +48,7 @@
                 <div class="sitter-stretch">
                     @if (view.From is not null && view.Until is not null)
                     {
-                        <span>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterAway, SitterSheetText.Day(view.From.Value), SitterSheetText.Day(view.Until.Value)))</span>
+                        <span>@(F(Strings.Care.SitterAway, SitterSheetText.Day(view.From.Value), SitterSheetText.Day(view.Until.Value)))</span>
                         <a class="link-action" href="@ChangeLink">@Strings.Care.SitterChange</a>
                     }
                     else
@@ -157,7 +156,7 @@
                                     </div>
                                     @if (candidate.TopWatered)
                                     {
-                                        <select class="form-select form-select-sm" aria-label="@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterWateredHow, candidate.Name))"
+                                        <select class="form-select form-select-sm" aria-label="@(F(Strings.Care.SitterWateredHow, candidate.Name))"
                                                 @onchange="e => SetWaterByAsync(candidate.Id, e.Value?.ToString())">
                                             <option value="" selected="@(candidate.WaterBy is null)">@Strings.Care.SitterNotSaid</option>
                                             @foreach (var method in Enum.GetValues<WaterMethod>())
@@ -175,7 +174,7 @@
 
             @if (view.DueBeforeYouGo.Count > 0 && view.From > Today)
             {
-                <p class="sitter-note">@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterDueBeforeYouGo, string.Join(", ", view.DueBeforeYouGo)))</p>
+                <p class="sitter-note">@(F(Strings.Care.SitterDueBeforeYouGo, string.Join(", ", view.DueBeforeYouGo)))</p>
             }
             @if (!view.AnyPace && view.Subjects.Any(s => s.IsPlant))
             {
@@ -232,7 +231,7 @@
 
     private string ChangeLink => span is { Stretches.Count: 1 } one ? $"away/{one.Stretches[0].Id}" : "away";
 
-    private string ListSummary => view is null ? "" : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterListSummary, view.Candidates.Count(c => c.OnSheet), view.Candidates.Count);
+    private string ListSummary => view is null ? "" : F(Strings.Care.SitterListSummary, view.Candidates.Count(c => c.OnSheet), view.Candidates.Count);
 
     protected override async Task OnInitializedAsync()
     {
@@ -472,7 +471,7 @@
         @foreach (var visit in sheetView.ByVisit)
         {
             <section class="sheet-visit">
-                <h3>@SitterSheetText.LongDay(visit.Date) <small>@(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SitterToCheck, visit.Count))</small></h3>
+                <h3>@SitterSheetText.LongDay(visit.Date) <small>@(F(Strings.Care.SitterToCheck, visit.Count))</small></h3>
                 @if (visit.Count == 0)
                 {
                     <p class="sheet-none">@Strings.Care.SitterNothingToCheck</p>

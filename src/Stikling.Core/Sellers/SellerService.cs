@@ -2,6 +2,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sellers;
 
@@ -119,7 +120,7 @@ public sealed class SellerService(ISellerRepository sellers, IPlantRepository pl
         var (fromPlants, fromPropagations) = renamed ? await FromAsync(all, seller.Id) : ([], []);
         seller.Name = cleaned!;
         seller.Kind = kind;
-        seller.Notes = string.IsNullOrWhiteSpace(notes) ? null : notes.Trim();
+        seller.Notes = Clean(notes);
         await sellers.SaveAsync(seller);
 
         if (renamed)

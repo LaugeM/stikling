@@ -15,8 +15,7 @@
 
 @code {
     // "from <link>": the link goes where {0} is
-    private MarkupString SourceText(string url) => (MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture,
-        Strings.Plants.CareOfferFrom,
+    private MarkupString SourceText(string url) => (MarkupString)F(Strings.Plants.CareOfferFrom,
         $"<a href=\"{System.Net.WebUtility.HtmlEncode(url)}\" target=\"_blank\" rel=\"noopener\">{System.Net.WebUtility.HtmlEncode(Book.SourceName(url))}</a>");
 
     [Parameter] public PlantCare? Care { get; set; }

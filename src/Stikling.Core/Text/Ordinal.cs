@@ -1,5 +1,5 @@
-using System.Globalization;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Text;
 
@@ -20,6 +20,6 @@ public static class Ordinal
                 3 => Strings.Shared.OrdinalRd,
                 _ => Strings.Shared.OrdinalTh
             };
-        return string.Format(CultureInfo.CurrentCulture, format, number);
+        return F(format, number);
     }
 }

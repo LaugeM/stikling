@@ -33,7 +33,7 @@ else
                 {
                     <li>
                         <a class="flowering-plant" href="plants/@item.Plant.Id">@item.Plant.DisplayName</a>
-                        <span class="flowering-when">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.FloweringSince, FloweringText.Date(item.Since, Today.Year))</span>
+                        <span class="flowering-when">@F(Strings.Pests.FloweringSince, FloweringText.Date(item.Since, Today.Year))</span>
                     </li>
                 }
                 @foreach (var item in calendar.BudsNow)
@@ -50,7 +50,7 @@ else
     @if (calendar.UsuallyNextMonth.Count > 0)
     {
         <section class="flowering-section">
-            <h2>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.FloweringUsuallyIn, FloweringText.MonthName(calendar.NextMonth))</h2>
+            <h2>@F(Strings.Pests.FloweringUsuallyIn, FloweringText.MonthName(calendar.NextMonth))</h2>
             <ul class="flowering-list flowering-grid">
                 @foreach (var item in calendar.UsuallyNextMonth)
                 {

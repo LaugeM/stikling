@@ -1,4 +1,5 @@
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -59,7 +60,7 @@ public static class PlantNames
 
     /// <summary>The locality or collector code, trimmed. Null when nothing was typed.</summary>
     public static string? Note(string? note) =>
-        string.IsNullOrWhiteSpace(note) ? null : note.Trim();
+        Clean(note);
 
     /// <summary>
     /// The species to look things up by: none for sp. and a lost name, since a stored species

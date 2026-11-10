@@ -25,9 +25,9 @@
     @* Shown while a new room is still being typed too, so a spot can be picked without saving the room first *@
     @if (PickedRoom is { } room1)
     {
-        <div class="room-chips spots" role="group" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomPickerSpotIn, room1)">
+        <div class="room-chips spots" role="group" aria-label="@F(Strings.Shared.RoomPickerSpotIn, room1)">
             <button type="button" class="room-chip @Picked(PickedSpot is null && !typingSpot)"
-                    @onclick="() => PickSpotAsync(null)">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomPickerAnywhere, room1)</button>
+                    @onclick="() => PickSpotAsync(null)">@F(Strings.Shared.RoomPickerAnywhere, room1)</button>
             @foreach (var spot in SpotNames)
             {
                 <button type="button" class="room-chip @Picked(!typingSpot && RoomName.Same(spot, PickedSpot))"
@@ -38,7 +38,7 @@
 
         @if (typingSpot)
         {
-            <input class="form-control mt-2" placeholder="@SpotPlaceholderText" autocomplete="off" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNewSpotIn, room1)"
+            <input class="form-control mt-2" placeholder="@SpotPlaceholderText" autocomplete="off" aria-label="@F(Strings.Shared.RoomsNewSpotIn, room1)"
                    value="@draft" @oninput="TypeSpotAsync" @ref="draftInput" />
         }
     }

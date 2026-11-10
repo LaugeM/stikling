@@ -234,7 +234,7 @@
     private bool IsReservoir => choice == ReservoirChoice && OffersReservoir;
 
     private string SubmitText =>
-        PlantIds.Count == 1 ? Strings.Care.SheetLogIt : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.SheetLogFor, Labels.Plants(PlantIds.Count));
+        PlantIds.Count == 1 ? Strings.Care.SheetLogIt : F(Strings.Care.SheetLogFor, Labels.Plants(PlantIds.Count));
 
     // Topping up a reservoir is called refilling, the same as the tick on the watering screen
     private string KindLabel(CareKind value) =>

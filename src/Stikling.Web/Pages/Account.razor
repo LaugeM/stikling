@@ -34,7 +34,7 @@ else if (account is { SignedIn: true })
     </p>
     @if (photoUsage is { } usage && usage.UsedBytes >= 0.8 * usage.LimitBytes)
     {
-        <p class="settings-hint">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountPhotoUsage, Labels.Bytes(usage.UsedBytes), Labels.Bytes(usage.LimitBytes))</p>
+        <p class="settings-hint">@F(Strings.Account.AccountPhotoUsage, Labels.Bytes(usage.UsedBytes), Labels.Bytes(usage.LimitBytes))</p>
     }
     @if (SyncProblem is { } problem)
     {
@@ -337,8 +337,8 @@ else
     private string SyncLine => (Sync.Running, Sync.LastSynced) switch
     {
         (true, _) => Strings.Account.AccountSyncing,
-        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountSyncedAt, Labels.Time(at)),
-        (_, { } at) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Account.AccountSyncedOn, Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))),
+        (_, { } at) when at.ToLocalTime().Date == Time.GetLocalNow().Date => F(Strings.Account.AccountSyncedAt, Labels.Time(at)),
+        (_, { } at) => F(Strings.Account.AccountSyncedOn, Labels.Date(DateOnly.FromDateTime(at.ToLocalTime().DateTime))),
         _ => Strings.Account.AccountNotSynced
     };
 

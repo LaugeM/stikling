@@ -1,5 +1,5 @@
-using System.Globalization;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Problems;
 
@@ -76,24 +76,24 @@ public static class SymptomText
     public static string DaysAgo(int days) =>
         days <= 0
             ? Strings.Symptoms.FactToday
-            : string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactAgo, ProblemText.Duration(days));
+            : F(Strings.Symptoms.FactAgo, ProblemText.Duration(days));
 
-    public static string Arrived(int days) => string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactArrived, DaysAgo(days));
+    public static string Arrived(int days) => F(Strings.Symptoms.FactArrived, DaysAgo(days));
 
-    public static string Repotted(int days) => string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactRepotted, DaysAgo(days));
+    public static string Repotted(int days) => F(Strings.Symptoms.FactRepotted, DaysAgo(days));
 
-    public static string Moved(int days) => string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactMoved, DaysAgo(days));
+    public static string Moved(int days) => F(Strings.Symptoms.FactMoved, DaysAgo(days));
 
     public static string Meter(int reading, int days) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactMeter, reading, DaysAgo(days));
+        F(Strings.Symptoms.FactMeter, reading, DaysAgo(days));
 
-    public static string Watered(int days) => string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactWateredRecently, DaysAgo(days));
+    public static string Watered(int days) => F(Strings.Symptoms.FactWateredRecently, DaysAgo(days));
 
     public static string LongerThanUsual(int daysSince, int usual) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactLongerThanUsual,
+        F(Strings.Symptoms.FactLongerThanUsual,
             ProblemText.Duration(daysSince), ProblemText.Duration(usual));
 
-    public static string FedOften(int days) => string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FactFedOften, days);
+    public static string FedOften(int days) => F(Strings.Symptoms.FactFedOften, days);
 
     /// <summary>The text of a fact that needs no number.</summary>
     public static string Plain(SymptomFactKind kind) => kind switch
@@ -117,5 +117,5 @@ public static class SymptomText
 
     /// <summary>"From the meter reading on 3 Nov".</summary>
     public static string FromMeter(DateOnly day) =>
-        string.Format(CultureInfo.CurrentCulture, Strings.Symptoms.FromMeter, ProblemText.ShortDay(day));
+        F(Strings.Symptoms.FromMeter, ProblemText.ShortDay(day));
 }

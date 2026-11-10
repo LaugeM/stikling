@@ -6,7 +6,7 @@
 @inject RoomService RoomService
 @inject TimeProvider Time
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, Strings.Plants.CollectionTitle)</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, Strings.Plants.CollectionTitle)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="plants">@Strings.Plants.ListTitle</a>
@@ -79,7 +79,7 @@ else
                 </ul>
                 @if (!showAllGenera && summary.ByGenus.Count > Preview)
                 {
-                    <button type="button" class="btn btn-link show-all" @onclick="() => showAllGenera = true">@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.ShowAll, summary.ByGenus.Count)</button>
+                    <button type="button" class="btn btn-link show-all" @onclick="() => showAllGenera = true">@F(Strings.PlantDetail.ShowAll, summary.ByGenus.Count)</button>
                 }
             </section>
 
@@ -115,7 +115,7 @@ else
                             </ul>
                             @if (!showAllRooms && summary.ByRoom.Count > Preview)
                             {
-                                <button type="button" class="btn btn-link show-all" @onclick="() => showAllRooms = true">@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.ShowAll, summary.ByRoom.Count)</button>
+                                <button type="button" class="btn btn-link show-all" @onclick="() => showAllRooms = true">@F(Strings.PlantDetail.ShowAll, summary.ByRoom.Count)</button>
                             }
                         </section>
                     }

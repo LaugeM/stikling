@@ -1,5 +1,4 @@
 @* One row in a propagation list: "3× corm · LECA · day 24". In select mode the card is a checkbox instead of a link. *@
-@using System.Globalization
 @using Stikling.Core.Selection
 @inject TimeProvider Time
 @inject PlantNameService Names
@@ -59,7 +58,7 @@ else
         <div class="item-name"><NumberTag Code="@Propagation.CollectionNumber" />@Propagation.DisplayName</div>
         @if (ParentName is not null)
         {
-            <div class="item-sub">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardFrom, ParentName)</div>
+            <div class="item-sub">@F(Strings.Propagations.CardFrom, ParentName)</div>
         }
         else if (!string.IsNullOrWhiteSpace(Propagation.Nickname) && Propagation.BotanicalName is { } botanical)
         {
@@ -82,7 +81,7 @@ else
                 }
                 @if (Propagation.SpareAvailable > 0)
                 {
-                    <span class="badge swap-badge">@string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardToSwap, Propagation.SpareAvailable)</span>
+                    <span class="badge swap-badge">@F(Strings.Propagations.CardToSwap, Propagation.SpareAvailable)</span>
                 }
                 <span>@Labels.Summary(Propagation)</span>
                 @if (Propagation.DaysToRoot is { } days)
@@ -91,7 +90,7 @@ else
                 }
                 @if (Propagation.RemainingCount != Propagation.InitialCount)
                 {
-                    <span>· @string.Format(CultureInfo.CurrentCulture, Strings.Propagations.CardLeft, Propagation.RemainingCount)</span>
+                    <span>· @F(Strings.Propagations.CardLeft, Propagation.RemainingCount)</span>
                 }
                 @if (Pace is { IsSlow: true })
                 {

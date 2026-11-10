@@ -1,6 +1,7 @@
 using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Plants;
 
@@ -134,8 +135,8 @@ public static class PlantLineage
     /// </summary>
     public static string ParentLabel(Plant plant) =>
         !plant.LivesElsewhere ? plant.DisplayName
-        : plant.LivesWithName is { } owner ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ParentLivesWith, plant.DisplayName, owner)
-        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ParentNotYours, plant.DisplayName);
+        : plant.LivesWithName is { } owner ? F(Strings.Plants.ParentLivesWith, plant.DisplayName, owner)
+        : F(Strings.Plants.ParentNotYours, plant.DisplayName);
 
     /// <summary>
     /// What a plant has given: units taken per propagation type, how many of them rooted, the

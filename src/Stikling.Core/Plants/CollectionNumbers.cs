@@ -2,6 +2,7 @@ using System.Text.RegularExpressions;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Plants;
 
@@ -27,21 +28,21 @@ public sealed record NumberAllPlan(IReadOnlyList<NumberedPlant> Plants, IReadOnl
             var plants = Plants.Count switch
             {
                 0 => null,
-                1 => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumbersOnePlant, Plants[0].Code),
-                var n => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumbersPlants, n, Plants[0].Code, Plants[^1].Code)
+                1 => F(Strings.Plants.NumbersOnePlant, Plants[0].Code),
+                var n => F(Strings.Plants.NumbersPlants, n, Plants[0].Code, Plants[^1].Code)
             };
             var cuttings = Cuttings.Count switch
             {
                 0 => null,
                 1 => Strings.Plants.GoingCuttingOne,
-                var n => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.GoingCuttings, n)
+                var n => F(Strings.Plants.GoingCuttings, n)
             };
             return (plants, cuttings) switch
             {
                 (null, null) => Strings.Plants.NumberAllNone,
-                ({ } p, null) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllPlantsOnly, p),
-                (null, { } c) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllCuttingsOnly, c),
-                ({ } p, { } c) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.NumberAllBoth, p, c)
+                ({ } p, null) => F(Strings.Plants.NumberAllPlantsOnly, p),
+                (null, { } c) => F(Strings.Plants.NumberAllCuttingsOnly, c),
+                ({ } p, { } c) => F(Strings.Plants.NumberAllBoth, p, c)
             };
         }
     }
@@ -178,8 +179,7 @@ public static partial class CollectionNumbers
 
     /// <summary>"Big Monstera also has #117." or "Big Monstera, Small Monstera also have #117."</summary>
     public static string ClashNote(string code, IReadOnlyList<CodeClash> clashes) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture,
-            clashes.Count == 1 ? Strings.Plants.ClashHas : Strings.Plants.ClashHave,
+        F(clashes.Count == 1 ? Strings.Plants.ClashHas : Strings.Plants.ClashHave,
             string.Join(", ", clashes.Select(c => c.Name)), Normalize(code));
 
     /// <summary>

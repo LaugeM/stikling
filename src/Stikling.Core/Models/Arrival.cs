@@ -1,6 +1,7 @@
 using Strings = Stikling.Core.Resources;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -103,6 +104,6 @@ public static class Arrival
         if (rating != ArrivalRating.Poor)
             return null;
         var list = problems.Select(Text).ToList();
-        return list.Count == 0 ? Strings.Plants.ArrivedPoor : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Plants.ArrivedPoorWith, string.Join(", ", list));
+        return list.Count == 0 ? Strings.Plants.ArrivedPoor : F(Strings.Plants.ArrivedPoorWith, string.Join(", ", list));
     }
 }

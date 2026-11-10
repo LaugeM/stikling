@@ -58,7 +58,7 @@ else
     }
     else if (confirmingRemove)
     {
-        <p>@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsRemoveConfirm, field.Name, Labels.Plants(UseCount(field)))</p>
+        <p>@F(Strings.Shared.OwnFieldsRemoveConfirm, field.Name, Labels.Plants(UseCount(field)))</p>
         <div class="care-actions">
             <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
             <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingRemove = false">@Strings.Common.Cancel</button>
@@ -91,7 +91,7 @@ else
                 @if (notFitting > 0)
                 {
                     <div class="form-text">
-                        @string.Format(System.Globalization.CultureInfo.CurrentCulture, notFitting == 1 ? Strings.Shared.OwnFieldsNotFitting_One : Strings.Shared.OwnFieldsNotFitting_Other, notFitting, pendingKind == OwnFieldKind.Number ? Strings.Shared.OwnFieldsAsNumber : Strings.Shared.OwnFieldsAsDate)
+                        @F(notFitting == 1 ? Strings.Shared.OwnFieldsNotFitting_One : Strings.Shared.OwnFieldsNotFitting_Other, notFitting, pendingKind == OwnFieldKind.Number ? Strings.Shared.OwnFieldsAsNumber : Strings.Shared.OwnFieldsAsDate)
                     </div>
                 }
                 else if (pendingKind == OwnFieldKind.Choice && field.Choices.Count == 0)
@@ -119,9 +119,9 @@ else
                         <li>
                             @if (renamingChoice == choice)
                             {
-                                <input class="form-control form-control-sm" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceNewName, choice)" autocomplete="off"
+                                <input class="form-control form-control-sm" aria-label="@F(Strings.Shared.OwnFieldsChoiceNewName, choice)" autocomplete="off"
                                        maxlength="@OwnField.MaxNameLength" value="@renameTo" @oninput="e => renameTo = e.Value?.ToString() ?? string.Empty" />
-                                <div class="form-text">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceRenameNote, choice)</div>
+                                <div class="form-text">@F(Strings.Shared.OwnFieldsChoiceRenameNote, choice)</div>
                                 <div class="care-actions">
                                     <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || string.IsNullOrWhiteSpace(renameTo))"
                                             @onclick="() => RenameChoiceAsync(choice)">@Strings.Shared.OwnFieldsRename</button>
@@ -197,7 +197,7 @@ else
     private int UseCount(OwnField field) => useCounts.GetValueOrDefault(field.Id);
 
     private string UseText(OwnField field) =>
-        UseCount(field) == 0 ? Strings.Shared.OwnFieldsOnNone : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsOn, Labels.Plants(UseCount(field)));
+        UseCount(field) == 0 ? Strings.Shared.OwnFieldsOnNone : F(Strings.Shared.OwnFieldsOn, Labels.Plants(UseCount(field)));
 
     private static string KindName(OwnFieldKind kind) => kinds.First(k => k.Value == kind).Text;
 
@@ -211,7 +211,7 @@ else
 
     private static string KindText(OwnField field) =>
         field.Kind == OwnFieldKind.Choice && field.Choices.Count > 0
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.OwnFieldsChoiceList, string.Join(", ", field.Choices))
+            ? F(Strings.Shared.OwnFieldsChoiceList, string.Join(", ", field.Choices))
             : KindName(field.Kind);
 
     private void StartNew()

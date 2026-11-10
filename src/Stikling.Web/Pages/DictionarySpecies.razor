@@ -1,10 +1,9 @@
 @page "/dictionary/{Genus}/{Species}"
 @layout WideLayout
-@using System.Globalization
 @inject DictionaryService Dictionary
 @inject PlantRegionService Regions
 
-<PageTitle>@string.Format(CultureInfo.CurrentCulture, Strings.PlantDetail.PageTitle, entry is null ? Strings.Dictionary.Title : $"{entry.Genus} {entry.Name}")</PageTitle>
+<PageTitle>@F(Strings.PlantDetail.PageTitle, entry is null ? Strings.Dictionary.Title : $"{entry.Genus} {entry.Name}")</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
 @if (browser is null)
@@ -79,7 +78,7 @@ else
             @if (entry.Cultivars.Count > 0)
             {
                 <section class="dict-section" aria-labelledby="dict-cultivars">
-                    <h2 class="section-label" id="dict-cultivars">@string.Format(CultureInfo.CurrentCulture, Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
+                    <h2 class="section-label" id="dict-cultivars">@F(Strings.Dictionary.CultivarsHeading, entry.Cultivars.Count)</h2>
                     <div class="dict-rows">
                         <VirtualGrid Items="cultivars" RowSize="RowSize">
 <ItemTemplate Context="cultivar">

@@ -154,9 +154,6 @@ else
     [Parameter]
     public Guid Id { get; set; }
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
     private Plant? plant;
     private FamilyTree? tree;
     private bool loaded;

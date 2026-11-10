@@ -50,7 +50,7 @@
             }
             @if (Problem is null)
             {
-                <p class="form-text mb-0">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetBugsQuestion, $"<a href=\"pests/new?plant={Plant.Id}\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.SheetOpenPestCase)}</a>"))</p>
+                <p class="form-text mb-0">@((MarkupString)F(Strings.Pests.SheetBugsQuestion, $"<a href=\"pests/new?plant={Plant.Id}\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.SheetOpenPestCase)}</a>"))</p>
             }
         </div>
 
@@ -331,7 +331,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding photos to a problem failed");
-            photoStatus = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.SheetPhotosFailed, ex.Message);
+            photoStatus = F(Strings.Pests.SheetPhotosFailed, ex.Message);
         }
 
         busy = false;
@@ -417,7 +417,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a problem failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntSave, ex.Message);
+            error = F(Strings.Pests.CouldntSave, ex.Message);
         }
         busy = false;
     }
@@ -442,7 +442,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting a problem update failed");
-            error = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Pests.CouldntDelete, ex.Message);
+            error = F(Strings.Pests.CouldntDelete, ex.Message);
         }
         busy = false;
     }

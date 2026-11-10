@@ -55,7 +55,7 @@
                             var current = choice.Id == selectedId;
                             <li>
                                 <button type="button" class="camera-choice @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
-                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))"
+                                        aria-label="@F(Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))"
                                         @onclick="() => selectedId = choice.Id">
                                     <PhotoImage PhotoId="choice.Id" />
                                 </button>

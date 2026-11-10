@@ -1,6 +1,7 @@
 using Stikling.Core.Models;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Leaves;
 
@@ -116,6 +117,4 @@ public sealed class LeafService(ILeafRepository leaves, ITimelineRepository time
         if (leaf.Validate(Today).FirstOrDefault() is { } error)
             throw new ArgumentException(error);
     }
-
-    private static string? Clean(string? note) => string.IsNullOrWhiteSpace(note) ? null : note.Trim();
 }

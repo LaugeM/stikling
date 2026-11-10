@@ -4,4 +4,4 @@
 <PageTitle>@Strings.Shared.NotFoundPageTitle</PageTitle>
 
 <h1>@Strings.Shared.NotFoundTitle</h1>
-<p>@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.NotFoundText, $"<a href=\"\">{Strings.Shared.NotFoundGoToToday}</a>"))</p>
+<p>@((MarkupString)F(Strings.Shared.NotFoundText, $"<a href=\"\">{Strings.Shared.NotFoundGoToToday}</a>"))</p>

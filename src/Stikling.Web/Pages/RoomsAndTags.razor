@@ -42,7 +42,7 @@
                             {
                                 <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">@Strings.Shared.RoomsGoRound</a>
                             }
-                            <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@r.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsHistoryOf, r.Name)">@Strings.Shared.RoomsHistory</a>
+                            <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@r.Id" aria-label="@F(Strings.Shared.RoomsHistoryOf, r.Name)">@Strings.Shared.RoomsHistory</a>
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => renaming = r.Id">@Strings.Shared.RoomsRename</button>
                             @if (r.Total == 0)
@@ -69,7 +69,7 @@
                                 <div class="room-row">
                                     <span class="room-name">@spot.Name</span>
                                     <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
-                                    <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@spot.Id" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsHistoryOf, spot.Place)">@Strings.Shared.RoomsHistory</a>
+                                    <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@spot.Id" aria-label="@F(Strings.Shared.RoomsHistoryOf, spot.Place)">@Strings.Shared.RoomsHistory</a>
                                     <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                             @onclick="() => renaming = spot.Id">@Strings.Shared.RoomsRename</button>
                                     @if (spot.Total == 0)
@@ -87,7 +87,7 @@
                     <div class="room-spot">
                         @if (addingSpotIn == r.Id)
                         {
-                            <RoomRenameRow Label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNewSpotIn, r.Name)" Busy="busy"
+                            <RoomRenameRow Label="@F(Strings.Shared.RoomsNewSpotIn, r.Name)" Busy="busy"
                                            OnSave="name => AddPlaceAsync(r.Id, name)" OnCancel="StopAddingRoom" />
                         }
                         else
@@ -163,7 +163,7 @@
         var id = $"light-{placeId}";
         <div class="form-check form-switch room-light">
             <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@busy"
-                   aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsGrowLightIn, name)"
+                   aria-label="@F(Strings.Shared.RoomsGrowLightIn, name)"
                    checked="@lit.Contains(placeId)" @onchange="e => SetLitAsync(placeId, e.Value is true)" />
             <label class="form-check-label" for="@id">@Strings.Shared.RoomsGrowLight</label>
         </div>
@@ -172,7 +172,7 @@
     private RenderFragment OutdoorsSwitch(Guid placeId, string name, bool roomIsOutdoors) => __builder =>
     {
         var id = $"outdoors-{placeId}";
-        var label = string.Format(System.Globalization.CultureInfo.CurrentCulture, roomIsOutdoors ? Strings.Shared.RoomsOutdoorsBecauseRoom : Strings.Shared.RoomsOutdoorsFor, name);
+        var label = F(roomIsOutdoors ? Strings.Shared.RoomsOutdoorsBecauseRoom : Strings.Shared.RoomsOutdoorsFor, name);
         <div class="form-check form-switch room-light">
             <input class="form-check-input" type="checkbox" role="switch" id="@id" disabled="@(busy || roomIsOutdoors)"
                    aria-label="@label"
@@ -194,7 +194,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Changing whether a room or spot is outdoors failed");
-            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsSaveError, ex.Message);
+            roomMessage = F(Strings.Shared.RoomsSaveError, ex.Message);
         }
 
         busy = false;
@@ -213,7 +213,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Changing whether a spot has a grow light failed");
-            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsLightError, ex.Message);
+            roomMessage = F(Strings.Shared.RoomsLightError, ex.Message);
         }
 
         busy = false;
@@ -359,7 +359,7 @@
             var written = (await RoomService.GetPlacesAsync()).NameOf(place.Id);
             rooms = await RoomService.GetAllAsync();
         placeInfo = await RoomService.GetPlacesAsync();
-            roomMessage = existed ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsAlreadyThere, written) : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsAdded, written);
+            roomMessage = existed ? F(Strings.Shared.RoomsAlreadyThere, written) : F(Strings.Shared.RoomsAdded, written);
             StopAddingRoom();
         }
         catch (ArgumentException ex)
@@ -381,12 +381,12 @@
             await RoomService.RemoveAsync(id);
             rooms = await RoomService.GetAllAsync();
         placeInfo = await RoomService.GetPlacesAsync();
-            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRemoved, name);
+            roomMessage = F(Strings.Shared.RoomsRemoved, name);
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Removing a room or spot failed");
-            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRemoveError, ex.Message);
+            roomMessage = F(Strings.Shared.RoomsRemoveError, ex.Message);
         }
 
         busy = false;
@@ -402,14 +402,14 @@
             var changed = await PlantService.AddTagsAsync(chosen, [name]);
             tags = PlantTags.InUse(await Plants.GetAllAsync());
             tagMessage = changed == 0
-                ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagAlready, Labels.Plants(chosen.Count), name)
-                : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagged, Labels.Plants(changed));
+                ? F(Strings.Shared.RoomsTagAlready, Labels.Plants(chosen.Count), name)
+                : F(Strings.Shared.RoomsTagged, Labels.Plants(changed));
             StopAddingTag();
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Adding a tag failed");
-            tagMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagError, ex.Message);
+            tagMessage = F(Strings.Shared.RoomsTagError, ex.Message);
         }
 
         busy = false;
@@ -443,7 +443,7 @@
         (0, 0) => Strings.Shared.RoomsEmptyPlace,
         (_, 0) => Labels.Plants(plants),
         (0, _) => Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other),
-        _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsPlantsAndPropagations, Labels.Plants(plants), Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other))
+        _ => F(Strings.Shared.RoomsPlantsAndPropagations, Labels.Plants(plants), Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other))
     };
 
     private void StopRenaming()
@@ -462,16 +462,16 @@
         placeInfo = await RoomService.GetPlacesAsync();
             roomMessage = (result.Total, result.Merged) switch
             {
-                (0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsNothingToRename, from),
-                (_, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsMovedInto, Held(result.Plants, result.Propagations), result.Name),
-                _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenamedTo, result.Name, Held(result.Plants, result.Propagations))
+                (0, _) => F(Strings.Shared.RoomsNothingToRename, from),
+                (_, true) => F(Strings.Shared.RoomsMovedInto, Held(result.Plants, result.Propagations), result.Name),
+                _ => F(Strings.Shared.RoomsRenamedTo, result.Name, Held(result.Plants, result.Propagations))
             };
             renaming = null;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Renaming a room or spot failed");
-            roomMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenameError, ex.Message);
+            roomMessage = F(Strings.Shared.RoomsRenameError, ex.Message);
         }
 
         busy = false;
@@ -494,16 +494,16 @@
             tags = PlantTags.InUse(await Plants.GetAllAsync());
             tagMessage = (changed, merged) switch
             {
-                (0, _) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagNothingChanged, from),
-                (_, true) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagMerged, Labels.Plants(changed), name),
-                _ => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsTagRenamed, name, Labels.Plants(changed))
+                (0, _) => F(Strings.Shared.RoomsTagNothingChanged, from),
+                (_, true) => F(Strings.Shared.RoomsTagMerged, Labels.Plants(changed), name),
+                _ => F(Strings.Shared.RoomsTagRenamed, name, Labels.Plants(changed))
             };
             renamingTag = null;
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Renaming a tag failed");
-            tagMessage = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.RoomsRenameError, ex.Message);
+            tagMessage = F(Strings.Shared.RoomsRenameError, ex.Message);
         }
 
         busy = false;

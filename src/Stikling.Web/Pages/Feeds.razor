@@ -54,12 +54,12 @@
                             </label>
                             <div class="feed-tools">
                                 <button type="button" class="feed-tool" disabled="@(index == 0)"
-                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsMoveUp, NameOf(dose))"
+                                        aria-label="@F(Strings.Supplies.FeedsMoveUp, NameOf(dose))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="feed-tool" disabled="@(index == draft.Products.Count - 1)"
-                                        aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsMoveDown, NameOf(dose))"
+                                        aria-label="@F(Strings.Supplies.FeedsMoveDown, NameOf(dose))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="feed-tool remove" aria-label="@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsRemove, NameOf(dose))"
+                                <button type="button" class="feed-tool remove" aria-label="@F(Strings.Supplies.FeedsRemove, NameOf(dose))"
                                         @onclick="() => draft.Products.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                             </div>
                             <DoseInput Id="@id" Unit="dose.Unit"
@@ -81,7 +81,7 @@
             @if (products.Count == 0)
             {
                 <p class="form-text">
-                    @((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsNoProducts, ProductsLink))
+                    @((MarkupString)F(Strings.Supplies.FeedsNoProducts, ProductsLink))
                 </p>
             }
             else if (Addable.Count > 0)
@@ -98,7 +98,7 @@
                         </button>
                     }
                 </div>
-                <div class="form-text">@((MarkupString)string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsSomethingMissing, ProductsLink))</div>
+                <div class="form-text">@((MarkupString)F(Strings.Supplies.FeedsSomethingMissing, ProductsLink))</div>
             }
         </div>
 
@@ -287,7 +287,7 @@ else
 
     /// <summary>"Given to 4 plants, last 12 Sep 2026".</summary>
     private static string Given(FeedUse use) => use.LastUsed is { } last
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsGiven, Labels.Plants(use.Plants), Labels.Date(last))
+        ? F(Strings.Supplies.FeedsGiven, Labels.Plants(use.Plants), Labels.Date(last))
         : Strings.Supplies.FeedsNotGiven;
 
     private async Task TogglePlantsAsync(Feed feed)
@@ -305,12 +305,12 @@ else
     private static string DatesText(FeedPlant fed)
     {
         var text = string.Join(", ", fed.Dates.Select(Labels.Date));
-        return fed.More > 0 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDatesMore, text, fed.More) : text;
+        return fed.More > 0 ? F(Strings.Supplies.FeedsDatesMore, text, fed.More) : text;
     }
 
     private static string DeleteWarning(FeedUse use) => use.Plants == 0
-        ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDeleteConfirm, use.Feed.Name)
-        : string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.FeedsDeleteGiven, use.Feed.Name, Labels.Plants(use.Plants));
+        ? F(Strings.Supplies.FeedsDeleteConfirm, use.Feed.Name)
+        : F(Strings.Supplies.FeedsDeleteGiven, use.Feed.Name, Labels.Plants(use.Plants));
 
     private void ToggleMixing(Feed feed)
     {
@@ -347,7 +347,7 @@ else
             return;
 
         draft.Name = draft.Name?.Trim();
-        draft.Notes = string.IsNullOrWhiteSpace(draft.Notes) ? null : draft.Notes.Trim();
+        draft.Notes = Clean(draft.Notes);
         // Saved with the names as they are now, so a feed read on its own still makes sense
         draft.Products = draft.Doses(products);
 

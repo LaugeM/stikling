@@ -1,9 +1,9 @@
-using System.Globalization;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
 using Stikling.Core.Today;
 using Strings = Stikling.Web.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Web.Services;
 
@@ -94,8 +94,6 @@ public static class WateringText
             : Strings.Care.WateringWateredAgo;
         return F(format, Labels.DaysAgo(last.DaysAgo));
     }
-
-    private static string F(string format, params object[] args) => string.Format(CultureInfo.CurrentCulture, format, args);
 
     private static string Days(int days) => Plural.Of(days, Strings.Care.WateringDays_One, Strings.Care.WateringDays_Other);
 

@@ -3,6 +3,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Plants;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sharing;
 
@@ -50,7 +51,7 @@ public static class SwapLists
         NameQualifier? qualifier = null, string? note = null)
     {
         var botanical = PlantNames.Botanical(genus, species, cultivar, qualifier, note);
-        var nick = string.IsNullOrWhiteSpace(nickname) ? null : nickname.Trim();
+        var nick = Clean(nickname);
         if (botanical is null)
             return nick ?? Strings.Shared.SwapUnnamedPlant;
 
@@ -86,7 +87,7 @@ public static class SwapLists
         var cuttings = propagations.Where(p => p.SpareAvailable > 0)
             .GroupBy(p => (Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote), p.Stage))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Stage)
-            .Select(g => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapCuttingLine, g.Key.Name, g.Sum(p => p.SpareAvailable), StageText(g.Key.Stage)))
+            .Select(g => F(Strings.Shared.SwapCuttingLine, g.Key.Name, g.Sum(p => p.SpareAvailable), StageText(g.Key.Stage)))
             .ToList();
 
         var offered = plants.Where(p => p.IsOffered).ToList();
@@ -94,7 +95,7 @@ public static class SwapLists
         List<string> Counted(SpareMark mark) => [.. offered.Where(p => p.Spare == mark)
             .GroupBy(p => (Number: CollectionNumbers.Normalize(p.CollectionNumber), Name: NameOf(p.Nickname, p.Genus, p.Species, p.Cultivar, p.NameQualifier, p.NameNote)))
             .OrderBy(g => g.Key.Name, byName).ThenBy(g => g.Key.Number, StringComparer.Ordinal)
-            .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.SwapPlantCount, g.Key.Name, g.Count()) : g.Key.Name))];
+            .Select(g => WithNumber(g.Key.Number, g.Count() > 1 ? F(Strings.Shared.SwapPlantCount, g.Key.Name, g.Count()) : g.Key.Name))];
 
         var text = new StringBuilder();
         text.AppendLine(Strings.Shared.SwapListHeading);

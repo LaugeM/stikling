@@ -77,7 +77,7 @@ else
         (0, 0) => Strings.Supplies.SellersNothingYet,
         (var plants, 0) => Labels.Plants(plants),
         (0, var propagations) => Plural.Of(propagations, Strings.Supplies.Propagation_One, Strings.Supplies.Propagation_Other),
-        var (plants, propagations) => string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Supplies.SellersPlantsAndPropagations,
+        var (plants, propagations) => F(Strings.Supplies.SellersPlantsAndPropagations,
             Labels.Plants(plants), Plural.Of(propagations, Strings.Supplies.Propagation_One, Strings.Supplies.Propagation_Other))
     };
 }

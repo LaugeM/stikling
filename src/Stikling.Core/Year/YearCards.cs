@@ -4,6 +4,7 @@ using Stikling.Core.Models;
 using Stikling.Core.Propagations;
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Year;
 
@@ -123,7 +124,7 @@ public static class YearCards
             : summary.Collage.Count > 0 ? ofPhoto(summary.Collage[0].Photo)
             : null;
 
-        var title = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearTitle, summary.Year);
+        var title = F(Strings.Shared.YearTitle, summary.Year);
         var alt = figures.Count == 0
             ? $"{title}."
             : $"{title}. {string.Join(", ", figures.Select(f => $"{f.Value} {f.Caption}"))}.";
@@ -133,7 +134,7 @@ public static class YearCards
 
     private static YearCard PlantsAdded(PlantYearSummary summary)
     {
-        var kicker = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearKickerAdded, summary.Year);
+        var kicker = F(Strings.Shared.YearKickerAdded, summary.Year);
         var line = string.Join(" · ", summary.Added.ByOrigin.Select(o => Origin(o.Origin, o.Count)));
         var count = summary.Added.Count;
         return new YearCard("plants-added", YearCardKind.Number, "plant", kicker, kicker, null, null, line,
@@ -143,27 +144,27 @@ public static class YearCards
 
     private static string Origin(PlantOrigin origin, int count) => origin switch
     {
-        PlantOrigin.Purchased => string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearOriginBought, count),
-        PlantOrigin.Propagated => string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearOriginPropagated, count),
-        PlantOrigin.GrownFromSeed => string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearOriginSeed, count),
+        PlantOrigin.Purchased => F(Strings.Shared.YearOriginBought, count),
+        PlantOrigin.Propagated => F(Strings.Shared.YearOriginPropagated, count),
+        PlantOrigin.GrownFromSeed => F(Strings.Shared.YearOriginSeed, count),
         PlantOrigin.Gift => Plural.Of(count, Strings.Shared.YearOriginGift_One, Strings.Shared.YearOriginGift_Other),
         PlantOrigin.Swap => Plural.Of(count, Strings.Shared.YearOriginSwap_One, Strings.Shared.YearOriginSwap_Other),
-        _ => string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearOriginOther, count),
+        _ => F(Strings.Shared.YearOriginOther, count),
     };
 
     private static YearCard Propagations(PlantYearSummary summary)
     {
         var p = summary.Propagations;
-        var kicker = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearKickerCuttings, summary.Year);
+        var kicker = F(Strings.Shared.YearKickerCuttings, summary.Year);
         if (!p.AllCuttings)
-            kicker = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearKickerPropagations, summary.Year);
+            kicker = F(Strings.Shared.YearKickerPropagations, summary.Year);
         var figure = p.Decided > 0
-            ? new YearFigure(p.Succeeded.ToString(CultureInfo.InvariantCulture), string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearMadeIt, p.Decided))
+            ? new YearFigure(p.Succeeded.ToString(CultureInfo.InvariantCulture), F(Strings.Shared.YearMadeIt, p.Decided))
             : new YearFigure(p.Started.ToString(CultureInfo.InvariantCulture), Strings.Shared.YearStarted);
-        var line = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearStartedRooted, p.Started, p.Rooted);
+        var line = F(Strings.Shared.YearStartedRooted, p.Started, p.Rooted);
         return new YearCard("propagations", YearCardKind.Number, "propagation", kicker, kicker, null, null, line,
             [figure], null, null, null, null, null, NoPhotos,
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearPropagationsAlt, kicker, figure.Value, figure.Caption, p.Started, p.Rooted));
+            F(Strings.Shared.YearPropagationsAlt, kicker, figure.Value, figure.Caption, p.Started, p.Rooted));
     }
 
     private static YearCard Quickest(QuickestRoot quickest, Func<Enum, string> label, Func<Guid, YearCardPhoto?> shown)
@@ -177,25 +178,25 @@ public static class YearCards
 
         if (quickest.PhotoId is { } photoId)
             return new YearCard("quickest-to-root", YearCardKind.Photo, "propagation", kicker, name, latin, cultivar,
-                string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearQuickestLine, days, medium), NoFigures, shown(photoId), null, null, null, null, NoPhotos,
-                string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearQuickestAltPhoto, kicker, name, days, medium));
+                F(Strings.Shared.YearQuickestLine, days, medium), NoFigures, shown(photoId), null, null, null, null, NoPhotos,
+                F(Strings.Shared.YearQuickestAltPhoto, kicker, name, days, medium));
 
         return new YearCard("quickest-to-root", YearCardKind.Number, "propagation", kicker, name, latin, cultivar,
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearQuickestLineNumber, name, medium), [Figure(quickest.DaysToRoot, Strings.Shared.YearFigureDay_One, Strings.Shared.YearFigureDay_Other)], null, null, null, null, null, NoPhotos,
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearQuickestAltNumber, kicker, name, days, medium));
+            F(Strings.Shared.YearQuickestLineNumber, name, medium), [Figure(quickest.DaysToRoot, Strings.Shared.YearFigureDay_One, Strings.Shared.YearFigureDay_Other)], null, null, null, null, null, NoPhotos,
+            F(Strings.Shared.YearQuickestAltNumber, kicker, name, days, medium));
     }
 
     private static YearCard Medium(int year, BestMedium best, Func<Enum, string> label)
     {
-        var kicker = best.Compared ? string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearKickerBestMedium, year) : string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearKickerMyMedium, year);
+        var kicker = best.Compared ? F(Strings.Shared.YearKickerBestMedium, year) : F(Strings.Shared.YearKickerMyMedium, year);
         var medium = InText(label(best.Medium));
-        var figure = new YearFigure(best.Succeeded.ToString(CultureInfo.InvariantCulture), string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearMediumMadeIt, best.Decided, medium));
+        var figure = new YearFigure(best.Succeeded.ToString(CultureInfo.InvariantCulture), F(Strings.Shared.YearMediumMadeIt, best.Decided, medium));
 
         var sentences = new List<string>();
         if (best.Compared)
-            sentences.Add(string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearMediumBest, best.MediumsCompared));
+            sentences.Add(F(Strings.Shared.YearMediumBest, best.MediumsCompared));
         if (best.AverageDaysToRoot is { } average)
-            sentences.Add(string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearMediumAverage, Days((int)Math.Round(average, MidpointRounding.AwayFromZero))));
+            sentences.Add(F(Strings.Shared.YearMediumAverage, Days((int)Math.Round(average, MidpointRounding.AwayFromZero))));
         var line = sentences.Count == 0 ? null : string.Join(' ', sentences);
 
         var alt = $"{kicker}: {figure.Value} {figure.Caption}." + (line is null ? "" : $" {line}");
@@ -208,32 +209,32 @@ public static class YearCards
         var kicker = Strings.Shared.YearMostPhotographed;
         var plant = most.Plant;
         var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
-        var line = string.Format(CultureInfo.CurrentCulture, most.PhotoCount == 1 ? Strings.Shared.YearMostLine_One : Strings.Shared.YearMostLine_Other, most.PhotoCount, year);
+        var line = F(most.PhotoCount == 1 ? Strings.Shared.YearMostLine_One : Strings.Shared.YearMostLine_Other, most.PhotoCount, year);
         return new YearCard("most-photographed", YearCardKind.Photo, "plant", kicker, plant.DisplayName, latin, cultivar,
             line, NoFigures, shown(most.PhotoId), null, null, null, null, NoPhotos,
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearMostAlt, kicker, plant.DisplayName, line));
+            F(Strings.Shared.YearMostAlt, kicker, plant.DisplayName, line));
     }
 
     private static YearCard Grown(PlantYearSummary summary, GrownThisYear grown, Func<Photo, YearCardPhoto> ofPhoto, Func<DateTimeOffset, DateOnly> localDay)
     {
-        var kicker = summary.SoFar ? Strings.Shared.YearGrownSoFar : string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearGrownIn, summary.Year);
+        var kicker = summary.SoFar ? Strings.Shared.YearGrownSoFar : F(Strings.Shared.YearGrownIn, summary.Year);
         var plant = grown.Plant;
         var (latin, cultivar) = Botanical(plant.Nickname, plant.Genus, plant.Species, plant.Cultivar, plant.NameQualifier, plant.NameNote);
-        var line = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearGrownLine, grown.DaysApart);
+        var line = F(Strings.Shared.YearGrownLine, grown.DaysApart);
         var before = TextCulture.Date(localDay(grown.First.TakenAt), Strings.Shared.YearGrownDayFormat);
         var after = TextCulture.Date(localDay(grown.Last.TakenAt), Strings.Shared.YearGrownDayFormat);
         return new YearCard("grown", YearCardKind.Pair, "plant", kicker, plant.DisplayName, latin, cultivar, line,
             NoFigures, null, ofPhoto(grown.First), ofPhoto(grown.Last), before, after, NoPhotos,
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearGrownAlt, kicker, plant.DisplayName, before, after, line));
+            F(Strings.Shared.YearGrownAlt, kicker, plant.DisplayName, before, after, line));
     }
 
     private static YearCard Collage(PlantYearSummary summary, Func<Photo, YearCardPhoto> ofPhoto)
     {
-        var kicker = string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearCollageKicker, summary.Year);
-        var line = string.Format(CultureInfo.CurrentCulture, summary.PhotosTaken == 1 ? Strings.Shared.YearCollageLine_One : Strings.Shared.YearCollageLine_Other, summary.PhotosTaken);
-        return new YearCard("collage", YearCardKind.Collage, "plant", kicker, string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearCollageTitle, summary.Year), null, null, line,
+        var kicker = F(Strings.Shared.YearCollageKicker, summary.Year);
+        var line = F(summary.PhotosTaken == 1 ? Strings.Shared.YearCollageLine_One : Strings.Shared.YearCollageLine_Other, summary.PhotosTaken);
+        return new YearCard("collage", YearCardKind.Collage, "plant", kicker, F(Strings.Shared.YearCollageTitle, summary.Year), null, null, line,
             NoFigures, null, null, null, null, null, summary.Collage.Select(c => ofPhoto(c.Photo)).ToList(),
-            string.Format(CultureInfo.CurrentCulture, Strings.Shared.YearCollageAlt, summary.Year, line));
+            F(Strings.Shared.YearCollageAlt, summary.Year, line));
     }
 
     private static YearFigure Figure(int value, string singular, string plural) =>

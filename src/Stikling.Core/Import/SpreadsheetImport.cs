@@ -5,6 +5,7 @@ using Stikling.Core.Names;
 using Stikling.Core.Plants;
 using Stikling.Core.Rooms;
 using Strings = Stikling.Core.Resources;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Import;
 
@@ -99,7 +100,7 @@ public static class SpreadsheetImport
                 if (PlantNames.ParseQualifier(sure) is { } qualifier)
                     draft.NameQualifier = qualifier;
                 else
-                    CantRead(ImportField.NameSure, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemNameSure, sure));
+                    CantRead(ImportField.NameSure, F(Strings.Account.ProblemNameSure, sure));
             }
             draft.NameNote = PlantNames.Note(Get(ImportField.NameNote));
 
@@ -137,7 +138,7 @@ public static class SpreadsheetImport
                 if (CollectionNumbers.Normalize(number) is { } code && CollectionNumbers.IsValid(code))
                     draft.CollectionNumber = code;
                 else
-                    CantRead(ImportField.Number, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemNumber, number));
+                    CantRead(ImportField.Number, F(Strings.Account.ProblemNumber, number));
             }
 
             draft.Source = Get(ImportField.Source);
@@ -147,9 +148,9 @@ public static class SpreadsheetImport
             {
                 var date = ImportValues.ReadDate(gotOn, order, today);
                 if (date is null)
-                    CantRead(ImportField.GotOn, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemDate, gotOn));
+                    CantRead(ImportField.GotOn, F(Strings.Account.ProblemDate, gotOn));
                 else if (date.Start > today)
-                    CantRead(ImportField.GotOn, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemFuture, gotOn));
+                    CantRead(ImportField.GotOn, F(Strings.Account.ProblemFuture, gotOn));
                 else
                     draft.AcquiredOn = date;
             }
@@ -159,7 +160,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadOrigin(origin) is { } value)
                     draft.Origin = value;
                 else
-                    CantRead(ImportField.Origin, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOrigin, origin));
+                    CantRead(ImportField.Origin, F(Strings.Account.ProblemOrigin, origin));
             }
 
             if (Get(ImportField.Raised) is { } raised)
@@ -167,7 +168,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadRaised(raised) is { } value)
                     draft.RaisedAs = value;
                 else
-                    CantRead(ImportField.Raised, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemRaised, raised));
+                    CantRead(ImportField.Raised, F(Strings.Account.ProblemRaised, raised));
             }
 
             if (Get(ImportField.Medium) is { } medium)
@@ -175,7 +176,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadMedium(medium) is { } value)
                     draft.Medium = value;
                 else
-                    CantRead(ImportField.Medium, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemMedium, medium));
+                    CantRead(ImportField.Medium, F(Strings.Account.ProblemMedium, medium));
             }
 
             if (Get(ImportField.Status) is { } status)
@@ -184,7 +185,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadStatus(status) is { } value)
                     draft.Status = value;
                 else
-                    CantRead(ImportField.Status, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemStatus, status));
+                    CantRead(ImportField.Status, F(Strings.Account.ProblemStatus, status));
             }
 
             if (Get(ImportField.Price) is { } price)
@@ -192,7 +193,7 @@ public static class SpreadsheetImport
                 if (ImportValues.ReadPrice(price) is { } value)
                     draft.PricePaid = value;
                 else
-                    CantRead(ImportField.Price, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemPrice, price));
+                    CantRead(ImportField.Price, F(Strings.Account.ProblemPrice, price));
             }
 
             if (Get(ImportField.HowMany) is { } howMany)
@@ -200,7 +201,7 @@ public static class SpreadsheetImport
                 if (int.TryParse(howMany.Trim(), System.Globalization.NumberStyles.None, System.Globalization.CultureInfo.InvariantCulture, out var howManyValue) && howManyValue >= 1)
                     draft.Count = howManyValue == 1 ? null : howManyValue;
                 else
-                    CantRead(ImportField.HowMany, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemHowMany, howMany));
+                    CantRead(ImportField.HowMany, F(Strings.Account.ProblemHowMany, howMany));
             }
 
             var care = new List<ImportCare>();
@@ -210,11 +211,11 @@ public static class SpreadsheetImport
                     continue;
                 var date = ImportValues.ReadDate(text, order, today);
                 if (date is null)
-                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemDate, text));
+                    CantRead(field, F(Strings.Account.ProblemDate, text));
                 else if (date.Start > today)
-                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemFuture, text));
+                    CantRead(field, F(Strings.Account.ProblemFuture, text));
                 else if (date.Precision != DatePrecision.Day)
-                    CantRead(field, string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemWholeDay, text));
+                    CantRead(field, F(Strings.Account.ProblemWholeDay, text));
                 else
                     care.Add(new ImportCare(kind, date.Start));
             }
@@ -277,24 +278,24 @@ public static class SpreadsheetImport
                 // "150 kr" reads too
                 if (ImportValues.ReadPrice(cell) is { } price)
                     return price.ToString("0.####", CultureInfo.InvariantCulture);
-                problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnNumber, cell, target.Name);
+                problem = F(Strings.Account.ProblemOwnNumber, cell, target.Name);
                 return null;
             case OwnFieldKind.Date:
                 if (ImportValues.ReadDate(cell, order, today) is not { } date)
                 {
-                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnDate, cell, target.Name);
+                    problem = F(Strings.Account.ProblemOwnDate, cell, target.Name);
                     return null;
                 }
                 if (date.Precision != DatePrecision.Day)
                 {
-                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnWholeDay, cell, target.Name);
+                    problem = F(Strings.Account.ProblemOwnWholeDay, cell, target.Name);
                     return null;
                 }
                 return date.Start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
             default:
                 if (cell.Length > OwnFieldValues.MaxTextLength)
                 {
-                    problem = string.Format(CultureInfo.CurrentCulture, Strings.Account.ProblemOwnTooLong, cell, target.Name);
+                    problem = F(Strings.Account.ProblemOwnTooLong, cell, target.Name);
                     return null;
                 }
                 return cell;

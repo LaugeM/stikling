@@ -92,7 +92,7 @@ else
                                    value="@PriceText(item)" @onchange="e => SetPrice(item, e.Value?.ToString())" disabled="@(item.DidNotCome)" />
                         </div>
                         <button type="button" class="order-remove" @onclick="() => Remove(item)"
-                                aria-label="@string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormRemoveItem, item.DisplayName)"
+                                aria-label="@F(Strings.Orders.FormRemoveItem, item.DisplayName)"
                                 title="@Strings.Orders.FormRemoveItemShort"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
                     </li>
                 }
@@ -293,7 +293,7 @@ else
             var choice = await SellerService.ChooseAsync(sellerText, SellerKind.OnlineShop, order.SellerId);
             order.SellerId = choice.SellerId;
             order.SellerName = choice.Source;
-            order.Notes = string.IsNullOrWhiteSpace(order.Notes) ? null : order.Notes.Trim();
+            order.Notes = Clean(order.Notes);
             errors = [.. order.Validate(Time.Today())];
             if (errors.Count > 0)
                 return;
@@ -304,7 +304,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the order failed");
-            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormSaveError, ex.Message)];
+            errors = [F(Strings.Orders.FormSaveError, ex.Message)];
         }
         finally
         {
@@ -326,7 +326,7 @@ else
         catch (Exception ex)
         {
             Logger.LogError(ex, "Deleting the order failed");
-            errors = [string.Format(CultureInfo.CurrentCulture, Strings.Orders.FormDeleteError, ex.Message)];
+            errors = [F(Strings.Orders.FormDeleteError, ex.Message)];
             confirmDelete = false;
         }
         finally

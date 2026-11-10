@@ -1,6 +1,7 @@
 using Strings = Stikling.Core.Resources;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Models;
 
@@ -78,15 +79,15 @@ public sealed class OwnField : Entity
         if (string.IsNullOrWhiteSpace(Name))
             errors.Add(Strings.Shared.FieldNameRequired);
         else if (Name.Trim().Length > MaxNameLength)
-            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldNameLong, MaxNameLength));
+            errors.Add(F(Strings.Shared.FieldNameLong, MaxNameLength));
 
         var choices = Choices ?? [];
         if (choices.Any(c => string.IsNullOrWhiteSpace(c)))
             errors.Add(Strings.Shared.FieldChoiceEmpty);
         if (choices.Any(c => c.Trim().Length > MaxNameLength))
-            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldChoiceLong, MaxNameLength));
+            errors.Add(F(Strings.Shared.FieldChoiceLong, MaxNameLength));
         if (choices.Count > MaxChoices)
-            errors.Add(string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.FieldTooManyChoices, MaxChoices));
+            errors.Add(F(Strings.Shared.FieldTooManyChoices, MaxChoices));
         if (choices.Select(c => c.Trim()).Distinct(StringComparer.CurrentCultureIgnoreCase).Count() != choices.Count)
             errors.Add(Strings.Shared.FieldChoiceTwice);
         return errors;

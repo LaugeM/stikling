@@ -15,13 +15,13 @@
         </a>
         <label class="row-btn @(busy ? "disabled" : null)" for="@inputId" title="@Strings.Care.PhotoRowTakePhoto">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
-            <span class="visually-hidden">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowTakePhotoOf, Due.Name)</span>
+            <span class="visually-hidden">@F(Strings.Care.PhotoRowTakePhotoOf, Due.Name)</span>
         </label>
         @if (cameraAvailable && Due.LastPhoto is not null)
         {
             <button type="button" class="row-btn" title="@Strings.Camera.SameAngle" disabled="@busy" @onclick="() => cameraOpen = true">
                 <SameAngleIcon />
-                <span class="visually-hidden">@string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Camera.SameAngleOf, Due.Name)</span>
+                <span class="visually-hidden">@F(Strings.Camera.SameAngleOf, Due.Name)</span>
             </button>
         }
         <input id="@inputId" type="file" accept="image/*" capture="environment" class="visually-hidden"
@@ -57,7 +57,7 @@
     {
         get
         {
-            var last = Due.LastPhoto is { } day ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowLastPhoto, Labels.Date(day)) : Strings.Care.PhotoRowNoPhotos;
+            var last = Due.LastPhoto is { } day ? F(Strings.Care.PhotoRowLastPhoto, Labels.Date(day)) : Strings.Care.PhotoRowNoPhotos;
             return string.IsNullOrWhiteSpace(Due.Location) ? last : $"{Due.Location} · {last}";
         }
     }
@@ -79,7 +79,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the monthly photo failed");
-            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+            status = F(Strings.Care.PhotoRowFailed, ex.Message);
         }
 
         busy = false;
@@ -100,7 +100,7 @@
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving the monthly photo failed");
-            status = string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Care.PhotoRowFailed, ex.Message);
+            status = F(Strings.Care.PhotoRowFailed, ex.Message);
         }
 
         busy = false;

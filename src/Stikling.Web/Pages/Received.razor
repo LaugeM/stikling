@@ -187,12 +187,6 @@ else if (copy is not null && check is not null)
 @code {
     private const int StripTiles = 6;
 
-    private static string F(string format, params object?[] args) =>
-        string.Format(System.Globalization.CultureInfo.CurrentCulture, format, args);
-
-    // Picks the one or other form by count, then fills in the rest
-    private static string F(int count, string one, string other, params object?[] args) => F(count == 1 ? one : other, args);
-
     [Parameter]
     public string Token { get; set; } = "";
 

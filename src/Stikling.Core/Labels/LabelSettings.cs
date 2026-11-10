@@ -2,6 +2,7 @@ using Strings = Stikling.Core.Resources;
 using System.Globalization;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Labels;
 
@@ -152,7 +153,7 @@ public sealed class LabelSettings
         if (!settings.Shape().OneLine)
             return null;
         return settings.Tab == LabelTab.Tape
-            ? string.Format(System.Globalization.CultureInfo.CurrentCulture, Strings.Shared.LabelNoRoomTape, settings.TapeMm)
+            ? F(Strings.Shared.LabelNoRoomTape, settings.TapeMm)
             : Strings.Shared.LabelNoRoomLow;
     }
 }
