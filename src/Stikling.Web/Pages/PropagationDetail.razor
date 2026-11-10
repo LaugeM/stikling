@@ -66,7 +66,7 @@ else
                 else if (ShownCover is null)
                 {
                     <div class="detail-icon" aria-hidden="true">
-                        <svg viewBox="0 0 24 24"><path d="M8 3h8l-1 6v9a3 3 0 0 1-6 0V9Z" /><path d="M12 12v4M12 16l-2 2M12 16l2 2" /></svg>
+                        <svg viewBox="0 0 24 24">@Icons.Feed</svg>
                     </div>
                 }
                 <div class="min-w-0">
@@ -95,7 +95,7 @@ else
                     @if (identifyOffered && IdentifyWanted)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                             @Strings.Identify.Button
                         </button>
                     }
@@ -267,7 +267,7 @@ else
                 <button type="button" class="btn btn-link btn-sm link-action details-toggle" aria-expanded="@(detailsOpen ? "true" : "false")"
                         aria-controls="propagation-details" @onclick="() => detailsOpen = !detailsOpen">
                     @Strings.Propagations.DetDetails
-                    <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true"><path d="m9 5 7 7-7 7" /></svg>
+                    <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                 </button>
                 <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">@Strings.Common.Edit</a>
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Propagations.DetShare</button>
@@ -485,14 +485,14 @@ else
                 @if (googleOn)
                 {
                     <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                         @Strings.Propagations.TlKindPhoto
                     </button>
                 }
                 else
                 {
                     <label class="btn btn-primary icon-btn" for="@photoInputId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                         @Strings.Propagations.TlKindPhoto
                     </label>
                 }
@@ -503,13 +503,13 @@ else
                     </button>
                 }
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
-                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
                     @Strings.Propagations.TlKindNote
                 </button>
                 @if (propagation.IsActive)
                 {
                     <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="@Strings.Propagations.DetCare" @onclick="() => careOpen = true">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3.5c3 4 5.5 7 5.5 10a5.5 5.5 0 0 1-11 0c0-3 2.5-6 5.5-10Z" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Drop</svg>
                         <span class="dock-label">@Strings.Propagations.DetCare</span>
                     </button>
                     <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
@@ -517,7 +517,7 @@ else
                         @Labels.Stage(propagation.Stage, propagation.Type)
                     </button>
                     <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.Propagations.DetMoreLabel" @onclick="() => more = More.Menu">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="5" cy="12" r="1.3" /><circle cx="12" cy="12" r="1.3" /><circle cx="19" cy="12" r="1.3" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.More</svg>
                     </button>
                 }
             </div>
@@ -555,13 +555,13 @@ else
             <ul class="sheet-actions">
                 <li>
                     <label class="sheet-action" for="@photoInputId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                         <span class="sheet-action-text"><b>@Strings.Propagations.DetFromDevice</b><small>@Strings.Propagations.DetFromDeviceHint</small></span>
                     </label>
                 </li>
                 <li>
                     <button type="button" class="sheet-action" @onclick="PickFromGoogleAsync">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Cloud</svg>
                         <span class="sheet-action-text"><b>@Strings.Propagations.DetFromGoogle</b><small>@Strings.Propagations.DetFromGoogleHint</small></span>
                     </button>
                 </li>
@@ -905,7 +905,7 @@ else
                     <ul class="sheet-actions">
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => more = More.Flag">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 21V4" /><path d="M5 4h12l-2.5 4.5L17 13H5" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Flag</svg>
                                 <span class="sheet-action-text"><b>@(propagation.Attention is null ? Strings.Propagations.AttentionFlagIt : Strings.Propagations.DetChangeFlag)</b><small>@Strings.Propagations.DetFlagHint</small></span>
                             </button>
                         </li>
@@ -913,20 +913,20 @@ else
                         {
                             <li>
                                 <button type="button" class="sheet-action" @onclick="OpenSwap">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7h11l-3-3M17 17H6l3 3" /></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Repeat</svg>
                                     <span class="sheet-action-text"><b>@Strings.Propagations.EditSwap</b><small>@(propagation.SpareAvailable > 0 ? F(Strings.Propagations.DetOffered, propagation.SpareAvailable) : Strings.Propagations.DetOfferSome)</small></span>
                                 </button>
                             </li>
                         }
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => more = More.Leaf">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-9" /><path d="M12 12C6 12 4 8 4 4c6 0 8 3.500 8 8Z" /><path d="M12 15c5 0 8-3 8-7-5 0-8 3-8 7Z" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Seedling</svg>
                                 <span class="sheet-action-text"><b>@Strings.Shared.LeafMenuTitle</b><small>@Strings.Shared.LeafMenuHint</small></span>
                             </button>
                         </li>
                         <li>
                             <a class="sheet-action" href="labels?cuttings=@propagation.Id">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 12V5a2 2 0 0 1 2-2h7l9 9-9 9Z" /><circle cx="8" cy="8" r="1.4" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Tag</svg>
                                 <span class="sheet-action-text"><b>@Strings.Propagations.DetPrintLabelMenu</b><small>@Strings.Propagations.DetPrintLabelHint</small></span>
                             </a>
                         </li>
@@ -934,14 +934,14 @@ else
                             @if (propagation.IsDormant)
                             {
                                 <button type="button" class="sheet-action" disabled="@busy" @onclick="EndDormancyAsync">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="4" /><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6 7 7M17 17l1.4 1.4M5.6 18.4 7 17M17 7l1.4-1.4" /></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sun</svg>
                                     <span class="sheet-action-text"><b>@Strings.Propagations.DetWokenUp</b><small>@F(Strings.Propagations.DetDormantFor, DaysLabel(propagation.DaysDormant(Today)))</small></span>
                                 </button>
                             }
                             else
                             {
                                 <button type="button" class="sheet-action" @onclick="OpenDormant">
-                                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20 14.5A8 8 0 1 1 9.5 4a6.5 6.5 0 0 0 10.5 10.5Z" /></svg>
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Moon</svg>
                                     <span class="sheet-action-text"><b>@Strings.Propagations.CardDormant</b><small>@Strings.Propagations.DetDormantHint</small></span>
                                 </button>
                             }

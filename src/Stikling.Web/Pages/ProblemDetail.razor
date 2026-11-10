@@ -97,15 +97,15 @@ else
                                             <text>@Strings.Pests.ProblemLogStarted</text>
                                             break;
                                         case ProblemLogKind.Update:
-                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12Z" /><circle cx="12" cy="12" r="3" /></svg>
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Eye</svg>
                                             <text>@Strings.Pests.ProblemLogHowItLooked</text>
                                             break;
                                         case ProblemLogKind.Change:
-                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 9h14l-3.5-3.5" /><path d="M20 15H6l3.5 3.5" /></svg>
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Swap</svg>
                                             <text>@Strings.Pests.ProblemLogUpdated</text>
                                             break;
                                         default:
-                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg>
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                                             <text>@Strings.Pests.ProblemLogOver</text>
                                             break;
                                     }
@@ -115,7 +115,7 @@ else
                                     <span class="log-actions">
                                         <button type="button" class="log-action" aria-label="@Strings.Pests.ProblemChangeUpdate" title="@Strings.Pests.ProblemChangeUpdate"
                                                 @onclick="() => OpenUpdate(shown.Update)">
-                                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19.5 8.5a2.1 2.1 0 0 0-3-3L5 17Z" /></svg>
+                                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
                                         </button>
                                     </span>
                                 }
@@ -263,7 +263,7 @@ else
                     </li>
                     <li>
                         <button type="button" class="sheet-action danger" disabled="@busy" @onclick="() => CloseAsync(ProblemOutcome.Died)">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 21v-7" /><path d="M12 14c-1-4-4-6-8-6 0 4 3 7 8 6Z" /><path d="M12 14c2-3 4.5-4 8-3.5-.5 3.5-3.5 5-8 3.5Z" /><path d="M4 21h16" /></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprig</svg>
                             <span class="sheet-action-text"><b>@ProblemText.Outcome(ProblemOutcome.Died)</b><small>@Strings.Pests.ProblemDiedHint</small></span>
                         </button>
                     </li>

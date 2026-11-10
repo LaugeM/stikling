@@ -30,7 +30,7 @@ else
     <div class="case-layout">
     <header class="detail-header">
         <div class="detail-icon @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+            <svg viewBox="0 0 24 24">@Icons.Pest</svg>
         </div>
         <div class="min-w-0">
             <h1>@Labels.For(view.Case.Pest)</h1>
@@ -467,7 +467,7 @@ else
                             <button type="button" class="btn btn-sm @(seen ? "btn-primary" : "btn-outline-primary")"
                                     aria-pressed="@(seen ? "true" : "false")"
                                     aria-label="@F(Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
-                                    disabled="@busy" @onclick="() => ToggleSeenAsync(plant)">@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
+                                    disabled="@busy" @onclick="() => ToggleSeenAsync(plant)">@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg> }@Strings.Pests.CaseSeenHere</button>
                         }
                     </li>
                 }

@@ -76,7 +76,7 @@
                                         aria-label="@F(Strings.Supplies.MixesMoveDown, Some(ingredient))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
                                 <button type="button" class="mix-tool remove" aria-label="@F(Strings.Supplies.MixesRemove, Some(ingredient))"
-                                        @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                        @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                             </div>
                         </li>
                     }

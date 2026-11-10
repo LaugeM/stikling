@@ -172,7 +172,7 @@ else
                             <div class="photo-pick">
                                 <PhotoImage PhotoId="photo.Id" Alt="@Strings.Propagations.EditPhotoAlt" />
                                 <button type="button" class="photo-remove" @onclick="() => RemovePhotoAsync(photo)"
-                                        aria-label="@Strings.Propagations.ComposerRemovePhoto" title="@Strings.Propagations.ComposerRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg></button>
+                                        aria-label="@Strings.Propagations.ComposerRemovePhoto" title="@Strings.Propagations.ComposerRemovePhoto"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                             </div>
                         }
                     </div>
@@ -180,14 +180,14 @@ else
 
                 <div class="composer-row">
                     <label class="btn btn-outline-primary btn-sm icon-btn" for="@cameraId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4Z" /><circle cx="12" cy="13" r="3.5" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                         @Strings.Propagations.EditCamera
                     </label>
                     <input id="@cameraId" type="file" accept="image/*" capture="environment" class="visually-hidden"
                            @ref="cameraInput" @onchange="() => AddPhotosAsync(cameraInput, fromCamera: true)" disabled="@busy" />
 
                     <label class="btn btn-outline-primary btn-sm icon-btn" for="@galleryId">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="4.5" width="17" height="15" rx="2" /><circle cx="9" cy="10" r="1.8" /><path d="m4 17 5-5 4 4 3-3 4 4" /></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Photo</svg>
                         @Strings.Propagations.EditGallery
                     </label>
                     <input id="@galleryId" type="file" accept="image/*" multiple class="visually-hidden"
@@ -196,7 +196,7 @@ else
                     {
                         <button type="button" class="btn btn-outline-primary btn-sm icon-btn" @onclick="StartGoogleAsync"
                                 disabled="@(busy || googleBusy)">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 18a4 4 0 0 1-.7-7.9A5.5 5.5 0 0 1 17 9.5 4.3 4.3 0 0 1 17 18Z" /></svg>
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Cloud</svg>
                             @Strings.Propagations.ComposerGoogle
                         </button>
                     }

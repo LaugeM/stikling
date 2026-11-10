@@ -24,7 +24,7 @@
         @if (views.Count > 0)
         {
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="pests/new">
-                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
                 @Strings.Pests.OpenPestCase
             </a>
         }
@@ -108,7 +108,7 @@ else
 }
 
 <a class="fab" href="pests/new" aria-label="@Strings.Pests.OpenPestCase" title="@Strings.Pests.OpenPestCase">
-    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
 </a>
 
 @code {
@@ -161,7 +161,7 @@ else
 
     private RenderFragment Card(PestCaseView view) => @<a class="item-card" href="pests/@view.Case.Id">
         <div class="item-thumb @(view.Case.IsOpen ? "alert" : null)" aria-hidden="true">
-            <svg viewBox="0 0 24 24"><circle cx="12" cy="13" r="4" /><path d="M12 9V6M8.5 10.5 6 8M15.5 10.5 18 8M8 13H4M20 13h-4M8.5 15.5 6 18M15.5 15.5 18 18M12 17v3" /></svg>
+            <svg viewBox="0 0 24 24">@Icons.Pest</svg>
         </div>
         <div class="item-text">
             <div class="item-name">@Labels.For(view.Case.Pest)</div>

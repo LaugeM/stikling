@@ -133,7 +133,7 @@ else
                                     <button type="button" class="btn btn-sm seen-toggle @(seen ? "btn-primary" : "btn-outline-primary")"
                                             aria-pressed="@(seen ? "true" : "false")"
                                             aria-label="@F(Strings.Pests.CaseSeenHereOn, plant.DisplayName)"
-                                            @onclick="() => ToggleSeen(plant.Id)" @onclick:preventDefault @onclick:stopPropagation>@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true"><path d="m5 12.5 4.5 4.5L19 7.5" /></svg> }@Strings.Pests.CaseSeenHere</button>
+                                            @onclick="() => ToggleSeen(plant.Id)" @onclick:preventDefault @onclick:stopPropagation>@if (seen) { <svg class="seen-tick" viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg> }@Strings.Pests.CaseSeenHere</button>
                                 }
                             </label>
                         </li>

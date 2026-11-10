@@ -47,7 +47,7 @@
                         <li class="label-item" @key="item.Id" style="--w: @Num(shape.WidthMm); --h: @Num(shape.HeightMm)">
                             <canvas data-label role="img" aria-label="@F(Strings.Shared.LabelsFor, item.Content.Name)"></canvas>
                             <button type="button" class="label-remove" aria-label="@F(Strings.Shared.LabelsLeaveOut, item.Content.Name)" @onclick="() => Remove(item)">
-                                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 6l12 12M18 6 6 18" /></svg>
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
                             </button>
                         </li>
                     }
