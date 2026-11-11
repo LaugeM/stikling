@@ -30,7 +30,7 @@
     border-top: 0;
 }
 
-/* A big box to tick in the shop, one hand and maybe gloves: well over the 44px tap area */
+/* A big box to tick in the shop, one hand and maybe gloves: the 44px tick button of Today's rows */
 .shop-tick {
     flex: none;
     display: grid;
@@ -40,7 +40,7 @@
     margin: 0;
     padding: 0;
     background: var(--pa-surface);
-    border: 2px solid var(--pa-border);
+    border: 1px solid var(--pa-border);
     border-radius: 0.75rem;
     color: #fff;
     cursor: pointer;

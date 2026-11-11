@@ -67,8 +67,9 @@
     color: var(--pa-muted);
 }
 
+/* Hidden is the exception worth seeing, so it is Ink against the muted lines. Not clay, which never marks a state */
 .ppi-state.hidden {
-    color: var(--pa-clay);
+    color: var(--pa-text);
 }
 
 .ppi-switch {

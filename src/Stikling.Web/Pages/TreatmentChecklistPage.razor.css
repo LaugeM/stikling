@@ -27,6 +27,7 @@
     outline-offset: 2px;
 }
 
+/* Only a mark, since the card is the button: the rounded square of Today's tick button, smaller */
 .tick-box {
     flex: 0 0 auto;
     display: inline-flex;
@@ -35,8 +36,8 @@
     width: 1.75rem;
     height: 1.75rem;
     margin-left: auto;
-    border: 2px solid var(--pa-border);
-    border-radius: 50%;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
     color: var(--pa-green-dark);
 }
 
