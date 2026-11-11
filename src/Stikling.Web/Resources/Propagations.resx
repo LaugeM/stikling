@@ -1409,6 +1409,39 @@
   <data name="DetCountPotted" xml:space="preserve">
     <value>{0} potted up</value>
   </data>
+  <data name="DetSplitOff" xml:space="preserve">
+    <value>Split off</value>
+    <comment>Button and title of the sheet that moves some units of a batch into a propagation of their own.</comment>
+  </data>
+  <data name="DetSplitHint" xml:space="preserve">
+    <value>One or more got ahead of the rest. They become a propagation of their own, with their own stage. The rest stay here.</value>
+  </data>
+  <data name="DetSplitHowMany" xml:space="preserve">
+    <value>How many (up to {0})</value>
+    <comment>Label of the number of units to split off. {0} is the most.</comment>
+  </data>
+  <data name="DetSplitStage" xml:space="preserve">
+    <value>How far have they got?</value>
+  </data>
+  <data name="DetSplitN" xml:space="preserve">
+    <value>Split off {0}</value>
+    <comment>Button. {0} is how many units.</comment>
+  </data>
+  <data name="DetSplitDone" xml:space="preserve">
+    <value>Split off into a propagation of its own.</value>
+  </data>
+  <data name="DetSplitFailed" xml:space="preserve">
+    <value>Couldn't split off: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="DetCountSplit" xml:space="preserve">
+    <value>{0} split off</value>
+    <comment>In the counts line under the name. {0} is how many units were split off.</comment>
+  </data>
+  <data name="DetSplitFrom" xml:space="preserve">
+    <value>Split off from {0}</value>
+    <comment>In the line under the name. {0} is a link to the batch it was split off from.</comment>
+  </data>
   <data name="DetCountGiven" xml:space="preserve">
     <value>{0} given away</value>
   </data>

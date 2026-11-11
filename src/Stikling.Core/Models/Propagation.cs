@@ -117,6 +117,12 @@ public sealed class Propagation : Entity
     /// <summary>Units given away to someone else before or without being potted up. Records from before read as 0.</summary>
     public int GivenAwayCount { get; set; }
 
+    /// <summary>Units moved out of this batch into propagations of their own. Records from before read as 0.</summary>
+    public int SplitOffCount { get; set; }
+
+    /// <summary>On a propagation that was split off from a batch: that batch. Null for every other one.</summary>
+    public Guid? SplitFromId { get; set; }
+
     public PropagationStage Stage { get; set; } = PropagationStage.Started;
 
     public string? Notes { get; set; }
@@ -165,7 +171,14 @@ public sealed class Propagation : Entity
 
     /// <summary>Units still in the propagation (not potted up, given away or failed).</summary>
     [JsonIgnore]
-    public int RemainingCount => InitialCount - PottedUpCount - FailedCount - GivenAwayCount;
+    public int RemainingCount => InitialCount - PottedUpCount - FailedCount - GivenAwayCount - SplitOffCount;
+
+    /// <summary>
+    /// The units that were this batch's own: the start count without the ones split off, since those are
+    /// neither a success nor a failure of this batch. What "x of y" and success rates divide by.
+    /// </summary>
+    [JsonIgnore]
+    public int StartedCount => InitialCount - SplitOffCount;
 
     /// <summary>Still in progress (not done and not failed).</summary>
     [JsonIgnore]
@@ -396,12 +409,12 @@ public sealed class Propagation : Entity
         errors.AddRange(PlantNames.QualifierErrors(Genus, Species, NameQualifier));
         if (Plants.CollectionNumbers.Normalize(CollectionNumber) is { } code && !Plants.CollectionNumbers.IsValid(code))
             errors.Add(Plants.CollectionNumbers.NotValidText);
-        if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0)
+        if (PottedUpCount < 0 || FailedCount < 0 || GivenAwayCount < 0 || SplitOffCount < 0)
             errors.Add(Strings.Propagations.ErrCountsNegative);
         if (InitialCount < 1)
             errors.Add(Strings.Propagations.ErrStartWithOne);
-        else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount)
-            errors.Add(F(Strings.Propagations.ErrCountLowerThanUsed, PottedUpCount + FailedCount + GivenAwayCount));
+        else if (InitialCount < PottedUpCount + FailedCount + GivenAwayCount + SplitOffCount)
+            errors.Add(F(Strings.Propagations.ErrCountLowerThanUsed, PottedUpCount + FailedCount + GivenAwayCount + SplitOffCount));
         if (RootedOn is { } rooted && rooted < StartedOn)
             errors.Add(Strings.Propagations.ErrRootedBeforeStart);
         if (FirstRootOn < StartedOn || FirstLeafOn < StartedOn)

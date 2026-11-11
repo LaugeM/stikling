@@ -449,6 +449,76 @@ public sealed class PropagationService(
             AddChangeAsync(propagation, WithOutcome(line, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway));
     }
 
+    /// <summary>
+    /// Moves <paramref name="count"/> units out of a batch into a propagation of their own, at <paramref name="stage"/>
+    /// (Started, Rooting or Rooted), because they got ahead of the rest. At least one unit stays in the batch, so
+    /// this never finishes it. The new one is saved first, then the batch's count, then a history line on both.
+    /// <paramref name="newId"/> is for running it again after a failure, so the same propagation is saved over itself.
+    /// After the count is stored, a failure comes as a <see cref="PartlySavedException"/>.
+    /// </summary>
+    public async Task<Propagation> SplitOffAsync(Propagation source, int count, PropagationStage stage, DateOnly? date = null, Guid? newId = null)
+    {
+        var day = date ?? Today;
+        if (!source.IsActive)
+            throw new InvalidOperationException(Strings.Propagations.ErrFinished);
+        if (count < 1 || count > source.RemainingCount - 1)
+            throw new ArgumentOutOfRangeException(nameof(count), count, F(Strings.Propagations.ErrChooseBetween, Math.Max(0, source.RemainingCount - 1)));
+        if (stage is not (PropagationStage.Started or PropagationStage.Rooting or PropagationStage.Rooted))
+            throw new ArgumentOutOfRangeException(nameof(stage), stage, null);
+        if (day > Today)
+            throw new InvalidOperationException(Strings.Propagations.ErrDateCantBeFuture);
+        if (day < source.StartedOn)
+            throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
+
+        var split = new Propagation
+        {
+            Nickname = source.Nickname,
+            CollectionNumber = source.CollectionNumber,
+            Genus = source.Genus,
+            Species = source.Species,
+            Cultivar = source.Cultivar,
+            NameQualifier = source.NameQualifier,
+            NameNote = source.NameNote,
+            ParentPlantId = source.ParentPlantId,
+            Source = source.Source,
+            SellerId = source.SellerId,
+            Type = source.Type,
+            Medium = source.Medium,
+            SoilMixId = source.SoilMixId,
+            Container = source.Container,
+            ContainerPotId = source.ContainerPotId,
+            PlaceId = source.PlaceId,
+            Experiment = source.Experiment,
+            StartedOn = source.StartedOn,
+            CormSizeMm = source.CormSizeMm,
+            RootingAids = [.. source.RootingAids],
+            DriedForHours = source.DriedForHours,
+            FirstRootOn = source.FirstRootOn,
+            FirstLeafOn = source.FirstLeafOn,
+            RootedOn = source.RootedOn,
+            InitialCount = count,
+            SplitFromId = source.Id,
+            Stage = stage
+        };
+        if (newId is { } id)
+            split.Id = id;
+        if (stage == PropagationStage.Rooted)
+            split.RootedOn ??= day;
+        else if (stage == PropagationStage.Rooting)
+            split.FirstRootOn ??= day;
+        await propagations.SaveAsync(split);
+
+        await CountAsync(source, p => p.SplitOffCount += count);
+
+        await PartlySavedException.AfterSaveAsync(async () =>
+        {
+            var moment = time.MomentOn(day);
+            await AddChangeAsync(source, [HistoryText.Line("SplitOff", HistoryArg.Of(count))], moment);
+            await AddChangeAsync(split, [HistoryText.Line("SplitOffFrom", HistoryArg.Of(source.DisplayName))], moment);
+        });
+        return split;
+    }
+
     // Records the count on a copy and saves that, then the same on the caller's propagation, so it only
     // changes once the count is stored. It gets the UpdatedAt the repository set on saving too.
     private async Task CountAsync(Propagation propagation, Action<Propagation> record)

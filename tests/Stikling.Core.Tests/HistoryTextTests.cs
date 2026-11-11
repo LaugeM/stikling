@@ -171,6 +171,7 @@ public class HistoryTextTests
         (L("FinishedNothing"), "Finished: nothing yet"),
         (L("GaveToWho", 2, "Anna"), "Gave 2 to Anna"),
         (L("GaveAway", 2), "Gave 2 away"),
+        (L("SplitOff", 1), "Split 1 off into its own propagation"),
         (L("FloweringBuds"), "Spike or buds"),
         (L("FloweringInFlower"), "In flower"),
         (L("FloweringDone"), "Done flowering"),

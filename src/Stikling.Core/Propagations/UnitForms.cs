@@ -33,6 +33,8 @@ public sealed class UnitForms(PropagationService propagationService, RoomService
 
     public GiveAwayForm GiveAway(Propagation propagation) => new(this, propagation);
 
+    public SplitOffForm SplitOff(Propagation propagation) => new(this, propagation);
+
     /// <summary>
     /// Runs a save and tells the two failures apart. The service says when the count was stored and a
     /// later step failed, with a <see cref="PartlySavedException"/>. That comes back as the result's

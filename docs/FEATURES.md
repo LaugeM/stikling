@@ -154,7 +154,7 @@ This is the core of the app: cuttings, corms, seeds and divisions, linked to the
 | ✅ | Type: cutting, corm, offset/pup, seed, division, air layer, leaf | 1 | S | M4 |
 | ✅ | Medium: water, perlite, sphagnum, LECA, PON, soil, corm riser, other | 1 | S | M4 |
 | ✅ | Stages: started, rooting, rooted and done (or failed). The date of each stage change is saved | 1 | M | M4 |
-| ✅ | Batches with a count ("3 corms in LECA"); mark some as failed | 1 | M | M4 |
+| ✅ | Batches with a count ("3 corms in LECA"); mark some as failed. **Split off** moves one or a few units that got ahead of the rest, like a corm that starts rooting, into a propagation of their own with their own stage, linked to the batch they came from. The batch keeps the rest, and the split off units count for neither its success nor its failure | 1 | M | M4 |
 | ✅ | **Gave some away**: units of a propagation still going can be given away, with who got them, without potting them up first. They don't count for or against the success rate | 4 | S | v2 |
 | ✅ | Correct how many were potted up or failed under Edit, when one was marked by mistake. What's left goes back to growing at the stage it had reached | 2 | S | v1.x |
 | ✅ | **Promote to plant**: turn 1..n units of a batch into plants and keep the lineage | 1 | M | M4 |
