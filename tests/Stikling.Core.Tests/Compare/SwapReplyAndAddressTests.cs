@@ -47,7 +47,7 @@ public class SwapReplyTextTests
         Assert.DoesNotContain("Could I have", onlyMine);
         Assert.Contains("I could offer:", onlyMine);
         Assert.DoesNotContain("I could offer", onlyTheirs);
-        Assert.Contains("- B, Up for swap", onlyTheirs);
+        Assert.Contains("- B, up for swap", onlyTheirs);
     }
 
     [Fact]
