@@ -19,6 +19,13 @@ public static class PublicPageText
     public static string StartYourOwn => Strings.PublicPage.StartYourOwn;
     public static string ReportPage => Strings.PublicPage.ReportPage;
     public static string ReportSubject => Strings.PublicPage.ReportSubject;
+    public static string CompareWithMine => Strings.PublicPage.CompareWithMine;
+    public static string OpenToSwapRequests => Strings.PublicPage.OpenToSwapRequests;
+    public static string GetInTouch => Strings.PublicPage.GetInTouch;
+
+    /// <summary>Where "Get in touch" goes: the link itself, or mailto: for an email address.</summary>
+    public static string ContactHref(string contact) =>
+        contact.StartsWith("https://", StringComparison.OrdinalIgnoreCase) ? contact : "mailto:" + contact;
 
     /// <summary>"Ann's plants on Stikling".</summary>
     public static string PageTitle(string title) => Format(Strings.PublicPage.PageTitle, title);

@@ -1,4 +1,5 @@
 using System.Globalization;
+using Stikling.Core.Compare;
 using Stikling.Core.Examples;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
@@ -77,10 +78,16 @@ public sealed record PublicSubject(
     string? Cultivar,
     Guid? CoverPhotoId,
     DateTimeOffset UpdatedAt,
-    string? Caption = null);
+    string? Caption = null,
+    string? NameGenus = null,
+    string? NameSpecies = null,
+    string? NameCultivar = null,
+    SpareMark? Mark = null,
+    int SpareCount = 0,
+    PropagationStage? Stage = null);
 
-/// <summary>A line of the wishlist on the page.</summary>
-public sealed record PublicLine(string Text, DateTimeOffset UpdatedAt);
+/// <summary>A line of the wishlist on the page. The name parts are only set when the wish has a genus.</summary>
+public sealed record PublicLine(string Text, DateTimeOffset UpdatedAt, string? Genus = null, string? Species = null, string? Cultivar = null);
 
 /// <summary>
 /// What shows on the page, in the order it is shown, with no photos yet. Parts that are off are empty.
@@ -200,7 +207,9 @@ public static class PublicCollectionPage
                     var stage = SwapLists.StageText(line.Stage ?? cutting.Stage);
                     swap.Add(PropagationSubject(cutting) with
                     {
-                        Caption = string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.SwapCuttingCaption, line.Count, stage)
+                        Caption = string.Format(CultureInfo.CurrentCulture, Strings.PublicPage.SwapCuttingCaption, line.Count, stage),
+                        SpareCount = line.Count,
+                        Stage = line.Stage ?? cutting.Stage
                     });
                 }
             }
@@ -209,7 +218,7 @@ public static class PublicCollectionPage
                 foreach (var line in lines)
                 {
                     if (line.SubjectId is { } id && plantsById.TryGetValue(id, out var plant))
-                        swap.Add(PlantSubject(plant) with { Caption = SwapLists.MarkText(mark) });
+                        swap.Add(PlantSubject(plant) with { Caption = SwapLists.MarkText(mark), Mark = mark });
                 }
             }
         }
@@ -222,7 +231,9 @@ public static class PublicCollectionPage
                 ? open.OrderBy(w => w.DisplayName, NameComparer).ThenBy(w => w.Id)
                 : open.OrderByDescending(w => w.CreatedAt).ThenBy(w => w.Id);
             // Only the name. Never what it would cost, where to find it or the notes.
-            wishlist.AddRange(ordered.Select(w => new PublicLine(w.DisplayName, w.UpdatedAt)));
+            wishlist.AddRange(ordered.Select(w => !string.IsNullOrWhiteSpace(w.Genus)
+                ? new PublicLine(w.DisplayName, w.UpdatedAt, PlantNames.Genus(w.Genus), PlantNames.Species(w.KnownSpecies), PlantNames.Cultivar(w.Cultivar))
+                : new PublicLine(w.DisplayName, w.UpdatedAt)));
         }
 
         return new PublicSubjects(settings, plantSubjects, cuttingSubjects, swap, wishlist);
@@ -238,14 +249,22 @@ public static class PublicCollectionPage
     private static PublicSubject PlantSubject(Plant plant)
     {
         var card = ShareCardText.ForPlant(plant, null, null, [], AnyDay);
-        return new PublicSubject(plant.Id, SubjectType.Plant, card.Name, card.Latin, card.Cultivar, plant.CoverPhotoId, plant.UpdatedAt);
+        return new PublicSubject(plant.Id, SubjectType.Plant, card.Name, card.Latin, card.Cultivar, plant.CoverPhotoId, plant.UpdatedAt)
+            .WithNameParts(plant.Genus, plant.KnownSpecies, plant.Cultivar);
     }
 
     private static PublicSubject PropagationSubject(Propagation propagation)
     {
         var card = ShareCardText.ForPropagation(propagation, null, AnyDay);
-        return new PublicSubject(propagation.Id, SubjectType.Propagation, card.Name, card.Latin, card.Cultivar, propagation.CoverPhotoId, propagation.UpdatedAt);
+        return new PublicSubject(propagation.Id, SubjectType.Propagation, card.Name, card.Latin, card.Cultivar, propagation.CoverPhotoId, propagation.UpdatedAt)
+            .WithNameParts(propagation.Genus, propagation.KnownSpecies, propagation.Cultivar);
     }
+
+    // The botanical name the tile shows, as its parts. Nothing when there is no genus: such a plant is only its name.
+    private static PublicSubject WithNameParts(this PublicSubject subject, string? genus, string? species, string? cultivar) =>
+        PlantNames.Genus(genus) is not { } g
+            ? subject
+            : subject with { NameGenus = g, NameSpecies = PlantNames.Species(species), NameCultivar = PlantNames.Cultivar(cultivar) };
 
     /// <summary>The parts that are on and have something in them, with how many, in the order of the page. Plants always.</summary>
     public static IReadOnlyList<PublicPartLink> Links(PublicSubjects subjects) =>
@@ -352,6 +371,57 @@ public static class PublicCollectionPage
         var tiles = subjects.SubjectsOf(kind).Skip((page - 1) * perPage).Take(perPage)
             .Select(s => TileOf(s, bySubject, null)).ToList();
         return new PublicPartPage(kind, total, page, pageCount, tiles, []);
+    }
+
+    /// <summary>The ids of the plants and cuttings <see cref="ForCompare"/> lists, so the API reads only their photos.</summary>
+    public static IReadOnlyCollection<Guid> CompareIds(PublicSubjects subjects) =>
+        [.. CompareSubjects(subjects).Select(s => s.Id)];
+
+    // The plants, then the cuttings that are on the page under Cuttings or Swap, each once
+    private static List<PublicSubject> CompareSubjects(PublicSubjects subjects)
+    {
+        var seen = new HashSet<Guid>();
+        return [.. subjects.Plants.Concat(subjects.Cuttings).Concat(subjects.Swap).Where(s => seen.Add(s.Id))];
+    }
+
+    /// <summary>
+    /// What a friend's page says, for comparing with a list of one's own. Only what the page itself shows:
+    /// the plants and cuttings with their names and covers, what is spare while the swap part is on, and the
+    /// wishes by name while the wishlist part is on. Nothing else is read.
+    /// </summary>
+    /// <param name="photos">The photos of the subjects in <see cref="CompareIds"/> that have an image on the server.</param>
+    /// <param name="swapRequests">Whether the owner is open to swap requests.</param>
+    /// <param name="swapContact">The contact link, only passed on when <paramref name="swapRequests"/> is on.</param>
+    public static FriendList ForCompare(PublicSubjects subjects, IEnumerable<Photo> photos, bool swapRequests, string? swapContact)
+    {
+        var bySubject = photos.ToLookup(p => p.SubjectId);
+        var swapById = subjects.Swap.ToDictionary(s => s.Id);
+
+        var plants = CompareSubjects(subjects).Select((subject, index) =>
+        {
+            var cover = CoverOf(subject.CoverPhotoId, subject.Type, subject.Id, bySubject[subject.Id]);
+            var swap = subjects.IsOn(PublicPartKind.Swap) && swapById.TryGetValue(subject.Id, out var s) ? s : null;
+            var (spare, count, stage) = swap switch
+            {
+                { Type: SubjectType.Propagation } => (FriendSpare.Cuttings, swap.SpareCount, swap.Stage),
+                { Mark: SpareMark.CuttingsToSpare } => (FriendSpare.CuttingsToSpare, 0, (PropagationStage?)null),
+                { Mark: SpareMark.UpForSwap } => (FriendSpare.UpForSwap, 0, null),
+                _ => (FriendSpare.None, 0, null)
+            };
+            return (Index: index, Plant: new FriendPlant(
+                subject.Id, subject.Type, subject.Name, subject.NameGenus, subject.NameSpecies, subject.NameCultivar, spare, count, stage,
+                cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height)));
+        })
+        .OrderBy(p => p.Plant.Spare == FriendSpare.None ? int.MaxValue : (int)p.Plant.Spare)
+        .ThenBy(p => p.Index)
+        .Select(p => p.Plant)
+        .ToList();
+
+        IReadOnlyList<FriendWish> wishes = subjects.IsOn(PublicPartKind.Wishlist)
+            ? [.. subjects.Wishlist.Select(l => new FriendWish(l.Text, l.Genus, l.Species, l.Cultivar))]
+            : [];
+
+        return new FriendList(null, plants, wishes, subjects.IsOn(PublicPartKind.Wishlist), swapRequests ? swapContact : null, []);
     }
 
     private static PublicTile TileOf(PublicSubject subject, ILookup<Guid, Photo> bySubject, List<DateTimeOffset>? changes)

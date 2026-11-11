@@ -14,7 +14,7 @@ using static Stikling.Api.People.MeEndpoints;
 namespace Stikling.Api.Tests;
 
 [Collection(ApiCollection.Name)]
-public class PublicPageTests(ApiFactory api)
+public partial class PublicPageTests(ApiFactory api)
 {
     private static readonly DateTimeOffset Monday = new(2026, 9, 28, 12, 0, 0, TimeSpan.Zero);
 

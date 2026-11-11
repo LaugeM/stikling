@@ -59,4 +59,39 @@ public class PublicPageRulesTests
     [InlineData(null, "en")]
     public void The_language_is_danish_or_english(string? language, string expected) =>
         Assert.Equal(expected, PublicPageLanguages.Normalize(language));
+
+    [Theory]
+    [InlineData("https://example.com/swap", true)]
+    [InlineData("HTTPS://example.com", true)]
+    [InlineData("https://instagram.com/fern.friend", true)]
+    [InlineData("fern@example.com", true)]
+    [InlineData("http://example.com", false)]
+    [InlineData("https://", false)]
+    [InlineData("javascript:alert(1)", false)]
+    [InlineData("example.com", false)]
+    [InlineData("fern@example", false)]
+    [InlineData("fern@.com", false)]
+    [InlineData("fern@example.", false)]
+    [InlineData("@example.com", false)]
+    [InlineData("a@b@example.com", false)]
+    [InlineData("fern @example.com", false)]
+    [InlineData("https://example.com/a b", false)]
+    [InlineData("", false)]
+    public void A_contact_is_an_https_link_or_an_email_address(string contact, bool expected) =>
+        Assert.Equal(expected, PublicPageRules.IsContact(contact));
+
+    [Fact]
+    public void A_contact_is_not_longer_than_the_limit()
+    {
+        Assert.True(PublicPageRules.IsContact("https://example.com/" + new string('a', PublicPageRules.MaxContactLength - 20)));
+        Assert.False(PublicPageRules.IsContact("https://example.com/" + new string('a', PublicPageRules.MaxContactLength)));
+    }
+
+    [Theory]
+    [InlineData("  fern@example.com ", "fern@example.com")]
+    [InlineData("   ", null)]
+    [InlineData("", null)]
+    [InlineData(null, null)]
+    public void A_contact_is_trimmed_and_empty_is_none(string? typed, string? expected) =>
+        Assert.Equal(expected, PublicPageRules.CleanContact(typed));
 }
