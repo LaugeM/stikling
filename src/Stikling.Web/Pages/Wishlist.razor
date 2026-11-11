@@ -17,6 +17,7 @@
 <div class="page-heading">
     <h1>@Strings.Shared.WishlistTitle</h1>
     <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
+        <a class="btn btn-link btn-sm link-action" href="compare">@Strings.Compare.EntryLink</a>
         @if (open.Count > 0)
         {
             <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => shareOpen = true">@Strings.Shared.WishlistShareAsText</button>

@@ -259,6 +259,12 @@ namespace Stikling.Api.Data.Migrations
                     b.Property<bool>("ShowWishlist")
                         .HasColumnType("bit");
 
+                    b.Property<string>("SwapContact")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("SwapRequests")
+                        .HasColumnType("bit");
+
                     b.Property<string>("TimeZone")
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");

@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Stikling.Api.Data;
 using Stikling.Api.Photos;
+using Stikling.Core.Compare;
 using Stikling.Core.Models;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
@@ -21,6 +22,8 @@ namespace Stikling.Api.Sharing;
 /// <param name="PageUrl">The address of the page being drawn, in full.</param>
 /// <param name="RootUrl">The address of the page's front, in full.</param>
 /// <param name="Canonical">The address search engines should use for this page, when it has a name.</param>
+/// <param name="CompareUrl">The app's page that compares this page with your own lists, with the address as it was asked for.</param>
+/// <param name="SwapContact">The contact link, only when the page is open to swap requests.</param>
 public sealed record PublicPageContext(
     string Language,
     string Title,
@@ -33,7 +36,9 @@ public sealed record PublicPageContext(
     PublicPageLayout Layout,
     bool StoriesOn,
     IReadOnlyList<PublicPartLink> Links,
-    HashSet<Guid> Thumbnails);
+    HashSet<Guid> Thumbnails,
+    string CompareUrl = "",
+    string? SwapContact = null);
 
 /// <summary>
 /// The public pages of whole collections, which anyone can open. What they show is decided in Core's
@@ -85,6 +90,10 @@ public static class PublicPagePages
             pages.MapGet($"/{{address}}/{segment}", (string address, HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options, TimeProvider clock) =>
                 PartAsync(http, db, options.Value, address, which, segment, clock));
         }
+
+        // What the page shows, as a list the app can compare with its own. Open to the app's origin like the rest.
+        pages.MapGet("/{address}/compare", (string address, HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options) =>
+            CompareAsync(http, db, options.Value, address));
 
         pages.MapGet("/{address}/plants/{id:guid}", (string address, Guid id, HttpContext http, StiklingDbContext db, IOptions<ShareOptions> options, TimeProvider clock) =>
             StoryAsync(http, db, options.Value, address, id, SubjectType.Plant, clock));
@@ -245,7 +254,9 @@ public static class PublicPagePages
 
     private static PublicPageContext ContextFor(Live live, string title, string path, DateTimeOffset updated, IReadOnlyList<PublicPartLink> links, HashSet<Guid> thumbnails) =>
         new(live.Page.Language, title, live.LinkPrefix, live.Url(path), live.RootUrl, live.Canonical(path), live.Page.Searchable,
-            SharePageEndpoints.DayIn(updated, live.Zone), live.Page.Layout, live.Page.ShowStories, links, thumbnails);
+            SharePageEndpoints.DayIn(updated, live.Zone), live.Page.Layout, live.Page.ShowStories, links, thumbnails,
+            $"{live.Options.AppUrl.TrimEnd('/')}/compare/{(live.Address.StartsWith('@') ? live.Address.ToLowerInvariant() : live.Address)}",
+            live.Page.SwapRequests ? live.Page.SwapContact : null);
 
     // The front page
 
@@ -296,6 +307,28 @@ public static class PublicPagePages
         var path = $"/{segment}" + (number > 1 ? $"?page={number}" : "");
         var context = ContextFor(live, title, path, updated, PublicCollectionPage.Links(subjects), thumbnails);
         return Written<PublicPartView>(live.Culture, new { Part = part, Context = context, Segment = segment });
+    }
+
+    // The page as a friend's list, for comparing with one's own. Only what the page itself shows.
+
+    private static async Task<IResult> CompareAsync(HttpContext http, StiklingDbContext db, ShareOptions options, string address)
+    {
+        var (live, failure) = await ResolveAsync(http, db, options, address);
+        if (live is null)
+            return failure!;
+        Speak(live.Culture);
+
+        var subjects = await SubjectsAsync(db, live);
+        var photos = await PhotosOfAsync(db, live.Page.CollectionId, PublicCollectionPage.CompareIds(subjects));
+        var list = PublicCollectionPage.ForCompare(subjects, photos, live.Page.SwapRequests, live.Page.SwapContact)
+            with { Title = PublicCollectionPage.TitleOf(live.Page.Title) };
+
+        var covers = list.Plants.Select(p => p.Cover?.Id).OfType<Guid>().Distinct().ToList();
+        var thumbnails = await ThumbnailsAsync(db, live.Page.CollectionId, covers);
+        var urls = covers.ToDictionary(id => id, id => live.Url($"/photos/{id}/{(thumbnails.Contains(id) ? "thumb" : "full")}"));
+
+        var asked = address.StartsWith('@') ? address.ToLowerInvariant() : address;
+        return Results.Ok(new FriendPageResponse(list, asked, urls));
     }
 
     // A story: what a plant's or a cutting's page shows, for a collection that has stories on

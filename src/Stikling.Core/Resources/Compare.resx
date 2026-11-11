@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="CanSpare_One" xml:space="preserve">
+    <value>Can spare {0} {1} cutting</value>
+    <comment>Under a friend's plant in a comparison: it has one cutting to spare. {0} is the number, {1} the stage like rooted, rooting or just started.</comment>
+  </data>
+  <data name="CanSpare_Other" xml:space="preserve">
+    <value>Can spare {0} {1} cuttings</value>
+    <comment>Under a friend's plant in a comparison: it has cuttings to spare. {0} is the number, {1} the stage like rooted, rooting or just started.</comment>
+  </data>
+  <data name="CanSpareNoStage_One" xml:space="preserve">
+    <value>Can spare {0} cutting</value>
+    <comment>Under a friend's plant in a comparison: one cutting to spare, stage not known. {0} is the number.</comment>
+  </data>
+  <data name="CanSpareNoStage_Other" xml:space="preserve">
+    <value>Can spare {0} cuttings</value>
+    <comment>Under a friend's plant in a comparison: cuttings to spare, stage not known. {0} is the number.</comment>
+  </data>
+  <data name="DifferenceTheirs" xml:space="preserve">
+    <value>Theirs: {0}</value>
+    <comment>Under a match that is the same species but another cultivar. {0} is their cultivar in quotes.</comment>
+  </data>
+  <data name="DifferenceTheirsNone" xml:space="preserve">
+    <value>Theirs: no cultivar</value>
+    <comment>Under a match that is the same species. Their plant has no cultivar.</comment>
+  </data>
+  <data name="DifferenceYours" xml:space="preserve">
+    <value>Yours: {0}</value>
+    <comment>Under a match that is the same species but another cultivar. {0} is your cultivar in quotes.</comment>
+  </data>
+  <data name="DifferenceYoursNone" xml:space="preserve">
+    <value>Yours: no cultivar</value>
+    <comment>Under a match that is the same species. Your plant has no cultivar.</comment>
+  </data>
+  <data name="ForYouCount_One" xml:space="preserve">
+    <value>{0} for you</value>
+    <comment>In the summary of a comparison: how many of their plants are on your wishlist. {0} is the number.</comment>
+  </data>
+  <data name="ForYouCount_Other" xml:space="preserve">
+    <value>{0} for you</value>
+    <comment>In the summary of a comparison: how many of their plants are on your wishlist. {0} is the number.</comment>
+  </data>
+  <data name="ForThemCount_One" xml:space="preserve">
+    <value>{0} for them</value>
+    <comment>In the summary of a comparison: how many of your plants are on their wishlist. {0} is the number.</comment>
+  </data>
+  <data name="ForThemCount_Other" xml:space="preserve">
+    <value>{0} for them</value>
+    <comment>In the summary of a comparison: how many of your plants are on their wishlist. {0} is the number.</comment>
+  </data>
+  <data name="ReplyHello" xml:space="preserve">
+    <value>Hi! I compared our plant lists in Stikling.</value>
+    <comment>First line of the message to send to a friend after a comparison.</comment>
+  </data>
+  <data name="ReplyCouldIHave" xml:space="preserve">
+    <value>Could I have one of these?</value>
+    <comment>Heading over their plants that are on your wishlist, in the message to a friend.</comment>
+  </data>
+  <data name="ReplyICouldOffer" xml:space="preserve">
+    <value>I could offer:</value>
+    <comment>Heading over your plants that are on their wishlist, in the message to a friend.</comment>
+  </data>
+  <data name="ReplyWouldYouSwap" xml:space="preserve">
+    <value>Would you like to swap some plants?</value>
+    <comment>Line in the message to a friend when the lists have nothing in common.</comment>
+  </data>
+</root>

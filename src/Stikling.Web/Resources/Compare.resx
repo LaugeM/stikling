@@ -1,0 +1,173 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Compare with a friend · Stikling</value>
+    <comment>Browser tab title of the Compare page.</comment>
+  </data>
+  <data name="Heading" xml:space="preserve">
+    <value>Compare with a friend</value>
+    <comment>Heading of the Compare page before anything is compared.</comment>
+  </data>
+  <data name="EntryLink" xml:space="preserve">
+    <value>Compare with a friend</value>
+    <comment>Link on the Wishlist and Available for swap pages that opens the Compare page.</comment>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>See what your friend has from your wishlist, and what you have from theirs.</value>
+  </data>
+  <data name="InputLabel" xml:space="preserve">
+    <value>A link to their page, or a list they sent</value>
+    <comment>Label of the box where a friend's link or list is pasted.</comment>
+  </data>
+  <data name="Go" xml:space="preserve">
+    <value>Compare</value>
+    <comment>Button under the box.</comment>
+  </data>
+  <data name="InputHint" xml:space="preserve">
+    <value>Ask for the link to their Stikling page, or for the list they share from their wishlist or swap list.</value>
+  </data>
+  <data name="PlainQuestion" xml:space="preserve">
+    <value>Is this what they have, or what they're looking for?</value>
+    <comment>Asked when the pasted list is just names, so the app can't tell which it is.</comment>
+  </data>
+  <data name="PlainHave" xml:space="preserve">
+    <value>They have these</value>
+    <comment>Answer to the question above.</comment>
+  </data>
+  <data name="PlainWant" xml:space="preserve">
+    <value>They're looking for these</value>
+    <comment>Answer to the question above.</comment>
+  </data>
+  <data name="ErrorEmpty" xml:space="preserve">
+    <value>Paste a link or a list first.</value>
+    <comment>Shown when Compare is tapped with nothing in the box.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading their page…</value>
+    <comment>Read by screen readers while the friend's page is fetched.</comment>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>There's no page at this address.</value>
+  </data>
+  <data name="Gone" xml:space="preserve">
+    <value>This page has been turned off.</value>
+    <comment>The owner turned their public page off.</comment>
+  </data>
+  <data name="Offline" xml:space="preserve">
+    <value>Comparing with a page needs a connection. Pasting a list works offline.</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Couldn't open that page right now. Try again in a bit.</value>
+  </data>
+  <data name="PasteInstead" xml:space="preserve">
+    <value>Paste a list instead</value>
+    <comment>Button under a problem with the friend's page, back to the box.</comment>
+  </data>
+  <data name="TheirList" xml:space="preserve">
+    <value>Their list</value>
+    <comment>Title of the result when the friend's list was pasted and has no page title.</comment>
+  </data>
+  <data name="Change" xml:space="preserve">
+    <value>Change</value>
+    <comment>Link next to the counts that goes back to the box.</comment>
+  </data>
+  <data name="ForYou" xml:space="preserve">
+    <value>For you</value>
+    <comment>Heading of what the friend has that is on my wishlist. Shown in capitals.</comment>
+  </data>
+  <data name="ForThem" xml:space="preserve">
+    <value>For them</value>
+    <comment>Heading of what I have that is on the friend's wishlist. Shown in capitals.</comment>
+  </data>
+  <data name="TheyHaveIt" xml:space="preserve">
+    <value>They have it</value>
+    <comment>Under one of their plants that is on my wishlist and isn't marked as spare.</comment>
+  </data>
+  <data name="TheyWant" xml:space="preserve">
+    <value>They're looking for {0}</value>
+    <comment>Under one of my plants. {0} is the name on their wishlist.</comment>
+  </data>
+  <data name="NoneForYou" xml:space="preserve">
+    <value>None of their plants are on your wishlist.</value>
+  </data>
+  <data name="NoneForThem" xml:space="preserve">
+    <value>None of your plants are on their wishlist.</value>
+  </data>
+  <data name="NoWishlistPage" xml:space="preserve">
+    <value>Their page doesn't share a wishlist.</value>
+  </data>
+  <data name="NoWishlistList" xml:space="preserve">
+    <value>Their list doesn't include a wishlist.</value>
+  </data>
+  <data name="MarkLabel" xml:space="preserve">
+    <value>Mark {0} as up for swap</value>
+    <comment>Spoken name of the Up for swap button. {0} is the plant.</comment>
+  </data>
+  <data name="MarkedUpForSwap" xml:space="preserve">
+    <value>{0} is now up for swap.</value>
+    <comment>{0} is the plant.</comment>
+  </data>
+  <data name="NothingTitle" xml:space="preserve">
+    <value>Nothing matches yet</value>
+  </data>
+  <data name="NothingBody" xml:space="preserve">
+    <value>None of their plants are on your wishlist, and none of yours are on theirs. Have a look at the rest of their plants.</value>
+  </data>
+  <data name="More" xml:space="preserve">
+    <value>More of their plants ({0})</value>
+    <comment>Folded heading. {0} is how many.</comment>
+  </data>
+  <data name="AddToWishlist" xml:space="preserve">
+    <value>+ Wishlist</value>
+    <comment>Small button on one of their plants that adds it to my wishlist.</comment>
+  </data>
+  <data name="AddLabel" xml:space="preserve">
+    <value>Add {0} to your wishlist</value>
+    <comment>Spoken name of the button above. {0} is the plant.</comment>
+  </data>
+  <data name="AddedToWishlist" xml:space="preserve">
+    <value>{0} is on your wishlist.</value>
+    <comment>{0} is the plant.</comment>
+  </data>
+  <data name="Unread_One" xml:space="preserve">
+    <value>Couldn't read {0} line</value>
+    <comment>Folded line under the result that lists the lines of a pasted list that weren't names.</comment>
+  </data>
+  <data name="Unread_Other" xml:space="preserve">
+    <value>Couldn't read {0} lines</value>
+  </data>
+  <data name="AskForSwap" xml:space="preserve">
+    <value>Ask for a swap</value>
+    <comment>Button when their page has a way to get in touch.</comment>
+  </data>
+  <data name="SendReply" xml:space="preserve">
+    <value>Send a reply</value>
+    <comment>Button when it has not.</comment>
+  </data>
+  <data name="ReplyTitle" xml:space="preserve">
+    <value>Your reply</value>
+    <comment>Title of the sheet with the message to send.</comment>
+  </data>
+  <data name="ReplyLabel" xml:space="preserve">
+    <value>Message</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="CopiedPaste" xml:space="preserve">
+    <value>Copied. Paste it in your message.</value>
+    <comment>Shown after the reply was copied and their contact was opened.</comment>
+  </data>
+</root>

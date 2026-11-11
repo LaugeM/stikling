@@ -58,12 +58,8 @@ public static class WishMatches
         return Clean(wish.Name) is { } name && name == Clean(nickname);
     }
 
-    private static (string Genus, string Species, string Cultivar) Key(string? genus, string? species, string? cultivar, PlantDictionary? dictionary)
-    {
-        var (g, s) = dictionary?.Current(genus, species) ?? (genus, species);
-        return (Clean(g) ?? "", Clean(s) ?? "", Clean(PlantNames.Cultivar(cultivar)) ?? "");
-    }
+    private static (string Genus, string Species, string Cultivar) Key(string? genus, string? species, string? cultivar, PlantDictionary? dictionary) =>
+        PlantNameKey.Of(genus, species, cultivar, dictionary);
 
-    private static string? Clean(string? name) =>
-        string.IsNullOrWhiteSpace(name) ? null : name.Trim().ToLowerInvariant();
+    private static string? Clean(string? name) => PlantNameKey.Clean(name);
 }

@@ -15,6 +15,10 @@ public static class PublicPageStyles
         .pp-head { padding: 1.5rem 1rem 0.5rem; }
         .pp-head h1 { font-size: 2rem; }
         .pp-head .line { max-width: 40rem; }
+        .pp-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 1rem; margin: 1rem 0 0; }
+        .pp-compare { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1rem; border: 1px solid var(--green); border-radius: 0.6rem; color: var(--moss); text-decoration: none; font: 600 0.95rem var(--display); }
+        .pp-swap { font-size: 0.9rem; color: var(--muted); }
+        .pp-swap a { display: inline-flex; align-items: center; min-height: 2.75rem; font-weight: 600; }
         .pp-back { display: inline-flex; align-items: center; min-height: 2.75rem; padding: 0 1rem; font-size: 0.95rem; }
         .pp-bar { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0.75rem 1rem 0; padding: 0; list-style: none; }
         .pp-bar a { display: inline-flex; align-items: center; gap: 0.4rem; min-height: 2.75rem; padding: 0 0.9rem; border: 1px solid var(--border); border-radius: 0.6rem; background: var(--surface); color: var(--ink); text-decoration: none; font: 600 0.95rem var(--display); }

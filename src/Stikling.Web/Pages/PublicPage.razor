@@ -172,6 +172,22 @@ else
         </section>
 
         <section class="pp-section">
+            @Switch("pp-swap-requests", Strings.PublicPage.SwapRequests, Strings.PublicPage.SwapRequestsHint, swapOn, SetSwapRequestsAsync)
+            @if (swapOn)
+            {
+                <label class="pp-label pp-sublabel" for="pp-contact">@Strings.PublicPage.ContactLabel</label>
+                <input id="pp-contact" type="text" class="form-control" maxlength="@PublicPageRules.MaxContactLength"
+                       placeholder="@Strings.PublicPage.ContactPlaceholder" autocapitalize="none" autocomplete="off" spellcheck="false" inputmode="email"
+                       aria-invalid="@(contactInvalid ? "true" : null)" aria-describedby="@(contactInvalid ? "pp-contact-error" : null)"
+                       @bind="contact" @bind:event="oninput" @onchange="SaveContactAsync" />
+                @if (contactInvalid)
+                {
+                    <p class="pp-error" id="pp-contact-error" role="alert">@Strings.PublicPage.ContactInvalid</p>
+                }
+            }
+        </section>
+
+        <section class="pp-section">
             <h2 class="pp-label">@Strings.PublicPage.HiddenHeading</h2>
             <div class="settings-rows">
                 <SettingsRow Href="settings/public-page/plants" Title="@Strings.PublicPage.HiddenPlants"
@@ -225,6 +241,9 @@ else
     private string nameText = "";
     private string title = "";
     private string line = "";
+    private bool swapOn;
+    private string contact = "";
+    private bool contactInvalid;
     private Guid? wordsFor;
     private int controlsVersion;
     private int shownPlants;
@@ -294,6 +313,9 @@ else
         wordsFor = page.Id;
         title = page.Title ?? "";
         line = page.Line ?? "";
+        swapOn = page.SwapRequests;
+        contact = page.SwapContact ?? "";
+        contactInvalid = false;
     }
 
     private void OnPageChanged() => _ = InvokeAsync(() =>
@@ -419,12 +441,47 @@ else
         await ChangeAsync(page with { Title = cleanTitle, Line = cleanLine });
     }
 
+    // Turning requests on needs a contact, so with none yet the field shows first and the save waits for it
+    private async Task SetSwapRequestsAsync(bool on)
+    {
+        if (PublicPages.Page is not { } page)
+            return;
+
+        swapOn = on;
+        contactInvalid = false;
+        if (!on)
+        {
+            await ChangeAsync(page with { SwapRequests = false });
+            return;
+        }
+
+        if (PublicPageRules.CleanContact(contact) is { } clean && PublicPageRules.IsContact(clean))
+            await ChangeAsync(page with { SwapRequests = true, SwapContact = clean });
+    }
+
+    private async Task SaveContactAsync()
+    {
+        if (PublicPages.Page is not { } page || !swapOn)
+            return;
+
+        var clean = PublicPageRules.CleanContact(contact);
+        contactInvalid = clean is null || !PublicPageRules.IsContact(clean);
+        if (contactInvalid || (page.SwapRequests && clean == page.SwapContact))
+            return;
+
+        contact = clean!;
+        await ChangeAsync(page with { SwapRequests = true, SwapContact = clean });
+    }
+
     private void PutControlsBack()
     {
         if (PublicPages.Page is { } page)
         {
             title = page.Title ?? "";
             line = page.Line ?? "";
+            swapOn = page.SwapRequests;
+            contact = page.SwapContact ?? "";
+            contactInvalid = false;
         }
 
         controlsVersion++;
