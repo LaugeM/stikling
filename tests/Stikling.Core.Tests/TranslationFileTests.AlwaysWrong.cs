@@ -34,8 +34,9 @@ public partial class TranslationFileTests
         return lists;
     }
 
+    // A hyphen counts as part of a word, so "et plante-navn" isn't read as "et plante"
     private static Regex PhrasePattern(string phrase) =>
-        new($@"\b{Regex.Escape(phrase)}\b", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
+        new($@"(?<![\w-]){Regex.Escape(phrase)}(?![\w-])", RegexOptions.IgnoreCase | RegexOptions.CultureInvariant);
 
     [Fact]
     public void No_translation_has_a_phrase_from_its_always_wrong_list()
@@ -71,5 +72,8 @@ public partial class TranslationFileTests
         Assert.Matches(pattern, "Et plante.");
         Assert.DoesNotMatch(pattern, "Et plantenavn");
         Assert.DoesNotMatch(pattern, "Det plantebord");
+        Assert.DoesNotMatch(pattern, "Et plante-navn");
+        Assert.DoesNotMatch(pattern, "Sæt plante");
+        Assert.Matches(PhrasePattern("en billede"), "Så kom en billede på");
     }
 }

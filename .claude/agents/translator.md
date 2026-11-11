@@ -36,7 +36,7 @@ For each key, read the English for what it means, then read the Danish as a Dane
 - names a button, heading or screen differently from how it is written where it appears. Search the `.da.resx` files for that name and match it.
 - uses a term differently from the existing Danish elsewhere. Search the `.da.resx` files for the term's usual Danish and follow the established use.
 
-Keep placeholders, HTML tags, `_One`/`_Other` pairs and the app name as `translating.md` says. Edit only the `<value>` of `.da.resx` files. When the English itself reads wrong, leave it and report it.
+Keep placeholders, HTML tags, `_One`/`_Other` pairs and the app name as `translating.md` says. Edit the `<value>` of `.da.resx` files, and `docs/dev/always-wrong.da.txt` as described below, and nothing else. When the English itself reads wrong, leave it and report it.
 
 A line that already reads naturally stays as it is, even when you would have phrased it differently.
 
