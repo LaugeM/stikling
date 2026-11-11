@@ -791,7 +791,7 @@ else
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
                       EarlierPropagationId="@(earlierUntil is null ? null : fromPropagation?.Id)" EarlierUntil="earlierUntil"
-                      EmptyText="@Strings.PlantDetail.TimelineEmpty" />
+                      EmptyText="@Strings.PlantDetail.TimelineEmpty" OnBeforeAfter="OpenShareBeforeAfter" />
         </div>
     </div>
 
@@ -928,7 +928,7 @@ else
     </Sheet>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="plant" SubjectId="plant.Id"
-                Plant="plant" FromPropagation="fromPropagation" StartOnLink="shareOnLink"
+                Plant="plant" FromPropagation="fromPropagation" StartOnLink="shareOnLink" StartBeforeId="shareBeforeId" StartAfterId="shareAfterId"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)" Text="ShareCardText.ForPlant(plant, ancestors.FirstOrDefault(), fromPropagation, propagations, Today)" />
 
     <Sheet Title="@MoreTitle" Open="more != More.None" OpenChanged="open => { if (!open) more = More.None; }">
@@ -1567,6 +1567,8 @@ else
     private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, FoundPests, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
+    private Guid? shareBeforeId;
+    private Guid? shareAfterId;
 
     private Plant? plant;
     private bool loaded;
@@ -2671,6 +2673,17 @@ else
     private void OpenShare()
     {
         shareOnLink = false;
+        shareBeforeId = null;
+        shareAfterId = null;
+        shareOpen = true;
+    }
+
+    // From Compare in the photo viewer: the Share sheet opens on Before and after with the two photos picked
+    private void OpenShareBeforeAfter((Guid Before, Guid After) pair)
+    {
+        shareOnLink = false;
+        shareBeforeId = pair.Before;
+        shareAfterId = pair.After;
         shareOpen = true;
     }
 
@@ -2679,6 +2692,8 @@ else
     {
         more = More.None;
         shareOnLink = true;
+        shareBeforeId = null;
+        shareAfterId = null;
         shareOpen = true;
     }
 

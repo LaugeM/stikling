@@ -1,0 +1,299 @@
+/* Dark in both themes, like the photo viewer and the camera, so the colours are written here as they have
+   them, with the dark values of the green accent. */
+.cmp {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    background: #0b0f0c;
+    color: #f1f4f1;
+    outline: none;
+    padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom);
+}
+
+.cmp-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem;
+}
+
+.cmp-count {
+    font-size: 0.9rem;
+    color: #b8c2bb;
+}
+
+.cmp-close {
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: inherit;
+    font-size: 1.25rem;
+}
+
+.cmp-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    overflow: hidden;
+}
+
+.cmp-stage.halves {
+    display: grid;
+    gap: 0.3rem;
+    padding: 0 0.3rem;
+    /* Rows and columns of a set size, so a tall photo shrinks to fit instead of growing over the controls */
+    grid-template: minmax(0, 1fr) / repeat(2, minmax(0, 1fr));
+}
+
+@media (orientation: portrait) {
+    .cmp-stage.halves {
+        grid-template: repeat(2, minmax(0, 1fr)) / minmax(0, 1fr);
+    }
+}
+
+.cmp-stage.slider {
+    touch-action: none;
+}
+
+.cmp-cell {
+    position: relative;
+    min-width: 0;
+    min-height: 0;
+}
+
+.cmp-half {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    border: 1px solid transparent;
+    touch-action: pan-y;
+    cursor: pointer;
+}
+
+.cmp-half.active {
+    border-color: #5fb883;
+}
+
+.cmp-half ::deep img,
+.cmp-half ::deep .photo-placeholder,
+.cmp-layer ::deep img,
+.cmp-layer ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+
+.cmp-slider {
+    position: absolute;
+    inset: 0;
+    --x: 50%;
+}
+
+.cmp-layer {
+    position: absolute;
+    inset: 0;
+}
+
+.cmp-top {
+    clip-path: inset(0 0 0 var(--x));
+}
+
+/* A control, not a border, so it is the plain light colour */
+.cmp-line {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: var(--x);
+    width: 2px;
+    transform: translateX(-50%);
+    background: #f1f4f1;
+    pointer-events: none;
+}
+
+.cmp-handle {
+    position: absolute;
+    top: 50%;
+    left: var(--x);
+    transform: translate(-50%, -50%);
+    width: 2.75rem;
+    height: 2.75rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 2px solid #f1f4f1;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.45);
+    color: #f1f4f1;
+}
+
+.cmp-handle svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin: 0 -0.15rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.cmp-pill {
+    position: absolute;
+    bottom: 0.5rem;
+    max-width: calc(100% - 1rem);
+    padding: 0.25rem 0.6rem;
+    border: 1px solid transparent;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.55);
+    color: #f1f4f1;
+    font-size: 0.85rem;
+    line-height: 1.3;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.cmp-pill.left {
+    left: 0.5rem;
+}
+
+.cmp-pill.right {
+    right: 0.5rem;
+}
+
+.cmp-pill.active {
+    border-color: #5fb883;
+}
+
+.cmp-nav {
+    display: none;
+}
+
+@media (hover: hover) {
+    .cmp-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        display: block;
+        width: 2.75rem;
+        height: 3.5rem;
+        border: 0;
+        border-radius: 0.5rem;
+        background: rgb(0 0 0 / 0.35);
+        color: #fff;
+    }
+
+    .cmp-nav svg {
+        width: 1.5rem;
+        height: 1.5rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 2.25;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+    }
+
+    .cmp-nav.prev {
+        left: 0.5rem;
+    }
+
+    .cmp-nav.next {
+        right: 0.5rem;
+    }
+}
+
+.cmp-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    padding: 0.75rem 1rem 1rem;
+}
+
+.cmp-strip {
+    position: relative;
+    display: flex;
+    gap: 0.5rem;
+    margin: 0;
+    padding: 0.2rem 0;
+    list-style: none;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.cmp-strip li {
+    flex: none;
+}
+
+.cmp-tile {
+    display: block;
+    width: 3rem;
+    height: 3rem;
+    padding: 0;
+    border: 1px solid transparent;
+    border-radius: 0.5rem;
+    background: #1a221d;
+    overflow: hidden;
+    /* The tap area reaches 44px without the tile growing */
+    position: relative;
+}
+
+.cmp-tile::after {
+    content: "";
+    position: absolute;
+    inset: -0.2rem;
+}
+
+.cmp-tile.current {
+    border-color: #5fb883;
+}
+
+.cmp-tile ::deep img,
+.cmp-tile ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.cmp-actions {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.cmp-actions .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.cmp-mode .btn-check:checked + .btn {
+    background: transparent;
+    border-color: #5fb883;
+    color: #86d1a4;
+}
+
+.cmp button:focus-visible,
+.cmp [role="button"]:focus-visible,
+.cmp [role="slider"]:focus-visible,
+.cmp .btn-check:focus-visible + .btn {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .cmp-half,
+    .cmp-pill,
+    .cmp-tile,
+    .cmp-actions .btn {
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    }
+}

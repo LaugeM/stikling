@@ -540,11 +540,12 @@ else
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
-                      OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" />
+                      OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" OnBeforeAfter="OpenShareBeforeAfter" />
         </div>
     </div>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
+                StartBeforeId="shareBeforeId" StartAfterId="shareAfterId"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
     <PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" />
@@ -1059,6 +1060,8 @@ else
     private enum More { None, Menu, Flag, Dormant, Swap, Leaf, ThisLeaf }
     private bool shareOpen;
     private bool shareOnLink;
+    private Guid? shareBeforeId;
+    private Guid? shareAfterId;
 
     private IReadOnlyList<Plant> allPlants = [];
 
@@ -1624,6 +1627,17 @@ else
     private void OpenShare()
     {
         shareOnLink = false;
+        shareBeforeId = null;
+        shareAfterId = null;
+        shareOpen = true;
+    }
+
+    // From Compare in the photo viewer: the Share sheet opens on Before and after with the two photos picked
+    private void OpenShareBeforeAfter((Guid Before, Guid After) pair)
+    {
+        shareOnLink = false;
+        shareBeforeId = pair.Before;
+        shareAfterId = pair.After;
         shareOpen = true;
     }
 
@@ -1632,6 +1646,8 @@ else
     {
         stageView = StageView.None;
         shareOnLink = true;
+        shareBeforeId = null;
+        shareAfterId = null;
         shareOpen = true;
     }
 

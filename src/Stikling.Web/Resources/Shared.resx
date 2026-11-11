@@ -1210,6 +1210,38 @@ Maybe</value>
     <value>Frame</value>
     <comment>Button that opens the framing of a photo: moving and zooming it where it is cropped.</comment>
   </data>
+  <data name="PhotoViewerCompare" xml:space="preserve">
+    <value>Compare</value>
+    <comment>Button in the photo viewer that opens the photo next to another one of the same plant.</comment>
+  </data>
+  <data name="CompareLabel" xml:space="preserve">
+    <value>Compare photos</value>
+    <comment>Name of the full-screen view where two photos are compared, and of its Side by side and Slider choice, for screen readers.</comment>
+  </data>
+  <data name="CompareSideBySide" xml:space="preserve">
+    <value>Side by side</value>
+    <comment>Choice in the compare view: the two photos next to each other.</comment>
+  </data>
+  <data name="CompareSlider" xml:space="preserve">
+    <value>Slider</value>
+    <comment>Choice in the compare view: one photo over the other with a line to drag.</comment>
+  </data>
+  <data name="CompareSliderHandle" xml:space="preserve">
+    <value>Drag to compare the photos</value>
+    <comment>Name of the handle on the line in the compare view, for screen readers.</comment>
+  </data>
+  <data name="CompareSameDay" xml:space="preserve">
+    <value>Same day</value>
+    <comment>Shown in the compare view when the two photos were taken on the same day, where it otherwise says how far apart they are, like "8 months apart".</comment>
+  </data>
+  <data name="ComparePhotoFrom" xml:space="preserve">
+    <value>Photo from {0}</value>
+    <comment>Name of a small photo in the row at the bottom of the compare view, for screen readers. {0} is the date.</comment>
+  </data>
+  <data name="ComparePickHalf" xml:space="preserve">
+    <value>Photo from {0}. Tap to change it from the row below</value>
+    <comment>Name of one of the two photos in the compare view, for screen readers. {0} is the date.</comment>
+  </data>
   <data name="PhotoViewerMoveToHistory" xml:space="preserve">
     <value>Move to history</value>
     <comment>Button that moves a reference photo to the history.</comment>

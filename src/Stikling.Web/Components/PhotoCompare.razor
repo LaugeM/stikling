@@ -1,0 +1,289 @@
+@* Full-screen view of two photos of the same plant or propagation, side by side or one over the other with a
+   line to drag. Each half can be moved to another photo. Nothing is stored. The swipes and the drag are in
+   wwwroot/js/compare.js, which calls back here; the state stays in this component. *@
+@implements IAsyncDisposable
+@using Stikling.Core.Sharing
+@inject IJSRuntime Js
+@inject TimeProvider Time
+
+<div class="cmp" role="dialog" aria-modal="true" aria-label="@Strings.Shared.CompareLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
+    <div class="cmp-bar">
+        <span class="cmp-count">@ApartText</span>
+        <button type="button" class="cmp-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
+    </div>
+
+    <div class="cmp-stage @(slider ? "slider" : "halves")" @ref="stage">
+        @if (slider)
+        {
+            var (older, newer) = OlderNewer;
+            <div class="cmp-slider" data-slider-box style="--x:@Percent%">
+                <div class="cmp-layer">
+                    <PhotoImage @key="older" PhotoId="older" Thumbnail="false" Framed="false" />
+                </div>
+                <div class="cmp-layer cmp-top">
+                    <PhotoImage @key="newer" PhotoId="newer" Thumbnail="false" Framed="false" />
+                </div>
+                <div class="cmp-line" aria-hidden="true"></div>
+                <div class="cmp-handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Percent"
+                     aria-label="@Strings.Shared.CompareSliderHandle" @onkeydown="OnHandleKey" @onkeydown:stopPropagation="true">
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg>
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
+                </div>
+                <button type="button" class="cmp-pill left @(IsActive(older) ? "active" : null)" aria-pressed="@(IsActive(older) ? "true" : "false")"
+                        @onclick="() => ActivateSideOf(older)">@DateText(older)</button>
+                <button type="button" class="cmp-pill right @(IsActive(newer) ? "active" : null)" aria-pressed="@(IsActive(newer) ? "true" : "false")"
+                        @onclick="() => ActivateSideOf(newer)">@DateText(newer)</button>
+            </div>
+        }
+        else
+        {
+            @for (var half = 0; half < 2; half++)
+            {
+                var h = half;
+                var id = Shown(h);
+                <div class="cmp-cell">
+                    <div class="cmp-half @(active == h ? "active" : null)" data-half="@h" role="button" tabindex="0" aria-pressed="@(active == h ? "true" : "false")"
+                         aria-label="@F(Strings.Shared.ComparePickHalf, DateText(id))" @onclick="() => active = h" @onkeydown="e => OnHalfKey(e, h)">
+                        <PhotoImage @key="id" PhotoId="id" Thumbnail="false" Framed="false" />
+                        <span class="cmp-pill left" aria-hidden="true">@DateText(id)</span>
+                    </div>
+                    @if (IndexOf(id) > 0)
+                    {
+                        <button type="button" class="cmp-nav prev" @onclick="() => Step(h, -1)" aria-label="@Strings.Shared.PhotoViewerPrevious"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg></button>
+                    }
+                    @if (IndexOf(id) < Photos.Count - 1)
+                    {
+                        <button type="button" class="cmp-nav next" @onclick="() => Step(h, 1)" aria-label="@Strings.Shared.PhotoViewerNext"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg></button>
+                    }
+                </div>
+            }
+        }
+    </div>
+
+    <div class="cmp-panel">
+        <ul class="cmp-strip" @ref="strip">
+            @foreach (var photo in Photos)
+            {
+                var current = photo.Id == Shown(active);
+                <li data-current="@(current ? "true" : null)">
+                    <button type="button" class="cmp-tile @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
+                            aria-label="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" @onclick="() => Pick(photo.Id)">
+                        <PhotoImage PhotoId="photo.Id" />
+                    </button>
+                </li>
+            }
+        </ul>
+        <div class="cmp-actions">
+            <div class="btn-group cmp-mode" role="radiogroup" aria-label="@Strings.Shared.CompareLabel">
+                <input type="radio" class="btn-check" name="cmp-mode" id="@modeSideId" @onkeydown:stopPropagation checked="@(!slider)" @onchange="() => SetSlider(false)" />
+                <label class="btn btn-outline-light btn-sm" for="@modeSideId">@Strings.Shared.CompareSideBySide</label>
+                <input type="radio" class="btn-check" name="cmp-mode" id="@modeSliderId" @onkeydown:stopPropagation checked="@slider" @onchange="() => SetSlider(true)" />
+                <label class="btn btn-outline-light btn-sm" for="@modeSliderId">@Strings.Shared.CompareSlider</label>
+            </div>
+            @if (ShowBeforeAfter && !NotShareable.Contains(OlderNewer.Item1) && !NotShareable.Contains(OlderNewer.Item2))
+            {
+                <button type="button" class="btn btn-outline-light btn-sm" @onclick="BeforeAfterAsync">@Strings.Propagations.ShBeforeAfter</button>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    /// <summary>The photos to choose from, oldest first (from PhotoCompare.Comparable in Core).</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Photo> Photos { get; set; } = [];
+
+    /// <summary>The two photos it starts with, the older one first.</summary>
+    [Parameter, EditorRequired]
+    public (Guid First, Guid Second) Start { get; set; }
+
+    /// <summary>The photo that was being looked at. Its half starts as the active one.</summary>
+    [Parameter]
+    public Guid? ViewedId { get; set; }
+
+    /// <summary>The day the photos count from (day 0). Without it, no day count is shown.</summary>
+    [Parameter]
+    public Func<DateOnly, string?>? PhotoAge { get; set; }
+
+    /// <summary>Whether Before and after shows. It makes one picture of the two photos, for sharing.</summary>
+    [Parameter]
+    public bool ShowBeforeAfter { get; set; }
+
+    /// <summary>
+    /// Photos the Share sheet doesn't have, like a plant's photos from when it was a cutting. Before and after
+    /// is hidden while one of them is shown, so it never quietly shares two other photos.
+    /// </summary>
+    [Parameter]
+    public IReadOnlySet<Guid> NotShareable { get; set; } = new HashSet<Guid>();
+
+    /// <summary>Raised with the older and the newer of the two photos shown.</summary>
+    [Parameter]
+    public EventCallback<(Guid Older, Guid Newer)> OnBeforeAfter { get; set; }
+
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+
+    private readonly string modeSideId = $"cmp-side-{Guid.NewGuid():N}";
+    private readonly string modeSliderId = $"cmp-slider-{Guid.NewGuid():N}";
+
+    private ElementReference dialog;
+    private ElementReference stage;
+    private ElementReference strip;
+    private DotNetObjectReference<PhotoCompare>? self;
+    private IJSObjectReference? module;
+    private IJSObjectReference? gestures;
+    private Dictionary<Guid, int> indexOf = [];
+
+    private Guid[] shown = [];
+    private int active;
+    private bool slider;
+    private double sliderAt = 50;
+    private Guid? revealed;
+    private bool disposed;
+
+    private int Percent => (int)Math.Round(sliderAt);
+
+    private Guid Shown(int half) => shown[half];
+
+    private int IndexOf(Guid id) => indexOf.TryGetValue(id, out var i) ? i : 0;
+
+    // Older and newer follow the order of the list, so they stay right whichever half holds which photo
+    private (Guid Older, Guid Newer) OlderNewer => IndexOf(shown[0]) <= IndexOf(shown[1]) ? (shown[0], shown[1]) : (shown[1], shown[0]);
+
+    private bool IsActive(Guid id) => Shown(active) == id;
+
+    private string ApartText
+    {
+        get
+        {
+            var (older, newer) = OlderNewer;
+            return ShareCardText.ApartLine(DayOf(older), DayOf(newer)) ?? Strings.Shared.CompareSameDay;
+        }
+    }
+
+    private DateOnly DayOf(Guid id) => indexOf.TryGetValue(id, out var i) ? Time.LocalDay(Photos[i].TakenAt) : default;
+
+    private string DateText(Guid id)
+    {
+        var day = DayOf(id);
+        return Labels.Date(day) + PhotoDayCount.Suffix(PhotoAge?.Invoke(day));
+    }
+
+    protected override void OnInitialized()
+    {
+        indexOf = Photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
+        shown = [Start.First, Start.Second];
+        active = ViewedId == Start.First ? 0 : 1;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (disposed)
+            return;
+        if (firstRender)
+        {
+            await dialog.FocusAsync();
+            try
+            {
+                self = DotNetObjectReference.Create(this);
+                module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/compare.js");
+                gestures = await module.InvokeAsync<IJSObjectReference>("attach", stage, self);
+            }
+            catch (JSException)
+            {
+                // The buttons and the keys still work without the gestures
+            }
+        }
+
+        // Keep the marked photo of the strip in view as it changes
+        if (module is not null && revealed != Shown(active))
+        {
+            revealed = Shown(active);
+            await module.InvokeVoidAsync("reveal", strip);
+        }
+    }
+
+    [JSInvokable]
+    public Task Swiped(int half, int step) => InvokeAsync(() =>
+    {
+        if (half is 0 or 1)
+            Step(half, step);
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task SliderTo(double percent) => InvokeAsync(() =>
+    {
+        sliderAt = Math.Clamp(percent, 0, 100);
+        StateHasChanged();
+    });
+
+    // One photo older or newer in the list for a half, never past the ends
+    private void Step(int half, int step)
+    {
+        var next = IndexOf(Shown(half)) + step;
+        if (next >= 0 && next < Photos.Count)
+            shown[half] = Photos[next].Id;
+        active = half;
+    }
+
+    private void Pick(Guid id) => shown[active] = id;
+
+    private void ActivateSideOf(Guid id) => active = shown[0] == id ? 0 : 1;
+
+    private void SetSlider(bool on)
+    {
+        slider = on;
+        if (on)
+            sliderAt = 50;
+    }
+
+    private async Task CloseAsync() => await OnClose.InvokeAsync();
+
+    private async Task BeforeAfterAsync() => await OnBeforeAfter.InvokeAsync(OlderNewer);
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "Escape": await CloseAsync(); break;
+            case "ArrowLeft": Step(active, -1); break;
+            case "ArrowRight": Step(active, 1); break;
+        }
+    }
+
+    private void OnHalfKey(KeyboardEventArgs e, int half)
+    {
+        if (e.Key is "Enter" or " ")
+            active = half;
+    }
+
+    private async Task OnHandleKey(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "ArrowLeft": sliderAt = Math.Max(0, sliderAt - 5); break;
+            case "ArrowRight": sliderAt = Math.Min(100, sliderAt + 5); break;
+            case "Escape": await CloseAsync(); break;
+        }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (gestures is not null)
+            {
+                await gestures.InvokeVoidAsync("dispose");
+                await gestures.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

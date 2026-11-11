@@ -266,7 +266,13 @@ else
 }
 
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
-             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" />
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" OnCompare="OpenCompare" />
+
+@if (compare is { } open)
+{
+    <PhotoCompare Photos="open.Photos" Start="open.Start" ViewedId="open.ViewedId" PhotoAge="PhotoAge"
+                  ShowBeforeAfter="OnBeforeAfter.HasDelegate" NotShareable="earlierPhotoIds" OnBeforeAfter="BeforeAfterAsync" OnClose="CloseCompare" />
+}
 
 @code {
     [Parameter, EditorRequired]
@@ -305,6 +311,12 @@ else
     [Parameter]
     public EventCallback OnSubjectChanged { get; set; }
 
+    /// <summary>Raised with the older and the newer photo when Before and after is picked in the compare view. It shows only when this is set.</summary>
+    [Parameter]
+    public EventCallback<(Guid Before, Guid After)> OnBeforeAfter { get; set; }
+
+    private sealed record CompareState(IReadOnlyList<Photo> Photos, (Guid First, Guid Second) Start, Guid ViewedId, int? ReturnTo);
+
     private readonly string referenceId = $"reference-{Guid.NewGuid():N}";
     private readonly string beforeId = $"before-{Guid.NewGuid():N}";
     private readonly string editDateId = $"edit-date-{Guid.NewGuid():N}";
@@ -323,6 +335,7 @@ else
     private bool busy;
     private Guid? confirmDeleteId;
     private int? viewerIndex;
+    private CompareState? compare;
     private Guid? editId;
     private string? editText;
     private DateOnly editDay;
@@ -410,6 +423,28 @@ else
             openWhenLoaded = null;
             OpenPhoto(waiting);
         }
+    }
+
+    // The viewer closes behind the compare view and comes back at the same photo when it is closed
+    private void OpenCompare(Photo photo)
+    {
+        var comparable = Stikling.Core.Timeline.PhotoCompare.Comparable(photos);
+        if (Stikling.Core.Timeline.PhotoCompare.StartPair(comparable, photo.Id) is not { } start)
+            return;
+        compare = new CompareState(comparable, start, photo.Id, viewerIndex);
+        viewerIndex = null;
+    }
+
+    private void CloseCompare()
+    {
+        viewerIndex = compare?.ReturnTo;
+        compare = null;
+    }
+
+    private async Task BeforeAfterAsync((Guid Older, Guid Newer) pair)
+    {
+        compare = null;
+        await OnBeforeAfter.InvokeAsync((pair.Older, pair.Newer));
     }
 
     private sealed record Row(DateTimeOffset At, TimelineEntry? Entry, ShelfHistoryItem? Shelf);
