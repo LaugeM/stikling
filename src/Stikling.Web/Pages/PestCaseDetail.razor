@@ -35,6 +35,7 @@ else
         <div class="min-w-0">
             <h1>@Labels.For(view.Case.Pest)</h1>
             <p class="detail-sub">@F(Strings.Pests.CaseScopeFound, Labels.Scope(view), Labels.Date(view.Case.StartedOn))</p>
+            <div class="detail-sub"><GuideLink Guide="@GuideBook.For(view.Case.Pest)" From="@GuideLinks.FromPestCase(view.Case.Id)" /></div>
             @if (view.Case.IsOpen)
             {
                 <span class="badge stage-badge">@Labels.For(view.Case.Status)</span>

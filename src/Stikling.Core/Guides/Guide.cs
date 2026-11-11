@@ -31,6 +31,37 @@ public sealed record GuideField(string LabelKey, string TextKey) : GuideBlock;
 /// <summary>Ingredients in a table, a name and what it does.</summary>
 public sealed record GuideTable(IReadOnlyList<(string NameKey, string DoesKey)> Rows) : GuideBlock;
 
+/// <summary>Pests in a table, each name a link to its guide, with what gives it away.</summary>
+public sealed record GuideLinkTable(IReadOnlyList<(string GuideId, string TextKey)> Rows) : GuideBlock;
+
+/// <summary>
+/// A photo in a guide. The file is in wwwroot/img/guides. The author, licence and address are shown as they are,
+/// in every language. A licence that asks for changes to be marked is why <paramref name="Cropped"/> exists.
+/// </summary>
+public sealed record GuidePhoto(string File, string CaptionKey, int Width, int Height, string Author, string Licence, string SourceUrl, bool Cropped = false)
+{
+    /// <summary>The page of the licence, which CC BY and CC BY-SA ask a credit to link to.</summary>
+    public string LicenceUrl => LicenceUrlFor(Licence);
+
+    /// <summary>
+    /// The Creative Commons page for a licence written the way Wikimedia Commons writes it,
+    /// like "CC0", "CC BY-SA 4.0" or "CC BY 3.0 US".
+    /// </summary>
+    public static string LicenceUrlFor(string licence)
+    {
+        var parts = licence.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts is ["CC0"])
+            return "https://creativecommons.org/publicdomain/zero/1.0/";
+        if (parts is not ["CC", var kind, var version, ..] || parts.Length > 4)
+            throw new ArgumentException($"Not a Creative Commons licence: {licence}", nameof(licence));
+        var port = parts.Length == 4 ? parts[3].ToLowerInvariant() + "/" : "";
+        return $"https://creativecommons.org/licenses/{kind.ToLowerInvariant()}/{version}/{port}";
+    }
+}
+
+/// <summary>Photos shown side by side when there is room, with a caption and a credit under each.</summary>
+public sealed record GuidePhotos(IReadOnlyList<GuidePhoto> Photos) : GuideBlock;
+
 /// <summary>A paragraph that ends with a link to another guide.</summary>
 public sealed record GuideSeeAlso(string TextKey, string GuideId) : GuideBlock;
 
@@ -111,6 +142,14 @@ public sealed record Guide(
                     yield return name;
                     yield return does;
                 }
+                break;
+            case GuideLinkTable linkTable:
+                foreach (var (_, textKey) in linkTable.Rows)
+                    yield return textKey;
+                break;
+            case GuidePhotos photos:
+                foreach (var photo in photos.Photos)
+                    yield return photo.CaptionKey;
                 break;
             case GuideSeeAlso seeAlso:
                 yield return seeAlso.TextKey;

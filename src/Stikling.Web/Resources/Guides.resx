@@ -761,7 +761,983 @@
     <comment>Guide, mixing soil: how it works in the app. Uses the name of the Soil mixes page.</comment>
   </data>
   <data name="SuppliesRowDetail" xml:space="preserve">
-    <value>How to take a cutting, move to semi-hydro, water with a wick and mix soil</value>
+    <value>How to take a cutting, move to semi-hydro, water with a wick, mix soil and deal with pests</value>
     <comment>Line under Guides in the list on the Supplies page.</comment>
+  </data>
+  <data name="GroupPests" xml:space="preserve">
+    <value>Pests</value>
+    <comment>Heading over the guides about pests on the Guides page.</comment>
+  </data>
+  <data name="PhotoCredit" xml:space="preserve">
+    <value>Photo: {0}, {1}</value>
+    <comment>Credit under a photo in a guide. {0} is who took it, {1} the licence.</comment>
+  </data>
+  <data name="FieldWhat" xml:space="preserve">
+    <value>What</value>
+    <comment>Label in a method of a guide, before what it is.</comment>
+  </data>
+  <data name="TreatItWith" xml:space="preserve">
+    <value>Treat it with</value>
+    <comment>Guide, pests: label over the choice of how to treat it.</comment>
+  </data>
+  <data name="PestSee" xml:space="preserve">
+    <value>What you see</value>
+    <comment>Guide, pests: heading over what the pest looks like.</comment>
+  </data>
+  <data name="MistakenFor" xml:space="preserve">
+    <value>Mistaken for</value>
+    <comment>Guide, pests: heading over what it is mistaken for.</comment>
+  </data>
+  <data name="WhyBack" xml:space="preserve">
+    <value>Why it comes back</value>
+    <comment>Guide, pests: heading over why it comes back.</comment>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>First</value>
+    <comment>Guide, pests: heading over what to do first.</comment>
+  </data>
+  <data name="WhenOver" xml:space="preserve">
+    <value>When it's over</value>
+    <comment>Guide, pests: heading over how to tell it is over.</comment>
+  </data>
+  <data name="IfNotStop" xml:space="preserve">
+    <value>If it doesn't stop</value>
+    <comment>Guide, pests: heading over what to do when it does not stop.</comment>
+  </data>
+  <data name="MethodSoapOil" xml:space="preserve">
+    <value>Soap or oil</value>
+    <comment>Guide, pests: name of a method.</comment>
+  </data>
+  <data name="MethodEnemies" xml:space="preserve">
+    <value>Natural enemies</value>
+    <comment>Guide, pests: name of a method.</comment>
+  </data>
+  <data name="MethodProduct" xml:space="preserve">
+    <value>A product for houseplants</value>
+    <comment>Guide, pests: name of a method.</comment>
+  </data>
+  <data name="SeeAlso" xml:space="preserve">
+    <value>See</value>
+    <comment>Guide, pests: before a link to another guide, as in See Checking for pests.</comment>
+  </data>
+  <data name="TitleCheck" xml:space="preserve">
+    <value>Checking for pests</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleThrips" xml:space="preserve">
+    <value>Thrips</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleMites" xml:space="preserve">
+    <value>Spider mites</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleGnats" xml:space="preserve">
+    <value>Fungus gnats</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleMealy" xml:space="preserve">
+    <value>Mealybugs</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleScale" xml:space="preserve">
+    <value>Scale</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleAphids" xml:space="preserve">
+    <value>Aphids</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="TitleWhitefly" xml:space="preserve">
+    <value>Whitefly</value>
+    <comment>Name of a guide, in the list and as its heading.</comment>
+  </data>
+  <data name="RowCheck" xml:space="preserve">
+    <value>How to look a plant over, and what to do when you find something</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowThrips" xml:space="preserve">
+    <value>How to tell thrips from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowMites" xml:space="preserve">
+    <value>How to tell spider mites from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowGnats" xml:space="preserve">
+    <value>How to tell fungus gnats from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowMealy" xml:space="preserve">
+    <value>How to tell mealybugs from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowScale" xml:space="preserve">
+    <value>How to tell scale from other pests, and the ways to treat it</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowAphids" xml:space="preserve">
+    <value>How to tell aphids from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="RowWhitefly" xml:space="preserve">
+    <value>How to tell whitefly from other pests, and the ways to treat them</value>
+    <comment>Line under a pest guide in the list of guides.</comment>
+  </data>
+  <data name="LinkCheck" xml:space="preserve">
+    <value>How to check for pests</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkThrips" xml:space="preserve">
+    <value>About thrips</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkMites" xml:space="preserve">
+    <value>About spider mites</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkGnats" xml:space="preserve">
+    <value>About fungus gnats</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkMealy" xml:space="preserve">
+    <value>About mealybugs</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkScale" xml:space="preserve">
+    <value>About scale</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkAphids" xml:space="preserve">
+    <value>About aphids</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="LinkWhitefly" xml:space="preserve">
+    <value>About whitefly</value>
+    <comment>Link to a pest guide, next to the place it is about.</comment>
+  </data>
+  <data name="Check_Lead" xml:space="preserve">
+    <value>Most pests come into a home on a new plant, since many of them barely move on their own. Finding them early, while there are few, makes them much easier to deal with.</value>
+    <comment>Guide, checking for pests: Lead.</comment>
+  </data>
+  <data name="Check_NewTitle" xml:space="preserve">
+    <value>New plants</value>
+    <comment>Guide, checking for pests: NewTitle.</comment>
+  </data>
+  <data name="Check_NewStep1" xml:space="preserve">
+    <value>Look a plant over before you buy it or bring it home: the undersides of the leaves, where leaves meet the stem, the base, any flowers, and the roots, by sliding it out of its pot.</value>
+    <comment>Guide, checking for pests: NewStep1.</comment>
+  </data>
+  <data name="Check_NewStep2" xml:space="preserve">
+    <value>Keep it away from your other plants for a while, at least a month where you can, so eggs have time to hatch and show.</value>
+    <comment>Guide, checking for pests: NewStep2.</comment>
+  </data>
+  <data name="Check_NewStep3" xml:space="preserve">
+    <value>Look it over every week for the first several weeks. If nothing shows, once a month is enough.</value>
+    <comment>Guide, checking for pests: NewStep3.</comment>
+  </data>
+  <data name="Check_NewStep4" xml:space="preserve">
+    <value>Look again at a plant that comes back in from outdoors.</value>
+    <comment>Guide, checking for pests: NewStep4.</comment>
+  </data>
+  <data name="Check_HowTitle" xml:space="preserve">
+    <value>How to look</value>
+    <comment>Guide, checking for pests: HowTitle.</comment>
+  </data>
+  <data name="Check_How1" xml:space="preserve">
+    <value>Turn the leaves over. Most pests sit on the undersides and where leaves meet the stem.</value>
+    <comment>Guide, checking for pests: How1.</comment>
+  </data>
+  <data name="Check_How2" xml:space="preserve">
+    <value>A magnifier that enlarges 10 times shows mites and eggs you can't see otherwise.</value>
+    <comment>Guide, checking for pests: How2.</comment>
+  </data>
+  <data name="Check_How3" xml:space="preserve">
+    <value>Shake a shoot over a sheet of white paper. Specks that walk are mites or thrips.</value>
+    <comment>Guide, checking for pests: How3.</comment>
+  </data>
+  <data name="Check_How4" xml:space="preserve">
+    <value>Sticky leaves, or a black film on them, mean something is sucking the sap above. The film is sooty mould growing on the sugary droppings, and wipes off with a damp cloth.</value>
+    <comment>Guide, checking for pests: How4.</comment>
+  </data>
+  <data name="Check_TrapsTitle" xml:space="preserve">
+    <value>Sticky traps</value>
+    <comment>Guide, checking for pests: TrapsTitle.</comment>
+  </data>
+  <data name="Check_Traps" xml:space="preserve">
+    <value>Yellow traps catch fungus gnats and whitefly, and blue ones catch thrips. They show what is there and whether the numbers go up or down, but they don't clear a plant, and they catch harmless insects too.</value>
+    <comment>Guide, checking for pests: Traps.</comment>
+  </data>
+  <data name="Check_WhichTitle" xml:space="preserve">
+    <value>Which pest is it?</value>
+    <comment>Guide, checking for pests: WhichTitle.</comment>
+  </data>
+  <data name="Check_WhichThrips" xml:space="preserve">
+    <value>Silvery patches dotted with tiny black droppings.</value>
+    <comment>Guide, checking for pests: WhichThrips.</comment>
+  </data>
+  <data name="Check_WhichMites" xml:space="preserve">
+    <value>Fine pale speckles, and fine webbing in a bad case.</value>
+    <comment>Guide, checking for pests: WhichMites.</comment>
+  </data>
+  <data name="Check_WhichGnats" xml:space="preserve">
+    <value>Small dark flies around the pots.</value>
+    <comment>Guide, checking for pests: WhichGnats.</comment>
+  </data>
+  <data name="Check_WhichMealy" xml:space="preserve">
+    <value>White cottony fluff in leaf joints and crevices.</value>
+    <comment>Guide, checking for pests: WhichMealy.</comment>
+  </data>
+  <data name="Check_WhichScale" xml:space="preserve">
+    <value>Small brown bumps along the veins and stems that don't move.</value>
+    <comment>Guide, checking for pests: WhichScale.</comment>
+  </data>
+  <data name="Check_WhichAphids" xml:space="preserve">
+    <value>Clusters on new shoots and buds, and white cast skins.</value>
+    <comment>Guide, checking for pests: WhichAphids.</comment>
+  </data>
+  <data name="Check_WhichWhitefly" xml:space="preserve">
+    <value>Tiny white flies that rise from the leaves when the plant is touched.</value>
+    <comment>Guide, checking for pests: WhichWhitefly.</comment>
+  </data>
+  <data name="Check_FoundTitle" xml:space="preserve">
+    <value>Found something</value>
+    <comment>Guide, checking for pests: FoundTitle.</comment>
+  </data>
+  <data name="Check_FoundStep1" xml:space="preserve">
+    <value>Move the plant away from the others. Wash your hands after handling it.</value>
+    <comment>Guide, checking for pests: FoundStep1.</comment>
+  </data>
+  <data name="Check_FoundStep2" xml:space="preserve">
+    <value>Look over the plants that stood near it.</value>
+    <comment>Guide, checking for pests: FoundStep2.</comment>
+  </data>
+  <data name="Check_FoundStep3" xml:space="preserve">
+    <value>Remove fallen and dead leaves, which can carry pests and eggs.</value>
+    <comment>Guide, checking for pests: FoundStep3.</comment>
+  </data>
+  <data name="Check_FoundStep4" xml:space="preserve">
+    <value>A plant badly overrun, above all by mealybugs or scale, can be easier to replace than to clear.</value>
+    <comment>Guide, checking for pests: FoundStep4.</comment>
+  </data>
+  <data name="Check_SprayTitle" xml:space="preserve">
+    <value>Before you spray anything</value>
+    <comment>Guide, checking for pests: SprayTitle.</comment>
+  </data>
+  <data name="Check_Spray1" xml:space="preserve">
+    <value>Use only a product sold for houseplants, for that pest and that kind of plant, and follow its label.</value>
+    <comment>Guide, checking for pests: Spray1.</comment>
+  </data>
+  <data name="Check_Spray2" xml:space="preserve">
+    <value>Spray outdoors if you can, and cover the undersides of the leaves and the stems.</value>
+    <comment>Guide, checking for pests: Spray2.</comment>
+  </data>
+  <data name="Check_Spray3" xml:space="preserve">
+    <value>Try it on a few leaves a day or two first, to see that it doesn't mark them.</value>
+    <comment>Guide, checking for pests: Spray3.</comment>
+  </data>
+  <data name="Check_Spray4" xml:space="preserve">
+    <value>Not on a plant that is dry and thirsty, or above 32°C.</value>
+    <comment>Guide, checking for pests: Spray4.</comment>
+  </data>
+  <data name="Check_Spray5" xml:space="preserve">
+    <value>Soap and oil only kill what they touch, so it takes more than one round.</value>
+    <comment>Guide, checking for pests: Spray5.</comment>
+  </data>
+  <data name="Check_EnemiesTitle" xml:space="preserve">
+    <value>Natural enemies</value>
+    <comment>Guide, checking for pests: EnemiesTitle.</comment>
+  </data>
+  <data name="Check_Enemies" xml:space="preserve">
+    <value>Predatory mites and insects can be bought by mail for most pests. They breed best from about 21°C and in good light, need the pest there to feed on, and most sprays kill them. The RHS says to leave a day after soap or oil before letting them out.</value>
+    <comment>Guide, checking for pests: Enemies.</comment>
+  </data>
+  <data name="Check_InApp" xml:space="preserve">
+    <value>Settings can start quarantine when you add a bought, swapped or gifted plant. A check with nothing found can be logged from a plant's menu. When you find something, open a pest case for the plants it covers, and Today keeps track of the treatments.</value>
+    <comment>Guide, checking for pests: InApp.</comment>
+  </data>
+  <data name="Thrips_Lead" xml:space="preserve">
+    <value>Thrips are slender insects up to about 2 mm long that feed on leaves and flowers. They are hard to see, so the damage is often what shows first.</value>
+    <comment>Guide, thrips: Lead.</comment>
+  </data>
+  <data name="Thrips_See1" xml:space="preserve">
+    <value>Leaves that turn dull, then silvery on top, dotted with tiny black droppings.</value>
+    <comment>Guide, thrips: See1.</comment>
+  </data>
+  <data name="Thrips_See2" xml:space="preserve">
+    <value>Pale flecks and scars, and new leaves and buds that grow twisted.</value>
+    <comment>Guide, thrips: See2.</comment>
+  </data>
+  <data name="Thrips_See3" xml:space="preserve">
+    <value>Narrow insects, more often under the leaves: dark adults with fringed wings folded along the back, and paler young without wings.</value>
+    <comment>Guide, thrips: See3.</comment>
+  </data>
+  <data name="Thrips_See4" xml:space="preserve">
+    <value>To find them, shake a shoot over white paper and look with a magnifier.</value>
+    <comment>Guide, thrips: See4.</comment>
+  </data>
+  <data name="Thrips_PhotoAdult" xml:space="preserve">
+    <value>A western flower thrips on a flower. The bar is 1 mm.</value>
+    <comment>Guide, thrips: PhotoAdult.</comment>
+  </data>
+  <data name="Thrips_Mistaken" xml:space="preserve">
+    <value>Spider mites speckle leaves too, but leave fine webbing and no black droppings.</value>
+    <comment>Guide, thrips: Mistaken.</comment>
+  </data>
+  <data name="Thrips_Back" xml:space="preserve">
+    <value>A female lays up to about 100 eggs, one or two a day, in young leaves and buds. The young feed, then rest in the mix or in sheltered spots on the plant before they grow wings, where sprays don't reach them. A generation takes about 24 to 35 days, and indoors they breed all year.</value>
+    <comment>Guide, thrips: Back.</comment>
+  </data>
+  <data name="Thrips_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others.</value>
+    <comment>Guide, thrips: FirstStep1.</comment>
+  </data>
+  <data name="Thrips_FirstStep2" xml:space="preserve">
+    <value>Cut off the worst leaves and any flowers with thrips in them.</value>
+    <comment>Guide, thrips: FirstStep2.</comment>
+  </data>
+  <data name="Thrips_FirstStep3" xml:space="preserve">
+    <value>Hang a blue sticky trap above or among the plants, to see how many there are and whether that falls.</value>
+    <comment>Guide, thrips: FirstStep3.</comment>
+  </data>
+  <data name="Thrips_Rinse" xml:space="preserve">
+    <value>Rinse and cut off</value>
+    <comment>Guide, thrips: Rinse.</comment>
+  </data>
+  <data name="Thrips_RinseHow" xml:space="preserve">
+    <value>Rinse the plant with water, the undersides too, and keep cutting off what is badly hit.</value>
+    <comment>Guide, thrips: RinseHow.</comment>
+  </data>
+  <data name="Thrips_RinseWatch" xml:space="preserve">
+    <value>Young growing again from the mix and buds. Rinsing reaches only what is on the leaves.</value>
+    <comment>Guide, thrips: RinseWatch.</comment>
+  </data>
+  <data name="Thrips_SoapHow" xml:space="preserve">
+    <value>Insecticidal soap or horticultural oil, sprayed so it covers the buds, the shoot tips and the undersides of the leaves.</value>
+    <comment>Guide, thrips: SoapHow.</comment>
+  </data>
+  <data name="Thrips_SoapRound" xml:space="preserve">
+    <value>It only kills what it touches, so it takes more than one round.</value>
+    <comment>Guide, thrips: SoapRound.</comment>
+  </data>
+  <data name="Thrips_SoapWatch" xml:space="preserve">
+    <value>Marked leaves. Try it on a few leaves first.</value>
+    <comment>Guide, thrips: SoapWatch.</comment>
+  </data>
+  <data name="Thrips_EnemiesWhat" xml:space="preserve">
+    <value>The RHS lists predatory mites (Amblyseius, Hypoaspis and Macrocheles species) and the predatory bug Orius laevigatus, for under glass.</value>
+    <comment>Guide, thrips: EnemiesWhat.</comment>
+  </data>
+  <data name="Thrips_EnemiesUc" xml:space="preserve">
+    <value>UC IPM, writing about gardens, finds that bought predators rarely clear thrips on their own.</value>
+    <comment>Guide, thrips: EnemiesUc.</comment>
+  </data>
+  <data name="Thrips_EnemiesWatch" xml:space="preserve">
+    <value>They need warmth, light and thrips to eat.</value>
+    <comment>Guide, thrips: EnemiesWatch.</comment>
+  </data>
+  <data name="Thrips_ProductHow" xml:space="preserve">
+    <value>A product sold for houseplants and for thrips, used as its label says.</value>
+    <comment>Guide, thrips: ProductHow.</comment>
+  </data>
+  <data name="Thrips_Over" xml:space="preserve">
+    <value>Leaves silvered by thrips stay silver after the thrips are gone, so look at the new leaves. Many growers take clean new growth and an empty trap for some weeks to mean it is over.</value>
+    <comment>Guide, thrips: Over.</comment>
+  </data>
+  <data name="Thrips_InApp" xml:space="preserve">
+    <value>A thrips case starts at 5 days between treatments, which you can change. Count the trap on the case to see whether the catch falls week by week, and once you stop treating, the case is watched until it has been clean long enough.</value>
+    <comment>Guide, thrips: InApp.</comment>
+  </data>
+  <data name="Mites_Lead" xml:space="preserve">
+    <value>Spider mites are tiny relatives of spiders, about half a millimetre long, that feed from the undersides of leaves. They do most harm in warm, dry rooms.</value>
+    <comment>Guide, spider mites: Lead.</comment>
+  </data>
+  <data name="Mites_See1" xml:space="preserve">
+    <value>Fine pale speckles on the top of the leaves, which can turn yellow or bronze before the leaves dry and drop.</value>
+    <comment>Guide, spider mites: See1.</comment>
+  </data>
+  <data name="Mites_See2" xml:space="preserve">
+    <value>Fine silk webbing between leaves and stems in a bad case.</value>
+    <comment>Guide, spider mites: See2.</comment>
+  </data>
+  <data name="Mites_See3" xml:space="preserve">
+    <value>Under the leaves, tiny oval mites, yellowish green with two dark spots, or orange red in winter and when crowded, with round eggs. A magnifier that enlarges 10 times helps.</value>
+    <comment>Guide, spider mites: See3.</comment>
+  </data>
+  <data name="Mites_See4" xml:space="preserve">
+    <value>Shake a shoot over white paper. Specks that walk are mites.</value>
+    <comment>Guide, spider mites: See4.</comment>
+  </data>
+  <data name="Mites_PhotoMite" xml:space="preserve">
+    <value>A spider mite in its red form, with strands of silk.</value>
+    <comment>Guide, spider mites: PhotoMite.</comment>
+  </data>
+  <data name="Mites_PhotoWebbing" xml:space="preserve">
+    <value>Webbing in a bad case, here on a tomato.</value>
+    <comment>Guide, spider mites: PhotoWebbing.</comment>
+  </data>
+  <data name="Mites_Mistaken" xml:space="preserve">
+    <value>Thrips speckle leaves too, but leave tiny black droppings and no webbing.</value>
+    <comment>Guide, spider mites: Mistaken.</comment>
+  </data>
+  <data name="Mites_Back" xml:space="preserve">
+    <value>From egg to adult takes about 12 days at 21°C and about 55 at 10°C, so a warm room speeds them up. Dust and a plant short of water make it worse. The damage often shows after the mites have built up.</value>
+    <comment>Guide, spider mites: Back.</comment>
+  </data>
+  <data name="Mites_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others, and look over the plants that stood near it.</value>
+    <comment>Guide, spider mites: FirstStep1.</comment>
+  </data>
+  <data name="Mites_FirstStep2" xml:space="preserve">
+    <value>Cut off the worst leaves.</value>
+    <comment>Guide, spider mites: FirstStep2.</comment>
+  </data>
+  <data name="Mites_Rinse" xml:space="preserve">
+    <value>Rinse and wipe</value>
+    <comment>Guide, spider mites: Rinse.</comment>
+  </data>
+  <data name="Mites_RinseHow" xml:space="preserve">
+    <value>Rinse the leaves often, above all the undersides, and wipe off dust. UC IPM, writing about gardens, sprays a plant with mites at least once a day.</value>
+    <comment>Guide, spider mites: RinseHow.</comment>
+  </data>
+  <data name="Mites_RinseMist" xml:space="preserve">
+    <value>Misting and moist air help keep them down, but don't clear them on their own.</value>
+    <comment>Guide, spider mites: RinseMist.</comment>
+  </data>
+  <data name="Mites_SoapHow" xml:space="preserve">
+    <value>Insecticidal soap or horticultural oil, reaching the undersides of the leaves. UC IPM's houseplant note keeps this for when rinsing hasn't worked.</value>
+    <comment>Guide, spider mites: SoapHow.</comment>
+  </data>
+  <data name="Mites_SoapRound" xml:space="preserve">
+    <value>It only kills what it touches, so it takes more than one round.</value>
+    <comment>Guide, spider mites: SoapRound.</comment>
+  </data>
+  <data name="Mites_SoapWatch" xml:space="preserve">
+    <value>Marked leaves. Try it on a few leaves first, and not on a dry plant or above 32°C.</value>
+    <comment>Guide, spider mites: SoapWatch.</comment>
+  </data>
+  <data name="Mites_EnemiesWhat" xml:space="preserve">
+    <value>Phytoseiulus persimilis is the predatory mite most used, and eats every stage. Amblyseius species, often A. californicus, do less against a heavy attack but can be let out early and last longer.</value>
+    <comment>Guide, spider mites: EnemiesWhat.</comment>
+  </data>
+  <data name="Mites_EnemiesWatch" xml:space="preserve">
+    <value>They need mites to eat and die out without them.</value>
+    <comment>Guide, spider mites: EnemiesWatch.</comment>
+  </data>
+  <data name="Mites_ProductHow" xml:space="preserve">
+    <value>A product sold for houseplants and for mites, used as its label says.</value>
+    <comment>Guide, spider mites: ProductHow.</comment>
+  </data>
+  <data name="Mites_Stop" xml:space="preserve">
+    <value>If they keep coming back or get worse, UC IPM says to throw the plant out, and the RHS says the same of a plant badly infested in late summer.</value>
+    <comment>Guide, spider mites: Stop.</comment>
+  </data>
+  <data name="Mites_Over" xml:space="preserve">
+    <value>Many growers look for no new speckles on new leaves, and nothing walking on the paper for some weeks.</value>
+    <comment>Guide, spider mites: Over.</comment>
+  </data>
+  <data name="Mites_InApp" xml:space="preserve">
+    <value>A spider mite case starts at 4 days between treatments, which you can change. Mites don't fly into sticky traps, so the trap is behind a small link on the case.</value>
+    <comment>Guide, spider mites: InApp.</comment>
+  </data>
+  <data name="Gnats_Lead" xml:space="preserve">
+    <value>Fungus gnats are small dark flies, 3 to 4 mm long, that run over the mix and fly slowly around the pots. The adults don't harm plants. Their larvae live in the mix and mostly eat dead roots, rotting bits and fungi.</value>
+    <comment>Guide, fungus gnats: Lead.</comment>
+  </data>
+  <data name="Gnats_See1" xml:space="preserve">
+    <value>Small dark flies on the mix, on the plant and at the windows.</value>
+    <comment>Guide, fungus gnats: See1.</comment>
+  </data>
+  <data name="Gnats_See2" xml:space="preserve">
+    <value>In the top of the mix, slender white larvae up to 6 mm long with shiny black heads, and slime trails in very wet pots.</value>
+    <comment>Guide, fungus gnats: See2.</comment>
+  </data>
+  <data name="Gnats_See3" xml:space="preserve">
+    <value>To check for larvae, lay a piece of raw potato on the mix, cut side down, and look under it after a few days.</value>
+    <comment>Guide, fungus gnats: See3.</comment>
+  </data>
+  <data name="Gnats_PhotoTrap" xml:space="preserve">
+    <value>A yellow sticky trap in a houseplant's pot, full of fungus gnats.</value>
+    <comment>Guide, fungus gnats: PhotoTrap.</comment>
+  </data>
+  <data name="Gnats_PhotoGnat" xml:space="preserve">
+    <value>An adult fungus gnat.</value>
+    <comment>Guide, fungus gnats: PhotoGnat.</comment>
+  </data>
+  <data name="Gnats_HarmTitle" xml:space="preserve">
+    <value>Does it harm the plant?</value>
+    <comment>Guide, fungus gnats: HarmTitle.</comment>
+  </data>
+  <data name="Gnats_Harm" xml:space="preserve">
+    <value>Seedlings and soft cuttings can be harmed. A plant with a few years of roots rarely is. Many larvae in a wet mix rich in organic matter can stunt young plants, but a wilting houseplant is more often down to watering or root rot than to gnats.</value>
+    <comment>Guide, fungus gnats: Harm.</comment>
+  </data>
+  <data name="Gnats_Mistaken" xml:space="preserve">
+    <value>Shore flies look much the same but have short, bristly antennae.</value>
+    <comment>Guide, fungus gnats: Mistaken.</comment>
+  </data>
+  <data name="Gnats_Back" xml:space="preserve">
+    <value>Eggs laid on the mix hatch in a few days, and the larvae turn into adults in the mix. From egg to adult takes about 17 days at 24°C, and indoors they breed all year.</value>
+    <comment>Guide, fungus gnats: Back.</comment>
+  </data>
+  <data name="Gnats_FirstStep1" xml:space="preserve">
+    <value>They breed in mix that stays wet. Letting the top of the mix dry between waterings, where the plant can take it, and emptying water left in saucers, cuts their numbers.</value>
+    <comment>Guide, fungus gnats: FirstStep1.</comment>
+  </data>
+  <data name="Gnats_FirstStep2" xml:space="preserve">
+    <value>Clear dead leaves and rotting bits off the pots.</value>
+    <comment>Guide, fungus gnats: FirstStep2.</comment>
+  </data>
+  <data name="Gnats_FirstStep3" xml:space="preserve">
+    <value>When you repot, use fresh houseplant compost rather than old, which can hold eggs and larvae, and keep open bags closed.</value>
+    <comment>Guide, fungus gnats: FirstStep3.</comment>
+  </data>
+  <data name="Gnats_FirstMix" xml:space="preserve">
+    <value>A mix with perlite or sand in it drains faster and stays wet for less time. See</value>
+    <comment>Guide, fungus gnats: FirstMix.</comment>
+  </data>
+  <data name="Gnats_Traps" xml:space="preserve">
+    <value>Sticky traps</value>
+    <comment>Guide, fungus gnats: Traps.</comment>
+  </data>
+  <data name="Gnats_TrapsHow" xml:space="preserve">
+    <value>Yellow sticky traps, cut into squares and stuck in the pots, catch the adults.</value>
+    <comment>Guide, fungus gnats: TrapsHow.</comment>
+  </data>
+  <data name="Gnats_TrapsWatch" xml:space="preserve">
+    <value>They cut the numbers but don't end it while larvae are in the mix, and they catch helpful insects too.</value>
+    <comment>Guide, fungus gnats: TrapsWatch.</comment>
+  </data>
+  <data name="Gnats_Bti" xml:space="preserve">
+    <value>Bacteria in the water</value>
+    <comment>Guide, fungus gnats: Bti.</comment>
+  </data>
+  <data name="Gnats_BtiHow" xml:space="preserve">
+    <value>Bti (Bacillus thuringiensis israelensis), watered into the mix, kills the larvae.</value>
+    <comment>Guide, fungus gnats: BtiHow.</comment>
+  </data>
+  <data name="Gnats_BtiRepeat" xml:space="preserve">
+    <value>It doesn't last indoors, so it is repeated about every 5 days.</value>
+    <comment>Guide, fungus gnats: BtiRepeat.</comment>
+  </data>
+  <data name="Gnats_Nematodes" xml:space="preserve">
+    <value>Nematodes</value>
+    <comment>Guide, fungus gnats: Nematodes.</comment>
+  </data>
+  <data name="Gnats_NemaHow" xml:space="preserve">
+    <value>Steinernema feltiae, tiny worms watered into the mix, which kill the larvae.</value>
+    <comment>Guide, fungus gnats: NemaHow.</comment>
+  </data>
+  <data name="Gnats_NemaNeed" xml:space="preserve">
+    <value>They need a moist mix and 16 to 32°C, can breed in the mix and last, and are sold by mail and keep only a short time.</value>
+    <comment>Guide, fungus gnats: NemaNeed.</comment>
+  </data>
+  <data name="Gnats_Mites" xml:space="preserve">
+    <value>Predatory mites</value>
+    <comment>Guide, fungus gnats: Mites.</comment>
+  </data>
+  <data name="Gnats_MitesHow" xml:space="preserve">
+    <value>The RHS lists the mites Hypoaspis miles and Macrocheles robustulus and the rove beetle Atheta coriaria, put in the mix to eat eggs, larvae and pupae.</value>
+    <comment>Guide, fungus gnats: MitesHow.</comment>
+  </data>
+  <data name="Gnats_MitesUc" xml:space="preserve">
+    <value>UC IPM finds Hypoaspis mites do poorly in a single houseplant and doesn't suggest them for homes.</value>
+    <comment>Guide, fungus gnats: MitesUc.</comment>
+  </data>
+  <data name="Gnats_NoSpray" xml:space="preserve">
+    <value>No spray is listed: UC IPM says other insecticides are rarely needed against fungus gnats in a home.</value>
+    <comment>Guide, fungus gnats: NoSpray.</comment>
+  </data>
+  <data name="Gnats_Over" xml:space="preserve">
+    <value>Many growers look for no new flies on the trap for some weeks, and no larvae under the potato.</value>
+    <comment>Guide, fungus gnats: Over.</comment>
+  </data>
+  <data name="Gnats_InApp" xml:space="preserve">
+    <value>A fungus gnat case starts at 7 days between treatments, which you can change. Count the trap on the case to see whether the catch falls week by week.</value>
+    <comment>Guide, fungus gnats: InApp.</comment>
+  </data>
+  <data name="Mealy_Lead" xml:space="preserve">
+    <value>Mealybugs are soft, oval insects up to 4 mm long, hidden under white wax, that suck sap in tight spots. Females hardly move, so they nearly always come in on a new plant.</value>
+    <comment>Guide, mealybugs: Lead.</comment>
+  </data>
+  <data name="Mealy_See1" xml:space="preserve">
+    <value>White cottony fluff in leaf joints, leaf sheaths and other crevices, with insects or orange pink eggs under it.</value>
+    <comment>Guide, mealybugs: See1.</comment>
+  </data>
+  <data name="Mealy_See2" xml:space="preserve">
+    <value>Sticky leaves, and black sooty mould on them.</value>
+    <comment>Guide, mealybugs: See2.</comment>
+  </data>
+  <data name="Mealy_See3" xml:space="preserve">
+    <value>A plant that grows slowly, yellows and drops leaves.</value>
+    <comment>Guide, mealybugs: See3.</comment>
+  </data>
+  <data name="Mealy_See4" xml:space="preserve">
+    <value>Long-tailed mealybugs have two tail threads longer than the body.</value>
+    <comment>Guide, mealybugs: See4.</comment>
+  </data>
+  <data name="Mealy_See5" xml:space="preserve">
+    <value>Root mealybugs live on the roots, with white wax on them, and are usually only found when repotting.</value>
+    <comment>Guide, mealybugs: See5.</comment>
+  </data>
+  <data name="Mealy_PhotoColony" xml:space="preserve">
+    <value>Mealybugs on a clivia leaf.</value>
+    <comment>Guide, mealybugs: PhotoColony.</comment>
+  </data>
+  <data name="Mealy_PhotoLong" xml:space="preserve">
+    <value>A long-tailed mealybug on an orchid bud.</value>
+    <comment>Guide, mealybugs: PhotoLong.</comment>
+  </data>
+  <data name="Mealy_Mistaken" xml:space="preserve">
+    <value>Some scale insects lay eggs under white wax, and some aphids have a white waxy coat. The larvae of the mealybug ladybird, sold to eat them, look like large mealybugs.</value>
+    <comment>Guide, mealybugs: Mistaken.</comment>
+  </data>
+  <data name="Mealy_Back" xml:space="preserve">
+    <value>Females lay 100 to 200 eggs over 10 to 20 days in a cottony sac, and the young grow up in about a month in summer, all year indoors. The wax keeps sprays off, and they hide where sprays don't reach, so no single treatment gets them all. The RHS says it is often impossible to get rid of them completely.</value>
+    <comment>Guide, mealybugs: Back.</comment>
+  </data>
+  <data name="Mealy_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others.</value>
+    <comment>Guide, mealybugs: FirstStep1.</comment>
+  </data>
+  <data name="Mealy_FirstStep2" xml:space="preserve">
+    <value>Look for egg sacs on the pot, stakes and saucer, and remove dead leaves, which can carry eggs.</value>
+    <comment>Guide, mealybugs: FirstStep2.</comment>
+  </data>
+  <data name="Mealy_Wipe" xml:space="preserve">
+    <value>Wipe off</value>
+    <comment>Guide, mealybugs: Wipe.</comment>
+  </data>
+  <data name="Mealy_WipeHow" xml:space="preserve">
+    <value>Pick them off, or dab each one with a cotton bud dipped in rubbing alcohol (isopropyl, 70% or weaker). On a sturdy plant, a strong spray of water every few days washes off those in the open.</value>
+    <comment>Guide, mealybugs: WipeHow.</comment>
+  </data>
+  <data name="Mealy_WipeWatch" xml:space="preserve">
+    <value>Try the alcohol on a small part of the plant a day or two before, since it can burn leaves, and keep it away from flames.</value>
+    <comment>Guide, mealybugs: WipeWatch.</comment>
+  </data>
+  <data name="Mealy_Spray" xml:space="preserve">
+    <value>Spray</value>
+    <comment>Guide, mealybugs: Spray.</comment>
+  </data>
+  <data name="Mealy_SprayHow" xml:space="preserve">
+    <value>Insecticidal soap, horticultural oil or neem oil, sprayed onto the insects. They work best on the young, which have less wax.</value>
+    <comment>Guide, mealybugs: SprayHow.</comment>
+  </data>
+  <data name="Mealy_SprayAlcohol" xml:space="preserve">
+    <value>For more than a few, UC IPM gives a spray of 10 to 25% rubbing alcohol in water, repeated weekly until they are gone.</value>
+    <comment>Guide, mealybugs: SprayAlcohol.</comment>
+  </data>
+  <data name="Mealy_SprayWatch" xml:space="preserve">
+    <value>Try it on a few leaves first.</value>
+    <comment>Guide, mealybugs: SprayWatch.</comment>
+  </data>
+  <data name="Mealy_EnemiesWhat" xml:space="preserve">
+    <value>The mealybug ladybird Cryptolaemus montrouzieri, and parasitic wasps such as Leptomastix, which only attacks citrus mealybug.</value>
+    <comment>Guide, mealybugs: EnemiesWhat.</comment>
+  </data>
+  <data name="Mealy_EnemiesWatch" xml:space="preserve">
+    <value>They need warmth and do best from May to September. The ladybird needs egg sacs to breed, so it is let out when there are many.</value>
+    <comment>Guide, mealybugs: EnemiesWatch.</comment>
+  </data>
+  <data name="Mealy_ProductHow" xml:space="preserve">
+    <value>A product sold for houseplants and for mealybugs, used as its label says. Products that go in the soil work less well against mealybugs than against other sap suckers.</value>
+    <comment>Guide, mealybugs: ProductHow.</comment>
+  </data>
+  <data name="Mealy_Stop" xml:space="preserve">
+    <value>A badly infested plant is often better thrown out than treated again and again.</value>
+    <comment>Guide, mealybugs: Stop.</comment>
+  </data>
+  <data name="Mealy_Over" xml:space="preserve">
+    <value>Many growers look for no new fluff for some weeks, looking in the crevices and at the roots when you repot.</value>
+    <comment>Guide, mealybugs: Over.</comment>
+  </data>
+  <data name="Mealy_InApp" xml:space="preserve">
+    <value>A mealybug case starts at 7 days between treatments, which you can change.</value>
+    <comment>Guide, mealybugs: InApp.</comment>
+  </data>
+  <data name="Scale_Lead" xml:space="preserve">
+    <value>Scale insects settle on a leaf or stem, stop moving and grow a waxy or hard shell. They look like small bumps, which makes them easy to miss.</value>
+    <comment>Guide, scale: Lead.</comment>
+  </data>
+  <data name="Scale_See1" xml:space="preserve">
+    <value>Small, light brown bumps shaped like limpets on the stems and along the veins under the leaves. Brown soft scale is common on houseplants.</value>
+    <comment>Guide, scale: See1.</comment>
+  </data>
+  <data name="Scale_See2" xml:space="preserve">
+    <value>Sticky, shiny leaves and black sooty mould on them.</value>
+    <comment>Guide, scale: See2.</comment>
+  </data>
+  <data name="Scale_See3" xml:space="preserve">
+    <value>Yellowing leaves and poor growth.</value>
+    <comment>Guide, scale: See3.</comment>
+  </data>
+  <data name="Scale_See4" xml:space="preserve">
+    <value>Tiny yellow or orange young that walk, before they settle.</value>
+    <comment>Guide, scale: See4.</comment>
+  </data>
+  <data name="Scale_See5" xml:space="preserve">
+    <value>On ferns, scale can look like the spore clusters under the fronds.</value>
+    <comment>Guide, scale: See5.</comment>
+  </data>
+  <data name="Scale_PhotoFicus" xml:space="preserve">
+    <value>Brown soft scale on a ficus leaf, shiny with honeydew.</value>
+    <comment>Guide, scale: PhotoFicus.</comment>
+  </data>
+  <data name="Scale_PhotoSingle" xml:space="preserve">
+    <value>One brown soft scale beside a leaf's vein.</value>
+    <comment>Guide, scale: PhotoSingle.</comment>
+  </data>
+  <data name="Scale_SoftTitle" xml:space="preserve">
+    <value>Soft and armoured</value>
+    <comment>Guide, scale: SoftTitle.</comment>
+  </data>
+  <data name="Scale_Soft" xml:space="preserve">
+    <value>Soft scale is rounded, its shell is its body, and it makes sticky honeydew. Armoured scale is flat, its cover lifts off and leaves the insect behind, it makes no honeydew, and sprays reach it less well.</value>
+    <comment>Guide, scale: Soft.</comment>
+  </data>
+  <data name="Scale_AliveTitle" xml:space="preserve">
+    <value>Alive or dead?</value>
+    <comment>Guide, scale: AliveTitle.</comment>
+  </data>
+  <data name="Scale_Alive" xml:space="preserve">
+    <value>Dead scales stay stuck to the plant. Squash a few: live ones leave a wet smear, dead ones don't. Clean new growth is the sign a treatment worked.</value>
+    <comment>Guide, scale: Alive.</comment>
+  </data>
+  <data name="Scale_Back" xml:space="preserve">
+    <value>The young spread and settle within a day or two, and indoors scale breeds all year, so every stage is there at once. Sprays mostly kill the young.</value>
+    <comment>Guide, scale: Back.</comment>
+  </data>
+  <data name="Scale_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others.</value>
+    <comment>Guide, scale: FirstStep1.</comment>
+  </data>
+  <data name="Scale_FirstStep2" xml:space="preserve">
+    <value>Cut off stems and leaves that are covered.</value>
+    <comment>Guide, scale: FirstStep2.</comment>
+  </data>
+  <data name="Scale_Scrape" xml:space="preserve">
+    <value>Scrape off</value>
+    <comment>Guide, scale: Scrape.</comment>
+  </data>
+  <data name="Scale_ScrapeHow" xml:space="preserve">
+    <value>Scrape or wipe the adults off, and wash the young off with water.</value>
+    <comment>Guide, scale: ScrapeHow.</comment>
+  </data>
+  <data name="Scale_ScrapeWatch" xml:space="preserve">
+    <value>On a big plant this may not keep up.</value>
+    <comment>Guide, scale: ScrapeWatch.</comment>
+  </data>
+  <data name="Scale_SoapHow" xml:space="preserve">
+    <value>Insecticidal soap or horticultural oil, which work best on the small young. Cover the plant well.</value>
+    <comment>Guide, scale: SoapHow.</comment>
+  </data>
+  <data name="Scale_SoapRound" xml:space="preserve">
+    <value>Since there are young all year indoors, it takes more than one round.</value>
+    <comment>Guide, scale: SoapRound.</comment>
+  </data>
+  <data name="Scale_EnemiesWhat" xml:space="preserve">
+    <value>For soft scale, parasitic wasps such as Metaphycus helvolus, and the nematode Steinernema feltiae. For armoured scale indoors, the ladybirds Chilocorus nigritus and Rhyzobius lophanthae.</value>
+    <comment>Guide, scale: EnemiesWhat.</comment>
+  </data>
+  <data name="Scale_ProductHow" xml:space="preserve">
+    <value>A product sold for houseplants and for scale, used as its label says. One that goes in the soil works against some soft scales.</value>
+    <comment>Guide, scale: ProductHow.</comment>
+  </data>
+  <data name="Scale_FewTitle" xml:space="preserve">
+    <value>A few is fine</value>
+    <comment>Guide, scale: FewTitle.</comment>
+  </data>
+  <data name="Scale_Few" xml:space="preserve">
+    <value>A healthy plant copes with a few scale insects, so not every one has to go. One badly overrun can be easier to replace.</value>
+    <comment>Guide, scale: Few.</comment>
+  </data>
+  <data name="Scale_Over" xml:space="preserve">
+    <value>New leaves and stems that stay clean for some weeks.</value>
+    <comment>Guide, scale: Over.</comment>
+  </data>
+  <data name="Scale_InApp" xml:space="preserve">
+    <value>A scale case starts at 7 days between treatments, which you can change.</value>
+    <comment>Guide, scale: InApp.</comment>
+  </data>
+  <data name="Aphids_Lead" xml:space="preserve">
+    <value>Aphids are soft, pear-shaped insects, 1 to 7 mm long, green, black, yellow, pink or white, that live in colonies on new growth. Unlike most pests, they are easy to see.</value>
+    <comment>Guide, aphids: Lead.</comment>
+  </data>
+  <data name="Aphids_See1" xml:space="preserve">
+    <value>Clusters on shoot tips, buds and under young leaves.</value>
+    <comment>Guide, aphids: See1.</comment>
+  </data>
+  <data name="Aphids_See2" xml:space="preserve">
+    <value>White cast skins on the tops of the leaves.</value>
+    <comment>Guide, aphids: See2.</comment>
+  </data>
+  <data name="Aphids_See3" xml:space="preserve">
+    <value>Sticky leaves, and black sooty mould on them.</value>
+    <comment>Guide, aphids: See3.</comment>
+  </data>
+  <data name="Aphids_See4" xml:space="preserve">
+    <value>New leaves that curl and twist.</value>
+    <comment>Guide, aphids: See4.</comment>
+  </data>
+  <data name="Aphids_See5" xml:space="preserve">
+    <value>Two small tubes sticking out from the back end, which no other pest has.</value>
+    <comment>Guide, aphids: See5.</comment>
+  </data>
+  <data name="Aphids_Photo" xml:space="preserve">
+    <value>Aphids on a stem.</value>
+    <comment>Guide, aphids: Photo.</comment>
+  </data>
+  <data name="Aphids_Mistaken" xml:space="preserve">
+    <value>White specks on top of the leaves are cast aphid skins, not whitefly. Aphids with a white waxy coat can look like mealybugs.</value>
+    <comment>Guide, aphids: Mistaken.</comment>
+  </data>
+  <data name="Aphids_Back" xml:space="preserve">
+    <value>Indoors they are mostly females that give birth to live young without mating, up to a dozen a day, and in warmth a newborn is an adult in about a week. Winged ones appear when a colony is crowded and fly to other plants. Even so, heavy damage to houseplants is uncommon.</value>
+    <comment>Guide, aphids: Back.</comment>
+  </data>
+  <data name="Aphids_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others.</value>
+    <comment>Guide, aphids: FirstStep1.</comment>
+  </data>
+  <data name="Aphids_FirstStep2" xml:space="preserve">
+    <value>Look over the shoot tips of the plants near it.</value>
+    <comment>Guide, aphids: FirstStep2.</comment>
+  </data>
+  <data name="Aphids_Squash" xml:space="preserve">
+    <value>Squash and rinse</value>
+    <comment>Guide, aphids: Squash.</comment>
+  </data>
+  <data name="Aphids_SquashHow" xml:space="preserve">
+    <value>Squash colonies with your fingers, rinse them off with water, and cut off tips that are covered.</value>
+    <comment>Guide, aphids: SquashHow.</comment>
+  </data>
+  <data name="Aphids_SquashMould" xml:space="preserve">
+    <value>Sooty mould wipes off with a damp cloth.</value>
+    <comment>Guide, aphids: SquashMould.</comment>
+  </data>
+  <data name="Aphids_SoapHow" xml:space="preserve">
+    <value>Insecticidal soap, horticultural oil or neem oil.</value>
+    <comment>Guide, aphids: SoapHow.</comment>
+  </data>
+  <data name="Aphids_SoapRound" xml:space="preserve">
+    <value>They only kill the aphids they touch, so it takes more than one round.</value>
+    <comment>Guide, aphids: SoapRound.</comment>
+  </data>
+  <data name="Aphids_SoapWatch" xml:space="preserve">
+    <value>Try it on a few leaves first, and not on a dry plant or above 32°C.</value>
+    <comment>Guide, aphids: SoapWatch.</comment>
+  </data>
+  <data name="Aphids_EnemiesWhat" xml:space="preserve">
+    <value>Lacewing larvae, the predatory midge Aphidoletes aphidimyza and parasitic wasps such as Aphidius.</value>
+    <comment>Guide, aphids: EnemiesWhat.</comment>
+  </data>
+  <data name="Aphids_ProductHow" xml:space="preserve">
+    <value>A product sold for houseplants and for aphids, used as its label says. UC IPM's houseplant note keeps one that goes in the soil for last.</value>
+    <comment>Guide, aphids: ProductHow.</comment>
+  </data>
+  <data name="Aphids_Over" xml:space="preserve">
+    <value>Many growers look for no new colonies on the shoot tips for some weeks.</value>
+    <comment>Guide, aphids: Over.</comment>
+  </data>
+  <data name="Aphids_InApp" xml:space="preserve">
+    <value>An aphid case starts at 5 days between treatments, which you can change.</value>
+    <comment>Guide, aphids: InApp.</comment>
+  </data>
+  <data name="Whitefly_Lead" xml:space="preserve">
+    <value>Whiteflies are tiny white winged insects, about 1.5 mm long, that rise in a cloud when the plant is touched. Their young are flat and sit still under the leaves.</value>
+    <comment>Guide, whitefly: Lead.</comment>
+  </data>
+  <data name="Whitefly_See1" xml:space="preserve">
+    <value>Small white flies that rise from the leaves.</value>
+    <comment>Guide, whitefly: See1.</comment>
+  </data>
+  <data name="Whitefly_See2" xml:space="preserve">
+    <value>Under the leaves, flat, oval, creamy young that look like scale, and grey white eggs, often in a ring.</value>
+    <comment>Guide, whitefly: See2.</comment>
+  </data>
+  <data name="Whitefly_See3" xml:space="preserve">
+    <value>Sticky leaves, and black sooty mould on them.</value>
+    <comment>Guide, whitefly: See3.</comment>
+  </data>
+  <data name="Whitefly_See4" xml:space="preserve">
+    <value>Leaves that yellow and drop. Poinsettias often have them.</value>
+    <comment>Guide, whitefly: See4.</comment>
+  </data>
+  <data name="Whitefly_See5" xml:space="preserve">
+    <value>Black young are dead, killed by a parasitic wasp.</value>
+    <comment>Guide, whitefly: See5.</comment>
+  </data>
+  <data name="Whitefly_PhotoAdults" xml:space="preserve">
+    <value>Adult whiteflies on a squash leaf.</value>
+    <comment>Guide, whitefly: PhotoAdults.</comment>
+  </data>
+  <data name="Whitefly_PhotoYoung" xml:space="preserve">
+    <value>Young whiteflies and a ring of eggs on a leaf.</value>
+    <comment>Guide, whitefly: PhotoYoung.</comment>
+  </data>
+  <data name="Whitefly_Mistaken" xml:space="preserve">
+    <value>White specks on top of the leaves are more likely cast aphid skins.</value>
+    <comment>Guide, whitefly: Mistaken.</comment>
+  </data>
+  <data name="Whitefly_Back" xml:space="preserve">
+    <value>Each female lays over 200 eggs, without needing a male, and from egg to adult takes about three weeks at 21°C. Indoors they breed all year. They quickly stop dying from most sprays, apart from soap and oil.</value>
+    <comment>Guide, whitefly: Back.</comment>
+  </data>
+  <data name="Whitefly_FirstStep1" xml:space="preserve">
+    <value>Move the plant away from the others.</value>
+    <comment>Guide, whitefly: FirstStep1.</comment>
+  </data>
+  <data name="Whitefly_FirstStep2" xml:space="preserve">
+    <value>Remove the worst leaves.</value>
+    <comment>Guide, whitefly: FirstStep2.</comment>
+  </data>
+  <data name="Whitefly_Traps" xml:space="preserve">
+    <value>Sticky traps</value>
+    <comment>Guide, whitefly: Traps.</comment>
+  </data>
+  <data name="Whitefly_TrapsHow" xml:space="preserve">
+    <value>A yellow sticky trap in each pot catches adults.</value>
+    <comment>Guide, whitefly: TrapsHow.</comment>
+  </data>
+  <data name="Whitefly_TrapsWatch" xml:space="preserve">
+    <value>They show how many there are and cut the numbers somewhat, but don't clear a plant.</value>
+    <comment>Guide, whitefly: TrapsWatch.</comment>
+  </data>
+  <data name="Whitefly_Rinse" xml:space="preserve">
+    <value>Rinse</value>
+    <comment>Guide, whitefly: Rinse.</comment>
+  </data>
+  <data name="Whitefly_RinseHow" xml:space="preserve">
+    <value>Wash the eggs and young off the undersides of the leaves with water.</value>
+    <comment>Guide, whitefly: RinseHow.</comment>
+  </data>
+  <data name="Whitefly_SoapHow" xml:space="preserve">
+    <value>Insecticidal soap or horticultural oil, covering the undersides of the leaves well, repeated, and best in the early evening.</value>
+    <comment>Guide, whitefly: SoapHow.</comment>
+  </data>
+  <data name="Whitefly_SoapWatch" xml:space="preserve">
+    <value>Not on a dry plant or above 32°C.</value>
+    <comment>Guide, whitefly: SoapWatch.</comment>
+  </data>
+  <data name="Whitefly_EnemiesWhat" xml:space="preserve">
+    <value>The parasitic wasp Encarsia formosa, let out before there are many, since it doesn't work at once. The young it kills turn black, so you can see it working. The predatory mite Amblyseius andersoni eats the eggs.</value>
+    <comment>Guide, whitefly: EnemiesWhat.</comment>
+  </data>
+  <data name="Whitefly_Stop" xml:space="preserve">
+    <value>UC IPM says a plant with a large infestation may be best thrown out.</value>
+    <comment>Guide, whitefly: Stop.</comment>
+  </data>
+  <data name="Whitefly_Over" xml:space="preserve">
+    <value>Many growers look for no adults rising and nothing new on the trap for some weeks.</value>
+    <comment>Guide, whitefly: Over.</comment>
+  </data>
+  <data name="Whitefly_InApp" xml:space="preserve">
+    <value>A whitefly case starts at 5 days between treatments, which you can change. Count the trap on the case to see whether the catch falls week by week.</value>
+    <comment>Guide, whitefly: InApp.</comment>
+  </data>
+  <data name="PhotoCropped" xml:space="preserve">
+    <value>{0}, cropped</value>
+    <comment>Credit under a photo that was cropped. {0} is the licence.</comment>
   </data>
 </root>
