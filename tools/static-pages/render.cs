@@ -37,6 +37,7 @@ var services = new ServiceCollection();
 services.AddSingleton<IJSRuntime, NoJSRuntime>();
 services.AddSingleton<NavigationManager, StaticNavigationManager>();
 services.AddSingleton<DeviceFiles>();
+services.AddSingleton<PageScripts>();
 services.AddSingleton(AccountSettings.From(config, isDevelopment: false));
 services.AddSingleton<AccountService>();
 await using var provider = services.BuildServiceProvider();
