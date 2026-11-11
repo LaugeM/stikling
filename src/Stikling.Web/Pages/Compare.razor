@@ -212,7 +212,7 @@ else
                     View.Offline => Strings.Compare.Offline,
                     _ => Strings.Compare.Failed
                 })</p>
-                <button type="button" class="btn btn-outline-primary mt-3" @onclick="Change">@Strings.Compare.PasteInstead</button>
+                <button type="button" class="btn btn-outline-primary mt-3 compare-paste-instead" @onclick="Change">@Strings.Compare.PasteInstead</button>
             </div>
         }
         else
@@ -281,7 +281,17 @@ else
 
     private bool nothingMatches => result is { ForYou.Count: 0, ForThem.Count: 0 };
 
-    protected override async Task OnInitializedAsync() => await LoadMineAsync();
+    // Compare waits for my own lists, so a tap before they have loaded doesn't say nothing matches
+    private Task mineLoaded = Task.CompletedTask;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // A page address shows the loading bar straight away, not the paste box first
+        if (!string.IsNullOrEmpty(Address))
+            view = View.Loading;
+        mineLoaded = LoadMineAsync();
+        await mineLoaded;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
@@ -374,6 +384,7 @@ else
             return;
         }
 
+        await mineLoaded;
         var read = ListTextReader.Read(text, dictionary ?? await Names.GetDictionaryAsync());
         switch (read.Kind)
         {
