@@ -50,6 +50,10 @@
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">@Strings.Shared.PhotoViewerFrame</button>
                         }
                         @* A photo from a received history stays in the history it came with *@
+                        @if (CanCompare(photo))
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCompare.InvokeAsync(photo)">@Strings.Shared.PhotoViewerCompare</button>
+                        }
                         @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? Strings.Shared.PhotoViewerMoveToHistory : Strings.Shared.PhotoViewerMoveToReference)</button>
@@ -103,6 +107,10 @@
     [Parameter]
     public EventCallback<(Photo Photo, PhotoFrame? Frame)> OnFrame { get; set; }
 
+    /// <summary>Opens the photo next to another one. Compare only shows when this is set, for a photo that isn't a reference photo and when there are two or more others to compare.</summary>
+    [Parameter]
+    public EventCallback<Photo> OnCompare { get; set; }
+
     /// <summary>Photos that belong to another page, like a cutting's photos on its plant. They can be framed and set as the cover, not moved or deleted from here.</summary>
     [Parameter]
     public IReadOnlySet<Guid>? KeptPhotoIds { get; set; }
@@ -115,7 +123,10 @@
     private bool focusPending;
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
-    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate;
+    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate;
+
+    private bool CanCompare(Photo photo) =>
+        OnCompare.HasDelegate && !photo.IsReference && PhotoList.Count(p => !p.IsReference) >= 2;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
 
