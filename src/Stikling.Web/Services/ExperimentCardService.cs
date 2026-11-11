@@ -19,15 +19,10 @@ public sealed record ExperimentCardSpec(string Id, string Format, string Kicker,
 /// only the words, photo ids and frames cross into JavaScript, and nothing comes back but the picture's address.
 /// The size picked is the share card's, so it is remembered by <see cref="ShareCardService"/>.
 /// </summary>
-public sealed class ExperimentCardService(IJSRuntime js) : IAsyncDisposable
+public sealed class ExperimentCardService(IJSRuntime js) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/experimentcard.js";
     internal const string PictureId = "experiment-result";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>How many mediums fit on a picture of that size.</summary>
     public static int MaxRows(string format) => format switch
@@ -86,13 +81,6 @@ public sealed class ExperimentCardService(IJSRuntime js) : IAsyncDisposable
     /// <summary>Lets go of the picture drawn.</summary>
     public async Task ReleaseAsync()
     {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.InvokeVoidAsync("release", new[] { PictureId });
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
+        await IfLoadedAsync(m => m.InvokeVoidAsync("release", new[] { PictureId }));
     }
 }

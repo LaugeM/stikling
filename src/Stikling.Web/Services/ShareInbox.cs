@@ -16,16 +16,11 @@ public sealed record InboxSaveResult(PhotoSaveResult Result, IReadOnlyList<strin
 /// on the Add photos page. They stay in Cache Storage on this device (wwwroot/js/shareinbox.js), so they
 /// don't sync and aren't in backups. The image data stays in JavaScript until it is saved as a photo.
 /// </summary>
-public sealed class ShareInbox(IJSRuntime js, PhotoService photos) : IAsyncDisposable
+public sealed class ShareInbox(IJSRuntime js, PhotoService photos) : JsModule(js, ModulePath)
 {
     private const string ModulePath = "./js/shareinbox.js";
 
     private sealed record InboxResponse(List<PhotoService.SavedFile> Saved, int Failed, List<string> SavedIds);
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>How many photos are waiting.</summary>
     public async Task<int> CountAsync() =>
@@ -60,23 +55,20 @@ public sealed class ShareInbox(IJSRuntime js, PhotoService photos) : IAsyncDispo
     /// <summary>Lets go of the addresses <see cref="ListAsync"/> handed out, for when the page is left.</summary>
     public async Task ReleaseAsync()
     {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.InvokeVoidAsync("release");
+        await IfLoadedAsync(m => m.InvokeVoidAsync("release"));
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
-        if (module is { IsCompletedSuccessfully: true })
+        try
         {
-            try
-            {
-                await module.Result.InvokeVoidAsync("release");
-                await module.Result.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            {
-                // The page is going away
-            }
+            await IfLoadedAsync(m => m.InvokeVoidAsync("release"));
         }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away
+        }
+
+        await base.DisposeAsync();
     }
 }

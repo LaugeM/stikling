@@ -32,7 +32,7 @@ public sealed record PhotoSaveResult(IReadOnlyList<Photo> Saved, int Failed, int
 /// Saves and shows photos. Image data is handled by wwwroot/js/photos.js;
 /// the metadata goes through <see cref="IPhotoRepository"/>.
 /// </summary>
-public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimeProvider time) : IAsyncDisposable
+public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimeProvider time) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/photos.js";
 
@@ -41,11 +41,6 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
 
     /// <summary>What photos.js and googlephotos.js return after storing images.</summary>
     public sealed record SaveResponse(List<SavedFile> Saved, int Failed);
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Stores the files chosen in <paramref name="input"/> as photos of the given subject.</summary>
     public async Task<PhotoSaveResult> SaveFromInputAsync(
@@ -184,10 +179,4 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     /// <summary>Frees the image data only, for a photo whose metadata is already marked deleted.</summary>
     public async Task RemoveBytesAsync(Guid id) =>
         await (await Module).InvokeVoidAsync("remove", id);
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

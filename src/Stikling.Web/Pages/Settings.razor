@@ -26,7 +26,7 @@
 @inject OwnFieldService OwnFieldBook
 @inject ICareIntervalRepository CareIntervalRepository
 @inject NavigationManager Navigation
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 
 <PageTitle>@Strings.Settings.PageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -966,8 +966,7 @@
             scrolledFor = Section;
             try
             {
-                await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-                await module.InvokeVoidAsync("scrollToSectionOnPhone", Section);
+                await Scripts.ScrollToSectionOnPhoneAsync(Section);
             }
             catch (JSException)
             {

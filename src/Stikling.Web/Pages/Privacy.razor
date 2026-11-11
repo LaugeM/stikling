@@ -2,7 +2,7 @@
 @* The privacy policy for the live site. Google's, Facebook's and Discord's sign-in and the Help page link here, so it has to
    describe the app and the hosting as they are. Change the date at the top when the content changes. The deploy renders it
    to plain HTML (tools/static-pages/render.cs), so it can be read without running the app. *@
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 
 <PageTitle>@Strings.Account.PrivacyPageTitle</PageTitle>
 
@@ -125,7 +125,6 @@
         if (!firstRender)
             return;
 
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("scrollToFragment");
+        await Scripts.ScrollToFragmentAsync();
     }
 }

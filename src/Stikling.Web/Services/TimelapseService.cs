@@ -38,16 +38,11 @@ public sealed class TimelapseProgress(Action<double> report)
 /// and the finished video stays there. Only the words, the timing and a photo id each cross into JavaScript,
 /// and nothing comes back but how far it has got and whether it worked.
 /// </summary>
-public sealed class TimelapseService(IJSRuntime js, DeviceFiles files) : IAsyncDisposable
+public sealed class TimelapseService(IJSRuntime js, DeviceFiles files) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/timelapse.js";
     internal const string FormatKey = "share-video-format";
     internal const string SpeedKey = "share-video-speed";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>The size used for the last video on this device. It is kept apart from the card's size, and starts on 9:16.</summary>
     public async Task<string> GetFormatAsync()
@@ -101,19 +96,4 @@ public sealed class TimelapseService(IJSRuntime js, DeviceFiles files) : IAsyncD
     /// <summary>"saved" or "failed".</summary>
     public async Task<string> SaveAsync(string fileName) =>
         await (await Module).InvokeAsync<string>("save", fileName);
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-        {
-            try
-            {
-                await module.Result.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            {
-                // The page is going away
-            }
-        }
-    }
 }

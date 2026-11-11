@@ -52,15 +52,10 @@ public sealed record YearVideoSpec(string Format, double Crossfade, double Total
 /// only the words and photo ids cross into JavaScript, and nothing comes back but a picture's address.
 /// The size picked stays on this device.
 /// </summary>
-public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : IAsyncDisposable
+public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/yearcards.js";
     internal const string FormatKey = "year-format";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>The size used last on this device. One that doesn't exist any more comes back as 9:16.</summary>
     public async Task<string> GetFormatAsync()
@@ -116,8 +111,7 @@ public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : IAsyncDi
     /// <summary>Lets go of the pictures drawn under these ids.</summary>
     public async Task ReleaseAsync(IEnumerable<string> ids)
     {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.InvokeVoidAsync("release", ids.ToArray());
+        await IfLoadedAsync(m => m.InvokeVoidAsync("release", ids.ToArray()));
     }
 
     /// <summary>"stikling-2026-plants-added.jpg".</summary>
@@ -125,10 +119,4 @@ public sealed class YearCardService(IJSRuntime js, DeviceFiles files) : IAsyncDi
 
     /// <summary>"stikling-2026-year.mp4".</summary>
     public static string VideoFileNameFor(int year) => $"stikling-{year}-year.mp4";
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

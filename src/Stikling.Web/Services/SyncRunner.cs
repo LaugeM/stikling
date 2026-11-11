@@ -32,7 +32,7 @@ public sealed class SyncRunner(
     DeviceFiles files,
     NotificationService notifications,
     IJSRuntime js,
-    TimeProvider time) : IAsyncDisposable
+    TimeProvider time) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/sync.js";
     internal const string LastSyncKey = "last-sync";
@@ -40,7 +40,6 @@ public sealed class SyncRunner(
     /// <summary>How long to wait after a change, so a few changes in a row go in one sync.</summary>
     private static readonly TimeSpan AfterChange = TimeSpan.FromSeconds(2);
 
-    private Task<IJSObjectReference>? module;
     private DotNetObjectReference<SyncRunner>? self;
     private bool started;
     private bool signedIn;
@@ -49,9 +48,6 @@ public sealed class SyncRunner(
     private Task current = Task.CompletedTask;
     private readonly Dictionary<(Guid, PhotoSize), Task<bool>> fetching = [];
     private readonly HashSet<(Guid, PhotoSize)> notOnServer = [];
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     public bool Running { get; private set; }
 
@@ -470,16 +466,13 @@ public sealed class SyncRunner(
             _ = SyncNowAsync();
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         db.Changed -= OnLocalChange;
         account.Changed -= OnAccountChanged;
         waiting?.Cancel();
-        if (module is { IsCompletedSuccessfully: true })
-        {
-            await module.Result.InvokeVoidAsync("forget");
-            await module.Result.DisposeAsync();
-        }
+        await IfLoadedAsync(m => m.InvokeVoidAsync("forget"));
+        await base.DisposeAsync();
 
         self?.Dispose();
     }

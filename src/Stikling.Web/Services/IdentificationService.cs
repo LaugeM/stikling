@@ -23,7 +23,7 @@ public sealed class IdentificationService(
     AccountSettings accountSettings,
     PhotoService photos,
     SyncRunner sync,
-    PlantNameService names) : IAsyncDisposable
+    PlantNameService names) : JsModule(js, ModulePath)
 {
     /// <summary>The <see cref="DeviceFiles"/> key of the person's own Pl@ntNet key. It belongs to this device, so it isn't synced or backed up.</summary>
     internal const string KeyName = "plantnet-key";
@@ -32,11 +32,6 @@ public sealed class IdentificationService(
 
     /// <summary>What identify.js hands back: the HTTP status (-1 offline, 0 photo missing) and the text of the answer.</summary>
     private sealed record Reply(int Status, string? Body);
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     public async Task<string?> GetKeyAsync() =>
         await files.GetAsync(KeyName) is { } key && !string.IsNullOrWhiteSpace(key) ? key.Trim() : null;
@@ -104,11 +99,5 @@ public sealed class IdentificationService(
             // route is kept in the message that is logged.
             return IdentificationOutcome.Failure(IdentificationProblem.Failed);
         }
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
     }
 }

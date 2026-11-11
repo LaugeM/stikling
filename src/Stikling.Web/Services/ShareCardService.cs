@@ -48,7 +48,7 @@ public enum ShareFileKind
 /// Draws a share card and hands it on, and shares or copies the address of a page. The picture is made and kept in wwwroot/js/sharecard.js;
 /// only the words and a photo id cross into JavaScript, and nothing comes back but whether it worked.
 /// </summary>
-public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncDisposable
+public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/sharecard.js";
     internal const string FormatKey = "share-format";
@@ -59,11 +59,6 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
         ("portrait", "4:5"),
         ("story", "9:16"),
     ];
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>The format used last on this device. A format that doesn't exist any more comes back as square.</summary>
     public async Task<string> GetFormatAsync()
@@ -118,11 +113,5 @@ public sealed class ShareCardService(IJSRuntime js, DeviceFiles files) : IAsyncD
             return slug.Length == 0 ? "stikling-experiment-result.jpg" : $"stikling-{slug}-result.jpg";
         var tail = kind == ShareFileKind.BeforeAfter ? "-before-after" : "";
         return slug.Length == 0 ? $"stikling-card{tail}.jpg" : $"stikling-{slug}{tail}.jpg";
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
     }
 }

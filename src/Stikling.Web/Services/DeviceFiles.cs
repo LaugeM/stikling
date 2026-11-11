@@ -7,15 +7,10 @@ namespace Stikling.Web.Services;
 /// last backup was taken, and whether someone is signed in here (<see cref="AccountService"/>).
 /// Anything that belongs to the person is a record instead.
 /// </summary>
-public sealed class DeviceFiles(IJSRuntime js) : IAsyncDisposable
+public sealed class DeviceFiles(IJSRuntime js) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/files.js";
     internal const string LastBackupKey = "last-backup";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Offers the bytes to the browser as a download.</summary>
     public async Task DownloadAsync(string fileName, byte[] bytes) =>
@@ -40,10 +35,4 @@ public sealed class DeviceFiles(IJSRuntime js) : IAsyncDisposable
 
     public Task SetLastBackupAsync(DateOnly date) =>
         SetAsync(LastBackupKey, date.ToString("yyyy-MM-dd"));
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

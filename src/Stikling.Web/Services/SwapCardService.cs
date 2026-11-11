@@ -30,14 +30,9 @@ public sealed record SwapCardDrawn(string Url, int Missing);
 /// only the words, photo ids and frames cross into JavaScript, and nothing comes back but a picture's address.
 /// The size picked is the share card's, so it is remembered by <see cref="ShareCardService"/>.
 /// </summary>
-public sealed class SwapCardService(IJSRuntime js) : IAsyncDisposable
+public sealed class SwapCardService(IJSRuntime js) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/swapcard.js";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>The specs of the pictures for these tiles at that size, one for each picture.</summary>
     public static IReadOnlyList<SwapCardSpec> SpecsFor(IReadOnlyList<SwapTile> tiles, string format)
@@ -70,13 +65,6 @@ public sealed class SwapCardService(IJSRuntime js) : IAsyncDisposable
     /// <summary>Lets go of the pictures drawn under these ids.</summary>
     public async Task ReleaseAsync(IEnumerable<string> ids)
     {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.InvokeVoidAsync("release", ids.ToArray());
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
+        await IfLoadedAsync(m => m.InvokeVoidAsync("release", ids.ToArray()));
     }
 }

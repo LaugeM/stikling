@@ -54,14 +54,9 @@ public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);
 /// Typed access to the IndexedDB module. Objects are serialised to JSON on the way in and
 /// back to C# types on the way out by Blazor's JS interop.
 /// </summary>
-public sealed class IndexedDb(IJSRuntime js) : IAsyncDisposable
+public sealed class IndexedDb(IJSRuntime js) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/db.js";
-
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>Raised after something is saved or deleted here, so sync can send it.</summary>
     public event Action? Changed;
@@ -89,10 +84,4 @@ public sealed class IndexedDb(IJSRuntime js) : IAsyncDisposable
 
     public async Task<StorageEstimate?> EstimateAsync() =>
         await (await Module).InvokeAsync<StorageEstimate?>("estimate");
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

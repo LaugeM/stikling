@@ -10,13 +10,8 @@ namespace Stikling.Web.Services;
 /// change list is kept in the same transaction as each write, and the photo lists in the same
 /// transaction as the images.
 /// </summary>
-public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IPhotoSyncStore, IAsyncDisposable
+public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.ModulePath), ISyncStore, IPhotoSyncStore
 {
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", IndexedDb.ModulePath).AsTask();
-
     public async Task<SyncState?> GetStateAsync() =>
         await (await Module).InvokeAsync<SyncState?>("getSyncState");
 
@@ -87,10 +82,4 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : ISyncStore, IPhotoSyncSt
     /// <summary>Empties the database, for signing out and removing everything from this device.</summary>
     public async Task ClearAllAsync() =>
         await (await Module).InvokeVoidAsync("clearAll");
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

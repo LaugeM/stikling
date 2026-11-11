@@ -9,10 +9,9 @@ namespace Stikling.Web.Services;
 /// The steps and the moving between them are in <see cref="GuidedTour"/>. This adds the navigating, the mark on
 /// the page and the Escape key, which need the browser.
 /// </summary>
-public sealed class TourService(NavigationManager navigation, IJSRuntime js) : IAsyncDisposable
+public sealed class TourService(NavigationManager navigation, IJSRuntime js) : JsModule(js, "./js/tour.js")
 {
     private readonly GuidedTour tour = new();
-    private Task<IJSObjectReference>? module;
     private DotNetObjectReference<TourService>? self;
 
     /// <summary>Raised when the tour starts, moves or ends.</summary>
@@ -21,9 +20,6 @@ public sealed class TourService(NavigationManager navigation, IJSRuntime js) : I
     public GuidedTour State => tour;
 
     public bool Active => tour.Active;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", "./js/tour.js").AsTask();
 
     /// <summary>Starts at the first stop and goes to its page.</summary>
     public async Task StartAsync()
@@ -103,11 +99,10 @@ public sealed class TourService(NavigationManager navigation, IJSRuntime js) : I
         }
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         navigation.LocationChanged -= OnLocationChanged;
         self?.Dispose();
-        if (module is { IsCompletedSuccessfully: true })
-            await (await module).DisposeAsync();
+        await base.DisposeAsync();
     }
 }

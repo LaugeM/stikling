@@ -1,6 +1,6 @@
 @* Scrolls to an element on the page and marks it for a moment, so a result opened from Search shows
    which note or item it meant. Put it on a page with the element's id, once the page has its data. *@
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 
 @code {
     /// <summary>The id of the element, like "entry-…". Nothing happens without one.</summary>
@@ -21,8 +21,7 @@
         shownFor = ElementId;
         try
         {
-            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-            await module.InvokeVoidAsync("showFound", ElementId);
+            await Scripts.ShowFoundAsync(ElementId);
         }
         catch (JSException)
         {

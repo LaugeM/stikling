@@ -23,7 +23,7 @@
 @inject OwnFieldService OwnFieldBook
 @inject NavigationManager Navigation
 @inject TimeProvider Time
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 @inject PlantNameService Names
 @inject PlantCareService CommonCare
 @inject PlantRegionService Regions
@@ -2306,8 +2306,7 @@ else
         if (!scrollToFamily || plant is null)
             return;
         scrollToFamily = false;
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("scrollToId", "plant-family");
+        await Scripts.ScrollToIdAsync("plant-family");
     }
 
     private static string DaysLabel(int? days) => days is null or 0
