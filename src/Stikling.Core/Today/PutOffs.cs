@@ -65,9 +65,10 @@ public sealed class PutOffs
 
     /// <summary>
     /// The key for a plan step moved to another day. The step id is a copy made when the plan was
-    /// started on the case, so starting a plan again isn't still moved.
+    /// started on the case, so starting a plan again isn't still moved. Round 1 keeps the key it always had, and later rounds of a plan that starts over have the round in it.
     /// </summary>
-    public static string PlanStep(Guid caseId, Guid stepId) => $"step:{caseId}:{stepId}";
+    public static string PlanStep(Guid caseId, Guid stepId, int round = 1) =>
+        round <= 1 ? $"step:{caseId}:{stepId}" : $"step:{caseId}:{stepId}:{round}";
 
     /// <summary>
     /// The key for a plant's anniversary. The year the window started is part of it, so next

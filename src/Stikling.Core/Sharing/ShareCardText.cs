@@ -80,8 +80,8 @@ public sealed record ShareCardText(string Name, string? Latin, string? Cultivar,
         else if (sign is { } d)
         {
             what = Format(seed ? Strings.Propagations.ShareCameUpIn : Strings.Propagations.ShareRootedIn, Days(d), medium);
-            if (p.PottedUpCount > 0 && p.InitialCount > 1)
-                what += Format(Strings.Propagations.ShareSomePottedUp, p.PottedUpCount, p.InitialCount);
+            if (p.PottedUpCount > 0 && p.StartedCount > 1)
+                what += Format(Strings.Propagations.ShareSomePottedUp, p.PottedUpCount, p.StartedCount);
             else if (p.Stage == PropagationStage.Failed)
                 what += Strings.Propagations.ShareItDidntMakeIt;
         }

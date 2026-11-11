@@ -84,6 +84,13 @@ public sealed record PlantFilter(
     bool FavouritesFirst = true,
     Func<Guid?, string?>? RoomName = null)
 {
+    /// <summary>
+    /// How many plants there are under the status picked, before the other filters. A dead or
+    /// given-away plant only counts toward the total when the status filter shows it.
+    /// </summary>
+    public int Total(IEnumerable<Plant> plants) =>
+        plants.Count(p => !p.IsDeleted && !p.LivesElsewhere && MatchesStatus(p));
+
     public IEnumerable<Plant> Apply(IEnumerable<Plant> plants) =>
         Order(plants
             // A plant that lives with someone else isn't in the list at all, not even under Gone or All

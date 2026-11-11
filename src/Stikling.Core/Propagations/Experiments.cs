@@ -85,7 +85,7 @@ public static class Experiments
             .Select(batches =>
             {
                 var rootedBatches = batches.Where(e => e.DaysToRoot is not null).ToList();
-                var rooted = rootedBatches.Sum(e => Math.Max(0, e.Propagation.InitialCount - e.Propagation.FailedCount));
+                var rooted = rootedBatches.Sum(e => Math.Max(0, e.Propagation.StartedCount - e.Propagation.FailedCount));
                 int? average = rootedBatches.Count == 0
                     ? null
                     : (int)Math.Round(rootedBatches.Average(e => e.DaysToRoot!.Value), MidpointRounding.AwayFromZero);
@@ -94,7 +94,7 @@ public static class Experiments
                 var photo = rootedBatches.OrderBy(e => e.DaysToRoot).Select(e => UsablePhoto(e.Propagation)).FirstOrDefault(p => p is not null)
                     ?? batches.Select(e => UsablePhoto(e.Propagation)).FirstOrDefault(p => p is not null);
 
-                return new ExperimentResultRow(batches.Key, rooted, batches.Sum(e => e.Propagation.InitialCount), average, photo?.Id, photo?.Frame);
+                return new ExperimentResultRow(batches.Key, rooted, batches.Sum(e => e.Propagation.StartedCount), average, photo?.Id, photo?.Frame);
             })
             .OrderByDescending(r => r.Total > 0 ? r.Rooted / (double)r.Total : 0)
             .ThenBy(r => r.AverageDays is null)

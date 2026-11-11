@@ -85,6 +85,8 @@ When starting or proposing another session, always set both its model and its ef
 
 Build, run the tests, and check any UI change in a browser at phone width. The dev server is `stikling-web` in `.claude/launch.json`.
 
+When the branch adds or changes text in a `.resx` file, run the `translator` agent (`.claude/agents/translator.md`) for a Danish pass before the browser check, since its rewrites can change how long a line is. It rewrites the Danish that sounds translated. Show me every line it changed in the chat, with the English, the old Danish and the new, so I can read them over. A pull request from Weblate in a language I can't read gets the translator in check mode instead, and its back-translations go in the chat too.
+
 Hand the browser check to the `browser-check` agent (`.claude/agents/browser-check.md`) instead of driving the browser in this session, where a check costs several times more. Tell it what changed, which screens to open and how to get to them. It checks phone, desktop and dark mode, reports in a few lines and leaves one screenshot in the pane. Check in the main session only when the judgment about how it looks is part of the design work.
 
 Clear the test data afterwards. The app has no button for it, so delete the database from the page with `indexedDB.deleteDatabase("stikling")` and reload. The `browser-check` agent does this itself for data it added.

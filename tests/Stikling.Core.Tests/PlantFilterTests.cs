@@ -294,4 +294,13 @@ public class PlantFilterTests
         Assert.Equal(3, new PlantFilter(GoneAs: PlantStatus.Died).Apply(All).Count());
         Assert.Equal(5, new PlantFilter(Status: StatusFilter.All, GoneAs: PlantStatus.Died).Apply(All).Count());
     }
+
+    [Fact]
+    public void Total_counts_only_plants_under_the_status_picked()
+    {
+        Assert.Equal(3, new PlantFilter(Search: "basil").Total(All));
+        Assert.Equal(2, new PlantFilter(Status: StatusFilter.Gone).Total(All));
+        Assert.Equal(1, new PlantFilter(Status: StatusFilter.Gone, GoneAs: PlantStatus.Died).Total(All));
+        Assert.Equal(5, new PlantFilter(Status: StatusFilter.All).Total(All));
+    }
 }

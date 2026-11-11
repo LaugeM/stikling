@@ -390,7 +390,7 @@ public static class Labels
     /// <summary>"3× corm · LECA".</summary>
     public static string Summary(Propagation propagation) =>
         F(Strings.Labels.PropagationSummary,
-            propagation.InitialCount, For(propagation.Type).ToLowerInvariant(), For(propagation.Medium));
+            propagation.StartedCount, For(propagation.Type).ToLowerInvariant(), For(propagation.Medium));
 
     /// <summary>"started today" / "day 24".</summary>
     public static string Age(Propagation propagation, DateOnly today) =>

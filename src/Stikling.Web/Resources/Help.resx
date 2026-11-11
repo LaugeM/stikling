@@ -724,6 +724,10 @@
     <value>Give the propagation a count, like 3 corms in LECA. They are tracked as one batch, and you can pot up or mark failed one or a few at a time as each goes its own way.</value>
     <comment>Answer to "What if I have several cuttings in one glass?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="IfHaveSeveralCuttingsOneA2" xml:space="preserve">
+    <value>When one gets ahead of the rest, like a corm that starts rooting, open the batch and tap &lt;em&gt;Split off&lt;/em&gt;. It becomes a propagation of its own with its own stage, linked to the batch it came from, and the batch keeps the rest.</value>
+    <comment>Answer to "What if I have several cuttings in one glass?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
   <data name="TrackSeedsQ" xml:space="preserve">
     <value>Can I track seeds?</value>
     <comment>Question in the "Propagations" part of the Help page.</comment>
@@ -1209,7 +1213,7 @@
     <comment>Question in the "Pests and problems" part of the Help page.</comment>
   </data>
   <data name="PestCaseA1" xml:space="preserve">
-    <value>One outbreak, like spider mites in the living room. A case covers the whole collection, one room, or the plants you pick, because pests spread and are treated together. You say how often to treat, and Today shows when the next round is due. A case can also mark which plants the pest was seen on, from the case, the case form or the plant's &lt;em&gt;Found pests&lt;/em&gt;. The rest are still treated, and the plant's history gets a line about it.</value>
+    <value>One outbreak, like spider mites in the living room. A case covers the whole collection, one room, or the plants you pick, because pests spread and are treated together. You say how often to treat, and Today shows when the next round is due. A case can also mark which plants the pest was seen on, from the case, the case form or the plant's &lt;em&gt;Found pests&lt;/em&gt;. The rest are still treated, and the plant's history gets a line about it. When you log a treatment on a case with several plants, you can tick off the plants as you treat them, and the case shows later how many a treatment reached.</value>
     <comment>Answer to "What is a pest case?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="ChangeCasePlantsQ" xml:space="preserve">
@@ -1417,7 +1421,7 @@
     <comment>Answer to "Can I follow a set of treatments, like spraying twice and then predatory mites?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="FollowSetTreatmentsLikeSprayingA2" xml:space="preserve">
-    <value>While the plan runs, Today and the case show the step that is up next. &lt;em&gt;Log&lt;/em&gt; it when it's done, &lt;em&gt;Skip&lt;/em&gt; it if you won't do it, or &lt;em&gt;Move&lt;/em&gt; it to a later day. The next step counts from the day the one before was done or skipped, so a late spray moves the rest along. A treatment you log outside the plan, like an extra spray, doesn't move it on. After the last step Today asks whether to start watching the case or keep treating. If you keep treating, the case goes on at its interval. You can also stop a plan from the case at any time.</value>
+    <value>While the plan runs, Today and the case show the step that is up next. &lt;em&gt;Log&lt;/em&gt; it when it's done, &lt;em&gt;Skip&lt;/em&gt; it if you won't do it, or &lt;em&gt;Move&lt;/em&gt; it to a later day. The next step counts from the day the one before was done or skipped, so a late spray moves the rest along. A treatment you log outside the plan, like an extra spray, doesn't move it on. After the last step Today asks whether to start watching the case or keep treating. If you keep treating, the case goes on at its interval. A plan can also start over after its last step, for pests that take several rounds, by ticking &lt;em&gt;Start over after the last step&lt;/em&gt; on the plan. Then Today and the case show which round it is on, and it keeps going round until you set the case to watching or resolved. You can also stop a plan from the case at any time.</value>
     <comment>Answer to "Can I follow a set of treatments, like spraying twice and then predatory mites?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="FollowSetTreatmentsLikeSprayingA3" xml:space="preserve">

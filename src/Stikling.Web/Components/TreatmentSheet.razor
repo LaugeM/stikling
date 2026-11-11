@@ -10,6 +10,7 @@
 @inject ITreatmentRecipeRepository Recipes
 @inject TimeProvider Time
 @inject PestPhotoService PestPhotos
+@inject NavigationManager Navigation
 
 <div class="care-sheet">
     @if (error is not null)
@@ -101,6 +102,14 @@
                @bind="notes" @bind:event="oninput" />
     </div>
 
+    @if (CanTick)
+    {
+        <div class="form-check form-switch mt-2">
+            <input class="form-check-input" type="checkbox" role="switch" id="treatment-tick" @bind="tickOff" />
+            <label class="form-check-label" for="treatment-tick">@Strings.Pests.TickSwitch</label>
+        </div>
+    }
+
     <PestPhotoPick @ref="picker" Plants="Plants" FoundOnIds="FoundOnIds" BusyChanged="SetPhotosBusy" />
 
     <div class="care-actions">
@@ -152,6 +161,10 @@
 
     private void SetPhotosBusy(bool value) => photosBusy = value;
 
+    // Ticking off the plants one by one only makes sense for a treatment on more than one plant
+    private bool tickOff = true;
+    private bool CanTick => !Check && Plants.Count > 1;
+
     private bool offPlan;
     private bool OnStep => Step is not null && !offPlan;
     private int StepNumber => Step is null ? 0 : Case.PlanSteps.FindIndex(s => s.Id == Step.Id) + 1;
@@ -185,7 +198,7 @@
     {
         offPlan = false;
         var draft = Step is { } step
-            ? PlanProgress.StartStep(Case, step, Today, recipes)
+            ? PlanProgress.StartStep(Case, step, Today, recipes, PlanProgress.CurrentRound(Case, Existing))
             : PestService.StartTreatment(Case, Existing, Today, recipes);
         recipeId = draft.RecipeId;
         what = draft.RecipeId is null ? draft.What : null;
@@ -232,10 +245,13 @@
                     // Only a date that isn't the plain interval is worth storing, so changing the
                     // interval later still moves the cases that never had a gap set by hand
                     NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
-                    PlanStepId = OnStep ? Step!.Id : null
+                    PlanStepId = OnStep ? Step!.Id : null,
+                    PlanRound = OnStep ? PlanProgress.CurrentRound(Case, Existing) : 0
                 };
                 if (!Check && Picked is { } recipe)
                     entry.Use(recipe);
+                if (CanTick && tickOff)
+                    entry.TreatedPlantIds = [];
                 entry.Notes = Clean(notes);
                 await Repository.SaveAsync(entry);
                 saved = entry;
@@ -247,9 +263,16 @@
             if (recorded is { } done)
                 await PestPhotos.AddLineAsync(Case, saved, done.PlantId, done.Ids, Labels.English);
 
+            var ticking = saved.TreatedPlantIds is not null;
+            var treatmentId = saved.Id;
             saved = null;
             recorded = null;
             Reset();
+            if (ticking)
+            {
+                Navigation.NavigateTo($"pests/{Case.Id}/treatments/{treatmentId}");
+                return;
+            }
             await OnLogged.InvokeAsync();
         }
         catch (Exception ex)
