@@ -2,6 +2,7 @@
 @layout WideLayout
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
+@inject IPestCaseRepository PestCaseRepository
 
 @* A guide. The structure is in Core (GuideBook) and the text in Resources/Guides.resx. It says the same to everyone:
    where it is opened from only changes the back link, the method it opens on and the end of the semi-hydro guide. *@
@@ -102,6 +103,12 @@ else
                 medium = cutting.Medium;
                 (backHref, backText) = ($"propagations/{propagationId}", Back(cutting.DisplayName));
                 break;
+            case "pest-case" when id is { } caseId && await PestCaseRepository.GetAsync(caseId) is { IsDeleted: false } pestCase:
+                (backHref, backText) = ($"pests/{caseId}", Back(Labels.For(pestCase.Pest)));
+                break;
+            case "pests":
+                (backHref, backText) = ("pests", Back(Strings.Pests.PestsTitle));
+                break;
             case "pots":
                 (backHref, backText) = ("pots", Back(Strings.Supplies.SuppliesPots));
                 break;
@@ -116,6 +123,10 @@ else
                 break;
         }
     }
+
+    /// <summary>An encoded link that opens in a new tab, for the photo credits.</summary>
+    private static string NewTabLink(string href, string text) =>
+        $"<a href=\"{H(href)}\" target=\"_blank\" rel=\"noopener\">{H(text)}<span class=\"visually-hidden\"> {H(Strings.Common.OpensInNewTab)}</span></a>";
 
     private static string Back(string name) =>
         F(Strings.Guides.BackTo, name);
@@ -184,6 +195,34 @@ else
                         </div>
                     }
                 </dl>
+                break;
+            case GuideLinkTable linkTable:
+                <dl class="guide-ingredients">
+                    @foreach (var (guideId, textKey) in linkTable.Rows)
+                    {
+                        <div>
+                            <dt>@if (GuideBook.Find(guideId) is { } linked)
+                                {
+                                    <a href="@GuideLinks.Href(linked.Id, From)">@GuideLinks.Text(linked.TitleKey)</a>
+                                }</dt>
+                            <dd>@GuideLinks.Text(textKey)</dd>
+                        </div>
+                    }
+                </dl>
+                break;
+            case GuidePhotos photos:
+                <div class="guide-photos">
+                    @foreach (var photo in photos.Photos)
+                    {
+                        <figure class="guide-photo">
+                            <img src="img/guides/@photo.File" width="@photo.Width" height="@photo.Height" loading="lazy" alt="@GuideLinks.Text(photo.CaptionKey)" />
+                            <figcaption>
+                                @GuideLinks.Text(photo.CaptionKey)
+                                <span class="guide-photo-credit">@Html(Strings.Guides.PhotoCredit, NewTabLink(photo.SourceUrl, photo.Author), NewTabLink(photo.LicenceUrl, photo.Cropped ? F(Strings.Guides.PhotoCropped, photo.Licence) : photo.Licence))</span>
+                            </figcaption>
+                        </figure>
+                    }
+                </div>
                 break;
             case GuideSeeAlso seeAlso:
                 <p>@GuideLinks.Text(seeAlso.TextKey) <GuideLink Guide="@seeAlso.GuideId" From="@From" Text="@(GuideBook.Find(seeAlso.GuideId) is { } other ? GuideLinks.Text(other.TitleKey) : null)" /></p>

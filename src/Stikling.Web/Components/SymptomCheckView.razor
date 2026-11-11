@@ -94,6 +94,7 @@
                             @if (cause.Kind == SymptomCauseKind.Pests)
                             {
                                 <p class="symptom-meta"><a class="link-action" href="pests/new?plant=@Plant.Id">@Strings.Pests.SymptomOpenPestCase</a></p>
+                                <p class="symptom-meta"><GuideLink Guide="@GuideBook.CheckingForPests" From="@GuideLinks.FromPlant(Plant.Id)" /></p>
                             }
                             @if (WhyOf(cause) is { Length: > 0 } why)
                             {

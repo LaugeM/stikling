@@ -514,7 +514,10 @@ else
                         @if (plant.QuarantinedSince is { } quarantinedSince)
                         {
                             <dt>@Strings.Plants.ListQuarantine</dt>
-                            <dd>@(quarantinedSince == Today ? F(Strings.PlantDetail.QuarantineSinceToday, plant.DaysInQuarantine(Today) ?? 0, plant.QuarantineDays ?? Plant.DefaultQuarantineDays) : F(Strings.PlantDetail.QuarantineSince, Labels.Date(quarantinedSince), plant.DaysInQuarantine(Today) ?? 0, plant.QuarantineDays ?? Plant.DefaultQuarantineDays))</dd>
+                            <dd>
+                                @(quarantinedSince == Today ? F(Strings.PlantDetail.QuarantineSinceToday, plant.DaysInQuarantine(Today) ?? 0, plant.QuarantineDays ?? Plant.DefaultQuarantineDays) : F(Strings.PlantDetail.QuarantineSince, Labels.Date(quarantinedSince), plant.DaysInQuarantine(Today) ?? 0, plant.QuarantineDays ?? Plant.DefaultQuarantineDays))
+                                <div class="detail-sub"><GuideLink Guide="@GuideBook.CheckingForPests" From="@GuideLinks.FromPlant(plant.Id)" /></div>
+                            </dd>
                         }
 
                         @if (lastChecked is { } checkedOn)
@@ -1367,6 +1370,7 @@ else
                 break;
 
             case More.Quarantine:
+                <div class="mb-3"><GuideLink Guide="@GuideBook.CheckingForPests" From="@GuideLinks.FromPlant(plant!.Id)" NewTab="true" /></div>
                 <div class="row g-2 mb-1">
                     <div class="col-7">
                         <label class="form-label" for="quarantine-since">@Strings.PlantDetail.QuarantineSinceLabel</label>

@@ -185,6 +185,47 @@
     }
 }
 
+/* Photos side by side when there is room, stacked on a phone */
+.guide-photos {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(15rem, 1fr));
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    align-items: start;
+}
+
+.guide-photo {
+    margin: 0;
+    min-width: 0;
+}
+
+.guide-photo img {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    height: auto;
+    border-radius: 0.75rem;
+}
+
+.guide-photo figcaption {
+    margin-top: 0.35rem;
+    font-size: 0.875rem;
+}
+
+.guide-photo-credit {
+    display: block;
+    font-size: 0.8125rem;
+    color: var(--pa-muted);
+}
+
+.guide-photo-credit ::deep a {
+    color: inherit;
+}
+
+.guide-ingredients dt a {
+    font-weight: 600;
+}
+
 .guide-track {
     display: inline-flex;
     align-items: center;

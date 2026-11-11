@@ -574,6 +574,738 @@
     <value>Gem en blanding du kan lide, under Jordblandinger, i dele, så du kan vælge den, når du ompotter.</value>
   </data>
   <data name="SuppliesRowDetail" xml:space="preserve">
-    <value>Sådan tager du en stikling, flytter til semi-hydro, vander med væge og blander jord</value>
+    <value>Sådan tager du en stikling, flytter til semi-hydro, vander med væge, blander jord og klarer skadedyr</value>
+  </data>
+  <data name="GroupPests" xml:space="preserve">
+    <value>Skadedyr</value>
+  </data>
+  <data name="PhotoCredit" xml:space="preserve">
+    <value>Foto: {0}, {1}</value>
+  </data>
+  <data name="FieldWhat" xml:space="preserve">
+    <value>Hvad</value>
+  </data>
+  <data name="TreatItWith" xml:space="preserve">
+    <value>Behandl den med</value>
+  </data>
+  <data name="PestSee" xml:space="preserve">
+    <value>Det du ser</value>
+  </data>
+  <data name="MistakenFor" xml:space="preserve">
+    <value>Kan forveksles med</value>
+  </data>
+  <data name="WhyBack" xml:space="preserve">
+    <value>Hvorfor den kommer igen</value>
+  </data>
+  <data name="First" xml:space="preserve">
+    <value>Først</value>
+  </data>
+  <data name="WhenOver" xml:space="preserve">
+    <value>Når det er overstået</value>
+  </data>
+  <data name="IfNotStop" xml:space="preserve">
+    <value>Hvis det ikke stopper</value>
+  </data>
+  <data name="MethodSoapOil" xml:space="preserve">
+    <value>Sæbe eller olie</value>
+  </data>
+  <data name="MethodEnemies" xml:space="preserve">
+    <value>Naturlige fjender</value>
+  </data>
+  <data name="MethodProduct" xml:space="preserve">
+    <value>Et produkt til stueplanter</value>
+  </data>
+  <data name="SeeAlso" xml:space="preserve">
+    <value>Se guiden:</value>
+  </data>
+  <data name="TitleCheck" xml:space="preserve">
+    <value>Sådan tjekker du for skadedyr</value>
+  </data>
+  <data name="TitleThrips" xml:space="preserve">
+    <value>Trips</value>
+  </data>
+  <data name="TitleMites" xml:space="preserve">
+    <value>Spindemider</value>
+  </data>
+  <data name="TitleGnats" xml:space="preserve">
+    <value>Sørgemyg</value>
+  </data>
+  <data name="TitleMealy" xml:space="preserve">
+    <value>Uldlus</value>
+  </data>
+  <data name="TitleScale" xml:space="preserve">
+    <value>Skjoldlus</value>
+  </data>
+  <data name="TitleAphids" xml:space="preserve">
+    <value>Bladlus</value>
+  </data>
+  <data name="TitleWhitefly" xml:space="preserve">
+    <value>Hvide fluer</value>
+  </data>
+  <data name="RowCheck" xml:space="preserve">
+    <value>Sådan ser du en plante efter, og hvad du gør, når du finder noget</value>
+  </data>
+  <data name="RowThrips" xml:space="preserve">
+    <value>Sådan kender du trips fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowMites" xml:space="preserve">
+    <value>Sådan kender du spindemider fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowGnats" xml:space="preserve">
+    <value>Sådan kender du sørgemyg fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowMealy" xml:space="preserve">
+    <value>Sådan kender du uldlus fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowScale" xml:space="preserve">
+    <value>Sådan kender du skjoldlus fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowAphids" xml:space="preserve">
+    <value>Sådan kender du bladlus fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="RowWhitefly" xml:space="preserve">
+    <value>Sådan kender du hvide fluer fra andre skadedyr, og måderne at behandle dem på</value>
+  </data>
+  <data name="LinkCheck" xml:space="preserve">
+    <value>Sådan tjekker du for skadedyr</value>
+  </data>
+  <data name="LinkThrips" xml:space="preserve">
+    <value>Om trips</value>
+  </data>
+  <data name="LinkMites" xml:space="preserve">
+    <value>Om spindemider</value>
+  </data>
+  <data name="LinkGnats" xml:space="preserve">
+    <value>Om sørgemyg</value>
+  </data>
+  <data name="LinkMealy" xml:space="preserve">
+    <value>Om uldlus</value>
+  </data>
+  <data name="LinkScale" xml:space="preserve">
+    <value>Om skjoldlus</value>
+  </data>
+  <data name="LinkAphids" xml:space="preserve">
+    <value>Om bladlus</value>
+  </data>
+  <data name="LinkWhitefly" xml:space="preserve">
+    <value>Om hvide fluer</value>
+  </data>
+  <data name="Check_Lead" xml:space="preserve">
+    <value>De fleste skadedyr kommer ind i hjemmet på en ny plante, for mange af dem bevæger sig næsten ikke af sig selv. Når du finder dem tidligt, mens der er få, er de meget lettere at klare.</value>
+  </data>
+  <data name="Check_NewTitle" xml:space="preserve">
+    <value>Nye planter</value>
+  </data>
+  <data name="Check_NewStep1" xml:space="preserve">
+    <value>Se planten efter, før du køber den eller tager den med hjem: undersiden af bladene, der hvor bladene møder stænglen, bunden, eventuelle blomster og rødderne, ved at løfte den ud af potten.</value>
+  </data>
+  <data name="Check_NewStep2" xml:space="preserve">
+    <value>Hold den væk fra dine andre planter et stykke tid, mindst en måned hvis du kan, så æggene har tid til at klække og vise sig.</value>
+  </data>
+  <data name="Check_NewStep3" xml:space="preserve">
+    <value>Se den efter hver uge de første mange uger. Hvis der ikke viser sig noget, er en gang om måneden nok.</value>
+  </data>
+  <data name="Check_NewStep4" xml:space="preserve">
+    <value>Se en plante efter igen, når den kommer ind igen fra udendørs.</value>
+  </data>
+  <data name="Check_HowTitle" xml:space="preserve">
+    <value>Sådan ser du efter</value>
+  </data>
+  <data name="Check_How1" xml:space="preserve">
+    <value>Vend bladene om. De fleste skadedyr sidder på undersiden og der hvor bladene møder stænglen.</value>
+  </data>
+  <data name="Check_How2" xml:space="preserve">
+    <value>Et forstørrelsesglas der forstørrer 10 gange, viser mider og æg som du ellers ikke kan se.</value>
+  </data>
+  <data name="Check_How3" xml:space="preserve">
+    <value>Ryst en skudspids over et hvidt stykke papir. Pletter der går, er mider eller trips.</value>
+  </data>
+  <data name="Check_How4" xml:space="preserve">
+    <value>Klistrede blade, eller en sort belægning på dem, betyder at noget suger saft længere oppe. Belægningen er sodskimmel der vokser på de sukkerholdige efterladenskaber, og den kan tørres af med en fugtig klud.</value>
+  </data>
+  <data name="Check_TrapsTitle" xml:space="preserve">
+    <value>Limfælder</value>
+  </data>
+  <data name="Check_Traps" xml:space="preserve">
+    <value>Gule fælder fanger sørgemyg og hvide fluer, og blå fanger trips. De viser hvad der er, og om antallet stiger eller falder, men de renser ikke en plante, og de fanger også harmløse insekter.</value>
+  </data>
+  <data name="Check_WhichTitle" xml:space="preserve">
+    <value>Hvilket skadedyr er det?</value>
+  </data>
+  <data name="Check_WhichThrips" xml:space="preserve">
+    <value>Sølvskinnende pletter med små sorte prikker af efterladenskaber.</value>
+  </data>
+  <data name="Check_WhichMites" xml:space="preserve">
+    <value>Fine lyse pletter, og fine spind hvis det er slemt.</value>
+  </data>
+  <data name="Check_WhichGnats" xml:space="preserve">
+    <value>Små mørke fluer omkring potterne.</value>
+  </data>
+  <data name="Check_WhichMealy" xml:space="preserve">
+    <value>Hvidt, bomuldsagtigt fnug i bladhjørner og sprækker.</value>
+  </data>
+  <data name="Check_WhichScale" xml:space="preserve">
+    <value>Små brune buler langs bladnerverne og stænglerne som ikke bevæger sig.</value>
+  </data>
+  <data name="Check_WhichAphids" xml:space="preserve">
+    <value>Klynger på nye skud og knopper, og hvide afkastede hudskaller.</value>
+  </data>
+  <data name="Check_WhichWhitefly" xml:space="preserve">
+    <value>Små hvide fluer der letter fra bladene, når planten rører ved.</value>
+  </data>
+  <data name="Check_FoundTitle" xml:space="preserve">
+    <value>Har du fundet noget</value>
+  </data>
+  <data name="Check_FoundStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre. Vask hænder, når du har rørt ved den.</value>
+  </data>
+  <data name="Check_FoundStep2" xml:space="preserve">
+    <value>Se de planter efter som stod i nærheden.</value>
+  </data>
+  <data name="Check_FoundStep3" xml:space="preserve">
+    <value>Fjern faldne og døde blade, som kan bære skadedyr og æg.</value>
+  </data>
+  <data name="Check_FoundStep4" xml:space="preserve">
+    <value>En plante der er overrendt, især af uldlus eller skjoldlus, kan være lettere at erstatte end at rense.</value>
+  </data>
+  <data name="Check_SprayTitle" xml:space="preserve">
+    <value>Før du sprøjter med noget</value>
+  </data>
+  <data name="Check_Spray1" xml:space="preserve">
+    <value>Brug kun et produkt der sælges til stueplanter, til det skadedyr og den slags plante, og følg etiketten.</value>
+  </data>
+  <data name="Check_Spray2" xml:space="preserve">
+    <value>Sprøjt udendørs hvis du kan, og dæk undersiden af bladene og stænglerne.</value>
+  </data>
+  <data name="Check_Spray3" xml:space="preserve">
+    <value>Prøv det først på nogle få blade en dag eller to, for at se at det ikke skader dem.</value>
+  </data>
+  <data name="Check_Spray4" xml:space="preserve">
+    <value>Ikke på en plante der er tør og tørstig, eller over 32°C.</value>
+  </data>
+  <data name="Check_Spray5" xml:space="preserve">
+    <value>Sæbe og olie dræber kun det de rører ved, så det tager mere end én runde.</value>
+  </data>
+  <data name="Check_EnemiesTitle" xml:space="preserve">
+    <value>Naturlige fjender</value>
+  </data>
+  <data name="Check_Enemies" xml:space="preserve">
+    <value>Rovmider og rovinsekter kan købes med posten til de fleste skadedyr. De yngler bedst fra omkring 21°C og i godt lys, har brug for at skadedyret er der som føde, og de fleste sprøjtemidler slår dem ihjel. RHS skriver at man skal vente en dag efter sæbe eller olie, før man sætter dem ud.</value>
+  </data>
+  <data name="Check_InApp" xml:space="preserve">
+    <value>I indstillingerne kan du lade karantæne starte, når du tilføjer en købt, byttet eller foræret plante. Et tjek hvor der ikke blev fundet noget, kan logges fra plantens menu. Når du finder noget, åbner du en sag for de planter den dækker, og I dag holder styr på behandlingerne.</value>
+  </data>
+  <data name="Thrips_Lead" xml:space="preserve">
+    <value>Trips er slanke insekter på op til omkring 2 mm som lever af blade og blomster. De er svære at se, så det er ofte skaden der viser sig først.</value>
+  </data>
+  <data name="Thrips_See1" xml:space="preserve">
+    <value>Blade der bliver matte og så sølvskinnende på oversiden, med små sorte prikker af efterladenskaber.</value>
+  </data>
+  <data name="Thrips_See2" xml:space="preserve">
+    <value>Lyse pletter og ar, og nye blade og knopper der vokser skæve.</value>
+  </data>
+  <data name="Thrips_See3" xml:space="preserve">
+    <value>Smalle insekter, oftest under bladene: mørke voksne med frynsede vinger lagt langs ryggen, og lysere unger uden vinger.</value>
+  </data>
+  <data name="Thrips_See4" xml:space="preserve">
+    <value>For at finde dem skal du ryste en skudspids over hvidt papir og kigge med forstørrelsesglas.</value>
+  </data>
+  <data name="Thrips_PhotoAdult" xml:space="preserve">
+    <value>En kalifornisk blomstertrips på en blomst. Stregen er 1 mm.</value>
+  </data>
+  <data name="Thrips_Mistaken" xml:space="preserve">
+    <value>Spindemider giver også pletter på bladene, men de efterlader fine spind og ingen sorte prikker.</value>
+  </data>
+  <data name="Thrips_Back" xml:space="preserve">
+    <value>En hun lægger op til omkring 100 æg, et eller to om dagen, i unge blade og knopper. Ungerne æder, og hviler så i jorden eller på skjulte steder på planten, hvor sprøjtemidler ikke når dem, før de får vinger. En generation tager omkring 24 til 35 dage, og indendørs yngler de hele året.</value>
+  </data>
+  <data name="Thrips_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre.</value>
+  </data>
+  <data name="Thrips_FirstStep2" xml:space="preserve">
+    <value>Klip de værste blade af og eventuelle blomster med trips i.</value>
+  </data>
+  <data name="Thrips_FirstStep3" xml:space="preserve">
+    <value>Hæng en blå limfælde over eller blandt planterne, så du kan se hvor mange der er, og om det falder.</value>
+  </data>
+  <data name="Thrips_Rinse" xml:space="preserve">
+    <value>Skyl og klip af</value>
+  </data>
+  <data name="Thrips_RinseHow" xml:space="preserve">
+    <value>Skyl planten med vand, også undersiden, og bliv ved med at klippe det af som er hårdt ramt.</value>
+  </data>
+  <data name="Thrips_RinseWatch" xml:space="preserve">
+    <value>Unger der vokser op igen fra jorden og knopperne. Skylning når kun det der sidder på bladene.</value>
+  </data>
+  <data name="Thrips_SoapHow" xml:space="preserve">
+    <value>Insektsæbe eller olie til planter, sprøjtet så det dækker knopperne, skudspidserne og undersiden af bladene.</value>
+  </data>
+  <data name="Thrips_SoapRound" xml:space="preserve">
+    <value>Det dræber kun det det rører ved, så det tager mere end én runde.</value>
+  </data>
+  <data name="Thrips_SoapWatch" xml:space="preserve">
+    <value>Skadede blade. Prøv det først på nogle få blade.</value>
+  </data>
+  <data name="Thrips_EnemiesWhat" xml:space="preserve">
+    <value>RHS nævner rovmider (arterne Amblyseius, Hypoaspis og Macrocheles) og rovtægen Orius laevigatus, til brug under glas.</value>
+  </data>
+  <data name="Thrips_EnemiesUc" xml:space="preserve">
+    <value>UC IPM, som skriver om haver, finder at købte rovdyr sjældent selv renser en plante for trips.</value>
+  </data>
+  <data name="Thrips_EnemiesWatch" xml:space="preserve">
+    <value>De har brug for varme, lys og trips at æde.</value>
+  </data>
+  <data name="Thrips_ProductHow" xml:space="preserve">
+    <value>Et produkt der sælges til stueplanter og mod trips, brugt som etiketten siger.</value>
+  </data>
+  <data name="Thrips_Over" xml:space="preserve">
+    <value>Blade der er blevet sølvskinnende af trips, bliver ved med at være det, når tripsene er væk, så se på de nye blade. Mange gartnere tager ren ny vækst og en tom fælde i nogle uger som tegn på at det er overstået.</value>
+  </data>
+  <data name="Thrips_InApp" xml:space="preserve">
+    <value>En sag om trips starter med 5 dage mellem behandlingerne, som du kan ændre. Tæl fælden på sagen for at se om fangsten falder uge for uge, og når du holder op med at behandle, holdes der øje med sagen, til den har været ren længe nok.</value>
+  </data>
+  <data name="Mites_Lead" xml:space="preserve">
+    <value>Spindemider er små slægtninge til edderkopper, omkring en halv millimeter lange, som lever af undersiden af bladene. De gør mest skade i varme, tørre rum.</value>
+  </data>
+  <data name="Mites_See1" xml:space="preserve">
+    <value>Fine lyse pletter på oversiden af bladene, som kan blive gule eller bronzefarvede, før bladene tørrer og falder af.</value>
+  </data>
+  <data name="Mites_See2" xml:space="preserve">
+    <value>Fine silkespind mellem blade og stængler hvis det er slemt.</value>
+  </data>
+  <data name="Mites_See3" xml:space="preserve">
+    <value>Under bladene små ovale mider, gulgrønne med to mørke pletter, eller orangerøde om vinteren og når der er trangt, med runde æg. Et forstørrelsesglas der forstørrer 10 gange, hjælper.</value>
+  </data>
+  <data name="Mites_See4" xml:space="preserve">
+    <value>Ryst en skudspids over hvidt papir. Pletter der går, er mider.</value>
+  </data>
+  <data name="Mites_PhotoMite" xml:space="preserve">
+    <value>En spindemide i sin røde form, med tråde af silke.</value>
+  </data>
+  <data name="Mites_PhotoWebbing" xml:space="preserve">
+    <value>Spind i et slemt tilfælde, her på en tomat.</value>
+  </data>
+  <data name="Mites_Mistaken" xml:space="preserve">
+    <value>Trips giver også pletter på bladene, men efterlader små sorte prikker og ingen spind.</value>
+  </data>
+  <data name="Mites_Back" xml:space="preserve">
+    <value>Fra æg til voksen tager det omkring 12 dage ved 21°C og omkring 55 ved 10°C, så et varmt rum får det til at gå hurtigere. Støv og en plante der mangler vand gør det værre. Skaden viser sig ofte først, når miderne har bygget sig op.</value>
+  </data>
+  <data name="Mites_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre, og se de planter efter som stod i nærheden.</value>
+  </data>
+  <data name="Mites_FirstStep2" xml:space="preserve">
+    <value>Klip de værste blade af.</value>
+  </data>
+  <data name="Mites_Rinse" xml:space="preserve">
+    <value>Skyl og tør af</value>
+  </data>
+  <data name="Mites_RinseHow" xml:space="preserve">
+    <value>Skyl bladene ofte, især undersiden, og tør støv af. UC IPM, som skriver om haver, sprøjter en plante med mider med vand mindst en gang om dagen.</value>
+  </data>
+  <data name="Mites_RinseMist" xml:space="preserve">
+    <value>Forstøvning og fugtig luft hjælper med at holde dem nede, men renser dem ikke af sig selv.</value>
+  </data>
+  <data name="Mites_SoapHow" xml:space="preserve">
+    <value>Insektsæbe eller olie til planter, så det når undersiden af bladene. UC IPM's note om stueplanter gemmer dette til når skylning ikke har virket.</value>
+  </data>
+  <data name="Mites_SoapRound" xml:space="preserve">
+    <value>Det dræber kun det det rører ved, så det tager mere end én runde.</value>
+  </data>
+  <data name="Mites_SoapWatch" xml:space="preserve">
+    <value>Skadede blade. Prøv det først på nogle få blade, og ikke på en tør plante eller over 32°C.</value>
+  </data>
+  <data name="Mites_EnemiesWhat" xml:space="preserve">
+    <value>Phytoseiulus persimilis er den rovmide der bruges mest, og den æder alle stadier. Amblyseius-arter, ofte A. californicus, gør mindre mod et kraftigt angreb, men kan sættes ud tidligt og holder længere.</value>
+  </data>
+  <data name="Mites_EnemiesWatch" xml:space="preserve">
+    <value>De har brug for mider at æde og dør ud uden dem.</value>
+  </data>
+  <data name="Mites_ProductHow" xml:space="preserve">
+    <value>Et produkt der sælges til stueplanter og mod mider, brugt som etiketten siger.</value>
+  </data>
+  <data name="Mites_Stop" xml:space="preserve">
+    <value>Hvis de bliver ved med at komme igen eller bliver værre, skriver UC IPM at man skal smide planten ud, og RHS skriver det samme om en plante der er hårdt angrebet sidst på sommeren.</value>
+  </data>
+  <data name="Mites_Over" xml:space="preserve">
+    <value>Mange gartnere kigger efter ingen nye pletter på nye blade, og intet der går på papiret i nogle uger.</value>
+  </data>
+  <data name="Mites_InApp" xml:space="preserve">
+    <value>En sag om spindemider starter med 4 dage mellem behandlingerne, som du kan ændre. Mider flyver ikke ind i limfælder, så fælden ligger bag et lille link på sagen.</value>
+  </data>
+  <data name="Gnats_Lead" xml:space="preserve">
+    <value>Sørgemyg er små mørke fluer på 3 til 4 mm som løber hen over jorden og flyver langsomt rundt om potterne. De voksne skader ikke planter. Larverne lever i jorden og æder mest døde rødder, rådnende stumper og svampe.</value>
+  </data>
+  <data name="Gnats_See1" xml:space="preserve">
+    <value>Små mørke fluer på jorden, på planten og ved vinduerne.</value>
+  </data>
+  <data name="Gnats_See2" xml:space="preserve">
+    <value>I toppen af jorden slanke hvide larver på op til 6 mm med skinnende sorte hoveder, og slimspor i meget våde potter.</value>
+  </data>
+  <data name="Gnats_See3" xml:space="preserve">
+    <value>Hvis du vil tjekke for larver, så læg et stykke rå kartoffel på jorden med snitfladen nedad, og kig under det efter nogle dage.</value>
+  </data>
+  <data name="Gnats_PhotoTrap" xml:space="preserve">
+    <value>En gul limfælde i en stueplantes potte, fuld af sørgemyg.</value>
+  </data>
+  <data name="Gnats_PhotoGnat" xml:space="preserve">
+    <value>En voksen sørgemyg.</value>
+  </data>
+  <data name="Gnats_HarmTitle" xml:space="preserve">
+    <value>Skader den planten?</value>
+  </data>
+  <data name="Gnats_Harm" xml:space="preserve">
+    <value>Frøplanter og bløde stiklinger kan tage skade. En plante med nogle års rødder gør det sjældent. Mange larver i en våd jord med meget organisk stof kan hæmme unge planter, men en visnende stueplante skyldes oftere vanding eller rodråd end myg.</value>
+  </data>
+  <data name="Gnats_Mistaken" xml:space="preserve">
+    <value>Strandfluer ligner dem meget, men har korte, børsteagtige følehorn.</value>
+  </data>
+  <data name="Gnats_Back" xml:space="preserve">
+    <value>Æg lagt på jorden klækker på nogle få dage, og larverne bliver til voksne i jorden. Fra æg til voksen tager det omkring 17 dage ved 24°C, og indendørs yngler de hele året.</value>
+  </data>
+  <data name="Gnats_FirstStep1" xml:space="preserve">
+    <value>De yngler i jord der bliver ved med at være våd. Hvis du lader toppen af jorden tørre mellem vandingerne, hvor planten kan klare det, og tømmer vand der er blevet stående i underskåle, falder antallet.</value>
+  </data>
+  <data name="Gnats_FirstStep2" xml:space="preserve">
+    <value>Fjern døde blade og rådnende stumper fra potterne.</value>
+  </data>
+  <data name="Gnats_FirstStep3" xml:space="preserve">
+    <value>Når du ompotter, så brug frisk stueplantejord frem for gammel, som kan indeholde æg og larver, og hold åbne poser lukkede.</value>
+  </data>
+  <data name="Gnats_FirstMix" xml:space="preserve">
+    <value>En jordblanding med perlite eller sand i dræner hurtigere og er våd i kortere tid. Se guiden:</value>
+  </data>
+  <data name="Gnats_Traps" xml:space="preserve">
+    <value>Limfælder</value>
+  </data>
+  <data name="Gnats_TrapsHow" xml:space="preserve">
+    <value>Gule limfælder, skåret i firkanter og stukket ned i potterne, fanger de voksne.</value>
+  </data>
+  <data name="Gnats_TrapsWatch" xml:space="preserve">
+    <value>De får antallet ned, men gør ikke en ende på det, så længe der er larver i jorden, og de fanger også nyttige insekter.</value>
+  </data>
+  <data name="Gnats_Bti" xml:space="preserve">
+    <value>Bakterier i vandet</value>
+  </data>
+  <data name="Gnats_BtiHow" xml:space="preserve">
+    <value>Bti (Bacillus thuringiensis israelensis), vandet ned i jorden, dræber larverne.</value>
+  </data>
+  <data name="Gnats_BtiRepeat" xml:space="preserve">
+    <value>Det holder ikke indendørs, så det gentages omkring hver 5. dag.</value>
+  </data>
+  <data name="Gnats_Nematodes" xml:space="preserve">
+    <value>Nematoder</value>
+  </data>
+  <data name="Gnats_NemaHow" xml:space="preserve">
+    <value>Steinernema feltiae, små orme vandet ned i jorden, som dræber larverne.</value>
+  </data>
+  <data name="Gnats_NemaNeed" xml:space="preserve">
+    <value>De har brug for fugtig jord og 16 til 32°C, kan yngle i jorden og holde sig, og sælges med posten og kan kun opbevares kort tid.</value>
+  </data>
+  <data name="Gnats_Mites" xml:space="preserve">
+    <value>Rovmider</value>
+  </data>
+  <data name="Gnats_MitesHow" xml:space="preserve">
+    <value>RHS nævner midene Hypoaspis miles og Macrocheles robustulus og rovbillen Atheta coriaria, som lægges i jorden for at æde æg, larver og pupper.</value>
+  </data>
+  <data name="Gnats_MitesUc" xml:space="preserve">
+    <value>UC IPM finder at Hypoaspis-mider klarer sig dårligt i en enkelt stueplante og foreslår dem ikke til hjem.</value>
+  </data>
+  <data name="Gnats_NoSpray" xml:space="preserve">
+    <value>Der er ikke nævnt noget sprøjtemiddel: UC IPM skriver at andre insektmidler sjældent er nødvendige mod sørgemyg i et hjem.</value>
+  </data>
+  <data name="Gnats_Over" xml:space="preserve">
+    <value>Mange gartnere kigger efter ingen nye fluer på fælden i nogle uger og ingen larver under kartoflen.</value>
+  </data>
+  <data name="Gnats_InApp" xml:space="preserve">
+    <value>En sag om sørgemyg starter med 7 dage mellem behandlingerne, som du kan ændre. Tæl fælden på sagen for at se om fangsten falder uge for uge.</value>
+  </data>
+  <data name="Mealy_Lead" xml:space="preserve">
+    <value>Uldlus er bløde, ovale insekter på op til 4 mm, gemt under hvid voks, som suger saft på trange steder. Hunnerne bevæger sig næsten ikke, så de kommer næsten altid ind på en ny plante.</value>
+  </data>
+  <data name="Mealy_See1" xml:space="preserve">
+    <value>Hvidt, bomuldsagtigt fnug i bladhjørner, bladskeder og andre sprækker, med insekter eller orangerøde æg under.</value>
+  </data>
+  <data name="Mealy_See2" xml:space="preserve">
+    <value>Klistrede blade, og sort sodskimmel på dem.</value>
+  </data>
+  <data name="Mealy_See3" xml:space="preserve">
+    <value>En plante der vokser langsomt, bliver gul og taber blade.</value>
+  </data>
+  <data name="Mealy_See4" xml:space="preserve">
+    <value>Uldlus med lang hale har to haletråde som er længere end kroppen.</value>
+  </data>
+  <data name="Mealy_See5" xml:space="preserve">
+    <value>Rodlus lever på rødderne, med hvid voks på, og findes som regel først, når du ompotter.</value>
+  </data>
+  <data name="Mealy_PhotoColony" xml:space="preserve">
+    <value>Uldlus på et clivia-blad.</value>
+  </data>
+  <data name="Mealy_PhotoLong" xml:space="preserve">
+    <value>En uldlus med lang hale på en orkidéknop.</value>
+  </data>
+  <data name="Mealy_Mistaken" xml:space="preserve">
+    <value>Nogle skjoldlus lægger æg under hvid voks, og nogle bladlus har en hvid voksagtig overflade. Larverne af uldlus-mariehønen, som sælges for at æde dem, ligner store uldlus.</value>
+  </data>
+  <data name="Mealy_Back" xml:space="preserve">
+    <value>Hunnerne lægger 100 til 200 æg over 10 til 20 dage i en bomuldsagtig pose, og ungerne bliver voksne på omkring en måned om sommeren, og hele året indendørs. Vokset holder sprøjtemidler ude, og de gemmer sig hvor sprøjtemidler ikke når, så ingen enkelt behandling får dem alle. RHS skriver at det ofte er umuligt at slippe helt af med dem.</value>
+  </data>
+  <data name="Mealy_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre.</value>
+  </data>
+  <data name="Mealy_FirstStep2" xml:space="preserve">
+    <value>Kig efter ægposer på potten, pindene og underskålen, og fjern døde blade, som kan bære æg.</value>
+  </data>
+  <data name="Mealy_Wipe" xml:space="preserve">
+    <value>Tør af</value>
+  </data>
+  <data name="Mealy_WipeHow" xml:space="preserve">
+    <value>Pluk dem af, eller duppe hver enkelt med en vatpind dyppet i sprit (isopropyl, 70 % eller svagere). På en robust plante kan en kraftig stråle vand med få dages mellemrum skylle dem af som sidder frit.</value>
+  </data>
+  <data name="Mealy_WipeWatch" xml:space="preserve">
+    <value>Prøv spritten på en lille del af planten en dag eller to før, for den kan svide bladene, og hold den væk fra åben ild.</value>
+  </data>
+  <data name="Mealy_Spray" xml:space="preserve">
+    <value>Sprøjt</value>
+  </data>
+  <data name="Mealy_SprayHow" xml:space="preserve">
+    <value>Insektsæbe, olie til planter eller neemolie, sprøjtet på insekterne. De virker bedst på ungerne, som har mindre voks.</value>
+  </data>
+  <data name="Mealy_SprayAlcohol" xml:space="preserve">
+    <value>Hvis der er mere end nogle få, angiver UC IPM en sprøjtning med 10 til 25 % sprit i vand, gentaget hver uge, til de er væk.</value>
+  </data>
+  <data name="Mealy_SprayWatch" xml:space="preserve">
+    <value>Prøv det først på nogle få blade.</value>
+  </data>
+  <data name="Mealy_EnemiesWhat" xml:space="preserve">
+    <value>Uldlus-mariehønen Cryptolaemus montrouzieri, og snyltehvepse som Leptomastix, som kun angriber citrus-uldlus.</value>
+  </data>
+  <data name="Mealy_EnemiesWatch" xml:space="preserve">
+    <value>De har brug for varme og klarer sig bedst fra maj til september. Mariehønen har brug for ægposer for at yngle, så den sættes ud, når der er mange.</value>
+  </data>
+  <data name="Mealy_ProductHow" xml:space="preserve">
+    <value>Et produkt der sælges til stueplanter og mod uldlus, brugt som etiketten siger. Produkter der går i jorden, virker dårligere mod uldlus end mod andre saftsugere.</value>
+  </data>
+  <data name="Mealy_Stop" xml:space="preserve">
+    <value>En plante med et kraftigt angreb er ofte bedre smidt ud end behandlet igen og igen.</value>
+  </data>
+  <data name="Mealy_Over" xml:space="preserve">
+    <value>Mange gartnere kigger efter ikke noget nyt fnug i nogle uger, og ser efter i sprækkerne og på rødderne, når planten ompottes.</value>
+  </data>
+  <data name="Mealy_InApp" xml:space="preserve">
+    <value>En sag om uldlus starter med 7 dage mellem behandlingerne, som du kan ændre.</value>
+  </data>
+  <data name="Scale_Lead" xml:space="preserve">
+    <value>Skjoldlus sætter sig på et blad eller en stængel, holder op med at bevæge sig og får et voksagtigt eller hårdt skjold. De ligner små buler, så de er lette at overse.</value>
+  </data>
+  <data name="Scale_See1" xml:space="preserve">
+    <value>Små, lysebrune buler formet som albueskæl på stænglerne og langs nerverne under bladene. Brun blød skjoldlus er almindelig på stueplanter.</value>
+  </data>
+  <data name="Scale_See2" xml:space="preserve">
+    <value>Klistrede, skinnende blade og sort sodskimmel på dem.</value>
+  </data>
+  <data name="Scale_See3" xml:space="preserve">
+    <value>Gulnende blade og dårlig vækst.</value>
+  </data>
+  <data name="Scale_See4" xml:space="preserve">
+    <value>Små gule eller orange unger som går omkring, før de sætter sig.</value>
+  </data>
+  <data name="Scale_See5" xml:space="preserve">
+    <value>På bregner kan skjoldlus ligne sporehobene under bladene.</value>
+  </data>
+  <data name="Scale_PhotoFicus" xml:space="preserve">
+    <value>Brun blød skjoldlus på et ficus-blad, skinnende af honningdug.</value>
+  </data>
+  <data name="Scale_PhotoSingle" xml:space="preserve">
+    <value>En enkelt brun blød skjoldlus ved siden af en bladnerve.</value>
+  </data>
+  <data name="Scale_SoftTitle" xml:space="preserve">
+    <value>Blød og pansret</value>
+  </data>
+  <data name="Scale_Soft" xml:space="preserve">
+    <value>Blød skjoldlus er rund, dens skjold er dens krop, og den laver klistret honningdug. Pansret skjoldlus er flad, dens dække løfter sig af og efterlader insektet, den laver ingen honningdug, og sprøjtemidler når den dårligere.</value>
+  </data>
+  <data name="Scale_AliveTitle" xml:space="preserve">
+    <value>Levende eller død?</value>
+  </data>
+  <data name="Scale_Alive" xml:space="preserve">
+    <value>Døde skjoldlus bliver siddende på planten. Mas nogle få: levende efterlader en våd plet, døde gør ikke. Ren ny vækst er tegnet på at en behandling har virket.</value>
+  </data>
+  <data name="Scale_Back" xml:space="preserve">
+    <value>Ungerne spreder sig og sætter sig inden for en dag eller to, og indendørs yngler skjoldlus hele året, så alle stadier er der på én gang. Sprøjtemidler dræber mest ungerne.</value>
+  </data>
+  <data name="Scale_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre.</value>
+  </data>
+  <data name="Scale_FirstStep2" xml:space="preserve">
+    <value>Klip stængler og blade af som er dækket.</value>
+  </data>
+  <data name="Scale_Scrape" xml:space="preserve">
+    <value>Skrab af</value>
+  </data>
+  <data name="Scale_ScrapeHow" xml:space="preserve">
+    <value>Skrab eller tør de voksne af, og vask ungerne af med vand.</value>
+  </data>
+  <data name="Scale_ScrapeWatch" xml:space="preserve">
+    <value>På en stor plante kan det være svært at følge med.</value>
+  </data>
+  <data name="Scale_SoapHow" xml:space="preserve">
+    <value>Insektsæbe eller olie til planter, som virker bedst på de små unger. Dæk planten godt.</value>
+  </data>
+  <data name="Scale_SoapRound" xml:space="preserve">
+    <value>Da der er unger hele året indendørs, tager det mere end én runde.</value>
+  </data>
+  <data name="Scale_EnemiesWhat" xml:space="preserve">
+    <value>Til blød skjoldlus snyltehvepse som Metaphycus helvolus og nematoden Steinernema feltiae. Til pansret skjoldlus indendørs mariehønerne Chilocorus nigritus og Rhyzobius lophanthae.</value>
+  </data>
+  <data name="Scale_ProductHow" xml:space="preserve">
+    <value>Et produkt der sælges til stueplanter og mod skjoldlus, brugt som etiketten siger. Et der går i jorden, virker mod nogle bløde skjoldlus.</value>
+  </data>
+  <data name="Scale_FewTitle" xml:space="preserve">
+    <value>Nogle få gør ikke noget</value>
+  </data>
+  <data name="Scale_Few" xml:space="preserve">
+    <value>En sund plante klarer nogle få skjoldlus, så ikke hver eneste behøver at fjernes. En der er overrendt, kan være lettere at erstatte.</value>
+  </data>
+  <data name="Scale_Over" xml:space="preserve">
+    <value>Nye blade og stængler der holder sig rene i nogle uger.</value>
+  </data>
+  <data name="Scale_InApp" xml:space="preserve">
+    <value>En sag om skjoldlus starter med 7 dage mellem behandlingerne, som du kan ændre.</value>
+  </data>
+  <data name="Aphids_Lead" xml:space="preserve">
+    <value>Bladlus er bløde, pæreformede insekter på 1 til 7 mm, grønne, sorte, gule, lyserøde eller hvide, som lever i kolonier på ny vækst. I modsætning til de fleste skadedyr er de lette at se.</value>
+  </data>
+  <data name="Aphids_See1" xml:space="preserve">
+    <value>Klynger på skudspidser, knopper og under unge blade.</value>
+  </data>
+  <data name="Aphids_See2" xml:space="preserve">
+    <value>Hvide afkastede hudskaller på oversiden af bladene.</value>
+  </data>
+  <data name="Aphids_See3" xml:space="preserve">
+    <value>Klistrede blade, og sort sodskimmel på dem.</value>
+  </data>
+  <data name="Aphids_See4" xml:space="preserve">
+    <value>Nye blade der krøller og vrider sig.</value>
+  </data>
+  <data name="Aphids_See5" xml:space="preserve">
+    <value>To små rør der stikker ud bagtil, som intet andet skadedyr har.</value>
+  </data>
+  <data name="Aphids_Photo" xml:space="preserve">
+    <value>Bladlus på en stængel.</value>
+  </data>
+  <data name="Aphids_Mistaken" xml:space="preserve">
+    <value>Hvide pletter på oversiden af bladene er afkastede hudskaller fra bladlus, ikke hvide fluer. Bladlus med en hvid voksagtig overflade kan ligne uldlus.</value>
+  </data>
+  <data name="Aphids_Back" xml:space="preserve">
+    <value>Indendørs er de mest hunner som føder levende unger uden at parre sig, op til et dusin om dagen, og i varme er en nyfødt voksen på omkring en uge. Bevingede dukker op, når en koloni bliver for trang, og flyver til andre planter. Alligevel er kraftig skade på stueplanter ualmindelig.</value>
+  </data>
+  <data name="Aphids_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre.</value>
+  </data>
+  <data name="Aphids_FirstStep2" xml:space="preserve">
+    <value>Se skudspidserne efter på de planter der står i nærheden.</value>
+  </data>
+  <data name="Aphids_Squash" xml:space="preserve">
+    <value>Mas og skyl</value>
+  </data>
+  <data name="Aphids_SquashHow" xml:space="preserve">
+    <value>Mas kolonierne med fingrene, skyl dem af med vand, og klip spidser af som er dækket.</value>
+  </data>
+  <data name="Aphids_SquashMould" xml:space="preserve">
+    <value>Sodskimmel kan tørres af med en fugtig klud.</value>
+  </data>
+  <data name="Aphids_SoapHow" xml:space="preserve">
+    <value>Insektsæbe, olie til planter eller neemolie.</value>
+  </data>
+  <data name="Aphids_SoapRound" xml:space="preserve">
+    <value>De dræber kun de bladlus de rører ved, så det tager mere end én runde.</value>
+  </data>
+  <data name="Aphids_SoapWatch" xml:space="preserve">
+    <value>Prøv det først på nogle få blade, og ikke på en tør plante eller over 32°C.</value>
+  </data>
+  <data name="Aphids_EnemiesWhat" xml:space="preserve">
+    <value>Guldøjelarver, rovgalmyggen Aphidoletes aphidimyza og snyltehvepse som Aphidius.</value>
+  </data>
+  <data name="Aphids_ProductHow" xml:space="preserve">
+    <value>Et produkt der sælges til stueplanter og mod bladlus, brugt som etiketten siger. UC IPM's note om stueplanter gemmer et der går i jorden, til sidst.</value>
+  </data>
+  <data name="Aphids_Over" xml:space="preserve">
+    <value>Mange gartnere kigger efter ingen nye kolonier på skudspidserne i nogle uger.</value>
+  </data>
+  <data name="Aphids_InApp" xml:space="preserve">
+    <value>En sag om bladlus starter med 5 dage mellem behandlingerne, som du kan ændre.</value>
+  </data>
+  <data name="Whitefly_Lead" xml:space="preserve">
+    <value>Hvide fluer er små hvide, bevingede insekter på omkring 1,5 mm som letter i en sky, når planten rører ved. Ungerne er flade og sidder stille under bladene.</value>
+  </data>
+  <data name="Whitefly_See1" xml:space="preserve">
+    <value>Små hvide fluer der letter fra bladene.</value>
+  </data>
+  <data name="Whitefly_See2" xml:space="preserve">
+    <value>Under bladene flade, ovale, cremefarvede unger som ligner skjoldlus, og gråhvide æg, ofte i en ring.</value>
+  </data>
+  <data name="Whitefly_See3" xml:space="preserve">
+    <value>Klistrede blade, og sort sodskimmel på dem.</value>
+  </data>
+  <data name="Whitefly_See4" xml:space="preserve">
+    <value>Blade der gulner og falder af. Julestjerner har dem ofte.</value>
+  </data>
+  <data name="Whitefly_See5" xml:space="preserve">
+    <value>Sorte unger er døde, dræbt af en snyltehveps.</value>
+  </data>
+  <data name="Whitefly_PhotoAdults" xml:space="preserve">
+    <value>Voksne hvide fluer på et squashblad.</value>
+  </data>
+  <data name="Whitefly_PhotoYoung" xml:space="preserve">
+    <value>Unge hvide fluer og en ring af æg på et blad.</value>
+  </data>
+  <data name="Whitefly_Mistaken" xml:space="preserve">
+    <value>Hvide pletter på oversiden af bladene er oftere afkastede hudskaller fra bladlus.</value>
+  </data>
+  <data name="Whitefly_Back" xml:space="preserve">
+    <value>Hver hun lægger over 200 æg, uden at have brug for en han, og fra æg til voksen tager det omkring tre uger ved 21°C. Indendørs yngler de hele året. De holder hurtigt op med at dø af de fleste sprøjtemidler, bortset fra sæbe og olie.</value>
+  </data>
+  <data name="Whitefly_FirstStep1" xml:space="preserve">
+    <value>Flyt planten væk fra de andre.</value>
+  </data>
+  <data name="Whitefly_FirstStep2" xml:space="preserve">
+    <value>Fjern de værste blade.</value>
+  </data>
+  <data name="Whitefly_Traps" xml:space="preserve">
+    <value>Limfælder</value>
+  </data>
+  <data name="Whitefly_TrapsHow" xml:space="preserve">
+    <value>En gul limfælde i hver potte fanger de voksne.</value>
+  </data>
+  <data name="Whitefly_TrapsWatch" xml:space="preserve">
+    <value>De viser hvor mange der er og får antallet noget ned, men renser ikke en plante.</value>
+  </data>
+  <data name="Whitefly_Rinse" xml:space="preserve">
+    <value>Skyl</value>
+  </data>
+  <data name="Whitefly_RinseHow" xml:space="preserve">
+    <value>Vask æggene og ungerne af undersiden af bladene med vand.</value>
+  </data>
+  <data name="Whitefly_SoapHow" xml:space="preserve">
+    <value>Insektsæbe eller olie til planter, så undersiden af bladene dækkes godt, gentaget, og bedst tidligt om aftenen.</value>
+  </data>
+  <data name="Whitefly_SoapWatch" xml:space="preserve">
+    <value>Ikke på en tør plante eller over 32°C.</value>
+  </data>
+  <data name="Whitefly_EnemiesWhat" xml:space="preserve">
+    <value>Snyltehvepsen Encarsia formosa, sat ud før der er mange, for den virker ikke med det samme. De unger den dræber, bliver sorte, så du kan se at den virker. Rovmiden Amblyseius andersoni æder æggene.</value>
+  </data>
+  <data name="Whitefly_Stop" xml:space="preserve">
+    <value>UC IPM skriver at en plante med et stort angreb måske er bedst smidt ud.</value>
+  </data>
+  <data name="Whitefly_Over" xml:space="preserve">
+    <value>Mange gartnere kigger efter ingen voksne der letter og intet nyt på fælden i nogle uger.</value>
+  </data>
+  <data name="Whitefly_InApp" xml:space="preserve">
+    <value>En sag om hvide fluer starter med 5 dage mellem behandlingerne, som du kan ændre. Tæl fælden på sagen for at se om fangsten falder uge for uge.</value>
+  </data>
+  <data name="PhotoCropped" xml:space="preserve">
+    <value>{0}, beskåret</value>
   </data>
 </root>
