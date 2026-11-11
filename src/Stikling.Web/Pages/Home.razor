@@ -250,6 +250,10 @@ else
                                     <span class="pest-due now">@Labels.Due(view)</span>
                                     @if (view.Step is { } step)
                                     {
+                                        @if (PlanProgress.Repeats(view.Case))
+                                        {
+                                            <span>· @F(Strings.Care.TodayPlanRound, view.Round)</span>
+                                        }
                                         <span>· @(F(Strings.Care.TodayStep, view.StepNumber, view.StepCount))@(StepWhat(step) is { } what ? $" · {what}" : "")</span>
                                     }
                                     <span>· @Labels.ScopeAndCount(view)</span>

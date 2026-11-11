@@ -129,6 +129,9 @@ public sealed class PestCase : Entity
     /// </summary>
     public List<PlanStep> PlanSteps { get; set; } = [];
 
+    /// <summary>Copied from the plan: the days after the last step before step 1 comes again. Null means no rounds.</summary>
+    public int? PlanRepeatAfterDays { get; set; }
+
     /// <summary>The day the plan was started, which is when its first step is due.</summary>
     public DateOnly? PlanStartedOn { get; set; }
 
@@ -145,6 +148,7 @@ public sealed class PestCase : Entity
         PlanId = plan.Id;
         PlanName = plan.Name?.Trim();
         PlanSteps = [.. plan.Steps.Select(s => { var step = s.Copy(); step.Id = Guid.NewGuid(); return step; })];
+        PlanRepeatAfterDays = plan.RepeatAfterDays is >= 1 ? plan.RepeatAfterDays : null;
         PlanStartedOn = on;
         PlanStoppedOn = null;
     }

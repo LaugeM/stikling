@@ -149,14 +149,15 @@ else
                                 @foreach (var ingredient in use.Recipe.Ingredients)
                                 {
                                     <li>
+                                        @* The measure comes first so its float starts on this line. After a long name it dropped to the next ingredient's line. *@
+                                        @if (measuring && litres > 0 && ingredient.For(litres.Value) is { } measure)
+                                        {
+                                            <span class="recipe-measure">@Doses.Measured(measure, ingredient.Unit)</span>
+                                        }
                                         <span>@ingredient.Name</span>
                                         @if (ingredient.Amount is { } amount)
                                         {
                                             <span class="recipe-dose">@Doses.Text(amount, ingredient.Unit, ingredient.Per, ingredient.PerUnit)</span>
-                                        }
-                                        @if (measuring && litres > 0 && ingredient.For(litres.Value) is { } measure)
-                                        {
-                                            <span class="recipe-measure">@Doses.Measured(measure, ingredient.Unit)</span>
                                         }
                                     </li>
                                 }

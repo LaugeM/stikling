@@ -101,6 +101,23 @@
         </div>
 
         <div class="mb-3">
+            <label class="form-check">
+                <input type="checkbox" class="form-check-input" id="plan-repeat"
+                       checked="@(draft.RepeatAfterDays is not null)" @onchange="e => SetRepeats((bool)(e.Value ?? false))" />
+                <span class="form-check-label">@Strings.Pests.PlansRepeat</span>
+            </label>
+            @if (draft.RepeatAfterDays is { } repeatDays)
+            {
+                <div class="plan-step-days mt-2">
+                    <label class="form-label" for="plan-repeat-days">@Strings.Pests.PlansRepeatDays</label>
+                    <input id="plan-repeat-days" type="number" min="1" inputmode="numeric"
+                           class="form-control" value="@repeatDays"
+                           @onchange="e => SetRepeatDays(e.Value?.ToString())" />
+                </div>
+            }
+        </div>
+
+        <div class="mb-3">
             <label class="form-label" for="plan-notes">@Strings.Pests.CaseEditNotes</label>
             <textarea id="plan-notes" class="form-control" rows="2"
                       placeholder="@Strings.Pests.PlansNotesPlaceholder" @bind="draft.Notes"></textarea>
@@ -223,6 +240,19 @@ else
     {
         // A new step defaults to a week after the one before; the first is always the start day
         draft!.Steps.Add(new PlanStep { DaysAfter = draft.Steps.Count == 0 ? 0 : 7 });
+    }
+
+    // Ticking it starts at the gap the last step had, since that is how often the plan was already treating
+    private void SetRepeats(bool repeats)
+    {
+        var last = draft!.Steps.Count > 1 ? draft.Steps[^1].DaysAfter : 0;
+        draft.RepeatAfterDays = repeats ? (last > 0 ? last : 4) : null;
+    }
+
+    private void SetRepeatDays(string? value)
+    {
+        if (int.TryParse(value, out var days))
+            draft!.RepeatAfterDays = days;
     }
 
     private void SetDays(PlanStep step, string? value)

@@ -30,6 +30,12 @@ public sealed class PestTreatment : Entity
     public Guid CaseId { get; set; }
 
     /// <summary>
+    /// The round of the case's plan this treatment was made for, when the plan starts over. 0 is
+    /// every treatment from before rounds existed and is read as round 1.
+    /// </summary>
+    public int PlanRound { get; set; }
+
+    /// <summary>
     /// The plant a check outside a case was for, and then <see cref="CaseId"/> is empty. It's a
     /// check on a single plant ("checked, no signs"). It is not a new care kind, because an
     /// unknown enum value would stop older versions on other devices from loading care logs,
@@ -89,9 +95,17 @@ public sealed class PestTreatment : Entity
     /// </summary>
     public bool Skipped { get; set; }
 
+    /// <summary>
+    /// The plants a treatment has reached so far, when it is being ticked off plant by plant.
+    /// Null means it covered the whole case, which is how every older treatment reads. An empty
+    /// list is a treatment just started, with nothing ticked yet.
+    /// </summary>
+    public List<Guid>? TreatedPlantIds { get; set; }
+
     public PestTreatment Copy()
     {
         var copy = (PestTreatment)MemberwiseClone();
+        copy.TreatedPlantIds = TreatedPlantIds is null ? null : [.. TreatedPlantIds];
         copy.Ingredients = [.. Ingredients.Select(i => i.Copy())];
         return copy;
     }

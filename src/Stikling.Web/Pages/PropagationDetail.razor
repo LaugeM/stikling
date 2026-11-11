@@ -209,6 +209,11 @@ else
                 {
                     <text> · @lastCare</text>
                 }
+                @* Shown next to the parent too: a split of a cutting from a plant keeps both links *@
+                @if (splitFrom is not null)
+                {
+                    <text> · @((MarkupString)F(Strings.Propagations.DetSplitFrom, $"<a class=\"link-action\" href=\"propagations/{splitFrom.Id}\">{System.Net.WebUtility.HtmlEncode(splitFrom.DisplayName)}</a>"))</text>
+                }
                 @if (parent is not null)
                 {
                     <text> · @((MarkupString)F(Strings.Propagations.DetFromParent, $"<a class=\"link-action\" href=\"plants/{parent.Id}\">{System.Net.WebUtility.HtmlEncode(parent.DisplayName)}</a>"))</text>
@@ -681,6 +686,10 @@ else
                         <button type="button" class="btn btn-outline-primary w-100 mt-2" @onclick="OpenGaveAway">
                             @(propagation.RemainingCount == 1 ? Strings.Propagations.DetGaveIt : Strings.Propagations.DetGaveSome)
                         </button>
+                        @if (propagation.RemainingCount >= 2)
+                        {
+                            <button type="button" class="btn btn-outline-primary w-100 mt-2" @onclick="OpenSplitOff">@Strings.Propagations.DetSplitOff</button>
+                        }
                     </div>
                     break;
 
@@ -891,6 +900,39 @@ else
                     </div>
                     break;
 
+                case StageView.SplitOff:
+                    var splitting = split!;
+                    <p class="form-text mb-3">@Strings.Propagations.DetSplitHint</p>
+                    @if (splitting.MaxCount > 1)
+                    {
+                        <div class="mb-2">
+                            <label class="form-label" for="split-count">@F(Strings.Propagations.DetSplitHowMany, splitting.MaxCount)</label>
+                            <input id="split-count" type="number" class="form-control" min="1" max="@splitting.MaxCount"
+                                   inputmode="numeric" @bind="splitting.Count" @bind:event="oninput" />
+                        </div>
+                    }
+                    <div class="mb-2">
+                        <label class="form-label" for="split-stage">@Strings.Propagations.DetSplitStage</label>
+                        <select id="split-stage" class="form-select" @bind="splitting.Stage">
+                            @foreach (var option in SplitOffForm.Stages)
+                            {
+                                <option value="@option">@Labels.Stage(option, propagation.Type)</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label" for="split-date">@Strings.Propagations.DetDate</label>
+                        <input id="split-date" type="date" class="form-control" @bind="splitting.Date"
+                               min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !splitting.CountIsValid)" @onclick="SplitOffAsync">
+                            @(splitting.Count == 1 ? Strings.Propagations.DetSplitOff : F(Strings.Propagations.DetSplitN, splitting.Count))
+                        </button>
+                        <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">@Strings.Common.Back</button>
+                    </div>
+                    break;
+
                 case StageView.PassOn:
                     <PassOnPanel SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" Name="@propagation.DisplayName"
                                  OnDone="() => stageView = StageView.None" OnChangePage="ChangePassOnPage" />
@@ -1012,7 +1054,7 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
-    private enum StageView { None, Stage, PotUp, Failed, GaveAway, PassOn }
+    private enum StageView { None, Stage, PotUp, Failed, GaveAway, SplitOff, PassOn }
 
     private enum More { None, Menu, Flag, Dormant, Swap, Leaf, ThisLeaf }
     private bool shareOpen;
@@ -1028,6 +1070,9 @@ else
     private Propagation? propagation;
     private IReadOnlyList<Propagation> allPropagations = [];
     private Plant? parent;
+
+    // The batch this was split off from, unless it is gone. Never needs more than its name from a deleted one
+    private Propagation? splitFrom;
     private Generation? generation;
     private IReadOnlyList<Plant> offspring = [];
     private IReadOnlyList<CodeClash> numberClashes = [];
@@ -1119,6 +1164,7 @@ else
     private PotUpForm? potUp;
     private FailedForm? failed;
     private GiveAwayForm? gave;
+    private SplitOffForm? split;
     private string? message;
 
     // The short moment after logging a milestone on this page. Page state only, so it isn't there after a reload.
@@ -1147,6 +1193,7 @@ else
         StageView.PotUp => PotUpWord,
         StageView.Failed => Strings.Propagations.DetMarkAsFailed,
         StageView.GaveAway => Strings.Propagations.DetGaveSome,
+        StageView.SplitOff => Strings.Propagations.DetSplitOff,
         StageView.PassOn => Strings.Propagations.DetSendHistory,
         _ => Strings.Propagations.EditHowFar,
     };
@@ -1196,6 +1243,7 @@ else
             var parts = new List<string> { F(Strings.Propagations.DetCountStarted, p.InitialCount) };
             if (p.PottedUpCount > 0) parts.Add(F(Strings.Propagations.DetCountPotted, p.PottedUpCount));
             if (p.GivenAwayCount > 0) parts.Add(F(Strings.Propagations.DetCountGiven, p.GivenAwayCount));
+            if (p.SplitOffCount > 0) parts.Add(F(Strings.Propagations.DetCountSplit, p.SplitOffCount));
             if (p.FailedCount > 0) parts.Add(F(Strings.Propagations.DetCountFailed, p.FailedCount));
             if (p.IsActive && p.RemainingCount != p.InitialCount) parts.Add(F(Strings.Propagations.CardLeft, p.RemainingCount));
             return string.Join(" · ", parts);
@@ -1224,6 +1272,7 @@ else
             potUp = null;
             failed = null;
             gave = null;
+            split = null;
         }
         await LoadAsync();
         await RefreshGhostAsync();
@@ -1302,10 +1351,13 @@ else
                 failed.Propagation = propagation;
             if (gave?.Propagation.Id == propagation.Id)
                 gave.Propagation = propagation;
+            if (split?.Propagation.Id == propagation.Id)
+                split.Propagation = propagation;
         }
         var plants = await PlantRepository.GetAllAsync();
         allPlants = plants;
         var propagations = allPropagations = await Repository.GetAllAsync();
+        splitFrom = propagation?.SplitFromId is { } fromId ? propagations.FirstOrDefault(p => p.Id == fromId && !p.IsDeleted) : null;
         parent = propagation?.ParentPlantId is { } parentId ? plants.FirstOrDefault(p => p.Id == parentId) : null;
         generation = propagation is null ? null : PlantLineage.GenerationOf(propagation, plants);
         offspring = plants.Where(p => p.FromPropagationId == Id)
@@ -1559,6 +1611,15 @@ else
         stageView = StageView.GaveAway;
     }
 
+    private void OpenSplitOff()
+    {
+        // After a failed try the same form is opened again, so its new propagation's id is reused
+        // and trying again can't make a second one
+        split ??= Units.SplitOff(propagation!);
+        message = null;
+        stageView = StageView.SplitOff;
+    }
+
     private void OpenPassOn() => stageView = StageView.PassOn;
 
     private void OpenShare()
@@ -1668,6 +1729,40 @@ else
             Logger.LogError(ex, "Marking units as given away failed");
             madePlants = [];
             message = F(Strings.Propagations.DetMarkGivenFailed, ex.Message);
+            stageView = StageView.None;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task SplitOffAsync()
+    {
+        if (propagation is null || split is not { CountIsValid: true } form)
+            return;
+
+        busy = true;
+        try
+        {
+            var made = await form.SaveAsync();
+            stageView = StageView.None;
+            split = null;
+            Navigation.NavigateTo($"propagations/{made.Id}");
+        }
+        catch (Stikling.Core.PartlySavedException later)
+        {
+            // The units were moved. Only a history line is missing, so go on to the new propagation
+            Logger.LogError(later, "A step after splitting units off failed");
+            await LoadAsync();
+            message = F(Strings.Propagations.DetSplitFailed, later.Message);
+            stageView = StageView.None;
+            split = null;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Splitting units off failed");
+            message = F(Strings.Propagations.DetSplitFailed, ex.Message);
             stageView = StageView.None;
         }
         finally

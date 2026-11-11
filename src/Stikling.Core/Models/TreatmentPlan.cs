@@ -18,6 +18,12 @@ public sealed class TreatmentPlan : Entity
     /// <summary>The steps in order.</summary>
     public List<PlanStep> Steps { get; set; } = [];
 
+    /// <summary>
+    /// Null when the plan ends after its last step. Otherwise the days between the last step of a
+    /// round and step 1 of the next, so it goes round until the case is watched or resolved.
+    /// </summary>
+    public int? RepeatAfterDays { get; set; }
+
     /// <summary>A copy with its own step list, so editing a draft can't change the original.</summary>
     public TreatmentPlan Copy()
     {
@@ -45,6 +51,9 @@ public sealed class TreatmentPlan : Entity
         if (string.IsNullOrWhiteSpace(Name))
             errors.Add(Strings.Pests.PlanNeedsName);
 
+        if (RepeatAfterDays is < 1)
+            errors.Add(Strings.Pests.PlanRepeatTooShort);
+
         if (Steps.Count == 0)
         {
             errors.Add(Strings.Pests.PlanNeedsStep);
@@ -65,11 +74,16 @@ public sealed class TreatmentPlan : Entity
     {
         var days = Steps.Sum(s => s.DaysAfter);
         var steps = Plural.Of(Steps.Count, Strings.Pests.PlanSteps_One, Strings.Pests.PlanSteps_Other);
-        return days > 0
+        var summary = days > 0
             ? F(Strings.Pests.PlanSummary,
                 steps,
                 Plural.Of(days, Strings.Pests.DurationDay_One, Strings.Pests.DurationDay_Other))
             : steps;
+        return RepeatAfterDays is >= 1 and var again
+            ? F(Strings.Pests.PlanSummaryRepeats,
+                summary,
+                Plural.Of(again, Strings.Pests.DurationDay_One, Strings.Pests.DurationDay_Other))
+            : summary;
     }
 }
 

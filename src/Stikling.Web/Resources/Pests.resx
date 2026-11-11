@@ -1397,4 +1397,66 @@
     <value>Other</value>
     <comment>Small heading over the remaining signs.</comment>
   </data>
+  <data name="PlansRepeat" xml:space="preserve">
+    <value>Start over after the last step</value>
+    <comment>Label of the checkbox that makes a treatment plan start over with step 1 after its last step.</comment>
+  </data>
+  <data name="PlansRepeatDays" xml:space="preserve">
+    <value>Days before step 1 again</value>
+    <comment>Label of the field for how many days after the last step step 1 comes again.</comment>
+  </data>
+  <data name="CaseRound" xml:space="preserve">
+    <value>Round {0}</value>
+    <comment>Which round a treatment plan that starts over is on, like Round 2. {0} is the number.</comment>
+  </data>
+  <data name="TickSwitch" xml:space="preserve">
+    <value>Tick off plants as I go</value>
+    <comment>Switch in the treatment form. On, saving opens a checklist of the plants of the case.</comment>
+  </data>
+  <data name="TickPageTitle" xml:space="preserve">
+    <value>Tick off plants</value>
+    <comment>Title of the browser tab for the checklist of a treatment.</comment>
+  </data>
+  <data name="TickHeading" xml:space="preserve">
+    <value>Tick off plants</value>
+    <comment>Heading of the checklist of the plants a pest treatment has reached.</comment>
+  </data>
+  <data name="TickProgress_One" xml:space="preserve">
+    <value>{0} of {1} plant</value>
+    <comment>Progress on the checklist. {0} is the plants ticked, {1} the plants in all.</comment>
+  </data>
+  <data name="TickProgress_Other" xml:space="preserve">
+    <value>{0} of {1} plants</value>
+  </data>
+  <data name="TickFoundOn" xml:space="preserve">
+    <value>Found on</value>
+    <comment>Heading of the plants the pest was found on, first on the checklist.</comment>
+  </data>
+  <data name="TickBackToCase" xml:space="preserve">
+    <value>Back to the case</value>
+    <comment>Link at the top of the checklist.</comment>
+  </data>
+  <data name="TickGone" xml:space="preserve">
+    <value>That treatment doesn't exist or was deleted.</value>
+    <comment>Shown when the link to a checklist points at a treatment or case that is gone.</comment>
+  </data>
+  <data name="TickNoPlants" xml:space="preserve">
+    <value>This case doesn't cover any plants right now.</value>
+    <comment>Shown on the checklist when the case has no plants.</comment>
+  </data>
+  <data name="TickFailed" xml:space="preserve">
+    <value>Couldn't save that tick: {0}</value>
+    <comment>Error on the checklist. {0} is the reason.</comment>
+  </data>
+  <data name="TickTreated_One" xml:space="preserve">
+    <value>Treated {0} of {1} plant</value>
+    <comment>In a treatment's history on a pest case that was ticked off plant by plant. {0} is the plants ticked, {1} the plants in all.</comment>
+  </data>
+  <data name="TickTreated_Other" xml:space="preserve">
+    <value>Treated {0} of {1} plants</value>
+  </data>
+  <data name="TickMore" xml:space="preserve">
+    <value>Tick off more</value>
+    <comment>Link in a recent treatment's history that opens its checklist.</comment>
+  </data>
 </root>

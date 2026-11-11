@@ -379,4 +379,118 @@ public class TreatmentPlanTests
 
         Assert.NotEmpty(check.Validate(Today));
     }
+
+    // A plan of three steps that starts over 4 days after the last one
+    private static PestCase Repeating()
+    {
+        var plan = Plan();
+        plan.RepeatAfterDays = 4;
+        var item = new PestCase { IntervalDays = 4, StartedOn = Started.AddDays(-1) };
+        item.StartPlan(plan, Started);
+        return item;
+    }
+
+    private static PestTreatment InRound(PestCase item, int step, DateOnly on, int round) =>
+        new() { CaseId = item.Id, OccurredOn = on, PlanStepId = item.PlanSteps[step].Id, PlanRound = round };
+
+    private static PestTreatment[] RoundOne(PestCase item) =>
+        [InRound(item, 0, Started, 1), InRound(item, 1, Started.AddDays(3), 1), InRound(item, 2, Started.AddDays(13), 1)];
+
+    [Fact]
+    public void A_plan_that_does_not_repeat_is_round_one_and_finishes()
+    {
+        var item = Running();
+        var treatments = new[] { ForStep(item, 0, Started), ForStep(item, 1, Started.AddDays(3)), ForStep(item, 2, Started.AddDays(13)) };
+
+        Assert.Equal(1, PlanProgress.CurrentRound(item, treatments));
+        Assert.True(PlanProgress.IsFinished(item, treatments));
+        Assert.NotNull(PlanProgress.DoneOn(item, treatments));
+    }
+
+    [Fact]
+    public void A_repeating_plan_comes_round_again_after_the_last_step()
+    {
+        var item = Repeating();
+        var treatments = RoundOne(item);
+
+        Assert.Equal(1, PlanProgress.CurrentRound(item, treatments.Take(2)));
+        Assert.Equal(2, PlanProgress.CurrentRound(item, treatments));
+        Assert.False(PlanProgress.IsFinished(item, treatments));
+        Assert.Null(PlanProgress.DoneOn(item, treatments));
+        Assert.Equal(0, PlanProgress.CurrentIndex(item, treatments));
+        Assert.Equal(Started.AddDays(13 + 4), Due(item, treatments));
+        Assert.Equal(2, View(item, treatments).Round);
+    }
+
+    [Fact]
+    public void The_second_round_follows_its_own_steps()
+    {
+        var item = Repeating();
+        var treatments = RoundOne(item).Append(InRound(item, 0, Started.AddDays(17), 2)).ToList();
+
+        Assert.Equal(1, PlanProgress.CurrentIndex(item, treatments));
+        Assert.Equal(Started.AddDays(17 + 3), Due(item, treatments));
+
+        treatments.AddRange([InRound(item, 1, Started.AddDays(20), 2), InRound(item, 2, Started.AddDays(30), 2)]);
+        Assert.Equal(3, PlanProgress.CurrentRound(item, treatments));
+        Assert.Equal(Started.AddDays(34), Due(item, treatments));
+    }
+
+    [Fact]
+    public void A_treatment_with_round_zero_counts_as_round_one()
+    {
+        var item = Repeating();
+        var treatments = RoundOne(item).Select(t => { t.PlanRound = 0; return t; }).ToList();
+
+        Assert.Equal(2, PlanProgress.CurrentRound(item, treatments));
+        Assert.Equal(Started.AddDays(17), Due(item, treatments));
+    }
+
+    [Fact]
+    public void A_put_off_in_round_one_does_not_move_the_step_in_round_two()
+    {
+        var item = Repeating();
+        var step = item.PlanSteps[0];
+        var treatments = RoundOne(item);
+        var putOffs = PutOffs.From([new PutOff { Key = PutOffs.PlanStep(item.Id, step.Id), Until = Today.AddDays(30) }], Today);
+
+        Assert.Equal(Started.AddDays(17), Due(item, treatments, putOffs));
+
+        var moved = PutOffs.From([new PutOff { Key = PutOffs.PlanStep(item.Id, step.Id, 2), Until = Today.AddDays(5) }], Today);
+        Assert.Equal(Today.AddDays(5), Due(item, treatments, moved));
+        Assert.Equal(PutOffs.PlanStep(item.Id, step.Id), PutOffs.PlanStep(item.Id, step.Id, 1));
+    }
+
+    [Fact]
+    public void A_step_made_for_a_round_carries_it()
+    {
+        var item = Repeating();
+
+        Assert.Equal(2, PlanProgress.StartStep(item, item.PlanSteps[0], Today, null, 2).PlanRound);
+        Assert.Equal(2, PlanProgress.Skip(item, item.PlanSteps[0], Today, 2).PlanRound);
+    }
+
+    [Fact]
+    public void A_plan_cannot_start_over_after_no_days()
+    {
+        var plan = Plan();
+        plan.RepeatAfterDays = 0;
+        Assert.NotEmpty(plan.Validate());
+
+        plan.RepeatAfterDays = 1;
+        Assert.Empty(plan.Validate());
+
+        plan.RepeatAfterDays = null;
+        Assert.Empty(plan.Validate());
+    }
+
+    [Fact]
+    public void Starting_a_plan_copies_when_it_starts_over()
+    {
+        var item = Repeating();
+        Assert.Equal(4, item.PlanRepeatAfterDays);
+
+        item.StartPlan(Plan(), Started);
+        Assert.Null(item.PlanRepeatAfterDays);
+    }
 }

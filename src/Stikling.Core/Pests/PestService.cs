@@ -18,6 +18,7 @@ namespace Stikling.Core.Pests;
 /// <param name="ReadyToResolve">The target is reached and there's a check from the last week.</param>
 /// <param name="Step">The step of the plan being followed that is up next, or null without a running plan.</param>
 /// <param name="StepNumber">The 1-based number of <paramref name="Step"/>, 0 when there is none.</param>
+/// <param name="Round">The round of a plan that starts over, 1 for any other.</param>
 /// <param name="StepCount">How many steps the plan on the case has.</param>
 /// <param name="PlanDoneOn">When the question after the last step is due, once every step is done.</param>
 /// <param name="PlanDone">Every step is done and <paramref name="PlanDoneOn"/> has come.</param>
@@ -35,7 +36,8 @@ public sealed record PestCaseView(
     int StepNumber = 0,
     int StepCount = 0,
     DateOnly? PlanDoneOn = null,
-    bool PlanDone = false)
+    bool PlanDone = false,
+    int Round = 1)
 {
     /// <summary>The weeks the count has to reach.</summary>
     public int CleanWeeks => CleanTarget / 7;
@@ -181,7 +183,8 @@ public static class PestService
             index + 1,
             item.PlanStartedOn is null ? 0 : item.PlanSteps.Count,
             doneOn,
-            doneOn is { } d && today >= d);
+            doneOn is { } d && today >= d,
+            PlanProgress.CurrentRound(item, list));
     }
 
     /// <summary>
