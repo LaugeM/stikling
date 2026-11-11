@@ -1,4 +1,5 @@
 @page "/backup"
+@using Stikling.Core.Sync
 @implements IDisposable
 @inject BackupService Backup
 @inject ILogger<BackupAndStorage> Logger
@@ -168,7 +169,7 @@
     {
         lastBackup = await Files.GetLastBackupAsync();
         storage = await Db.EstimateAsync();
-        photoCount = (await Db.GetAllAsync<Photo>(Stores.Photos)).Count(p => !p.IsDeleted);
+        photoCount = (await Db.GetAllAsync(RecordKinds.Photos)).Count(p => !p.IsDeleted);
         // Only for the wording of the hint, and read without loading Clerk
         signedIn = Account.IsAvailable && await Account.WasSignedInAsync();
     }

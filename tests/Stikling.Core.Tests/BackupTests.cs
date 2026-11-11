@@ -796,4 +796,25 @@ public class BackupTests
         var restored = Assert.Single(merged.ToSave);
         Assert.Equal(["Potting soil", "Bark", "Perlite"], restored.Ingredients.Select(i => i.Name));
     }
+
+    [Fact]
+    public void The_backup_format_is_pinned()
+    {
+        // These names are the file format, so a rename or a reorder would break reading older backups
+        var json = JsonDocument.Parse(JsonSerializer.Serialize(new BackupData(), new JsonSerializerOptions(JsonSerializerDefaults.Web)));
+
+        Assert.Equal(
+            "version,app,exportedAt,plants,propagations,propagationCareLogs,timeline,photos,careLogs,pestCases,pestTreatments,"
+            + "pots,soilMixes,products,feeds,treatmentRecipes,places,settings,putOffs,growLights,receivedHistories,awayStretches,"
+            + "sitterSheets,floweringMarks,problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,"
+            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,counts",
+            string.Join(",", json.RootElement.EnumerateObject().Select(p => p.Name)));
+
+        Assert.Equal(
+            "plants,propagations,entries,photos,careEntries,pestCases,treatments,pots,soilMixes,products,feeds,recipes,rooms,"
+            + "settings,putOffs,growLights,receivedHistories,awayStretches,sitterSheets,propagationCareEntries,floweringMarks,"
+            + "problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,ownFields,orders,orderItems,"
+            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems",
+            string.Join(",", json.RootElement.GetProperty("counts").EnumerateObject().Select(p => p.Name)));
+    }
 }

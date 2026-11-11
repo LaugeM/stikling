@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Sync;
 
 namespace Stikling.Core.Backup;
 
@@ -54,6 +55,57 @@ public sealed class BackupData
     public List<Supply> Supplies { get; set; } = [];
     public List<SupplyEntry> SupplyEntries { get; set; } = [];
     public List<ShoppingItem> ShoppingItems { get; set; } = [];
+
+    /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
+    // Before Lists, which uses it: static fields are set in the order they are written
+    public static BackupList<Photo> PhotoList { get; } = List(RecordKinds.Photos, d => d.Photos, (d, l) => d.Photos = l);
+
+    /// <summary>
+    /// Each kind of record with its list above, in the order of the lists. The property names are
+    /// the backup's format, which is why they are written out rather than made from the kinds.
+    /// </summary>
+    public static readonly IReadOnlyList<BackupList> Lists =
+    [
+        List(RecordKinds.Plants, d => d.Plants, (d, l) => d.Plants = l),
+        List(RecordKinds.Propagations, d => d.Propagations, (d, l) => d.Propagations = l),
+        List(RecordKinds.PropagationCareLogs, d => d.PropagationCareLogs, (d, l) => d.PropagationCareLogs = l),
+        List(RecordKinds.Timeline, d => d.Timeline, (d, l) => d.Timeline = l),
+        PhotoList,
+        List(RecordKinds.CareLogs, d => d.CareLogs, (d, l) => d.CareLogs = l),
+        List(RecordKinds.PestCases, d => d.PestCases, (d, l) => d.PestCases = l),
+        List(RecordKinds.PestTreatments, d => d.PestTreatments, (d, l) => d.PestTreatments = l),
+        List(RecordKinds.Pots, d => d.Pots, (d, l) => d.Pots = l),
+        List(RecordKinds.SoilMixes, d => d.SoilMixes, (d, l) => d.SoilMixes = l),
+        List(RecordKinds.Products, d => d.Products, (d, l) => d.Products = l),
+        List(RecordKinds.Feeds, d => d.Feeds, (d, l) => d.Feeds = l),
+        List(RecordKinds.TreatmentRecipes, d => d.TreatmentRecipes, (d, l) => d.TreatmentRecipes = l),
+        List(RecordKinds.Places, d => d.Places, (d, l) => d.Places = l),
+        List(RecordKinds.Settings, d => d.Settings, (d, l) => d.Settings = l),
+        List(RecordKinds.PutOffs, d => d.PutOffs, (d, l) => d.PutOffs = l),
+        List(RecordKinds.GrowLights, d => d.GrowLights, (d, l) => d.GrowLights = l),
+        List(RecordKinds.ReceivedHistories, d => d.ReceivedHistories, (d, l) => d.ReceivedHistories = l),
+        List(RecordKinds.AwayStretches, d => d.AwayStretches, (d, l) => d.AwayStretches = l),
+        List(RecordKinds.SitterSheets, d => d.SitterSheets, (d, l) => d.SitterSheets = l),
+        List(RecordKinds.FloweringMarks, d => d.FloweringMarks, (d, l) => d.FloweringMarks = l),
+        List(RecordKinds.Problems, d => d.Problems, (d, l) => d.Problems = l),
+        List(RecordKinds.ProblemUpdates, d => d.ProblemUpdates, (d, l) => d.ProblemUpdates = l),
+        List(RecordKinds.Wishes, d => d.Wishes, (d, l) => d.Wishes = l),
+        List(RecordKinds.Sellers, d => d.Sellers, (d, l) => d.Sellers = l),
+        List(RecordKinds.OwnCareKinds, d => d.OwnCareKinds, (d, l) => d.OwnCareKinds = l),
+        List(RecordKinds.CareIntervals, d => d.CareIntervals, (d, l) => d.CareIntervals = l),
+        List(RecordKinds.TreatmentPlans, d => d.TreatmentPlans, (d, l) => d.TreatmentPlans = l),
+        List(RecordKinds.OwnFields, d => d.OwnFields, (d, l) => d.OwnFields = l),
+        List(RecordKinds.Orders, d => d.Orders, (d, l) => d.Orders = l),
+        List(RecordKinds.OrderItems, d => d.OrderItems, (d, l) => d.OrderItems = l),
+        List(RecordKinds.Leaves, d => d.Leaves, (d, l) => d.Leaves = l),
+        List(RecordKinds.PhotoMarks, d => d.PhotoMarks, (d, l) => d.PhotoMarks = l),
+        List(RecordKinds.Supplies, d => d.Supplies, (d, l) => d.Supplies = l),
+        List(RecordKinds.SupplyEntries, d => d.SupplyEntries, (d, l) => d.SupplyEntries = l),
+        List(RecordKinds.ShoppingItems, d => d.ShoppingItems, (d, l) => d.ShoppingItems = l),
+    ];
+
+    private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
+        where T : Entity => new(kind, get, set);
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the

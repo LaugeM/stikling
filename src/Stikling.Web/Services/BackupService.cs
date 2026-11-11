@@ -33,24 +33,13 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
 
     /// <summary>
     /// True when the device has anything a restore could remove or overwrite, deleted records included.
-    /// Settings and what's put off on Today don't count, since a fresh device can have those before
-    /// anything has been added.
+    /// Only the kinds of record with <see cref="RecordKind.IsContent"/> count.
     /// </summary>
     public async Task<bool> HasAnythingToSaveAsync()
     {
-        string[] stores =
-        [
-            Stores.Plants, Stores.Propagations, Stores.Timeline, Stores.Photos, Stores.CareLogs,
-            Stores.PestCases, Stores.PestTreatments, Stores.Pots, Stores.SoilMixes, Stores.Products,
-            Stores.Feeds, Stores.TreatmentRecipes, Stores.Places, Stores.GrowLights,
-            Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs, Stores.FloweringMarks,
-            Stores.Problems, Stores.ProblemUpdates, Stores.Wishes, Stores.Sellers, Stores.OwnCareKinds, Stores.CareIntervals,
-            Stores.TreatmentPlans, Stores.OwnFields, Stores.Orders, Stores.OrderItems, Stores.Leaves, Stores.PhotoMarks,
-            Stores.Supplies, Stores.SupplyEntries, Stores.ShoppingItems
-        ];
-        foreach (var store in stores)
+        foreach (var kind in RecordKinds.All.Where(k => k.IsContent))
         {
-            if ((await db.GetAllAsync<JsonElement>(store)).Count > 0)
+            if ((await db.GetAllAsync<JsonElement>(kind.Name)).Count > 0)
                 return true;
         }
         return false;
@@ -60,46 +49,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     public async Task<BackupCounts> ExportAsync(string filePrefix = "stikling-backup")
     {
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
-        var data = new BackupData
-        {
-            ExportedAt = time.GetUtcNow(),
-            Plants = await db.GetAllAsync<Plant>(Stores.Plants),
-            Propagations = await db.GetAllAsync<Propagation>(Stores.Propagations),
-            PropagationCareLogs = await db.GetAllAsync<PropagationCareLog>(Stores.PropagationCareLogs),
-            Timeline = await db.GetAllAsync<TimelineEntry>(Stores.Timeline),
-            Photos = await db.GetAllAsync<Photo>(Stores.Photos),
-            CareLogs = await db.GetAllAsync<CareLog>(Stores.CareLogs),
-            PestCases = await db.GetAllAsync<PestCase>(Stores.PestCases),
-            PestTreatments = await db.GetAllAsync<PestTreatment>(Stores.PestTreatments),
-            Pots = await db.GetAllAsync<Pot>(Stores.Pots),
-            SoilMixes = await db.GetAllAsync<SoilMix>(Stores.SoilMixes),
-            Products = await db.GetAllAsync<Product>(Stores.Products),
-            Feeds = await db.GetAllAsync<Feed>(Stores.Feeds),
-            TreatmentRecipes = await db.GetAllAsync<TreatmentRecipe>(Stores.TreatmentRecipes),
-            Places = await db.GetAllAsync<Place>(Stores.Places),
-            Settings = await db.GetAllAsync<UserSettings>(Stores.Settings),
-            PutOffs = await db.GetAllAsync<PutOff>(Stores.PutOffs),
-            GrowLights = await db.GetAllAsync<GrowLight>(Stores.GrowLights),
-            ReceivedHistories = await db.GetAllAsync<ReceivedHistory>(Stores.ReceivedHistories),
-            AwayStretches = await db.GetAllAsync<AwayStretch>(Stores.AwayStretches),
-            SitterSheets = await db.GetAllAsync<SitterSheet>(Stores.SitterSheets),
-            FloweringMarks = await db.GetAllAsync<FloweringMark>(Stores.FloweringMarks),
-            Problems = await db.GetAllAsync<Problem>(Stores.Problems),
-            ProblemUpdates = await db.GetAllAsync<ProblemUpdate>(Stores.ProblemUpdates),
-            Wishes = await db.GetAllAsync<Wish>(Stores.Wishes),
-            Sellers = await db.GetAllAsync<Seller>(Stores.Sellers),
-            OwnCareKinds = await db.GetAllAsync<OwnCareKind>(Stores.OwnCareKinds),
-            CareIntervals = await db.GetAllAsync<CareInterval>(Stores.CareIntervals),
-            TreatmentPlans = await db.GetAllAsync<TreatmentPlan>(Stores.TreatmentPlans),
-            OwnFields = await db.GetAllAsync<OwnField>(Stores.OwnFields),
-            Orders = await db.GetAllAsync<Order>(Stores.Orders),
-            OrderItems = await db.GetAllAsync<OrderItem>(Stores.OrderItems),
-            Leaves = await db.GetAllAsync<Leaf>(Stores.Leaves),
-            PhotoMarks = await db.GetAllAsync<PhotoMark>(Stores.PhotoMarks),
-            Supplies = await db.GetAllAsync<Supply>(Stores.Supplies),
-            SupplyEntries = await db.GetAllAsync<SupplyEntry>(Stores.SupplyEntries),
-            ShoppingItems = await db.GetAllAsync<ShoppingItem>(Stores.ShoppingItems)
-        };
+        var data = new BackupData { ExportedAt = time.GetUtcNow() };
+        foreach (var list in BackupData.Lists)
+            await list.ExportAsync(data, db);
 
         using var buffer = new MemoryStream();
         using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
@@ -132,9 +84,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
     public async Task<PhotoFolderSummary> DownloadPhotoFoldersAsync(PhotoFolderOptions options, IProgress<(int Done, int Total)>? progress = null)
     {
         var plan = PhotoFolders.Plan(
-            await db.GetAllAsync<Plant>(Stores.Plants), await db.GetAllAsync<Propagation>(Stores.Propagations),
-            await db.GetAllAsync<Pot>(Stores.Pots), await db.GetAllAsync<Photo>(Stores.Photos), options, time.LocalTimeZone,
-            new Stikling.Core.Rooms.Places(await db.GetAllAsync<Place>(Stores.Places)));
+            await db.GetAllAsync(RecordKinds.Plants), await db.GetAllAsync(RecordKinds.Propagations),
+            await db.GetAllAsync(RecordKinds.Pots), await db.GetAllAsync(RecordKinds.Photos), options, time.LocalTimeZone,
+            new Stikling.Core.Rooms.Places(await db.GetAllAsync(RecordKinds.Places)));
 
         if (plan.Count == 0)
             return new PhotoFolderSummary(0, 0);
@@ -204,61 +156,23 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         using var zip = new ZipArchive(zipStream, ZipArchiveMode.Read, leaveOpen: true);
         var data = await ReadAsync(zip);
 
-        // One tally for every store, so adding a store is one line instead of four sums to keep in step
-        var added = 0;
-        var updated = 0;
-        var broughtBack = 0;
-        var kept = 0;
-
-        async Task<MergeResult<T>> Restore<T>(string store, List<T> incoming) where T : Entity
+        var counts = new MergeCounts();
+        MergeResult<Photo>? photoMeta = null;
+        foreach (var list in BackupData.Lists)
         {
-            var result = await MergeAsync(store, incoming);
-            added += result.Added;
-            updated += result.Updated;
-            broughtBack += result.BroughtBack;
-            kept += result.Skipped;
-            return result;
+            if (ReferenceEquals(list, BackupData.PhotoList))
+            {
+                photoMeta = await BackupData.PhotoList.MergeAsync(data, db);
+                counts += photoMeta.Counts;
+            }
+            else
+            {
+                counts += await list.RestoreAsync(data, db);
+            }
         }
 
-        await Restore(Stores.Plants, data.Plants);
-        await Restore(Stores.Propagations, data.Propagations);
-        await Restore(Stores.PropagationCareLogs, data.PropagationCareLogs);
-        await Restore(Stores.Timeline, data.Timeline);
-        var photoMeta = await Restore(Stores.Photos, data.Photos);
-        await Restore(Stores.CareLogs, data.CareLogs);
-        await Restore(Stores.PestCases, data.PestCases);
-        await Restore(Stores.PestTreatments, data.PestTreatments);
-        await Restore(Stores.Pots, data.Pots);
-        await Restore(Stores.SoilMixes, data.SoilMixes);
-        await Restore(Stores.Products, data.Products);
-        await Restore(Stores.Feeds, data.Feeds);
-        await Restore(Stores.TreatmentRecipes, data.TreatmentRecipes);
-        await Restore(Stores.Places, data.Places);
-        await Restore(Stores.Settings, data.Settings);
-        await Restore(Stores.PutOffs, data.PutOffs);
-        await Restore(Stores.GrowLights, data.GrowLights);
-        await Restore(Stores.ReceivedHistories, data.ReceivedHistories);
-        await Restore(Stores.AwayStretches, data.AwayStretches);
-        await Restore(Stores.SitterSheets, data.SitterSheets);
-        await Restore(Stores.FloweringMarks, data.FloweringMarks);
-        await Restore(Stores.Problems, data.Problems);
-        await Restore(Stores.ProblemUpdates, data.ProblemUpdates);
-        await Restore(Stores.Wishes, data.Wishes);
-        await Restore(Stores.Sellers, data.Sellers);
-        await Restore(Stores.OwnCareKinds, data.OwnCareKinds);
-        await Restore(Stores.CareIntervals, data.CareIntervals);
-        await Restore(Stores.TreatmentPlans, data.TreatmentPlans);
-        await Restore(Stores.OwnFields, data.OwnFields);
-        await Restore(Stores.Orders, data.Orders);
-        await Restore(Stores.OrderItems, data.OrderItems);
-        await Restore(Stores.Leaves, data.Leaves);
-        await Restore(Stores.PhotoMarks, data.PhotoMarks);
-        await Restore(Stores.Supplies, data.Supplies);
-        await Restore(Stores.SupplyEntries, data.SupplyEntries);
-        await Restore(Stores.ShoppingItems, data.ShoppingItems);
-
         // A delete carried over from the backup frees the image too
-        foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))
+        foreach (var photo in (photoMeta?.ToSave ?? []).Where(p => p.IsDeleted))
             await photos.RemoveBytesAsync(photo.Id);
 
         // Every photo in the backup gets its image back when it's missing here, not only the ones
@@ -278,15 +192,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         }
 
         Restored?.Invoke();
-        return new ImportSummary(added, updated, broughtBack, kept, restoredPhotos);
-    }
-
-    private async Task<MergeResult<T>> MergeAsync<T>(string store, List<T> incoming) where T : Entity
-    {
-        var result = BackupMerge.Merge(await db.GetAllAsync<T>(store), incoming);
-        foreach (var item in result.ToSave)
-            await db.PutAsync(store, item);
-        return result;
+        return new ImportSummary(counts.Added, counts.Updated, counts.BroughtBack, counts.Skipped, restoredPhotos);
     }
 
     private async Task AddPhotoAsync(ZipArchive zip, Guid id, bool thumbnail)

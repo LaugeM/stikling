@@ -6,7 +6,10 @@ namespace Stikling.Core.Backup;
 /// <param name="ToSave">The items to write: the ones missing here, newer in the backup, or deleted here since.</param>
 /// <param name="BroughtBack">Items deleted on this device that the backup still had, so they return.</param>
 public sealed record MergeResult<T>(IReadOnlyList<T> ToSave, int Added, int Updated, int BroughtBack, int Skipped)
-    where T : Entity;
+    where T : Entity
+{
+    public MergeCounts Counts => new(Added, Updated, BroughtBack, Skipped);
+}
 
 /// <summary>
 /// Restoring merges rather than replaces: what's already on the device is kept unless the backup
