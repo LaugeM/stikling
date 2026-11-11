@@ -2,7 +2,7 @@
 
 The guides are short how-tos built into the app, at `/guides`. They work offline and say the same thing to everyone. This file is the text of each guide and where every part of it comes from. A change to a guide in the app is a change here too.
 
-Part (a): taking a cutting, moving a plant to semi-hydro, watering through a wick, mixing soil. Part (b): checking for pests, and a guide for each pest a case can be for. Guides by plant group come later. The structure is in `Stikling.Core/Guides/GuideBook.cs`, the English and Danish in `Stikling.Web/Resources/Guides.resx` and `Guides.da.resx`, and the guides are at `/guides`.
+Part (a): taking a cutting, moving a plant to semi-hydro, watering through a wick, mixing soil. Part (b): checking for pests, and a guide for each pest a case can be for. Part (c): a guide for each of nine plant groups (aroids, begonias, bromeliads and air plants, cacti and succulents, carnivorous plants, ferns, hoyas, orchids, prayer plants). The structure is in `Stikling.Core/Guides/GuideBook.cs`, the English and Danish in `Stikling.Web/Resources/Guides.resx` and `Guides.da.resx`, and the guides are at `/guides`.
 
 In the app a line marked *growers* says "many growers" or "some growers" in the words of the line itself, and a line from a maker says who, like "COMPO says". The sources of a guide are listed at its end.
 
@@ -26,6 +26,16 @@ In the app a line marked *growers* says "many growers" or "some growers" in the 
 - **Links only**: the guides explain cases, treatment plans and traps and link to them, and start nothing.
 - **Opens from**: a pest case's page (its pest's guide, or Checking for pests for Other), the new case form once a pest is picked (in a new tab, like the other edit form links), the Pests page and its empty state, the symptom check's Pests cause, and a plant's quarantine card. The back link names the case or the plant.
 
+## Plant group guides (shape confirmed Nov 11)
+
+- **Which guides**: aroids, begonias, bromeliads and air plants, cacti and succulents, carnivorous plants, ferns, hoyas, orchids and prayer plants, listed under a By plant group heading on `/guides` in that order (alphabetical in English; the order is the same in Danish).
+- **What's special only**: the plant page already shows the light, water and humidity a plant usually likes (`tools/plant-names/care.txt`), so a group guide only says what differs from an ordinary houseplant. Every one has the same parts, leaving out any a group has nothing special for: the lead (what the group is), What to look at (signs to read instead of a schedule), Mix and pot, the group's own topic (climbing, flowers, rest, water, cups and pups and so on), Making new plants, Problems (linking the pest guides), In Stikling.
+- **What to look at, never how often**: like the other guides, these never say how often to water or feed. Where a source gives a schedule ("water weekly"), the guide takes only the sign it is checked by.
+- **Which plants a guide is for** is decided by the plant's genus, through its family in `plant-regions.json` where the dictionary has one, and a list of genera where it doesn't. The lists are under each guide below. On a plant's page, a genus the dictionary knows as an old name is matched by the name it goes by now (`PlantRegionInfo.Genus`), so a plant saved as Absolmsia gets the hoya guide.
+- **Opens from**: a plant's page whose genus is in a group (a small guide link under What it likes), the dictionary's genus page for a genus in a group, and Guides. The back link names the plant or the genus.
+- **Photos** only where words fall short: a hoya's peduncle, an orchid keiki and the spore cases under a fern. The rest have none (see Photos below).
+- **The growers lines** were checked against threads in r/hoyas, r/orchids, r/Monstera, r/alocasia, r/succulents, r/SavageGarden, r/tillandsia, r/calatheas, r/ferns and r/begonias and the r/succulents wiki, read Nov 11. They are not listed as sources in the app, like all growers lines.
+
 ## Photos
 
 Photos are in `wwwroot/img/guides/`, WebP, 800px on the long side, and listed here. Every one is from Wikimedia Commons under a licence that allows it in the app with credit. Under each photo the app shows its caption and a credit line, "Photo: author, licence", linking to the file's page. The licences ask for changes to be marked, so a cropped photo says "cropped" after the licence. Resizing alone is not marked.
@@ -44,8 +54,13 @@ Photos are in `wwwroot/img/guides/`, WebP, 800px on the long side, and listed he
 | aphids.webp | Aphids | Aphids on a stem. | Jules Verne Times Two | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:Green_peach_aphid_(Myzus_persicae)_on_a_stem,_Lisbon,_Portugal_(approx._GPS_location)_julesvernex2.jpg |
 | whitefly-adults.webp | Whitefly | Adult whiteflies on a squash leaf. | Pablo Oliveri (Pro Huerta) | CC BY-SA 2.5 | https://commons.wikimedia.org/wiki/File:Pro_Huerta_-_Cucurbita_maxima_var._zapallito_-_Trialeurodes_vaporariorum_01_adults.jpg |
 | whitefly-young.webp | Whitefly | Young whiteflies and a ring of eggs on a leaf. | Tashkoskim | CC BY-SA 4.0 | https://commons.wikimedia.org/wiki/File:%D0%9B%D0%B0%D1%80%D0%B2%D0%B8_%D0%B8_%D1%98%D0%B0%D1%98%D1%86%D0%B0_%D0%BE%D0%B4_%D0%B1%D0%B5%D0%BB%D0%BE%D0%BA%D1%80%D0%B8%D0%BB%D0%BA%D0%B8.jpg |
+| hoya-peduncle.webp | Hoyas | The old flower peduncle of a Hoya carnosa, still on the stem. | MPF (Wikimedia Commons user) | CC BY 2.5 | https://commons.wikimedia.org/wiki/File:Hoya_carnosa1.jpg |
+| orchid-keiki.webp | Orchids | A Phalaenopsis keiki, joined to the mother plant by the flower stem. | Dominique Lyon | CC0 | https://commons.wikimedia.org/wiki/File:Phalaenopsis_keiki.jpg |
+| fern-sori.webp | Ferns | The spore cases (sori) on the underside of the fronds of Nephrolepis cordifolia. | Ixitixel | CC BY-SA 3.0 | https://commons.wikimedia.org/wiki/File:Nephrolepis_cordifolia_(Sori).jpg |
 
 Thrips has one photo. The only damage photo found, `Basilikum Thripsbefall-Schlaghecken.jpg`, is titled thrips damage but described as leafhopper damage, so it is left out. Checking for pests has none. The captions are checked against each file's description on Commons. The whitefly photos are on squash and pepper and the spider mite webbing on tomato, since no houseplant photos as clear were found. The species are the same ones found indoors.
+
+The plant group guides have three photos: a hoya's old peduncle, an orchid keiki and the spore cases of a fern. Left out, since no photo under CC0, CC BY or CC BY-SA was found on Commons that shows the subject: bromeliad pups, the scales on an air plant and a stretched succulent. A begonia photo (`Begonia_acetosa_propagation.jpg`) was left out too: it shows whole leaves rooting with their stalks, while the guide's leaf cuttings have the stalk cut off and the veins cut. The hoya photo names no author on Commons beyond its uploader, MPF, and its description says "Persistent flower peduncle". The fern is Nephrolepis cordifolia, and the keiki photo is of a plant out of its pot on paving, since that was the clearest licensed one found.
 
 ## Rules for the text
 
@@ -90,6 +105,37 @@ Thrips has one photo. The only damage photo found, `Basilikum Thripsbefall-Schla
 | rhs-scale | *Scale insects*, Royal Horticultural Society. https://www.rhs.org.uk/biodiversity/scale-insects |
 | rhs-aphids | *Aphids*, Royal Horticultural Society. https://www.rhs.org.uk/biodiversity/aphids |
 | rhs-whitefly | *Glasshouse whitefly*, Royal Horticultural Society. https://www.rhs.org.uk/biodiversity/glasshouse-whitefly |
+| rhs-monstera | *How to grow Swiss cheese plants*, Royal Horticultural Society. https://www.rhs.org.uk/plants/swiss-cheese-plants/how-to-grow-swiss-cheese-plants |
+| rhs-philodendron | *How to grow philodendrons*, Royal Horticultural Society. https://www.rhs.org.uk/plants/philodendron/growing-guide |
+| rhs-alocasia | *How to grow alocasias*, Royal Horticultural Society. https://www.rhs.org.uk/plants/alocasia/growing-guide |
+| iastate-aroids | Haynes, *A is for Aroids!*, Iowa State University Extension and Outreach, 2021. https://yardandgarden.extension.iastate.edu/article/2021/01/aroids |
+| iastate-philodendron | Steil, *Growing Philodendrons at Home*, Iowa State University Extension and Outreach, reviewed 2025. https://yardandgarden.extension.iastate.edu/how-to/growing-philodendrons-home |
+| rhs-hoya | *How to grow hoya*, Royal Horticultural Society. https://www.rhs.org.uk/plants/hoya/how-to-grow |
+| iastate-hoya | Steil, *All About Hoyas*, Iowa State University Extension and Outreach, reviewed 2026. https://yardandgarden.extension.iastate.edu/how-to/all-about-hoyas |
+| psu-hoya | Smith, *Hoyas as Houseplants*, Penn State Extension, 2026. https://extension.psu.edu/hoyas-as-houseplants |
+| rhs-phal | *How to grow Phalaenopsis (moth orchids)*, Royal Horticultural Society. https://www.rhs.org.uk/plants/phalaenopsis/growing-guide |
+| rhs-orchids | Richards, *Top tips for growing orchids at home*, Royal Horticultural Society. https://www.rhs.org.uk/plants/types/houseplants/top-tips-for-growing-orchids-at-home |
+| aos-phal | Sullivan, *Novice Culture Sheet: Phalaenopsis*, American Orchid Society, 2012. https://secure.aos.org/media/Content-Images/PDFs/Phalaenopsis_novice.pdf |
+| iastate-succulents | Steil, *Growing Succulents Indoors*, Iowa State University Extension and Outreach, reviewed 2024. https://yardandgarden.extension.iastate.edu/how-to/growing-succulents-indoors |
+| illinois-succulents | Anderson, *Propagating Succulents and Cacti*, University of Illinois Extension, 2015. https://extension.illinois.edu/blogs/hort-home-landscape/2015-06-04-propagating-succulents-and-cacti |
+| rhs-carnivorous | *How to grow carnivorous plants*, Royal Horticultural Society. https://www.rhs.org.uk/plants/types/carnivorous/growing-guide |
+| rhs-flytrap | *Venus fly trap*, Royal Horticultural Society. https://www.rhs.org.uk/plants/venus-fly-trap |
+| icps-flytrap | Brittnacher, *Growing Dionaea muscipula*, International Carnivorous Plant Society, updated 2019. https://www.carnivorousplants.org/grow/guides/Dionaea |
+| icps-nepenthes | Brittnacher, *Growing Nepenthes*, International Carnivorous Plant Society. https://www.carnivorousplants.org/grow/guides/Nepenthes |
+| rhs-bromeliads | *How to grow bromeliads*, Royal Horticultural Society. https://www.rhs.org.uk/plants/bromeliads/growing-guide |
+| rhs-airplants | *Air plants*, Royal Horticultural Society. https://www.rhs.org.uk/plants/types/houseplants/air-plants |
+| uf-bromeliads | *Bromeliads*, UF/IFAS Gardening Solutions. https://gardeningsolutions.ifas.ufl.edu/plants/ornamentals/bromeliads/ |
+| rhs-calathea | *How to grow calatheas*, Royal Horticultural Society. https://www.rhs.org.uk/plants/calathea/growing-guide |
+| illinois-prayer | *Prayer Plant*, Houseplants, University of Illinois Extension. https://extension.illinois.edu/houseplants/prayer-plant |
+| umd-prayer | *Prayer plant leaves turning yellow/brown*, an answer from the Home and Garden Information Center, University of Maryland Extension, on Ask Extension, 2023. https://ask.extension.org/kb/faq.php?id=852330 |
+| rhs-ferns | *How to grow epiphytic ferns*, Royal Horticultural Society. https://www.rhs.org.uk/plants/epiphytic-ferns/how-to-grow-epiphytic-ferns |
+| rhs-tender-ferns | *Tender ferns*, Royal Horticultural Society. https://www.rhs.org.uk/plants/types/ferns/tender-ferns-houseplants |
+| clemson-ferns | Russ, Pertuit and Smith, *Indoor Ferns*, HGIC 1505, Clemson Cooperative Extension, revised 2015. https://hgic.clemson.edu/factsheet/indoor-ferns/ |
+| rhs-begonias | *Begonias: houseplants*, Royal Horticultural Society. https://www.rhs.org.uk/plants/begonias/houseplants |
+| iastate-begonias | Haynes, *Growing Begonias in Iowa*, Iowa State University Extension and Outreach, reviewed 2024. https://yardandgarden.extension.iastate.edu/how-to/growing-begonias-iowa |
+| iastate-leafvein | Steil, *How to Propagate Houseplants by Leaf Vein Cuttings*, Iowa State University Extension and Outreach, reviewed 2025. https://yardandgarden.extension.iastate.edu/how-to/how-propagate-houseplants-leaf-vein-cuttings |
+
+The plant group sources were read on Nov 11. The RHS growing guides carry no author or date. The ICPS Nepenthes page is about growing from seed, and the guide takes only its line on which ones make houseplants. umd-prayer is one extension answer to one grower's question; the guide takes only its general points. Temperatures in Fahrenheit are given in Celsius.
 
 The pest sources were read on Nov 11. The UC notes other than ucipm are written for gardens, landscapes and greenhouses, and the RHS pest pages mostly for gardens and glasshouses with a pointer to rhs-sap for indoor plants. The pest guides take only what holds indoors from them: what the pest looks like, its life cycle, and how sprays have to be used. Where a garden source and an indoor one differ, the guide says which says what. Temperatures in the UC notes are in Fahrenheit and are given here in Celsius (90°F as 32°C, 75°F as 24°C, 60 to 90°F as 16 to 32°C).
 
@@ -760,3 +806,458 @@ Photo: whitefly-young.webp
 - **Fungus gnats and watering.** "Let the top of the mix dry between waterings, where the plant can take it" is the one line in these guides about watering. It tells people to wait longer, never to water sooner, and both sources say it. The RHS adds "as long as plant health isn't affected", which is where "where the plant can take it" comes from.
 - **The "growers" lines** are only the "When it's over" lines, since no source says when a pest is gone for good. They say what to look for, not a number of weeks, and the case's Clean for how long count (4 weeks unless changed) is what the app uses.
 - **Left out.** Broad and cyclamen mites (in ucipm, too small to see and diagnosed from damage), ants, fumigants and anything sprayed into the air indoors.
+
+---
+
+## Aroids
+
+For: the family Araceae (monstera, philodendron, alocasia, anthurium, pothos, syngonium, aglaonema, ZZ plant, peace lily and the rest).
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Moss pole.
+
+**Intro.** Aroids are the arum family, more than 100 genera, with monstera, philodendron, alocasia, anthurium, pothos and peace lily among them. Most have a flower made of a spike inside a hood, but only a few grown indoors have showy ones. [iastate-aroids] Many climb trees in the wild and root onto them as they go. [rhs-philodendron]
+
+**What to look at**
+
+- Most do well when the compost dries a little between waterings. The RHS waits until the top has dried for philodendrons, until it is almost dry for monsteras, and until the top 5 cm is dry for alocasias. [iastate-aroids, rhs-philodendron, rhs-monstera, rhs-alocasia]
+- Yellowing leaves and a plant that collapses point to roots rotting in wet compost. [rhs-philodendron, rhs-monstera]
+- Brown leaf edges point to dry air. [rhs-monstera, rhs-alocasia]
+- Long stems with fewer, smaller leaves mean too little light. A monstera in low light makes leaves with fewer holes. [rhs-philodendron, rhs-monstera]
+- Direct sun can scorch the leaves. [rhs-philodendron, rhs-monstera, rhs-alocasia]
+
+**Mix and pot**
+
+- An open mix that drains well. The RHS mixes 2 parts orchid compost with 1 part peat-free ericaceous compost for monsteras and philodendrons, and 3 parts peat-free compost with 1 part grit for alocasias. Iowa State uses an ordinary potting mix for philodendrons. See Mixing soil. [rhs-monstera, rhs-philodendron, rhs-alocasia, iastate-philodendron]
+- A pot only a few centimetres bigger than the root ball, since a much bigger one stays wet and rots the roots. They do well slightly pot-bound. [rhs-philodendron, rhs-monstera, iastate-aroids]
+- A heavy pot for a big climber or a large alocasia, which get top-heavy. [rhs-monstera, rhs-alocasia]
+
+**Give it something to climb** (switch)
+
+Bushy kinds need no support. [rhs-philodendron] For climbers, all of these are common:
+
+*Moss pole*
+- Why people pick it: the stems can root into the moss, and a plant that climbs often makes bigger leaves, with more holes on a monstera. [rhs-monstera, rhs-philodendron]
+- How: tie the stems to the pole and keep the moss moist, or the roots won't grow into it. [rhs-monstera, rhs-philodendron]
+- Watch for: a plant that outgrows the pole. Many growers add a piece on top before it does. *growers*
+
+*Stake or trellis*
+- Why people pick it: it holds the plant up without a pole to keep moist. [iastate-philodendron]
+- How: tie the stems on, and guide the aerial roots down into the pot, where they root and help hold the plant. [iastate-philodendron] Many growers say a plant with its aerial roots in the pot does fine without a moss pole. *growers*
+
+*Let it trail*
+- Why people pick it: climbing kinds like heartleaf philodendron and pothos hang well from a basket or a shelf. [iastate-philodendron]
+- Watch for: trailing stems usually keep smaller leaves than climbing ones. [rhs-monstera]
+
+**Aerial roots.** The roots that grow from the stems are how the plant climbs in the wild. They can be left, guided onto a pole or into the pot, or cut off close to the stem, which doesn't harm the plant. [iastate-philodendron, rhs-monstera]
+
+**Winter rest for alocasias.** Alocasias rest in winter. Kept cooler and drier, but above 10°C, they may lose some of their leaves, which is normal, and grow new ones in spring. Wet compost while they rest rots the roots. [rhs-alocasia] Many growers find some lose every leaf and go back to a bare corm or rhizome, which can sit still for months before it grows again. *growers*
+
+**Making new plants**
+
+- Stem cuttings with a node, rooted in water or a mix. See Taking a cutting. [rhs-philodendron, rhs-monstera, iastate-philodendron]
+- Offsets, the small plants at the base of a grown alocasia or a bushy philodendron, cut off with some root and potted on their own. [rhs-alocasia, iastate-philodendron]
+- Pieces of an alocasia's rhizome, in late spring or early summer. [rhs-alocasia]
+- The small corms found around an alocasia's roots when it is repotted. Many growers start them in damp moss or perlite in a closed box somewhere warm. *growers*
+
+**Gloves.** The sap irritates skin, and the plants are poisonous if eaten. Wear gloves when cutting them, and keep them away from children and pets. [rhs-philodendron, rhs-alocasia, iastate-philodendron]
+
+**Problems.** Mealybugs, spider mites and scale. Spider mites like dry air, which alocasias often get. [rhs-philodendron, rhs-alocasia, rhs-monstera] (Each pest links to its guide.)
+
+**In Stikling.** When an alocasia drops its leaves for winter, mark it Dormant on its page, so it shows as resting rather than dead. A corm, an offset or a cutting can be tracked as a propagation from its parent.
+
+---
+
+## Begonias
+
+For: the family Begoniaceae.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Leaf cuttings.
+
+**Intro.** Begonias grown indoors come in a few kinds that are looked after differently: cane begonias with tall, bamboo-like stems, often called angel wings; rhizomatous ones like rex begonias, which grow from a creeping stem and are kept for their leaves; fibrous-rooted ones with upright stems; and semi-tuberous ones sold in flower. [rhs-begonias, iastate-begonias] Cane begonias are the easiest indoors. [iastate-begonias]
+
+**What to look at**
+
+- Brown leaf edges: dry air, or too warm. [rhs-begonias]
+- Rotting or dropping leaves: air that is too damp, too much water or too little light. [rhs-begonias]
+- Flower buds that drop: dry air or too little water. [rhs-begonias]
+- The RHS says most begonias brought to it were overwatered or kept in air that was too dry. Roots rot quickly in compost that stays wet. [rhs-begonias, iastate-begonias] Many growers let a rex begonia dry until the pot feels light. *growers*
+
+**Keep the leaves dry.** Don't wet the leaves or the middle of a rex or other rhizomatous begonia, and don't mist the fibrous kinds. Air that is damp and still brings powdery mildew and grey mould, so give them air as well as humidity. [rhs-begonias]
+
+**Humidity.** The RHS gives rex and rhizomatous begonias high humidity in summer and stands cane and fibrous ones on a tray of damp gravel. [rhs-begonias] Many growers find cane begonias manage in ordinary room air, and keep the rex begonias for a humid spot. *growers*
+
+**Mix and pot.** Peat-free multipurpose compost for cane and fibrous begonias. [rhs-begonias] Many growers keep them in a pot on the small side. *growers*
+
+**Making new plants** (switch)
+
+*Leaf cuttings*
+- For: rex and other rhizomatous begonias. [rhs-begonias, iastate-leafvein]
+- How: take a firm, newly grown leaf and cut off its stalk. Cut through the main veins on the underside, about 2.5 cm apart, and lay the leaf flat on a sandy cutting mix with the cuts touching it, held down with pins or small stones. Water it, cover it with a bag or dome that doesn't seal tight, and keep it warm and bright, out of direct sun. [rhs-begonias, iastate-leafvein]
+- How long: small plants appear at the cuts in 6 to 8 weeks. Pot them up once they have two or three leaves. [iastate-leafvein, rhs-begonias]
+
+*Stem cuttings*
+- For: cane and fibrous begonias. [rhs-begonias]
+- How: a piece 7 to 10 cm long cut just below a node, rooted in a sandy cutting mix, or in water. [rhs-begonias, iastate-begonias]
+
+*Division*
+- For: rhizomatous begonias. [rhs-begonias]
+- How: in spring, divide the rhizome so each piece has one or more growing points. [rhs-begonias]
+
+**Rest.** Semi-tuberous begonias rest for about six weeks after flowering, cooler and with less water, then are cut back. Rex and cane begonias only get less water in winter. [rhs-begonias]
+
+**Problems.** Aphids and spider mites, and powdery mildew and grey mould. [rhs-begonias] (Each pest links to its guide.)
+
+**In Stikling.** A leaf cutting can be tracked as a propagation of the kind Leaf, and a bag or dome as a rooting aid, so the results page shows whether it helped.
+
+
+---
+
+## Bromeliads and air plants
+
+For: the family Bromeliaceae.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Soaking.
+
+**Intro.** Bromeliads grow as a rosette of leaves, and many hold water in a cup in the middle. Air plants (Tillandsia) are bromeliads too, and most live with no compost at all. [rhs-bromeliads, rhs-airplants] They take up water and food mainly through their leaves and the cup, and the roots mostly hold the plant in place. [uf-bromeliads]
+
+**What to look at**
+
+- Long, thin, greener leaves mean too little light, and shorter, thicker, paler ones a lot. Bleached or brown patches are scorch from strong sun. [uf-bromeliads, rhs-bromeliads]
+- Brown leaf tips and rotting roots: too much water, or a pot standing wet. [rhs-bromeliads]
+- An air plant whose middle or leaves turn brown or black is rotting, mostly from water left in the middle with too little air around it. [rhs-airplants]
+- An air plant that dries out was watered too seldom, too warm or in too dry air. An overnight soak can sometimes bring it back. [rhs-airplants] Many growers say the leaves curl more when it is dry. *growers*
+
+**The cup.** Keep the cup in the middle filled, with rainwater or distilled water if you can, and empty it and fill it fresh every month or two so it doesn't go stale. Keep the compost damp but not wet. [rhs-bromeliads] Fresh water in the cup also keeps mosquito larvae out. [uf-bromeliads]
+
+**Mix and pot.** A loose mix, like equal parts fine bark, grit and coir, or peat, bark and coarse sand. Most need only a small pot, 7.5 to 12.5 cm. [rhs-bromeliads, uf-bromeliads]
+
+**Air plants**
+
+- No compost. Fix them to wood, shells or stone with wire, a tie or glue. [rhs-airplants]
+- Rainwater. Hard tap water leaves a crust on the small scales that take up water. [rhs-airplants]
+- Let them dry after watering, turned upside down or shaken, so no water sits in the middle. [rhs-airplants] Many growers make sure they are dry within a few hours. *growers*
+- Not below 12°C. [rhs-airplants]
+
+**Watering an air plant** (switch)
+
+*Soaking*
+- Why people pick it: the whole plant gets wet at once. The RHS waters this way. [rhs-airplants]
+- How: put the plant under rainwater for a while, then let it dry. [rhs-airplants] Many growers soak for 20 to 30 minutes. *growers*
+- Watch for: water left in the middle. Some growers find the thick, silvery kinds, like xerographica, rot from soaking. *growers*
+
+*Misting*
+- Why people pick it: less water stays in the middle. Some growers mist the silvery kinds rather than soak them. *growers*
+- How: mist the whole plant. The RHS mists only between soaks, in warm weather, and says misting alone is not enough. [rhs-airplants]
+
+**Flowers and pups.** The colourful part is a bract that lasts for months. Most bromeliads flower only once and then slowly die, after making pups at the base. [rhs-bromeliads, rhs-airplants] A grown bromeliad that won't flower can be put in a large clear bag with a few ripe apples or bananas for up to two weeks. [rhs-bromeliads]
+
+**Making new plants.** Cut a pup off once it is about a third the size of its parent, in spring, and pot it up or treat it as a grown air plant. With only one pup, the old rosette can be cut away after flowering instead. [rhs-bromeliads, rhs-airplants]
+
+**Problems.** Mealybugs and scale. [rhs-bromeliads] (Each pest links to its guide.)
+
+**In Stikling.** A pup with its own roots is a plant: add it with its parent picked. Before that it can be tracked as a propagation of the kind Offset. The flowering log under More on the plant's page keeps when it flowered.
+
+
+---
+
+## Cacti and succulents
+
+For: the families Cactaceae, Crassulaceae and Aizoaceae, and the genera Aloe, Haworthia, Haworthiopsis, Gasteria, Agave and Curio.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Offsets.
+
+**Intro.** Cacti and succulents store water in thick leaves or stems. They need a lot of light, a mix that drains fast and compost that dries between waterings. [rhs-cacti, iastate-succulents]
+
+**What to look at**
+
+- Wrinkled or drying lower leaves, or a shrivelling plant: too dry. [iastate-succulents, rhs-cacti]
+- Yellowing leaves, soft stems, blisters or rot: too wet. [iastate-succulents, rhs-cacti]
+- Pale, stretched growth that leans to the window: too little light. Turning the pot keeps it even. [iastate-succulents, rhs-cacti]
+- Wait until the compost is dry before watering, then water so it runs out of the bottom, and never leave the pot standing in water. [iastate-succulents, rhs-cacti]
+- A white, chalky crust on the leaves comes from hard tap water. The RHS uses rainwater. [rhs-cacti]
+
+**Forest cacti are different.** Christmas cactus, orchid cactus (Epiphyllum) and Rhipsalis like semi-shade, an east or west window, and more water than other cacti. A Christmas cactus flowers in winter and rests in summer. [rhs-cacti]
+
+**Mix and pot**
+
+- A gritty mix: a ready-made cactus compost, or loam-based compost with up to 30% grit. Iowa State uses 1 part potting soil, bark or coir to 2 parts perlite, sand, pumice or gravel. See Mixing soil. [rhs-cacti, iastate-succulents]
+- A pot with a hole in the bottom, only just big enough. Clay dries faster. [iastate-succulents, rhs-cacti]
+- Hold a spiny plant with a band of folded newspaper or thick gloves. [rhs-cacti, iastate-succulents]
+
+**Winter rest.** Most rest from November to early March. The RHS keeps them at 8 to 10°C at night and gives them only enough water to stop them shrivelling, and a cool, dry, bright rest helps them flower. [rhs-cacti]
+
+**Stretched plants.** A plant that has stretched stays stretched. Many growers cut off the top, let it dry, root it as a cutting, and leave the stem, which often grows new heads. *growers*
+
+**Making new plants** (switch)
+
+*Offsets*
+- For: kinds that grow in clumps or rosettes, like aloe. [rhs-cacti, illinois-succulents]
+- How: cut off an offset once it has roots of its own, and pot it up. [rhs-cacti, illinois-succulents] Many growers wait until it is about a third the size of the plant, and let the cut dry for a few days first. *growers*
+
+*Stem cuttings*
+- For: branching plants and columnar cacti. [rhs-cacti]
+- How: cut a piece of stem, leave it to dry and seal for a day to a week, then set it in a gritty mix kept only just moist. [rhs-cacti, illinois-succulents]
+- How long: roots in a few weeks to a month. A gentle tug that meets resistance means roots. [illinois-succulents]
+
+*Leaves*
+- For: many succulents, like echeveria and crassula. [rhs-cacti] Many growers find that aloe, haworthia and the string-of plants rarely or never grow from a single leaf. *growers*
+- How: let a leaf dry like a cutting and lay it on the mix. [illinois-succulents] Many growers twist it off whole, so it breaks cleanly where it met the stem. *growers*
+- How long: a small plant forms at the base in one to two months, and the old leaf shrivels away. [illinois-succulents]
+
+*Seed*
+- How: sow in spring on a gritty mix, cover small seeds only with sand, keep it at about 21°C, bright but out of direct sun, under glass or a clear bag. Seedlings can take up to a year to be big enough to pot. [rhs-cacti]
+
+**Problems.** Mealybugs, spider mites and scale. Cold causes dead or discoloured patches. [rhs-cacti] (Each pest links to its guide.)
+
+**In Stikling.** Set the growing season to Rests in winter under What it likes, and Today asks "Gone dormant?" when its rest comes round. Leaves, cuttings, offsets and seed can each be tracked as a propagation.
+
+---
+
+## Carnivorous plants
+
+For: the families Droseraceae, Sarraceniaceae, Nepenthaceae, Lentibulariaceae and Cephalotaceae, and the genera Dionaea, Drosera, Sarracenia, Nepenthes, Pinguicula, Utricularia, Darlingtonia, Heliamphora and Cephalotus.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: A cool rest.
+
+**Intro.** Carnivorous plants grow in bogs and other places too poor for most plants, and catch insects for what the soil lacks. The easiest indoors are the Cape sundew, the Venus flytrap and the purple pitcher plant. Tropical pitcher plants (Nepenthes) need warmth and humid air. [rhs-carnivorous]
+
+**Water.** Rainwater, distilled water or reverse osmosis water. Tap water can kill them, above all hard water. [rhs-carnivorous, rhs-flytrap, icps-flytrap] The ICPS uses tap water only when it has under 90 ppm of dissolved salts, and says an ordinary water filter doesn't take them out. [icps-flytrap]
+
+**Standing in water.** Most stand in a saucer of water while they grow. The RHS keeps up to 2.5 cm in it, and the ICPS keeps the water at least 5 cm below the surface of the mix. [rhs-carnivorous, icps-flytrap] In winter the RHS waters from below and tips the rest away. [rhs-carnivorous]
+
+**Mix and pot**
+
+- A mix with almost no food in it, never potting compost or garden soil, and no fertiliser. [rhs-carnivorous, icps-flytrap]
+- The ICPS uses peat and sand 1 to 1, or pure sphagnum, and no perlite. The RHS avoids peat and uses sphagnum with fine pine bark. [icps-flytrap, rhs-carnivorous]
+- Keep a new plant in its pot and mix for the first year. [rhs-carnivorous]
+
+**Food**
+
+- Most catch enough on their own. [rhs-carnivorous] Indoors, where there is little to catch, the ICPS feeds flytraps live insects or soaked dried bloodworms. [icps-flytrap]
+- A trap only digests something that moves, so a dead insect needs the trap gently pressed after it closes. [rhs-flytrap, icps-flytrap]
+- A flytrap's trap closes only a few times before it dies, so don't set them off for fun. [rhs-flytrap]
+
+**Light.** The RHS keeps them bright but out of direct sun behind glass, which can scorch them. A flytrap in poor light makes weak traps, and in strong light they turn red. [rhs-carnivorous, rhs-flytrap] The ICPS finds a windowsill too dark for a flytrap and grows them under lights. [icps-flytrap] Pitcher plants with thick, waxy leaves do well in a window with some direct sun. [icps-nepenthes]
+
+**Winter for a flytrap** (switch)
+
+*A cool rest*
+- Why people pick it: the RHS gives flytraps and many other carnivorous plants a rest in winter. [rhs-carnivorous, rhs-flytrap]
+- How: a cooler spot in winter, not a warm room, but above 10°C indoors, and less water, given only when the mix starts to dry. Some lose leaves. [rhs-carnivorous, rhs-flytrap]
+
+*Growing on*
+- Why people pick it: the ICPS has grown flytraps indoors under lights for years without a rest, and says one is only needed for plants outdoors that freeze. [icps-flytrap] Many growers do the same, and others still give a rest. *growers*
+- How: under lights on a timer, kept the same all year. [icps-flytrap]
+- Watch for: a rest in the fridge for a plant indoors does nothing, the ICPS says. [icps-flytrap]
+
+Many growers say tropical pitcher plants don't rest at all. *growers*
+
+**Flowers.** The RHS cuts off flowers once they fade. [rhs-carnivorous] Many growers let flytraps flower and say it doesn't kill them. *growers*
+
+**Making new plants**
+
+- Flytraps: divide a large clump with four or more crowns. [rhs-carnivorous]
+- Sundews and butterworts: leaf cuttings, division or seed. [rhs-carnivorous]
+- Tropical pitcher plants: stem cuttings. [rhs-carnivorous]
+- Trumpet pitchers: divide large clumps, or rhizome cuttings. [rhs-carnivorous]
+
+**Problems.** Aphids and mealybugs on new shoots, and grey mould indoors. Most problems go away with the right water and mix. A few sundews among other plants catch fungus gnats. [rhs-carnivorous] (Each pest links to its guide.)
+
+**In Stikling.** For a flytrap given a rest, set the growing season to Rests in winter, kept cooler, and Today asks "Gone dormant?" when it comes round.
+
+---
+
+## Ferns
+
+For: the families Aspleniaceae, Davalliaceae, Nephrolepidaceae, Polypodiaceae and Pteridaceae, and the genera Adiantum, Asplenium, Blechnum, Cyrtomium, Davallia, Microsorum, Nephrolepis, Pellaea, Phlebodium, Platycerium, Polypodium and Pteris.
+Opens from: the plant's page, the genus page, Guides.
+The switch: none.
+
+**Intro.** The ferns kept indoors are ones that can't take temperatures below 10°C. [rhs-tender-ferns] Some grow in the ground, like Boston and maidenhair ferns. Others grow on trees in the wild, like bird's nest, hare's foot and staghorn ferns, and need less water than ground ferns. [rhs-ferns, clemson-ferns] Tough, leathery ferns manage indoor air better than fine, feathery ones. [clemson-ferns]
+
+**What to look at**
+
+- Brown fronds can come from too much water, hard tap water, direct sun, dry air, a cold draught or a radiator. Check the compost first: brown often means less water, not more. [rhs-ferns]
+- Brown leaflets on fine fronds, like a maidenhair's, mean dry air. [clemson-ferns]
+- Ground ferns should never dry out completely. The tree-growing kinds are watered once the compost starts to feel dry. [clemson-ferns, rhs-ferns]
+- Rows of brown dots under the fronds are spore cases, part of the fern. Scale insects can look like them. [ucipm]
+
+**Humid air.** A tray of damp gravel under the pot, plants grouped together, a bright bathroom or a glass case. Clemson stands the pot inside a bigger one lined with damp sphagnum. [rhs-ferns, clemson-ferns] Indoor air is driest in winter. [clemson-ferns]
+
+**Water.** Rainwater or filtered water where you can, at room temperature. Hard tap water undoes the slightly acid mix they like. [rhs-ferns]
+
+**Mix and pot**
+
+- An open, slightly acid mix: the RHS uses 2 parts peat-free ericaceous compost, 1 part perlite and 1 part orchid bark, or orchid compost alone for many tree-growing kinds. [rhs-ferns]
+- Repot in spring once the roots are crowded, into a pot just bigger than the roots. Don't bury the furry surface stems of a hare's foot fern. [rhs-ferns, clemson-ferns]
+- A staghorn fern grows on a board or bark, not in soil, held on by the round, flat fronds at its base. It needs very humid air. [clemson-ferns]
+
+**Making new plants**
+
+- Divide a clump so each part has plenty of fronds and roots, cutting a tight root ball if needed. [rhs-ferns, clemson-ferns]
+- Ferns with creeping stems, like hare's foot ferns, can be divided along the stem. [rhs-ferns]
+- From spores, which is possible but hard. [rhs-ferns]
+
+**Problems.** Scale insects and mites are the most common, and Boston ferns also get mealybugs. Many sprays harm ferns, so try one on a small part first. Pests can often be picked off or rinsed off with water. [clemson-ferns] (Each pest links to its guide.)
+
+**In Stikling.** A division with its own roots can be added straight away as a plant with its parent picked.
+
+Photo: fern-sori.webp
+
+---
+
+## Hoyas
+
+For: the genus Hoya.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Water.
+
+**Intro.** Hoyas, or wax plants, are climbing and trailing plants with thick leaves, from tropical Asia and Australia. Many grow on trees in the wild. They flower in clusters of waxy, often scented stars. [iastate-hoya]
+
+**What to look at**
+
+- Thick leaves hold a lot of water. Collectors wait until the leaves pucker slightly before watering. [psu-hoya] Wrinkled or soft leaves mean dry, but soft leaves in wet compost can mean damaged roots. [iastate-hoya]
+- Yellow leaves in compost that stays wet: too much water. [iastate-hoya]
+- Thin, stretched growth and no flowers: too little light. Leaves that redden or scorch: too much. [iastate-hoya]
+- Leaves that drop or blacken, and stems that die back, come from waterlogged compost or a cold winter. A plant with rotting roots seldom recovers, so take cuttings as soon as you see it. [rhs-hoya]
+
+**Mix and pot**
+
+- A chunky mix that drains at once, like equal parts orchid bark, peat-free compost and coarse perlite, or potting soil with bark and perlite or pumice. [rhs-hoya, iastate-hoya] Many growers use a mostly bark mix in a clear pot. *growers*
+- A snug pot. Hoyas flower better slightly pot-bound, and a big pot stays wet. Move up only one size, when the roots fill the pot. [iastate-hoya, rhs-hoya, psu-hoya]
+- A wire hoop, a trellis or a hanging pot. [rhs-hoya, iastate-hoya]
+
+**Flowers**
+
+- Hoyas flower from short spurs called peduncles, and many flower from the same one again and again. Don't cut them off with the old flowers. [iastate-hoya, rhs-hoya]
+- Once buds show, don't move or turn the plant, since a change of light or water drops them. [rhs-hoya, psu-hoya, iastate-hoya]
+- Young plants often take several years to flower. A plant that grows well but doesn't flower usually needs more light. [iastate-hoya, rhs-hoya]
+
+**Rest.** From October to February they grow little. The RHS keeps them a bit cooler and drier then, but never dry right through. [rhs-hoya]
+
+**Pruning.** Light pruning only, in late winter or early spring. Hoyas don't take hard pruning. [rhs-hoya]
+
+**Root a cutting in** (switch)
+
+Take a piece with one or two nodes and take off the lowest leaves. A single leaf roots, but never grows into a vine without a node at its base, which is how sweetheart hoyas are often sold. [iastate-hoya]
+
+*Water*
+- How: stand it with the node in water. [rhs-hoya, iastate-hoya]
+- How long: roots in two or three weeks. [rhs-hoya]
+
+*Sphagnum moss*
+- How: the node in damp sphagnum. [iastate-hoya] Some growers wrap moss round each node, lay the cuttings on a damp mix and close them in a clear bag. *growers*
+
+*A light mix*
+- How: a light propagation mix. [iastate-hoya] Many growers use perlite, which makes the move to a pot easy. *growers*
+
+**Layering.** A low shoot pegged down into a pot of cutting compost beside the plant, and cut free once it has rooted. [rhs-hoya]
+
+**Gloves.** The milky sap irritates skin. [rhs-hoya]
+
+**Problems.** Mealybugs, often hidden where the leaves meet the stem, scale, and spider mites, which come with very dry air. [iastate-hoya, rhs-hoya] (Each pest links to its guide.)
+
+**In Stikling.** The flowering log under More on the plant's page keeps when it budded and flowered, and after two years says when it usually starts.
+
+Photo: hoya-peduncle.webp
+
+---
+
+## Orchids
+
+For: the family Orchidaceae.
+Opens from: the plant's page, the genus page, Guides.
+The switch starts on: Running water through.
+
+**Intro.** This guide is about moth orchids (Phalaenopsis), the easiest to grow at home and the ones sold most. [rhs-orchids, aos-phal] In the wild their roots cling to trees in the open air. [rhs-phal] Other orchids, like slipper orchids, are looked after differently. [rhs-orchids]
+
+**What to look at**
+
+- The roots. Healthy roots are plump, firm and silvery white. Grey, shrivelled ones are too dry, and brown, mushy or hollow ones are dead. [rhs-phal, rhs-orchids] Many growers water once the roots turn from green to silvery. *growers*
+- A clear pot shows the roots and the moisture inside. [rhs-phal]
+- The weight of the pot: after a few waterings you can tell by lifting it. If in doubt, wait a day. [aos-phal]
+- The leaves: olive green is right. Darker means too little light, a red tinge too much. [aos-phal]
+
+**Water**
+
+- Never leave it standing in water, and blot any water left where the leaves meet in the middle, or it rots there. [rhs-phal, aos-phal]
+- Use water at room temperature. The RHS uses rainwater or boiled water, since they don't like the chlorine in tap water. The American Orchid Society says not to use softened or distilled water. [rhs-phal, rhs-orchids, aos-phal]
+- Bark holds less water than moss, so an orchid in moss needs water less often. [aos-phal]
+- Plain water now and then washes out the salts from feeding. [rhs-phal, aos-phal] Some growers water before they feed, since dry roots soak up the feed too strong. *growers*
+
+**How to water** (switch)
+
+*Running water through*
+- How: in the sink, let tepid water run through the pot for a minute, then let it drain completely. [aos-phal]
+
+*Soaking*
+- How: stand the pot in a bowl of water, then let it drain completely. [rhs-phal] Many growers soak for 15 to 30 minutes. *growers*
+
+Ice cubes, sometimes sold with orchids, are not in any of these sources, and many growers advise against them. *growers*
+
+**Mix and pot**
+
+- Bark orchid compost. Never multipurpose or loam-based compost, which kills them. [rhs-phal]
+- Repot every one to three years, when the bark breaks down, while the roots have green tips. Cut off dead roots, set the plant at the same height and don't bury the roots growing in the air. [rhs-phal, aos-phal]
+
+**Aerial roots.** Roots growing above the pot are normal. Don't bury or cut them. [rhs-phal]
+
+**After it flowers.** Both are common:
+
+- Cut the stem just above a node lower down, one of the small brown rings, and a side shoot often flowers again within 8 to 12 weeks. [rhs-phal, aos-phal, rhs-orchids]
+- Cut it down to the leaves. The plant flowers again within a year, with larger flowers on a stronger stem. [aos-phal] If the stem turns pale and dry, cut it off at the base. [rhs-phal]
+
+**Flowering again.** A healthy plant that hasn't flowered for a while can be moved somewhere about 5°C cooler for a month, or given more light. [rhs-phal, aos-phal] Cold draughts and changing temperatures make buds drop. [rhs-orchids, aos-phal]
+
+**Keikis.** A keiki is a small plant that sometimes grows from a node on the flower stem. Once it has several good roots it can be cut off and potted in orchid compost. [rhs-phal]
+
+**Problems.** Mealybugs. Water on the flowers spots them. [rhs-phal, rhs-orchids] (Each pest links to its guide.)
+
+**In Stikling.** The flowering log under More on the plant's page keeps spikes, flowers and when it's done, and after two years says when it usually starts. A keiki with its own roots is a plant: add it with its parent picked.
+
+Photo: orchid-keiki.webp
+
+---
+
+## Prayer plants
+
+For: the family Marantaceae (Maranta, Calathea and Goeppertia, Ctenanthe, Stromanthe).
+Opens from: the plant's page, the genus page, Guides.
+The switch: none.
+
+**Intro.** Prayer plants are the arrowroot family: Maranta, and calatheas, most of which are called Goeppertia now. Their leaves fold up at night. [rhs-calathea, illinois-prayer]
+
+**Where this comes from** (shown under the intro). The RHS's calathea guide is the one full source. The rest is a short University of Illinois page, one extension answer and what growers say, and each part says which.
+
+**What to look at**
+
+- Brown leaf tips and edges: dry air. [rhs-calathea] Water with a lot of minerals or additives can cause them too. [umd-prayer]
+- Patches that look soaked with water, mostly in winter: oedema, from compost kept too wet. [rhs-calathea]
+- Weak growth: too little light. [rhs-calathea]
+- Yellowing on the oldest, outermost leaves can be normal. [umd-prayer]
+- Don't let water stand where the stems meet, since they rot easily. [illinois-prayer]
+
+**Water.** Rainwater is best. Tap water left to stand for a day will do, and distilled water from a dehumidifier or tumble dryer works too. [rhs-calathea] They react to hard water and to what is added to tap water. [umd-prayer] Many growers water with distilled or rainwater and say the brown edges stopped. *growers* Keep the compost evenly moist while they grow, and let the top dry a little in winter, but never dry through. [rhs-calathea]
+
+**Humid air.** A tray of damp gravel with the water below the top of the gravel, plants grouped together, or a bathroom. Sources differ on misting: the RHS mists the leaves regularly, and Maryland's answer says to stop, since wet leaves invite disease. [rhs-calathea, umd-prayer]
+
+**Mix and pot.** A peat-free compost that holds water and drains, or multipurpose compost with about 10% grit. Repot every few years, one or two sizes up. [rhs-calathea] Many growers check the root ball of a new plant for a mesh plug from the nursery. *growers*
+
+**Making new plants**
+
+- Division in spring: cut the root ball into pieces with several leaves each, pot them on their own, and keep them warm, humid and moist until they grow. [rhs-calathea]
+- Branching kinds like Ctenanthe: cut just below where a stem branches and root it in a covered pot. [rhs-calathea]
+
+**Problems.** Spider mites, mealybugs and soft scale, and fungus gnats. [rhs-calathea] (Each pest links to its guide.)
+
+**In Stikling.** For the common ones, the plant form offers the light, water and humidity they usually like.
+
+---
+
+## Notes on the plant group guides
+
+- **Nothing about how often.** The RHS guides give watering and feeding by the week and month, the AOS sheet "once a week" for orchids in bark, and Iowa State "every 2 to 3 weeks" for succulents. The guides take only the sign each is checked by (compost dry, roots silvery, pot light) and leave the schedules out, like the rest of the guides. No feeding schedule is given anywhere.
+- **Where sources disagree** the guide says who says what: tap water for carnivorous plants (RHS against ICPS), peat (ICPS uses it, the RHS avoids it), a flytrap's winter rest (a switch), misting prayer plants, distilled water for orchids (the RHS uses rain or boiled water, the AOS says not distilled).
+- **Families** come from `plant-regions.json`. The genus lists cover genera the dictionary has no family for (Pinguicula, Cephalotus, Agave, Phlebodium and others) and keep the matching working for a genus the dictionary doesn't know.
+- **The "In Stikling" lines** name features that are built: dormancy status, growing season, the flowering log, propagation kinds (cutting, corm, offset, seed, division, leaf), rooting aids and adding a rooted pup as a plant.
+- **Left out.** Feeding amounts, keiki paste, Bti for bromeliad cups (outdoors in Florida), and anything about growing outdoors.

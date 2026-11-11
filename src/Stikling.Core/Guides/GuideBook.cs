@@ -21,10 +21,20 @@ public static class GuideBook
     public const string Scale = "scale";
     public const string Aphids = "aphids";
     public const string Whitefly = "whitefly";
+    public const string Aroids = "aroids";
+    public const string Begonias = "begonias";
+    public const string Bromeliads = "bromeliads";
+    public const string Succulents = "cacti-and-succulents";
+    public const string Carnivorous = "carnivorous-plants";
+    public const string Ferns = "ferns";
+    public const string Hoyas = "hoyas";
+    public const string Orchids = "orchids";
+    public const string PrayerPlants = "prayer-plants";
 
     public const string Propagating = "Propagating";
     public const string GrowingMedia = "GrowingMedia";
     public const string Pests = "Pests";
+    public const string PlantGroups = "PlantGroups";
 
     private static readonly GuideSource RhsCuttings = new("rhs-cuttings", "Hunt, How to take cuttings from houseplants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/houseplants/how-to-take-cuttings-from-houseplants");
     private static readonly GuideSource RhsMedia = new("rhs-media", "A guide to compost mixes for houseplants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/houseplants/growing-media-houseplants");
@@ -60,11 +70,41 @@ public static class GuideBook
     private static readonly GuideSource RhsAphids = new("rhs-aphids", "Aphids", "Royal Horticultural Society", "https://www.rhs.org.uk/biodiversity/aphids");
     private static readonly GuideSource RhsWhitefly = new("rhs-whitefly", "Glasshouse whitefly", "Royal Horticultural Society", "https://www.rhs.org.uk/biodiversity/glasshouse-whitefly");
 
+    private static readonly GuideSource RhsMonstera = new("rhs-monstera", "How to grow Swiss cheese plants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/swiss-cheese-plants/how-to-grow-swiss-cheese-plants");
+    private static readonly GuideSource RhsPhilodendron = new("rhs-philodendron", "How to grow philodendrons", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/philodendron/growing-guide");
+    private static readonly GuideSource RhsAlocasia = new("rhs-alocasia", "How to grow alocasias", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/alocasia/growing-guide");
+    private static readonly GuideSource IastateAroids = new("iastate-aroids", "Haynes, A is for Aroids!, 2021", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/article/2021/01/aroids");
+    private static readonly GuideSource IastatePhilodendron = new("iastate-philodendron", "Steil, Growing Philodendrons at Home, reviewed 2025", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/how-to/growing-philodendrons-home");
+    private static readonly GuideSource RhsHoya = new("rhs-hoya", "How to grow hoya", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/hoya/how-to-grow");
+    private static readonly GuideSource IastateHoya = new("iastate-hoya", "Steil, All About Hoyas, reviewed 2026", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/how-to/all-about-hoyas");
+    private static readonly GuideSource PsuHoya = new("psu-hoya", "Smith, Hoyas as Houseplants, 2026", "Penn State Extension", "https://extension.psu.edu/hoyas-as-houseplants");
+    private static readonly GuideSource RhsPhal = new("rhs-phal", "How to grow Phalaenopsis (moth orchids)", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/phalaenopsis/growing-guide");
+    private static readonly GuideSource RhsOrchids = new("rhs-orchids", "Richards, Top tips for growing orchids at home", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/houseplants/top-tips-for-growing-orchids-at-home");
+    private static readonly GuideSource AosPhal = new("aos-phal", "Sullivan, Novice Culture Sheet: Phalaenopsis, 2012", "American Orchid Society", "https://secure.aos.org/media/Content-Images/PDFs/Phalaenopsis_novice.pdf");
+    private static readonly GuideSource IastateSucculents = new("iastate-succulents", "Steil, Growing Succulents Indoors, reviewed 2024", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/how-to/growing-succulents-indoors");
+    private static readonly GuideSource IllinoisSucculents = new("illinois-succulents", "Anderson, Propagating Succulents and Cacti, 2015", "University of Illinois Extension", "https://extension.illinois.edu/blogs/hort-home-landscape/2015-06-04-propagating-succulents-and-cacti");
+    private static readonly GuideSource RhsCarnivorous = new("rhs-carnivorous", "How to grow carnivorous plants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/carnivorous/growing-guide");
+    private static readonly GuideSource RhsFlytrap = new("rhs-flytrap", "Venus fly trap", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/venus-fly-trap");
+    private static readonly GuideSource IcpsFlytrap = new("icps-flytrap", "Brittnacher, Growing Dionaea muscipula, updated 2019", "International Carnivorous Plant Society", "https://www.carnivorousplants.org/grow/guides/Dionaea");
+    private static readonly GuideSource IcpsNepenthes = new("icps-nepenthes", "Brittnacher, Growing Nepenthes", "International Carnivorous Plant Society", "https://www.carnivorousplants.org/grow/guides/Nepenthes");
+    private static readonly GuideSource RhsBromeliads = new("rhs-bromeliads", "How to grow bromeliads", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/bromeliads/growing-guide");
+    private static readonly GuideSource RhsAirplants = new("rhs-airplants", "Air plants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/houseplants/air-plants");
+    private static readonly GuideSource UfBromeliads = new("uf-bromeliads", "Bromeliads", "UF/IFAS Gardening Solutions", "https://gardeningsolutions.ifas.ufl.edu/plants/ornamentals/bromeliads/");
+    private static readonly GuideSource RhsCalathea = new("rhs-calathea", "How to grow calatheas", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/calathea/growing-guide");
+    private static readonly GuideSource IllinoisPrayer = new("illinois-prayer", "Prayer Plant", "University of Illinois Extension", "https://extension.illinois.edu/houseplants/prayer-plant");
+    private static readonly GuideSource UmdPrayer = new("umd-prayer", "Prayer plant leaves turning yellow/brown, 2023", "Home and Garden Information Center, University of Maryland Extension, on Ask Extension", "https://ask.extension.org/kb/faq.php?id=852330");
+    private static readonly GuideSource RhsFerns = new("rhs-ferns", "How to grow epiphytic ferns", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/epiphytic-ferns/how-to-grow-epiphytic-ferns");
+    private static readonly GuideSource RhsTenderFerns = new("rhs-tender-ferns", "Tender ferns", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/types/ferns/tender-ferns-houseplants");
+    private static readonly GuideSource ClemsonFerns = new("clemson-ferns", "Russ, Pertuit and Smith, Indoor Ferns, HGIC 1505, revised 2015", "Clemson Cooperative Extension", "https://hgic.clemson.edu/factsheet/indoor-ferns/");
+    private static readonly GuideSource RhsBegonias = new("rhs-begonias", "Begonias: houseplants", "Royal Horticultural Society", "https://www.rhs.org.uk/plants/begonias/houseplants");
+    private static readonly GuideSource IastateBegonias = new("iastate-begonias", "Haynes, Growing Begonias in Iowa, reviewed 2024", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/how-to/growing-begonias-iowa");
+    private static readonly GuideSource IastateLeafvein = new("iastate-leafvein", "Steil, How to Propagate Houseplants by Leaf Vein Cuttings, reviewed 2025", "Iowa State University Extension and Outreach", "https://yardandgarden.extension.iastate.edu/how-to/how-propagate-houseplants-leaf-vein-cuttings");
+
     private static readonly string[] Ingredients =
         ["Multipurpose", "Peat", "Coir", "Loam", "Bark", "Perlite", "Pumice", "Grit", "Vermiculite", "Castings", "Charcoal", "SphagnumMoss"];
 
-    private static GuidePhoto Photo(string file, string captionKey, int width, int height, string author, string licence, string source) =>
-        new(file, captionKey, width, height, author, licence, "https://commons.wikimedia.org/wiki/File:" + source);
+    private static GuidePhoto Photo(string file, string captionKey, int width, int height, string author, string licence, string source, bool cropped = false) =>
+        new(file, captionKey, width, height, author, licence, "https://commons.wikimedia.org/wiki/File:" + source, cropped);
 
     private static GuideSection Section(string title, params GuideBlock[] blocks) => new(title, blocks);
 
@@ -425,6 +465,211 @@ public static class GuideBook
             Section("InStikling", new GuideText("Whitefly_InApp")),
         ],
         [RhsWhitefly, UcWhiteflies, Uc, RhsBio]),
+
+        new(Aroids, PlantGroups, "TitleAroids", "RowAroids", "Aroids_Lead", null, "LinkAroids",
+        [
+            Section("LookAt", Items("Aroids_Look1", "Aroids_Look2", "Aroids_Look3", "Aroids_Look4", "Aroids_Look5")),
+            Section("MixPot", Items("Aroids_Mix1", "Aroids_Mix2", "Aroids_Mix3")),
+            new GuideMethods("Aroids_Climb",
+            [
+                Method("moss-pole", "Aroids_MossPole",
+                    new GuideField("FieldWhy", "Aroids_MossWhy"),
+                    new GuideField("FieldHow", "Aroids_MossHow"),
+                    new GuideField("FieldWatch", "Aroids_MossWatch")),
+                Method("stake", "Aroids_Stake",
+                    new GuideField("FieldWhy", "Aroids_StakeWhy"),
+                    new GuideField("FieldHow", "Aroids_StakeHow")),
+                Method("trail", "Aroids_Trail",
+                    new GuideField("FieldWhy", "Aroids_TrailWhy"),
+                    new GuideField("FieldWatch", "Aroids_TrailWatch")),
+            ], NoteKey: "Aroids_ClimbNote"),
+            Section("Aroids_AerialTitle", new GuideText("Aroids_Aerial")),
+            Section("Aroids_WinterTitle", new GuideText("Aroids_Winter")),
+            Section("NewPlants", Items("Aroids_New1", "Aroids_New2", "Aroids_New3", "Aroids_New4")),
+            Section("GlovesTitle", new GuideText("Aroids_Gloves")),
+            Section("Problems", new GuidePestLinks("Aroids_Problems", [Mealybugs, SpiderMites, Scale])),
+            Section("InStikling", new GuideText("Aroids_InApp")),
+        ],
+        [RhsMonstera, RhsPhilodendron, RhsAlocasia, IastatePhilodendron, IastateAroids]),
+
+        new(Begonias, PlantGroups, "TitleBegonias", "RowBegonias", "Begonias_Lead", null, "LinkBegonias",
+        [
+            Section("LookAt", Items("Begonias_Look1", "Begonias_Look2", "Begonias_Look3", "Begonias_Look4")),
+            Section("Begonias_DryTitle", new GuideText("Begonias_Dry")),
+            Section("Begonias_HumidTitle", new GuideText("Begonias_Humid")),
+            Section("MixPot", new GuideText("Begonias_Mix")),
+            new GuideMethods("NewPlants",
+            [
+                Method("leaf", "Begonias_Leaf",
+                    new GuideField("FieldFor", "Begonias_LeafFor"),
+                    new GuideField("FieldHow", "Begonias_LeafHow"),
+                    new GuideField("FieldHowLong", "Begonias_LeafLong")),
+                Method("stem", "Begonias_Stem",
+                    new GuideField("FieldFor", "Begonias_StemFor"),
+                    new GuideField("FieldHow", "Begonias_StemHow")),
+                Method("division", "Begonias_Division",
+                    new GuideField("FieldFor", "Begonias_DivisionFor"),
+                    new GuideField("FieldHow", "Begonias_DivisionHow")),
+            ]),
+            Section("RestTitle", new GuideText("Begonias_Rest")),
+            Section("Problems", new GuidePestLinks("Begonias_Problems", [Aphids, SpiderMites])),
+            Section("InStikling", new GuideText("Begonias_InApp")),
+        ],
+        [RhsBegonias, IastateBegonias, IastateLeafvein]),
+
+        new(Bromeliads, PlantGroups, "TitleBrom", "RowBrom", "Brom_Lead", null, "LinkBrom",
+        [
+            Section("LookAt", Items("Brom_Look1", "Brom_Look2", "Brom_Look3", "Brom_Look4")),
+            Section("Brom_CupTitle", new GuideText("Brom_Cup")),
+            Section("MixPot", new GuideText("Brom_Mix")),
+            Section("Brom_AirTitle", Items("Brom_Air1", "Brom_Air2", "Brom_Air3", "Brom_Air4")),
+            new GuideMethods("Brom_Watering",
+            [
+                Method("soaking", "Brom_Soaking",
+                    new GuideField("FieldWhy", "Brom_SoakWhy"),
+                    new GuideField("FieldHow", "Brom_SoakHow"),
+                    new GuideField("FieldWatch", "Brom_SoakWatch")),
+                Method("misting", "Brom_Misting",
+                    new GuideField("FieldWhy", "Brom_MistWhy"),
+                    new GuideField("FieldHow", "Brom_MistHow")),
+            ]),
+            Section("Brom_FlowersTitle", new GuideText("Brom_Flowers")),
+            Section("NewPlants", new GuideText("Brom_New")),
+            Section("Problems", new GuidePestLinks("Brom_Problems", [Mealybugs, Scale])),
+            Section("InStikling", new GuideText("Brom_InApp")),
+        ],
+        [RhsAirplants, RhsBromeliads, UfBromeliads]),
+
+        new(Succulents, PlantGroups, "TitleSucc", "RowSucc", "Succ_Lead", null, "LinkSucc",
+        [
+            Section("LookAt", Items("Succ_Look1", "Succ_Look2", "Succ_Look3", "Succ_Look4", "Succ_Look5")),
+            Section("Succ_ForestTitle", new GuideText("Succ_Forest")),
+            Section("MixPot", Items("Succ_Mix1", "Succ_Mix2", "Succ_Mix3")),
+            Section("Succ_RestTitle", new GuideText("Succ_Rest")),
+            Section("Succ_StretchTitle", new GuideText("Succ_Stretch")),
+            new GuideMethods("NewPlants",
+            [
+                Method("offsets", "Succ_Offsets",
+                    new GuideField("FieldFor", "Succ_OffsetsFor"),
+                    new GuideField("FieldHow", "Succ_OffsetsHow")),
+                Method("stem", "Succ_Stem",
+                    new GuideField("FieldFor", "Succ_StemFor"),
+                    new GuideField("FieldHow", "Succ_StemHow"),
+                    new GuideField("FieldHowLong", "Succ_StemLong")),
+                Method("leaves", "Succ_Leaves",
+                    new GuideField("FieldFor", "Succ_LeavesFor"),
+                    new GuideField("FieldHow", "Succ_LeavesHow"),
+                    new GuideField("FieldHowLong", "Succ_LeavesLong")),
+                Method("seed", "Succ_Seed",
+                    new GuideField("FieldHow", "Succ_SeedHow")),
+            ]),
+            Section("Problems", new GuidePestLinks("Succ_Problems", [Mealybugs, SpiderMites, Scale])),
+            Section("InStikling", new GuideText("Succ_InApp")),
+        ],
+        [RhsCacti, IastateSucculents, IllinoisSucculents]),
+
+        new(Carnivorous, PlantGroups, "TitleCarniv", "RowCarniv", "Carniv_Lead", null, "LinkCarniv",
+        [
+            Section("WaterTitle", new GuideText("Carniv_Water")),
+            Section("Carniv_StandingTitle", new GuideText("Carniv_Standing")),
+            Section("MixPot", Items("Carniv_Mix1", "Carniv_Mix2", "Carniv_Mix3")),
+            Section("Carniv_FoodTitle", Items("Carniv_Food1", "Carniv_Food2", "Carniv_Food3")),
+            Section("Carniv_LightTitle", new GuideText("Carniv_Light")),
+            new GuideMethods("Carniv_Winter",
+            [
+                Method("rest", "Carniv_Rest",
+                    new GuideField("FieldWhy", "Carniv_RestWhy"),
+                    new GuideField("FieldHow", "Carniv_RestHow")),
+                Method("grow-on", "Carniv_GrowOn",
+                    new GuideField("FieldWhy", "Carniv_GrowWhy"),
+                    new GuideField("FieldHow", "Carniv_GrowHow"),
+                    new GuideField("FieldWatch", "Carniv_GrowWatch")),
+            ]),
+            new GuideText("Carniv_Tropical"),
+            Section("FlowersTitle", new GuideText("Carniv_Flowers")),
+            Section("NewPlants", Items("Carniv_New1", "Carniv_New2", "Carniv_New3", "Carniv_New4")),
+            Section("Problems", new GuidePestLinks("Carniv_Problems", [Aphids, Mealybugs, FungusGnats])),
+            Section("InStikling", new GuideText("Carniv_InApp")),
+        ],
+        [RhsCarnivorous, IcpsFlytrap, RhsFlytrap, IcpsNepenthes]),
+
+        new(Ferns, PlantGroups, "TitleFerns", "RowFerns", "Ferns_Lead", null, "LinkFerns",
+        [
+            Section("LookAt",
+                Items("Ferns_Look1", "Ferns_Look2", "Ferns_Look3", "Ferns_Look4"),
+                new GuidePhotos([Photo("fern-sori.webp", "Ferns_PhotoSori", 800, 600, "Ixitixel", "CC BY-SA 3.0", "Nephrolepis_cordifolia_(Sori).jpg")])),
+            Section("HumidAirTitle", new GuideText("Ferns_Humid")),
+            Section("WaterTitle", new GuideText("Ferns_Water")),
+            Section("MixPot", Items("Ferns_Mix1", "Ferns_Mix2", "Ferns_Mix3")),
+            Section("NewPlants", Items("Ferns_New1", "Ferns_New2", "Ferns_New3")),
+            Section("Problems", new GuidePestLinks("Ferns_Problems", [Scale, SpiderMites, Mealybugs])),
+            Section("InStikling", new GuideText("Ferns_InApp")),
+        ],
+        [RhsFerns, ClemsonFerns, RhsTenderFerns, Uc]),
+
+        new(Hoyas, PlantGroups, "TitleHoyas", "RowHoyas", "Hoyas_Lead", null, "LinkHoyas",
+        [
+            Section("LookAt", Items("Hoyas_Look1", "Hoyas_Look2", "Hoyas_Look3", "Hoyas_Look4")),
+            Section("MixPot", Items("Hoyas_Mix1", "Hoyas_Mix2", "Hoyas_Mix3")),
+            Section("FlowersTitle",
+                Items("Hoyas_Flowers1", "Hoyas_Flowers2", "Hoyas_Flowers3"),
+                new GuidePhotos([Photo("hoya-peduncle.webp", "Hoyas_PhotoPeduncle", 800, 800, "MPF (Wikimedia Commons user)", "CC BY 2.5", "Hoya_carnosa1.jpg")])),
+            Section("RestTitle", new GuideText("Hoyas_Rest")),
+            Section("Hoyas_PruningTitle", new GuideText("Hoyas_Pruning")),
+            new GuideMethods("Hoyas_Root",
+            [
+                Method("water", "Hoyas_Water",
+                    new GuideField("FieldHow", "Hoyas_WaterHow"),
+                    new GuideField("FieldHowLong", "Hoyas_WaterLong")),
+                Method("sphagnum", "Hoyas_Sphagnum",
+                    new GuideField("FieldHow", "Hoyas_SphagnumHow")),
+                Method("mix", "Hoyas_LightMix",
+                    new GuideField("FieldHow", "Hoyas_MixHow")),
+            ], NoteKey: "Hoyas_RootNote"),
+            Section("Hoyas_LayeringTitle", new GuideText("Hoyas_Layering")),
+            Section("GlovesTitle", new GuideText("Hoyas_Gloves")),
+            Section("Problems", new GuidePestLinks("Hoyas_Problems", [Mealybugs, Scale, SpiderMites])),
+            Section("InStikling", new GuideText("Hoyas_InApp")),
+        ],
+        [IastateHoya, RhsHoya, PsuHoya]),
+
+        new(Orchids, PlantGroups, "TitleOrchids", "RowOrchids", "Orchids_Lead", null, "LinkOrchids",
+        [
+            Section("LookAt", Items("Orchids_Look1", "Orchids_Look2", "Orchids_Look3", "Orchids_Look4")),
+            Section("WaterTitle", Items("Orchids_Water1", "Orchids_Water2", "Orchids_Water3", "Orchids_Water4")),
+            new GuideMethods("Orchids_How",
+            [
+                Method("run", "Orchids_Run",
+                    new GuideField("FieldHow", "Orchids_RunHow")),
+                Method("soak", "Orchids_Soak",
+                    new GuideField("FieldHow", "Orchids_SoakHow")),
+            ]),
+            new GuideText("Orchids_Ice"),
+            Section("MixPot", Items("Orchids_Mix1", "Orchids_Mix2")),
+            Section("Orchids_AerialTitle", new GuideText("Orchids_Aerial")),
+            Section("Orchids_AfterTitle",
+                new GuideText("Orchids_AfterLead"),
+                Items("Orchids_After1", "Orchids_After2")),
+            Section("Orchids_AgainTitle", new GuideText("Orchids_Again")),
+            Section("Orchids_KeikisTitle",
+                new GuideText("Orchids_Keikis"),
+                new GuidePhotos([Photo("orchid-keiki.webp", "Orchids_PhotoKeiki", 600, 800, "Dominique Lyon", "CC0", "Phalaenopsis_keiki.jpg")])),
+            Section("Problems", new GuidePestLinks("Orchids_Problems", [Mealybugs])),
+            Section("InStikling", new GuideText("Orchids_InApp")),
+        ],
+        [RhsPhal, AosPhal, RhsOrchids]),
+
+        new(PrayerPlants, PlantGroups, "TitlePrayer", "RowPrayer", "Prayer_Lead", "Prayer_Where", "LinkPrayer",
+        [
+            Section("LookAt", Items("Prayer_Look1", "Prayer_Look2", "Prayer_Look3", "Prayer_Look4", "Prayer_Look5")),
+            Section("WaterTitle", new GuideText("Prayer_Water")),
+            Section("HumidAirTitle", new GuideText("Prayer_Humid")),
+            Section("MixPot", new GuideText("Prayer_Mix")),
+            Section("NewPlants", Items("Prayer_New1", "Prayer_New2")),
+            Section("Problems", new GuidePestLinks("Prayer_Problems", [SpiderMites, Mealybugs, Scale, FungusGnats])),
+            Section("InStikling", new GuideText("Prayer_InApp")),
+        ],
+        [RhsCalathea, UmdPrayer, IllinoisPrayer]),
     ];
 
     /// <summary>The guide for a pest a case can be for. A case for Other opens Checking for pests.</summary>
@@ -439,6 +684,53 @@ public static class GuideBook
         Pest.Whitefly => Whitefly,
         _ => CheckingForPests
     };
+
+    /// <summary>
+    /// The families and genera each plant group guide is for, see docs/dev/guides.md. A family is matched first, then a genus,
+    /// so a genus the dictionary has no family for still gets its guide. Hoyas are the genus only, since their family
+    /// (Apocynaceae) has plants no guide here is about.
+    /// </summary>
+    private static readonly (string Guide, string[] Families, string[] Genera)[] PlantGroupMembers =
+    [
+        (Aroids, ["Araceae"], []),
+        (Begonias, ["Begoniaceae"], ["Begonia"]),
+        (Bromeliads, ["Bromeliaceae"], []),
+        (Succulents, ["Cactaceae", "Crassulaceae", "Aizoaceae"], ["Aloe", "Haworthia", "Haworthiopsis", "Gasteria", "Agave", "Curio"]),
+        (Carnivorous, ["Droseraceae", "Sarraceniaceae", "Nepenthaceae", "Lentibulariaceae", "Cephalotaceae"],
+            ["Dionaea", "Drosera", "Sarracenia", "Nepenthes", "Pinguicula", "Utricularia", "Darlingtonia", "Heliamphora", "Cephalotus"]),
+        (Ferns, ["Aspleniaceae", "Davalliaceae", "Nephrolepidaceae", "Polypodiaceae", "Pteridaceae"],
+            ["Adiantum", "Asplenium", "Blechnum", "Cyrtomium", "Davallia", "Microsorum", "Nephrolepis", "Pellaea", "Phlebodium", "Platycerium", "Polypodium", "Pteris"]),
+        (Hoyas, [], ["Hoya"]),
+        (Orchids, ["Orchidaceae"], []),
+        (PrayerPlants, ["Marantaceae"], ["Maranta", "Calathea", "Goeppertia", "Ctenanthe", "Stromanthe"]),
+    ];
+
+    /// <summary>
+    /// The plant group guide for a plant, from its genus and its family where the dictionary has one, or null.
+    /// Ignores case. The family is checked first, then the genus.
+    /// </summary>
+    public static string? ForPlant(string? genus, string? family)
+    {
+        if (family?.Trim() is { Length: > 0 } botanicalFamily)
+        {
+            foreach (var (guide, families, _) in PlantGroupMembers)
+            {
+                if (families.Contains(botanicalFamily, StringComparer.OrdinalIgnoreCase))
+                    return guide;
+            }
+        }
+
+        if (genus?.Trim() is { Length: > 0 } name)
+        {
+            foreach (var (guide, _, genera) in PlantGroupMembers)
+            {
+                if (genera.Contains(name, StringComparer.OrdinalIgnoreCase))
+                    return guide;
+            }
+        }
+
+        return null;
+    }
 
     public static Guide? Find(string? id) => All.FirstOrDefault(g => g.Id == id);
 

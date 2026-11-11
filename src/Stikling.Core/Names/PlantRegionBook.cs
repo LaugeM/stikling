@@ -4,7 +4,8 @@ namespace Stikling.Core.Names;
 
 /// <summary>What the book knows about a plant. <paramref name="Areas"/> are Kew level 3 codes.</summary>
 /// <param name="SpeciesFound">False when a species was looked up and isn't in the file.</param>
-public sealed record PlantRegionInfo(string? Family, IReadOnlyList<string> Areas, bool SpeciesFound);
+/// <param name="Genus">The genus it was found under, which is the name it goes by now when an old name was looked up.</param>
+public sealed record PlantRegionInfo(string? Family, IReadOnlyList<string> Areas, bool SpeciesFound, string? Genus = null);
 
 /// <summary>Looks up a plant's family and where it grows wild by genus and species.</summary>
 public sealed class PlantRegionBook
@@ -49,7 +50,7 @@ public sealed class PlantRegionBook
 
         var lookUp = NameKey.Of(PlantNames.SpeciesToLookUp(species, qualifier));
         if (lookUp.Length == 0)
-            return new PlantRegionInfo(found.Family, [], true);
+            return new PlantRegionInfo(found.Family, [], true, found.Name);
 
         var all = speciesByGenus[key];
         if (!all.TryGetValue(lookUp, out var codes))
@@ -64,7 +65,7 @@ public sealed class PlantRegionBook
         }
 
         return codes is null
-            ? new PlantRegionInfo(found.Family, [], false)
-            : new PlantRegionInfo(found.Family, codes.Split(' ', StringSplitOptions.RemoveEmptyEntries), true);
+            ? new PlantRegionInfo(found.Family, [], false, found.Name)
+            : new PlantRegionInfo(found.Family, codes.Split(' ', StringSplitOptions.RemoveEmptyEntries), true, found.Name);
     }
 }

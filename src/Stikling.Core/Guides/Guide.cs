@@ -65,6 +65,13 @@ public sealed record GuidePhotos(IReadOnlyList<GuidePhoto> Photos) : GuideBlock;
 /// <summary>A paragraph that ends with a link to another guide.</summary>
 public sealed record GuideSeeAlso(string TextKey, string GuideId) : GuideBlock;
 
+/// <summary>
+/// The problems of a plant group guide: a paragraph, then "Guides:" and a link to the guide of each pest it names.
+/// </summary>
+/// <param name="TextKey">The paragraph.</param>
+/// <param name="GuideIds">The pest guides the links open, in the order shown.</param>
+public sealed record GuidePestLinks(string TextKey, IReadOnlyList<string> GuideIds) : GuideBlock;
+
 /// <summary>The end of the semi-hydro guide: start tracking the move for the plant it was opened from.</summary>
 public sealed record GuideTrack : GuideBlock;
 
@@ -153,6 +160,10 @@ public sealed record Guide(
                 break;
             case GuideSeeAlso seeAlso:
                 yield return seeAlso.TextKey;
+                break;
+            case GuidePestLinks pestLinks:
+                yield return pestLinks.TextKey;
+                yield return "GuidesFor";
                 break;
             case GuideMethods methods:
                 yield return methods.LabelKey;

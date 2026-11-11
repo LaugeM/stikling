@@ -68,7 +68,7 @@ public class GuideBookTests
         // The texts that are not part of a guide's structure: the list, the page around a guide and the links to it
         string[] shared =
         [
-            "PageTitle", "Title", "Intro", "GroupPropagating", "GroupGrowingMedia", "GroupPests", "PhotoCredit", "PhotoCropped", "BackToGuides", "BackTo", "BackToHelp",
+            "PageTitle", "Title", "Intro", "GroupPropagating", "GroupGrowingMedia", "GroupPests", "GroupPlantGroups", "GuidesFor", "PhotoCredit", "PhotoCropped", "BackToGuides", "BackTo", "BackToHelp",
             "LinkAll", "SearchGroup", "SuppliesRowDetail", "WrittenFrom", "WhereThisComesFrom", "InStikling",
             "TrackHeading", "TrackStart", "TrackMoving", "TrackMovingLink", "TrackFromList"
         ];
@@ -88,7 +88,7 @@ public class GuideBookTests
     {
         foreach (var guide in GuideBook.All)
         {
-            Assert.Contains(guide.Group, new[] { GuideBook.Propagating, GuideBook.GrowingMedia, GuideBook.Pests });
+            Assert.Contains(guide.Group, new[] { GuideBook.Propagating, GuideBook.GrowingMedia, GuideBook.Pests, GuideBook.PlantGroups });
             Assert.True(Read("Guides.resx").ContainsKey("Group" + guide.Group));
         }
 
@@ -97,13 +97,80 @@ public class GuideBookTests
     }
 
     [Fact]
-    public void The_list_shows_the_guides_in_order_under_Propagating_Growing_media_and_Pests()
+    public void The_list_shows_the_guides_in_order_under_Propagating_Growing_media_Pests_and_By_plant_group()
     {
         Assert.Equal(
             [GuideBook.Cutting, GuideBook.SemiHydro, GuideBook.Wick, GuideBook.Mixing, GuideBook.CheckingForPests, GuideBook.Thrips,
-             GuideBook.SpiderMites, GuideBook.FungusGnats, GuideBook.Mealybugs, GuideBook.Scale, GuideBook.Aphids, GuideBook.Whitefly],
+             GuideBook.SpiderMites, GuideBook.FungusGnats, GuideBook.Mealybugs, GuideBook.Scale, GuideBook.Aphids, GuideBook.Whitefly,
+             GuideBook.Aroids, GuideBook.Begonias, GuideBook.Bromeliads, GuideBook.Succulents, GuideBook.Carnivorous, GuideBook.Ferns,
+             GuideBook.Hoyas, GuideBook.Orchids, GuideBook.PrayerPlants],
             GuideBook.All.Select(g => g.Id));
-        Assert.Equal([GuideBook.Propagating, GuideBook.GrowingMedia, GuideBook.Pests], GuideBook.All.Select(g => g.Group).Distinct());
+        Assert.Equal([GuideBook.Propagating, GuideBook.GrowingMedia, GuideBook.Pests, GuideBook.PlantGroups], GuideBook.All.Select(g => g.Group).Distinct());
+    }
+
+    [Fact]
+    public void Every_pest_link_in_a_plant_group_guide_is_a_pest_guide()
+    {
+        var pestGuides = GuideBook.All.Where(g => g.Group == GuideBook.Pests).Select(g => g.Id).ToHashSet();
+        var links = GuideBook.All.Where(g => g.Group == GuideBook.PlantGroups).SelectMany(g => g.Blocks.SelectMany(Seen)).OfType<GuidePestLinks>().ToList();
+        Assert.Equal(9, links.Count);
+        Assert.All(links, l =>
+        {
+            Assert.NotEmpty(l.GuideIds);
+            Assert.All(l.GuideIds, id => Assert.Contains(id, pestGuides));
+        });
+    }
+
+    [Fact]
+    public void Every_plant_group_guide_has_the_parts_it_has_something_special_for()
+    {
+        foreach (var guide in GuideBook.All.Where(g => g.Group == GuideBook.PlantGroups))
+        {
+            var sections = guide.Blocks.SelectMany(Seen).OfType<GuideSection>().Select(s => s.TitleKey).ToList();
+            Assert.Contains("Problems", sections);
+            Assert.Contains("InStikling", sections);
+            Assert.Contains(guide.Blocks.SelectMany(Seen), b => b is GuidePestLinks);
+        }
+    }
+
+    [Theory]
+    [InlineData(null, "Araceae", GuideBook.Aroids)]
+    [InlineData("Monstera", "araceae", GuideBook.Aroids)]
+    [InlineData("hoya", "Apocynaceae", GuideBook.Hoyas)]
+    [InlineData("Hoya", null, GuideBook.Hoyas)]
+    [InlineData("Dischidia", "Apocynaceae", null)]
+    [InlineData("Pinguicula", null, GuideBook.Carnivorous)]
+    [InlineData("Phlebodium", null, GuideBook.Ferns)]
+    [InlineData(null, "Polypodiaceae", GuideBook.Ferns)]
+    [InlineData("Aloe", "Asphodelaceae", GuideBook.Succulents)]
+    [InlineData("Echeveria", "Crassulaceae", GuideBook.Succulents)]
+    [InlineData("Begonia", null, GuideBook.Begonias)]
+    [InlineData("Tillandsia", "Bromeliaceae", GuideBook.Bromeliads)]
+    [InlineData("Phalaenopsis", "Orchidaceae", GuideBook.Orchids)]
+    [InlineData("Calathea", null, GuideBook.PrayerPlants)]
+    [InlineData("Stromanthe", "Marantaceae", GuideBook.PrayerPlants)]
+    [InlineData("Monstera", null, null)]
+    [InlineData(" ", "", null)]
+    [InlineData(null, null, null)]
+    public void A_plant_opens_the_guide_for_its_group_from_its_family_or_genus(string? genus, string? family, string? expected)
+    {
+        Assert.Equal(expected, GuideBook.ForPlant(genus, family));
+    }
+
+    [Fact]
+    public void A_family_decides_before_a_genus()
+    {
+        Assert.Equal(GuideBook.Aroids, GuideBook.ForPlant("Hoya", "Araceae"));
+    }
+
+    [Fact]
+    public void Every_plant_group_guide_is_for_some_plant()
+    {
+        string[] samples = ["Araceae", "Begoniaceae", "Bromeliaceae", "Cactaceae", "Droseraceae", "Pteridaceae", "Hoya", "Orchidaceae", "Marantaceae"];
+        var found = samples.Select(x => GuideBook.ForPlant(x, x)).ToList();
+        Assert.Equal(
+            GuideBook.All.Where(g => g.Group == GuideBook.PlantGroups).Select(g => g.Id).Order(),
+            found.OfType<string>().Order());
     }
 
     [Theory]
@@ -148,7 +215,7 @@ public class GuideBookTests
     {
         var folder = Path.Combine(ResourcesFolder(), "..", "wwwroot", "img", "guides");
         var photos = GuideBook.All.SelectMany(g => g.Blocks.SelectMany(Seen)).OfType<GuidePhotos>().SelectMany(p => p.Photos).ToList();
-        Assert.Equal(12, photos.Count);
+        Assert.Equal(15, photos.Count);
         Assert.Equal(photos.Count, photos.Select(p => p.File).Distinct().Count());
         foreach (var photo in photos)
         {

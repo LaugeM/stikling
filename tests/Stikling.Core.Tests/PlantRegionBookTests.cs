@@ -59,6 +59,13 @@ public class PlantRegionBookTests
         var origin = Book().Find("Thaumatophyllum", "hederaceum", null);
         Assert.Equal("Araceae", origin!.Family);
         Assert.Equal(["CUB"], origin.Areas);
+        Assert.Equal("Philodendron", origin.Genus);
+    }
+
+    [Fact]
+    public void A_current_genus_is_found_under_its_own_name()
+    {
+        Assert.Equal("Monstera", Book().Find("monstera", null, null)?.Genus);
     }
 
     [Fact]
