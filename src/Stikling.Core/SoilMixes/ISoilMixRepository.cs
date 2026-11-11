@@ -2,14 +2,7 @@ using Stikling.Core.Models;
 
 namespace Stikling.Core.SoilMixes;
 
-public interface ISoilMixRepository
+/// <summary>Plants in a deleted mix keep the link, the way a deleted pot works.</summary>
+public interface ISoilMixRepository : IRepository<SoilMix>
 {
-    Task<IReadOnlyList<SoilMix>> GetAllAsync();
-
-    Task<SoilMix?> GetAsync(Guid id);
-
-    Task SaveAsync(SoilMix mix);
-
-    /// <summary>Soft-deletes the mix. Plants in it keep the link, the way a deleted pot works.</summary>
-    Task DeleteAsync(Guid id);
 }

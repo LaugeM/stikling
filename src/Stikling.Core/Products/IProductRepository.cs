@@ -2,14 +2,7 @@ using Stikling.Core.Models;
 
 namespace Stikling.Core.Products;
 
-public interface IProductRepository
+/// <summary>Care entries keep their own copy of a deleted product's name and dose.</summary>
+public interface IProductRepository : IRepository<Product>
 {
-    Task<IReadOnlyList<Product>> GetAllAsync();
-
-    Task<Product?> GetAsync(Guid id);
-
-    Task SaveAsync(Product product);
-
-    /// <summary>Soft-deletes the product. Care entries keep their own copy of its name and dose.</summary>
-    Task DeleteAsync(Guid id);
 }

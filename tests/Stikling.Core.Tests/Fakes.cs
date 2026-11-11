@@ -29,71 +29,71 @@ using Stikling.Core.Today;
 
 namespace Stikling.Core.Tests;
 
-/// <summary>In-memory repositories for testing services without a browser database.</summary>
-internal sealed class FakePlantRepository : IPlantRepository
+/// <summary>
+/// The four methods every in-memory repository shares. A fake keeps its records in <see cref="Records"/>,
+/// and overrides <see cref="Check"/> to throw for a record that isn't valid.
+/// </summary>
+internal abstract class FakeRepository<T> : IRepository<T> where T : Entity
 {
-    public Dictionary<Guid, Plant> Plants { get; } = [];
+    protected Dictionary<Guid, T> Records { get; } = [];
 
-    /// <summary>How many times a plant was saved.</summary>
+    /// <summary>How many times a record was saved.</summary>
     public int Saves { get; private set; }
 
-    public Task<IReadOnlyList<Plant>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Plant>>(Plants.Values.Where(p => !p.IsDeleted).ToList());
-
-    public Task<Plant?> GetAsync(Guid id) =>
-        Task.FromResult(Plants.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
-
-    public Task<bool> IsDeletedAsync(Guid id) =>
-        Task.FromResult(Plants.TryGetValue(id, out var p) && p.IsDeleted);
-
-    public Task SaveAsync(Plant plant)
+    /// <summary>Throws when the record can't be saved. Does nothing unless a fake overrides it.</summary>
+    protected virtual void Check(T item)
     {
-        // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
-        if (plant.Validate(DateOnly.MaxValue).Count > 0)
-            throw new InvalidOperationException("Invalid plant");
+    }
+
+    public Task<IReadOnlyList<T>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<T>>(Records.Values.Where(r => !r.IsDeleted).ToList());
+
+    public Task<T?> GetAsync(Guid id) =>
+        Task.FromResult(Records.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public virtual Task SaveAsync(T item)
+    {
+        Check(item);
         Saves++;
-        Plants[plant.Id] = plant;
+        Records[item.Id] = item;
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public virtual Task DeleteAsync(Guid id)
     {
-        if (Plants.TryGetValue(id, out var p))
-            p.DeletedAt = DateTimeOffset.UtcNow;
+        if (Records.TryGetValue(id, out var item))
+            item.DeletedAt = DateTimeOffset.UtcNow;
         return Task.CompletedTask;
     }
 }
 
-internal sealed class FakePropagationRepository : IPropagationRepository
+/// <summary>In-memory repositories for testing services without a browser database.</summary>
+internal sealed class FakePlantRepository : FakeRepository<Plant>, IPlantRepository
 {
-    public Dictionary<Guid, Propagation> Propagations { get; } = [];
+    public Dictionary<Guid, Plant> Plants => Records;
 
-    /// <summary>How many times a propagation was saved.</summary>
-    public int Saves { get; private set; }
+    public Task<bool> IsDeletedAsync(Guid id) =>
+        Task.FromResult(Plants.TryGetValue(id, out var p) && p.IsDeleted);
 
-    public Task<IReadOnlyList<Propagation>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Propagation>>(Propagations.Values.Where(p => !p.IsDeleted).ToList());
+    protected override void Check(Plant plant)
+    {
+        // DateOnly.MaxValue: the fake has no clock, and the future-date rule is tested on the model itself
+        if (plant.Validate(DateOnly.MaxValue).Count > 0)
+            throw new InvalidOperationException("Invalid plant");
+    }
+}
 
-    public Task<Propagation?> GetAsync(Guid id) =>
-        Task.FromResult(Propagations.TryGetValue(id, out var p) && !p.IsDeleted ? p : null);
+internal sealed class FakePropagationRepository : FakeRepository<Propagation>, IPropagationRepository
+{
+    public Dictionary<Guid, Propagation> Propagations => Records;
 
     public Task<bool> IsDeletedAsync(Guid id) =>
         Task.FromResult(Propagations.TryGetValue(id, out var p) && p.IsDeleted);
 
-    public Task SaveAsync(Propagation propagation)
+    protected override void Check(Propagation propagation)
     {
         if (propagation.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid propagation");
-        Saves++;
-        Propagations[propagation.Id] = propagation;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Propagations.TryGetValue(id, out var p))
-            p.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
@@ -126,61 +126,31 @@ internal sealed class FakeCareLogRepository : ICareLogRepository
     }
 }
 
-internal sealed class FakeOwnCareKindRepository : IOwnCareKindRepository
+internal sealed class FakeOwnCareKindRepository : FakeRepository<OwnCareKind>, IOwnCareKindRepository
 {
-    public Dictionary<Guid, OwnCareKind> Kinds { get; } = [];
-
-    public Task<IReadOnlyList<OwnCareKind>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.Where(k => !k.IsDeleted).ToList());
+    public Dictionary<Guid, OwnCareKind> Kinds => Records;
 
     public Task<IReadOnlyList<OwnCareKind>> GetStoredAsync() =>
         Task.FromResult<IReadOnlyList<OwnCareKind>>(Kinds.Values.ToList());
 
-    public Task<OwnCareKind?> GetAsync(Guid id) =>
-        Task.FromResult(Kinds.TryGetValue(id, out var kind) && !kind.IsDeleted ? kind : null);
-
-    public Task SaveAsync(OwnCareKind kind)
+    protected override void Check(OwnCareKind kind)
     {
         if (kind.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        Kinds[kind.Id] = kind;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Kinds.TryGetValue(id, out var kind))
-            kind.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeOwnFieldRepository : IOwnFieldRepository
+internal sealed class FakeOwnFieldRepository : FakeRepository<OwnField>, IOwnFieldRepository
 {
-    public Dictionary<Guid, OwnField> Fields { get; } = [];
-
-    public Task<IReadOnlyList<OwnField>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.Where(f => !f.IsDeleted).ToList());
+    public Dictionary<Guid, OwnField> Fields => Records;
 
     public Task<IReadOnlyList<OwnField>> GetStoredAsync() =>
         Task.FromResult<IReadOnlyList<OwnField>>(Fields.Values.ToList());
 
-    public Task<OwnField?> GetAsync(Guid id) =>
-        Task.FromResult(Fields.TryGetValue(id, out var field) && !field.IsDeleted ? field : null);
-
-    public Task SaveAsync(OwnField field)
+    protected override void Check(OwnField field)
     {
         if (field.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        Fields[field.Id] = field;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Fields.TryGetValue(id, out var field))
-            field.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
@@ -320,31 +290,16 @@ internal sealed class FixedTime(DateTimeOffset now, TimeSpan offset = default, T
         : TimeZoneInfo.CreateCustomTimeZone("Test", offset, "Test", "Test"));
 }
 
-internal sealed class FakePotRepository : IPotRepository
+internal sealed class FakePotRepository : FakeRepository<Pot>, IPotRepository
 {
-    public Dictionary<Guid, Pot> Pots { get; } = [];
-
-    public Task<IReadOnlyList<Pot>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Pot>>(Pots.Values.Where(p => !p.IsDeleted).ToList());
+    public Dictionary<Guid, Pot> Pots => Records;
 
     public Task<ContainerList> GetContainersAsync() => Task.FromResult(new ContainerList(Pots.Values));
 
-    public Task<Pot?> GetAsync(Guid id) =>
-        Task.FromResult(Pots.TryGetValue(id, out var pot) && !pot.IsDeleted ? pot : null);
-
-    public Task SaveAsync(Pot pot)
+    protected override void Check(Pot pot)
     {
         if (pot.Validate().Count > 0)
             throw new InvalidOperationException("Invalid pot");
-        Pots[pot.Id] = pot;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Pots.TryGetValue(id, out var pot))
-            pot.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
@@ -391,29 +346,14 @@ internal sealed class FakePlaceRepository : IPlaceRepository
     }
 }
 
-internal sealed class FakeTreatmentPlanRepository : ITreatmentPlanRepository
+internal sealed class FakeTreatmentPlanRepository : FakeRepository<TreatmentPlan>, ITreatmentPlanRepository
 {
-    public Dictionary<Guid, TreatmentPlan> Plans { get; } = [];
+    public Dictionary<Guid, TreatmentPlan> Plans => Records;
 
-    public Task<IReadOnlyList<TreatmentPlan>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<TreatmentPlan>>(Plans.Values.Where(p => !p.IsDeleted).ToList());
-
-    public Task<TreatmentPlan?> GetAsync(Guid id) =>
-        Task.FromResult(Plans.TryGetValue(id, out var plan) && !plan.IsDeleted ? plan : null);
-
-    public Task SaveAsync(TreatmentPlan plan)
+    protected override void Check(TreatmentPlan plan)
     {
         if (plan.Validate().Count > 0)
             throw new InvalidOperationException("Invalid plan");
-        Plans[plan.Id] = plan;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Plans.TryGetValue(id, out var plan))
-            plan.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
@@ -444,97 +384,46 @@ internal sealed class FakeSellerRepository : ISellerRepository
     }
 }
 
-internal sealed class FakeSoilMixRepository : ISoilMixRepository
+internal sealed class FakeSoilMixRepository : FakeRepository<SoilMix>, ISoilMixRepository
 {
-    public Dictionary<Guid, SoilMix> Mixes { get; } = [];
+    public Dictionary<Guid, SoilMix> Mixes => Records;
 
-    public Task<IReadOnlyList<SoilMix>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<SoilMix>>(Mixes.Values.Where(m => !m.IsDeleted).ToList());
-
-    public Task<SoilMix?> GetAsync(Guid id) =>
-        Task.FromResult(Mixes.TryGetValue(id, out var mix) && !mix.IsDeleted ? mix : null);
-
-    public Task SaveAsync(SoilMix mix)
+    protected override void Check(SoilMix mix)
     {
         if (mix.Validate().Count > 0)
             throw new InvalidOperationException("Invalid mix");
-        Mixes[mix.Id] = mix;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Mixes.TryGetValue(id, out var mix))
-            mix.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeProductRepository : IProductRepository
+internal sealed class FakeProductRepository : FakeRepository<Product>, IProductRepository
 {
-    public Dictionary<Guid, Product> Products { get; } = [];
+    public Dictionary<Guid, Product> Products => Records;
 
-    public Task<IReadOnlyList<Product>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Product>>(Products.Values.Where(p => !p.IsDeleted).ToList());
-
-    public Task<Product?> GetAsync(Guid id) =>
-        Task.FromResult(Products.TryGetValue(id, out var product) && !product.IsDeleted ? product : null);
-
-    public Task SaveAsync(Product product)
+    protected override void Check(Product product)
     {
         if (product.Validate().Count > 0)
             throw new InvalidOperationException("Invalid product");
-        Products[product.Id] = product;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Products.TryGetValue(id, out var product))
-            product.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeFeedRepository : IFeedRepository
+internal sealed class FakeFeedRepository : FakeRepository<Feed>, IFeedRepository
 {
-    public Dictionary<Guid, Feed> Feeds { get; } = [];
+    public Dictionary<Guid, Feed> Feeds => Records;
 
-    public Task<IReadOnlyList<Feed>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Feed>>(Feeds.Values.Where(f => !f.IsDeleted).ToList());
-
-    public Task<Feed?> GetAsync(Guid id) =>
-        Task.FromResult(Feeds.TryGetValue(id, out var feed) && !feed.IsDeleted ? feed : null);
-
-    public Task SaveAsync(Feed feed)
+    protected override void Check(Feed feed)
     {
         if (feed.Validate().Count > 0)
             throw new InvalidOperationException("Invalid feed");
-        Feeds[feed.Id] = feed;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Feeds.TryGetValue(id, out var feed))
-            feed.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeAwayStretchRepository : IAwayStretchRepository
+internal sealed class FakeAwayStretchRepository : FakeRepository<AwayStretch>, IAwayStretchRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, AwayStretch> Stretches { get; } = [];
+    public Dictionary<Guid, AwayStretch> Stretches => Records;
 
-    public Task<IReadOnlyList<AwayStretch>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<AwayStretch>>(Stretches.Values.Where(s => !s.IsDeleted).ToList());
-
-    public Task<AwayStretch?> GetAsync(Guid id) =>
-        Task.FromResult(Stretches.TryGetValue(id, out var stretch) && !stretch.IsDeleted ? stretch : null);
-
-    public Task SaveAsync(AwayStretch stretch)
+    public override Task SaveAsync(AwayStretch stretch)
     {
         if (stretch.Validate().Count > 0)
             throw new InvalidOperationException("Invalid stretch");
@@ -545,7 +434,7 @@ internal sealed class FakeAwayStretchRepository : IAwayStretchRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Stretches.TryGetValue(id, out var stretch))
             stretch.DeletedAt = stretch.UpdatedAt = clock = clock.AddSeconds(1);
@@ -553,168 +442,60 @@ internal sealed class FakeAwayStretchRepository : IAwayStretchRepository
     }
 }
 
-internal sealed class FakeSitterSheetRepository : ISitterSheetRepository
+internal sealed class FakeSitterSheetRepository : FakeRepository<SitterSheet>, ISitterSheetRepository
 {
-    public Dictionary<Guid, SitterSheet> Sheets { get; } = [];
-
-    public Task<SitterSheet?> GetAsync(Guid id) =>
-        Task.FromResult(Sheets.TryGetValue(id, out var sheet) && !sheet.IsDeleted ? sheet : null);
-
-    public Task SaveAsync(SitterSheet sheet)
-    {
-        Sheets[sheet.Id] = sheet;
-        return Task.CompletedTask;
-    }
+    public Dictionary<Guid, SitterSheet> Sheets => Records;
 }
 
-internal sealed class FakeGrowLightRepository : IGrowLightRepository
+internal sealed class FakeGrowLightRepository : FakeRepository<GrowLight>, IGrowLightRepository
 {
-    public Dictionary<Guid, GrowLight> Lights { get; } = [];
+    public Dictionary<Guid, GrowLight> Lights => Records;
 
-    public Task<IReadOnlyList<GrowLight>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<GrowLight>>(Lights.Values.Where(l => !l.IsDeleted).ToList());
-
-    public Task<GrowLight?> GetAsync(Guid id) =>
-        Task.FromResult(Lights.TryGetValue(id, out var light) && !light.IsDeleted ? light : null);
-
-    public Task SaveAsync(GrowLight light)
+    protected override void Check(GrowLight light)
     {
         if (light.Validate().Count > 0)
             throw new InvalidOperationException("Invalid grow light");
-        Lights[light.Id] = light;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Lights.TryGetValue(id, out var light))
-            light.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeReceivedHistoryRepository : IReceivedHistoryRepository
+internal sealed class FakeReceivedHistoryRepository : FakeRepository<ReceivedHistory>, IReceivedHistoryRepository
 {
-    public Dictionary<Guid, ReceivedHistory> Histories { get; } = [];
+    public Dictionary<Guid, ReceivedHistory> Histories => Records;
 
     public Task<ReceivedHistory?> GetForAsync(Guid subjectId) =>
         Task.FromResult(Histories.Values.Where(h => h.SubjectId == subjectId && !h.IsDeleted).OrderByDescending(h => h.UpdatedAt).FirstOrDefault());
-
-    public Task<ReceivedHistory?> GetAsync(Guid id) =>
-        Task.FromResult(Histories.TryGetValue(id, out var history) && !history.IsDeleted ? history : null);
-
-    public Task SaveAsync(ReceivedHistory history)
-    {
-        Histories[history.Id] = history;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Histories.TryGetValue(id, out var history))
-            history.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
-    }
 }
 
-internal sealed class FakeTreatmentRecipeRepository : ITreatmentRecipeRepository
+internal sealed class FakeTreatmentRecipeRepository : FakeRepository<TreatmentRecipe>, ITreatmentRecipeRepository
 {
-    public Dictionary<Guid, TreatmentRecipe> Recipes { get; } = [];
+    public Dictionary<Guid, TreatmentRecipe> Recipes => Records;
 
-    public Task<IReadOnlyList<TreatmentRecipe>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<TreatmentRecipe>>(Recipes.Values.Where(r => !r.IsDeleted).ToList());
-
-    public Task<TreatmentRecipe?> GetAsync(Guid id) =>
-        Task.FromResult(Recipes.TryGetValue(id, out var recipe) && !recipe.IsDeleted ? recipe : null);
-
-    public Task SaveAsync(TreatmentRecipe recipe)
+    protected override void Check(TreatmentRecipe recipe)
     {
         if (recipe.Validate().Count > 0)
             throw new InvalidOperationException("Invalid recipe");
-        Recipes[recipe.Id] = recipe;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Recipes.TryGetValue(id, out var recipe))
-            recipe.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeCareIntervalRepository : ICareIntervalRepository
+internal sealed class FakeCareIntervalRepository : FakeRepository<CareInterval>, ICareIntervalRepository
 {
-    public Dictionary<Guid, CareInterval> Intervals { get; } = [];
+    public Dictionary<Guid, CareInterval> Intervals => Records;
 
-    public Task<IReadOnlyList<CareInterval>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<CareInterval>>(Intervals.Values.Where(i => !i.IsDeleted).ToList());
-
-    public Task<CareInterval?> GetAsync(Guid id) =>
-        Task.FromResult(Intervals.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
-
-    public Task SaveAsync(CareInterval interval)
+    protected override void Check(CareInterval interval)
     {
         if (interval.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
-        Intervals[interval.Id] = interval;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Intervals.TryGetValue(id, out var item))
-            item.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakePestCaseRepository : IPestCaseRepository
+internal sealed class FakePestCaseRepository : FakeRepository<PestCase>, IPestCaseRepository
 {
-    public Dictionary<Guid, PestCase> Cases { get; } = [];
-
-    public Task<IReadOnlyList<PestCase>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<PestCase>>(Cases.Values.Where(c => !c.IsDeleted).ToList());
-
-    public Task<PestCase?> GetAsync(Guid id) =>
-        Task.FromResult(Cases.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
-
-    public Task SaveAsync(PestCase item)
-    {
-        Cases[item.Id] = item;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Cases.TryGetValue(id, out var item))
-            item.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
-    }
+    public Dictionary<Guid, PestCase> Cases => Records;
 }
 
-internal class FakePestTreatmentRepository : IPestTreatmentRepository
+internal class FakePestTreatmentRepository : FakeRepository<PestTreatment>, IPestTreatmentRepository
 {
-    public Dictionary<Guid, PestTreatment> Treatments { get; } = [];
-
-    public Task<IReadOnlyList<PestTreatment>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<PestTreatment>>(Treatments.Values.Where(t => !t.IsDeleted).ToList());
-
-    public Task<PestTreatment?> GetAsync(Guid id) =>
-        Task.FromResult(Treatments.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
-
-    public virtual Task SaveAsync(PestTreatment treatment)
-    {
-        Treatments[treatment.Id] = treatment;
-        return Task.CompletedTask;
-    }
-
-    public Task DeleteAsync(Guid id)
-    {
-        if (Treatments.TryGetValue(id, out var item))
-            item.DeletedAt = DateTimeOffset.UtcNow;
-        return Task.CompletedTask;
-    }
+    public Dictionary<Guid, PestTreatment> Treatments => Records;
 }
 
 internal sealed class FakePlantNameSource(PlantNameData data, params EverydayNameData[] everyday) : IPlantNameSource
@@ -1235,19 +1016,13 @@ internal sealed class FakePublicPageServer : IPublicPageServer
     }
 }
 
-internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
+internal sealed class FakeFloweringMarkRepository : FakeRepository<FloweringMark>, IFloweringMarkRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, FloweringMark> Marks { get; } = [];
+    public Dictionary<Guid, FloweringMark> Marks => Records;
 
-    public Task<IReadOnlyList<FloweringMark>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<FloweringMark>>(Marks.Values.Where(m => !m.IsDeleted).ToList());
-
-    public Task<FloweringMark?> GetAsync(Guid id) =>
-        Task.FromResult(Marks.TryGetValue(id, out var mark) && !mark.IsDeleted ? mark : null);
-
-    public Task SaveAsync(FloweringMark mark)
+    public override Task SaveAsync(FloweringMark mark)
     {
         if (mark.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid mark");
@@ -1258,7 +1033,7 @@ internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Marks.TryGetValue(id, out var mark))
             mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1266,19 +1041,13 @@ internal sealed class FakeFloweringMarkRepository : IFloweringMarkRepository
     }
 }
 
-internal sealed class FakeLeafRepository : ILeafRepository
+internal sealed class FakeLeafRepository : FakeRepository<Leaf>, ILeafRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, Leaf> Leaves { get; } = [];
+    public Dictionary<Guid, Leaf> Leaves => Records;
 
-    public Task<IReadOnlyList<Leaf>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Leaf>>(Leaves.Values.Where(l => !l.IsDeleted).ToList());
-
-    public Task<Leaf?> GetAsync(Guid id) =>
-        Task.FromResult(Leaves.TryGetValue(id, out var leaf) && !leaf.IsDeleted ? leaf : null);
-
-    public Task SaveAsync(Leaf leaf)
+    public override Task SaveAsync(Leaf leaf)
     {
         if (leaf.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid leaf");
@@ -1289,7 +1058,7 @@ internal sealed class FakeLeafRepository : ILeafRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Leaves.TryGetValue(id, out var leaf))
             leaf.DeletedAt = leaf.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1297,19 +1066,13 @@ internal sealed class FakeLeafRepository : ILeafRepository
     }
 }
 
-internal sealed class FakeProblemRepository : IProblemRepository
+internal sealed class FakeProblemRepository : FakeRepository<Problem>, IProblemRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, Problem> Problems { get; } = [];
+    public Dictionary<Guid, Problem> Problems => Records;
 
-    public Task<IReadOnlyList<Problem>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Problem>>(Problems.Values.Where(p => !p.IsDeleted).ToList());
-
-    public Task<Problem?> GetAsync(Guid id) =>
-        Task.FromResult(Problems.TryGetValue(id, out var problem) && !problem.IsDeleted ? problem : null);
-
-    public Task SaveAsync(Problem problem)
+    public override Task SaveAsync(Problem problem)
     {
         if (problem.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid problem");
@@ -1320,7 +1083,7 @@ internal sealed class FakeProblemRepository : IProblemRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Problems.TryGetValue(id, out var problem))
             problem.DeletedAt = problem.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1328,19 +1091,13 @@ internal sealed class FakeProblemRepository : IProblemRepository
     }
 }
 
-internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
+internal sealed class FakeProblemUpdateRepository : FakeRepository<ProblemUpdate>, IProblemUpdateRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, ProblemUpdate> Updates { get; } = [];
+    public Dictionary<Guid, ProblemUpdate> Updates => Records;
 
-    public Task<IReadOnlyList<ProblemUpdate>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<ProblemUpdate>>(Updates.Values.Where(u => !u.IsDeleted).ToList());
-
-    public Task<ProblemUpdate?> GetAsync(Guid id) =>
-        Task.FromResult(Updates.TryGetValue(id, out var update) && !update.IsDeleted ? update : null);
-
-    public Task SaveAsync(ProblemUpdate update)
+    public override Task SaveAsync(ProblemUpdate update)
     {
         if (update.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid update");
@@ -1351,7 +1108,7 @@ internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Updates.TryGetValue(id, out var update))
             update.DeletedAt = update.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1359,19 +1116,13 @@ internal sealed class FakeProblemUpdateRepository : IProblemUpdateRepository
     }
 }
 
-internal sealed class FakeWishRepository : IWishRepository
+internal sealed class FakeWishRepository : FakeRepository<Wish>, IWishRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, Wish> Wishes { get; } = [];
+    public Dictionary<Guid, Wish> Wishes => Records;
 
-    public Task<IReadOnlyList<Wish>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Wish>>(Wishes.Values.Where(w => !w.IsDeleted).ToList());
-
-    public Task<Wish?> GetAsync(Guid id) =>
-        Task.FromResult(Wishes.TryGetValue(id, out var wish) && !wish.IsDeleted ? wish : null);
-
-    public Task SaveAsync(Wish wish)
+    public override Task SaveAsync(Wish wish)
     {
         if (wish.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid wish");
@@ -1382,7 +1133,7 @@ internal sealed class FakeWishRepository : IWishRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Wishes.TryGetValue(id, out var wish))
             wish.DeletedAt = wish.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1390,19 +1141,13 @@ internal sealed class FakeWishRepository : IWishRepository
     }
 }
 
-internal sealed class FakeOrderRepository : IOrderRepository
+internal sealed class FakeOrderRepository : FakeRepository<Order>, IOrderRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, Order> Orders { get; } = [];
+    public Dictionary<Guid, Order> Orders => Records;
 
-    public Task<IReadOnlyList<Order>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Order>>(Orders.Values.Where(o => !o.IsDeleted).ToList());
-
-    public Task<Order?> GetAsync(Guid id) =>
-        Task.FromResult(Orders.TryGetValue(id, out var order) && !order.IsDeleted ? order : null);
-
-    public Task SaveAsync(Order order)
+    public override Task SaveAsync(Order order)
     {
         if (order.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid order");
@@ -1413,7 +1158,7 @@ internal sealed class FakeOrderRepository : IOrderRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Orders.TryGetValue(id, out var order))
             order.DeletedAt = order.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1421,20 +1166,14 @@ internal sealed class FakeOrderRepository : IOrderRepository
     }
 }
 
-internal sealed class FakeOrderItemRepository : IOrderItemRepository
+internal sealed class FakeOrderItemRepository : FakeRepository<OrderItem>, IOrderItemRepository
 {
     // Each item is a second newer than the last, so "in the order they were made" can be told apart
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, OrderItem> Items { get; } = [];
+    public Dictionary<Guid, OrderItem> Items => Records;
 
-    public Task<IReadOnlyList<OrderItem>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<OrderItem>>(Items.Values.Where(i => !i.IsDeleted).ToList());
-
-    public Task<OrderItem?> GetAsync(Guid id) =>
-        Task.FromResult(Items.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
-
-    public Task SaveAsync(OrderItem item)
+    public override Task SaveAsync(OrderItem item)
     {
         if (item.Validate().Count > 0)
             throw new InvalidOperationException("Invalid order item");
@@ -1445,7 +1184,7 @@ internal sealed class FakeOrderItemRepository : IOrderItemRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Items.TryGetValue(id, out var item))
             item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1489,19 +1228,13 @@ internal sealed class FakePhotoMarkRepository : IPhotoMarkRepository
 }
 
 
-internal sealed class FakeSupplyRepository : ISupplyRepository
+internal sealed class FakeSupplyRepository : FakeRepository<Supply>, ISupplyRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, Supply> Supplies { get; } = [];
+    public Dictionary<Guid, Supply> Supplies => Records;
 
-    public Task<IReadOnlyList<Supply>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<Supply>>(Supplies.Values.Where(s => !s.IsDeleted).ToList());
-
-    public Task<Supply?> GetAsync(Guid id) =>
-        Task.FromResult(Supplies.TryGetValue(id, out var supply) && !supply.IsDeleted ? supply : null);
-
-    public Task SaveAsync(Supply supply)
+    public override Task SaveAsync(Supply supply)
     {
         if (supply.Validate().Count > 0)
             throw new InvalidOperationException("Invalid supply");
@@ -1512,7 +1245,7 @@ internal sealed class FakeSupplyRepository : ISupplyRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Supplies.TryGetValue(id, out var supply))
             supply.DeletedAt = supply.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1520,19 +1253,13 @@ internal sealed class FakeSupplyRepository : ISupplyRepository
     }
 }
 
-internal sealed class FakeSupplyEntryRepository : ISupplyEntryRepository
+internal sealed class FakeSupplyEntryRepository : FakeRepository<SupplyEntry>, ISupplyEntryRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, SupplyEntry> Entries { get; } = [];
+    public Dictionary<Guid, SupplyEntry> Entries => Records;
 
-    public Task<IReadOnlyList<SupplyEntry>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<SupplyEntry>>(Entries.Values.Where(e => !e.IsDeleted).ToList());
-
-    public Task<SupplyEntry?> GetAsync(Guid id) =>
-        Task.FromResult(Entries.TryGetValue(id, out var entry) && !entry.IsDeleted ? entry : null);
-
-    public Task SaveAsync(SupplyEntry entry)
+    public override Task SaveAsync(SupplyEntry entry)
     {
         if (entry.Validate().Count > 0)
             throw new InvalidOperationException("Invalid supply entry");
@@ -1543,7 +1270,7 @@ internal sealed class FakeSupplyEntryRepository : ISupplyEntryRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Entries.TryGetValue(id, out var entry))
             entry.DeletedAt = entry.UpdatedAt = clock = clock.AddSeconds(1);
@@ -1551,19 +1278,13 @@ internal sealed class FakeSupplyEntryRepository : ISupplyEntryRepository
     }
 }
 
-internal sealed class FakeShoppingItemRepository : IShoppingItemRepository
+internal sealed class FakeShoppingItemRepository : FakeRepository<ShoppingItem>, IShoppingItemRepository
 {
     private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
 
-    public Dictionary<Guid, ShoppingItem> Items { get; } = [];
+    public Dictionary<Guid, ShoppingItem> Items => Records;
 
-    public Task<IReadOnlyList<ShoppingItem>> GetAllAsync() =>
-        Task.FromResult<IReadOnlyList<ShoppingItem>>(Items.Values.Where(i => !i.IsDeleted).ToList());
-
-    public Task<ShoppingItem?> GetAsync(Guid id) =>
-        Task.FromResult(Items.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
-
-    public Task SaveAsync(ShoppingItem item)
+    public override Task SaveAsync(ShoppingItem item)
     {
         if (item.Validate().Count > 0)
             throw new InvalidOperationException("Invalid shopping item");
@@ -1574,7 +1295,7 @@ internal sealed class FakeShoppingItemRepository : IShoppingItemRepository
         return Task.CompletedTask;
     }
 
-    public Task DeleteAsync(Guid id)
+    public override Task DeleteAsync(Guid id)
     {
         if (Items.TryGetValue(id, out var item))
             item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
