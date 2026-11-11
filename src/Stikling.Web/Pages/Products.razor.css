@@ -75,3 +75,14 @@
     background: none;
     color: var(--pa-muted);
 }
+
+/* Running low or Out, in the quiet outline of the other neutral badges */
+.product-badge {
+    padding: 0.05rem 0.5rem;
+    border: 1px solid var(--pa-muted);
+    border-radius: 0.6rem;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}

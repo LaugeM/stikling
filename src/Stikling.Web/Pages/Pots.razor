@@ -3,6 +3,7 @@
 @inject IPotRepository Repository
 @inject ILogger<Pots> Logger
 @inject PotService PotService
+@inject StockService StockService
 @inject PhotoService Photos
 @inject GooglePhotosService Google
 @inject DeviceFiles Device
@@ -314,6 +315,15 @@ else
                                         }
                                         <label class="btn btn-link btn-sm link-action" for="@RowInputId"
                                                @onclick="() => photoTarget = use.Pot">@Strings.Supplies.PotsPhotoLink</label>
+                                        @if (stock?.OpenLineForPot(use.Pot.Id) is not null)
+                                        {
+                                            <span class="pot-on-list">@Strings.Stock.PotOnList</span>
+                                        }
+                                        else
+                                        {
+                                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                    @onclick="() => AddToListAsync(use.Pot)">@Strings.Stock.PotAddToList</button>
+                                        }
                                         <button type="button" class="btn btn-link btn-sm link-action"
                                                 @onclick="() => StartEditAsync(use.Pot)">@Strings.Common.Edit</button>
                                         <button type="button" class="btn btn-link btn-sm link-action"
@@ -342,6 +352,7 @@ else
     public Guid? Show { get; set; }
 
     private IReadOnlyList<PotUse> uses = [];
+    private StockView? stock;
     private bool fitOpen;
     private Guid? fitStart;
     private IReadOnlyList<Pot> all = [];
@@ -413,10 +424,25 @@ else
         all = await Repository.GetAllAsync();
         uses = await PotService.GetAllAsync();
         covers = await PotService.GetCoversAsync();
+        stock = await StockService.GetAsync();
         loading = false;
     }
 
     private IReadOnlyList<PotUse> Shown => uses.Where(use => use.Pot.Kind == kind).ToList();
+
+    private async Task AddToListAsync(Pot pot)
+    {
+        busy = true;
+        try
+        {
+            await StockService.AddPotAsync(pot);
+            stock = await StockService.GetAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
 
     /// <summary>When some pots in the list have a photo, the rest keep its room, so the sizes line up.</summary>
     private bool AnyTiles => Shown.Any(use => covers.ContainsKey(use.Pot.Id));
@@ -675,6 +701,7 @@ else
         if (draft?.Id == viewerPot.Id)
             draft.CoverPhotoId = photo.Id;
         covers = await PotService.GetCoversAsync();
+        stock = await StockService.GetAsync();
     }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
@@ -686,6 +713,7 @@ else
         viewerIndex = viewerPhotos.Count == 0 ? null : Math.Min(viewerIndex ?? 0, viewerPhotos.Count - 1);
         formPhotos.RemoveAll(p => p.Id == photo.Id);
         covers = await PotService.GetCoversAsync();
+        stock = await StockService.GetAsync();
     }
 
     private void SetSelfWatering(bool on) => draft!.SelfWatering = on ? PotWatering.Wick : null;

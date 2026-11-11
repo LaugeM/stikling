@@ -51,6 +51,9 @@ public sealed class BackupData
     public List<OrderItem> OrderItems { get; set; } = [];
     public List<Leaf> Leaves { get; set; } = [];
     public List<PhotoMark> PhotoMarks { get; set; } = [];
+    public List<Supply> Supplies { get; set; } = [];
+    public List<SupplyEntry> SupplyEntries { get; set; } = [];
+    public List<ShoppingItem> ShoppingItems { get; set; } = [];
 
     /// <summary>
     /// What the file contains, for the line shown before restoring. Deleted items are in the
@@ -89,7 +92,10 @@ public sealed class BackupData
         Orders.Count(o => !o.IsDeleted),
         OrderItems.Count(i => !i.IsDeleted),
         Leaves.Count(l => !l.IsDeleted),
-        PhotoMarks.Count(m => !m.IsDeleted));
+        PhotoMarks.Count(m => !m.IsDeleted),
+        Supplies.Count(s => !s.IsDeleted),
+        SupplyEntries.Count(e => !e.IsDeleted),
+        ShoppingItems.Count(i => !i.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -125,4 +131,7 @@ public sealed record BackupCounts(
     int Orders,
     int OrderItems,
     int Leaves,
-    int PhotoMarks);
+    int PhotoMarks,
+    int Supplies,
+    int SupplyEntries,
+    int ShoppingItems);

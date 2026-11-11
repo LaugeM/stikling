@@ -11,6 +11,7 @@
 @inject SellerService SellerService
 @inject Stikling.Core.Orders.OrderService OrderService
 @inject ShelfService ShelfService
+@inject StockService StockService
 
 <PageTitle>@Strings.Supplies.SuppliesPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadDataAsync" />
@@ -22,6 +23,12 @@
 </p>
 
 <div class="settings-rows">
+    <SettingsRow Href="shopping-list" Title="@Strings.Stock.SuppliesShoppingList" Detail="@ShoppingDetail">
+        <Icon><path d="m4 6.500 1.500 1.500L8 5" /><path d="M11.500 6.500H20" /><path d="m4 13.500 1.500 1.500L8 12" /><path d="M11.500 13.500H20" /><path d="M4 19.500h4M11.500 19.500H16" /></Icon>
+    </SettingsRow>
+    <SettingsRow Href="stock" Title="@Strings.Stock.SuppliesStock" Detail="@StockDetail">
+        <Icon><path d="M3.500 8 12 4l8.500 4v9L12 21l-8.500-4Z" /><path d="m3.500 8 8.500 4 8.500-4" /><path d="M12 12v9" /></Icon>
+    </SettingsRow>
     <SettingsRow Href="sellers" Title="@Strings.Supplies.SuppliesSellers" Detail="@SellersDetail">
         <Icon><path d="M4 9.5 5.5 4h13L20 9.5" /><path d="M4 9.5a2.7 2.7 0 0 0 5.3 0 2.7 2.7 0 0 0 5.4 0 2.7 2.7 0 0 0 5.3 0" /><path d="M5.5 12.5V20h13v-7.5" /></Icon>
     </SettingsRow>
@@ -74,6 +81,7 @@
     private IReadOnlyList<PestCase> pestCases = [];
     private int openProblems;
     private int shelfPhotos;
+    private StockView? stock;
 
     protected override async Task OnInitializedAsync() => await LoadDataAsync();
 
@@ -89,9 +97,26 @@
         treatmentPlans = (await PlanRepository.GetAllAsync()).Count;
         pestCases = await PestCaseRepository.GetAllAsync();
         shelfPhotos = await ShelfService.CountAsync();
+        stock = await StockService.GetAsync();
         var plants = await PlantRepository.GetAllAsync();
         openProblems = (await ProblemService.AllAsync())
             .Count(p => p.IsOpen && plants.Any(x => x.Id == p.SubjectId && x.InCollection));
+    }
+
+    private string ShoppingDetail => stock is not { ToBuy.Count: > 0 }
+        ? Strings.Stock.ShoppingNothing
+        : Plural.Of(stock.ToBuy.Count, Strings.Stock.ShoppingToBuy_One, Strings.Stock.ShoppingToBuy_Other);
+
+    /// <summary>"12 supplies, 2 running low", or what the stock is for when it is empty. Out counts as running low.</summary>
+    private string StockDetail
+    {
+        get
+        {
+            if (stock is not { Supplies.Count: > 0 })
+                return Strings.Stock.StockNone;
+            var count = Plural.Of(stock.Supplies.Count, Strings.Stock.StockSupply_One, Strings.Stock.StockSupply_Other);
+            return stock.RunningLow == 0 ? count : F(Strings.Stock.StockDetailLow, count, stock.RunningLow);
+        }
     }
 
     private string ShelfDetail => shelfPhotos == 0

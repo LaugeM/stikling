@@ -34,6 +34,9 @@ public static class Stores
     public const string OrderItems = "orderItems";
     public const string Leaves = "leaves";
     public const string PhotoMarks = "photoMarks";
+    public const string Supplies = "supplies";
+    public const string SupplyEntries = "supplyEntries";
+    public const string ShoppingItems = "shoppingItems";
     public const string PropagationCareLogs = "propagationCareLogs";
     public const string Settings = "settings";
     public const string PutOffs = "putOffs";

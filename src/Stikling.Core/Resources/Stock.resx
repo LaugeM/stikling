@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SupplyNeedsName" xml:space="preserve">
+    <value>Give the supply a name.</value>
+    <comment>Error when saving a supply with no name.</comment>
+  </data>
+  <data name="AmountNegative" xml:space="preserve">
+    <value>An amount can't be below 0.</value>
+  </data>
+  <data name="PriceNegative" xml:space="preserve">
+    <value>A price can't be below 0.</value>
+  </data>
+  <data name="ShoppingNeedsText" xml:space="preserve">
+    <value>Write what to buy.</value>
+    <comment>Error when adding a line to the shopping list with nothing written.</comment>
+  </data>
+  <data name="SuggestStickyTraps" xml:space="preserve">
+    <value>Sticky traps</value>
+    <comment>Suggested name for a supply against pests, on the Stock page.</comment>
+  </data>
+  <data name="SuggestAlcohol" xml:space="preserve">
+    <value>Isopropyl alcohol</value>
+    <comment>Suggested name for a supply against pests, on the Stock page.</comment>
+  </data>
+  <data name="SuggestNeem" xml:space="preserve">
+    <value>Neem oil</value>
+    <comment>Suggested name for a supply against pests, on the Stock page.</comment>
+  </data>
+  <data name="SuggestSoap" xml:space="preserve">
+    <value>Insecticidal soap</value>
+    <comment>Suggested name for a supply against pests, on the Stock page.</comment>
+  </data>
+  <data name="SuggestMites" xml:space="preserve">
+    <value>Predatory mites</value>
+    <comment>Suggested name for a supply against pests, on the Stock page.</comment>
+  </data>
+</root>

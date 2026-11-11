@@ -22,6 +22,7 @@ using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
+using Stikling.Core.Stock;
 using Stikling.Core.Sync;
 using Stikling.Core.Timeline;
 using Stikling.Core.Today;
@@ -1487,3 +1488,96 @@ internal sealed class FakePhotoMarkRepository : IPhotoMarkRepository
     }
 }
 
+
+internal sealed class FakeSupplyRepository : ISupplyRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, Supply> Supplies { get; } = [];
+
+    public Task<IReadOnlyList<Supply>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<Supply>>(Supplies.Values.Where(s => !s.IsDeleted).ToList());
+
+    public Task<Supply?> GetAsync(Guid id) =>
+        Task.FromResult(Supplies.TryGetValue(id, out var supply) && !supply.IsDeleted ? supply : null);
+
+    public Task SaveAsync(Supply supply)
+    {
+        if (supply.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid supply");
+        if (supply.CreatedAt == default)
+            supply.CreatedAt = clock;
+        supply.UpdatedAt = clock = clock.AddSeconds(1);
+        Supplies[supply.Id] = supply;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Supplies.TryGetValue(id, out var supply))
+            supply.DeletedAt = supply.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeSupplyEntryRepository : ISupplyEntryRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, SupplyEntry> Entries { get; } = [];
+
+    public Task<IReadOnlyList<SupplyEntry>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<SupplyEntry>>(Entries.Values.Where(e => !e.IsDeleted).ToList());
+
+    public Task<SupplyEntry?> GetAsync(Guid id) =>
+        Task.FromResult(Entries.TryGetValue(id, out var entry) && !entry.IsDeleted ? entry : null);
+
+    public Task SaveAsync(SupplyEntry entry)
+    {
+        if (entry.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid supply entry");
+        if (entry.CreatedAt == default)
+            entry.CreatedAt = clock;
+        entry.UpdatedAt = clock = clock.AddSeconds(1);
+        Entries[entry.Id] = entry;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Entries.TryGetValue(id, out var entry))
+            entry.DeletedAt = entry.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
+
+internal sealed class FakeShoppingItemRepository : IShoppingItemRepository
+{
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, ShoppingItem> Items { get; } = [];
+
+    public Task<IReadOnlyList<ShoppingItem>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<ShoppingItem>>(Items.Values.Where(i => !i.IsDeleted).ToList());
+
+    public Task<ShoppingItem?> GetAsync(Guid id) =>
+        Task.FromResult(Items.TryGetValue(id, out var item) && !item.IsDeleted ? item : null);
+
+    public Task SaveAsync(ShoppingItem item)
+    {
+        if (item.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid shopping item");
+        if (item.CreatedAt == default)
+            item.CreatedAt = clock;
+        item.UpdatedAt = clock = clock.AddSeconds(1);
+        Items[item.Id] = item;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Items.TryGetValue(id, out var item))
+            item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}

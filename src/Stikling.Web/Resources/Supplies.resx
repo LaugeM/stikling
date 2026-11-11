@@ -121,7 +121,7 @@
     <comment>Title of the browser tab.</comment>
   </data>
   <data name="SuppliesIntro" xml:space="preserve">
-    <value>The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again.</value>
+    <value>The sellers your plants came from, and the pots, mixes and products you use, so a plant or a treatment can point at them instead of you typing them again. Stock keeps track of what you have, and the shopping list of what to buy.</value>
   </data>
   <data name="SuppliesSellers" xml:space="preserve">
     <value>Sellers</value>
@@ -809,6 +809,10 @@
   <data name="MixesEditWarning_Other" xml:space="preserve">
     <value>{0} plants are in this mix. Saving changes what they all show, because a plant points at the mix rather than keeping its own copy of the recipe.</value>
   </data>
+  <data name="MixesEditWarningWithCuttings" xml:space="preserve">
+    <value>{0} plants and cuttings are in this mix. Saving changes what they all show, because a plant points at the mix rather than keeping its own copy of the recipe.</value>
+    <comment>Warning when editing a mix that has cuttings in it. {0} is the number of plants and cuttings together.</comment>
+  </data>
   <data name="MixesCopyHint_One" xml:space="preserve">
     <value>Saving it as a new mix leaves that plant on the mix as it was, and the new one is there for what you pot from now on.</value>
   </data>
@@ -871,6 +875,10 @@
   </data>
   <data name="MixesDeleteInUse_Other" xml:space="preserve">
     <value>{0} plants in this mix. Deleting it takes the mix off them, and changes nothing else about them.</value>
+  </data>
+  <data name="MixesDeleteInUseWithCuttings" xml:space="preserve">
+    <value>{0} plants and cuttings are in this mix. Deleting it takes the mix off them, and changes nothing else about them.</value>
+    <comment>Warning before deleting a mix that has cuttings in it. {0} is the number of plants and cuttings together.</comment>
   </data>
   <data name="FeedsTitle" xml:space="preserve">
     <value>Feeds</value>

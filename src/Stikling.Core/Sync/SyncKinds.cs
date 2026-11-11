@@ -45,6 +45,9 @@ public static class SyncKinds
         "orderItems",
         "leaves",
         "photoMarks",
+        "supplies",
+        "supplyEntries",
+        "shoppingItems",
     ];
 
     public static readonly IReadOnlyList<string> All = [.. Collection, Settings];

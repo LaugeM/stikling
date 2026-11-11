@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Plants;
+using Stikling.Core.Propagations;
 
 namespace Stikling.Core.SoilMixes;
 
@@ -27,8 +28,17 @@ public sealed record MixUse(SoilMix Mix, int Plants)
 }
 
 /// <summary>The mixes, with the plants counted against them.</summary>
-public sealed class SoilMixService(ISoilMixRepository mixes, IPlantRepository plants)
+public sealed class SoilMixService(ISoilMixRepository mixes, IPlantRepository plants, IPropagationRepository propagations)
 {
+    /// <summary>
+    /// How many cuttings (propagations still going) are in a mix. A cutting points at the mix like a
+    /// plant does, so changing the mix changes what it shows too.
+    /// </summary>
+    public static int CuttingsIn(Guid mixId, IEnumerable<Propagation> all) =>
+        all.Count(p => !p.IsDeleted && p.IsActive && p.SoilMixId == mixId);
+
+    public async Task<int> CuttingsInAsync(Guid mixId) => CuttingsIn(mixId, await propagations.GetAllAsync());
+
     public async Task<IReadOnlyList<MixUse>> GetAllAsync() =>
         MixUse.List(await mixes.GetAllAsync(), await plants.GetAllAsync());
 

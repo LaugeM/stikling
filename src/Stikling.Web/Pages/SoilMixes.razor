@@ -106,7 +106,7 @@
             <textarea id="mix-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
         </div>
 
-        @if (editing is not null && plantsInMix > 0)
+        @if (editing is not null && InMix > 0)
         {
             <div class="confirm-card">
                 <p>@EditWarning</p>
@@ -118,7 +118,7 @@
             <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SaveAsync(asCopy: false)">
                 @(editing is null ? Strings.Supplies.MixesSubmitAdd : Strings.Supplies.SaveChanges)
             </button>
-            @if (editing is not null && plantsInMix > 0)
+            @if (editing is not null && InMix > 0)
             {
                 <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SaveAsync(asCopy: true)">
                     @Strings.Supplies.MixesSaveAsNew
@@ -264,8 +264,10 @@ else
     private SoilMix? draft;
     private SoilMix? editing;
     private int plantsInMix;
+    private int cuttingsInMix;
     private Guid? confirming;
     private int confirmingPlants;
+    private int confirmingCuttings;
 
     // The mix whose plants are showing, and the one being measured out for a batch. The size is
     // kept between mixes, since it's usually the same tub or bag.
@@ -298,14 +300,23 @@ else
             ? Strings.Supplies.MixesNoPlantsInIt
             : F(Strings.Supplies.PlantCountInUse, Labels.Plants(use.Plants));
 
-    /// <summary>What saving does to the plants already in the mix, said before it happens.</summary>
-    private string EditWarning => Plural.Of(plantsInMix, Strings.Supplies.MixesEditWarning_One, Strings.Supplies.MixesEditWarning_Other);
+    /// <summary>Plants and cuttings both point at the mix, so both are changed by editing it.</summary>
+    private int InMix => plantsInMix + cuttingsInMix;
 
-    private string CopyHint => Plural.Of(plantsInMix, Strings.Supplies.MixesCopyHint_One, Strings.Supplies.MixesCopyHint_Other);
+    /// <summary>What saving does to the plants and cuttings already in the mix, said before it happens.</summary>
+    private string EditWarning => cuttingsInMix > 0
+        ? F(Strings.Supplies.MixesEditWarningWithCuttings, InMix)
+        : Plural.Of(plantsInMix, Strings.Supplies.MixesEditWarning_One, Strings.Supplies.MixesEditWarning_Other);
 
-    private string DeleteWarning(MixUse use) => confirmingPlants == 0
+    private string CopyHint => cuttingsInMix > 0
+        ? Strings.Supplies.MixesCopyHint_Other
+        : Plural.Of(plantsInMix, Strings.Supplies.MixesCopyHint_One, Strings.Supplies.MixesCopyHint_Other);
+
+    private string DeleteWarning(MixUse use) => confirmingPlants + confirmingCuttings == 0
         ? F(Strings.Supplies.MixesDeleteConfirm, use.Mix.Name)
-        : Plural.Of(confirmingPlants, Strings.Supplies.MixesDeleteInUse_One, Strings.Supplies.MixesDeleteInUse_Other);
+        : confirmingCuttings > 0
+            ? F(Strings.Supplies.MixesDeleteInUseWithCuttings, confirmingPlants + confirmingCuttings)
+            : Plural.Of(confirmingPlants, Strings.Supplies.MixesDeleteInUse_One, Strings.Supplies.MixesDeleteInUse_Other);
 
     private async Task TogglePlantsAsync(MixUse use)
     {
@@ -330,6 +341,7 @@ else
     {
         editing = null;
         plantsInMix = 0;
+        cuttingsInMix = 0;
         errors = [];
         confirming = null;
         draft = new SoilMix();
@@ -339,6 +351,7 @@ else
     {
         editing = use.Mix;
         plantsInMix = await MixService.PlantsInAsync(use.Mix.Id);
+        cuttingsInMix = await MixService.CuttingsInAsync(use.Mix.Id);
         errors = [];
         confirming = null;
         draft = use.Mix.Copy();
@@ -407,6 +420,7 @@ else
     private async Task ConfirmAsync(MixUse use)
     {
         confirmingPlants = await MixService.PlantsInAsync(use.Mix.Id);
+        confirmingCuttings = await MixService.CuttingsInAsync(use.Mix.Id);
         confirming = use.Mix.Id;
     }
 

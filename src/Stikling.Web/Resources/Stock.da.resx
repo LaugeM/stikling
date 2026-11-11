@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SuppliesShoppingList" xml:space="preserve">
+    <value>Indkøbsliste</value>
+  </data>
+  <data name="ShoppingToBuy_One" xml:space="preserve">
+    <value>{0} ting at købe</value>
+  </data>
+  <data name="ShoppingToBuy_Other" xml:space="preserve">
+    <value>{0} ting at købe</value>
+  </data>
+  <data name="ShoppingNothing" xml:space="preserve">
+    <value>Intet at købe</value>
+  </data>
+  <data name="SuppliesStock" xml:space="preserve">
+    <value>Lager</value>
+  </data>
+  <data name="StockSupply_One" xml:space="preserve">
+    <value>{0} vare</value>
+  </data>
+  <data name="StockSupply_Other" xml:space="preserve">
+    <value>{0} varer</value>
+  </data>
+  <data name="StockDetailLow" xml:space="preserve">
+    <value>{0}, {1} ved at løbe tør</value>
+  </data>
+  <data name="StockNone" xml:space="preserve">
+    <value>LECA, gødning, limfælder og resten</value>
+  </data>
+  <data name="StockPageTitle" xml:space="preserve">
+    <value>Lager</value>
+  </data>
+  <data name="StockTitle" xml:space="preserve">
+    <value>Lager</value>
+  </data>
+  <data name="StockIntro" xml:space="preserve">
+    <value>Det du har af løse ting, som LECA, perlite, gødning og limfælder. Markér hvad der er ved at løbe tør eller er brugt op, så kommer det på indkøbslisten. Potter tæller du på siden {0}.</value>
+  </data>
+  <data name="StockPotsLink" xml:space="preserve">
+    <value>Potter</value>
+  </data>
+  <data name="StockShoppingLink" xml:space="preserve">
+    <value>Indkøbsliste</value>
+  </data>
+  <data name="KindMixing" xml:space="preserve">
+    <value>Til jordblandinger</value>
+  </data>
+  <data name="KindWater" xml:space="preserve">
+    <value>Til vandet</value>
+  </data>
+  <data name="KindPests" xml:space="preserve">
+    <value>Mod skadedyr</value>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>Andet</value>
+  </data>
+  <data name="LevelLow" xml:space="preserve">
+    <value>Ved at løbe tør</value>
+  </data>
+  <data name="LevelOut" xml:space="preserve">
+    <value>Brugt op</value>
+  </data>
+  <data name="ActionHaveIt" xml:space="preserve">
+    <value>Jeg har det</value>
+  </data>
+  <data name="ActionBought" xml:space="preserve">
+    <value>Købt…</value>
+  </data>
+  <data name="ActionCounted" xml:space="preserve">
+    <value>Talt op…</value>
+  </data>
+  <data name="StockAbout" xml:space="preserve">
+    <value>Cirka {0}, talt op {1}</value>
+  </data>
+  <data name="StockLastBought" xml:space="preserve">
+    <value>Sidst købt {0}</value>
+  </data>
+  <data name="StockAddButton" xml:space="preserve">
+    <value>Tilføj en vare</value>
+  </data>
+  <data name="StockFormAdd" xml:space="preserve">
+    <value>Tilføj en vare</value>
+  </data>
+  <data name="StockFormEdit" xml:space="preserve">
+    <value>Redigér vare</value>
+  </data>
+  <data name="StockFormKind" xml:space="preserve">
+    <value>Hvad skal den bruges til?</value>
+  </data>
+  <data name="StockFormName" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="StockFormNamePlaceholder" xml:space="preserve">
+    <value>Navn, fx LECA</value>
+  </data>
+  <data name="StockFormSuggestions" xml:space="preserve">
+    <value>Navne at vælge imellem</value>
+  </data>
+  <data name="StockFormProducts" xml:space="preserve">
+    <value>Dine produkter</value>
+  </data>
+  <data name="StockFormProductHint" xml:space="preserve">
+    <value>Vælg et af dine produkter, eller skriv et navn til noget der ikke er et produkt.</value>
+  </data>
+  <data name="StockFormIsProduct" xml:space="preserve">
+    <value>Et af dine produkter, så navnet kommer derfra.</value>
+  </data>
+  <data name="StockFormUnit" xml:space="preserve">
+    <value>Tælles i</value>
+  </data>
+  <data name="StockFormLevel" xml:space="preserve">
+    <value>Hvor meget er der?</value>
+  </data>
+  <data name="StockSubmitAdd" xml:space="preserve">
+    <value>Tilføj vare</value>
+  </data>
+  <data name="StockEmptyTitle" xml:space="preserve">
+    <value>Ingen varer endnu</value>
+  </data>
+  <data name="StockEmptyHint" xml:space="preserve">
+    <value>Tilføj det du har på lager, som LECA, perlite, gødning eller limfælder. Markér noget som ved at løbe tør, så havner det på indkøbslisten.</value>
+  </data>
+  <data name="StockDeleteConfirm" xml:space="preserve">
+    <value>Slet {0} fra lageret? Den forsvinder også fra indkøbslisten.</value>
+  </data>
+  <data name="StockSuppliesList" xml:space="preserve">
+    <value>Dine varer</value>
+  </data>
+  <data name="StockLevelAria" xml:space="preserve">
+    <value>Markér {0}</value>
+  </data>
+  <data name="UnitLitres" xml:space="preserve">
+    <value>Liter</value>
+  </data>
+  <data name="UnitKilograms" xml:space="preserve">
+    <value>Kilogram</value>
+  </data>
+  <data name="UnitGrams" xml:space="preserve">
+    <value>Gram</value>
+  </data>
+  <data name="UnitMillilitres" xml:space="preserve">
+    <value>Milliliter</value>
+  </data>
+  <data name="UnitPieces" xml:space="preserve">
+    <value>Stykker</value>
+  </data>
+  <data name="UnitPacks" xml:space="preserve">
+    <value>Pakker</value>
+  </data>
+  <data name="UnitShortLitres" xml:space="preserve">
+    <value>L</value>
+  </data>
+  <data name="UnitShortKilograms" xml:space="preserve">
+    <value>kg</value>
+  </data>
+  <data name="UnitShortGrams" xml:space="preserve">
+    <value>g</value>
+  </data>
+  <data name="UnitShortMillilitres" xml:space="preserve">
+    <value>ml</value>
+  </data>
+  <data name="UnitShortPieces" xml:space="preserve">
+    <value>stk.</value>
+  </data>
+  <data name="UnitShortPacks" xml:space="preserve">
+    <value>pk.</value>
+  </data>
+  <data name="AmountWithUnit" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="BoughtTitle" xml:space="preserve">
+    <value>Købte {0}</value>
+  </data>
+  <data name="BoughtDay" xml:space="preserve">
+    <value>Dag</value>
+  </data>
+  <data name="BoughtAmount" xml:space="preserve">
+    <value>Hvor meget</value>
+  </data>
+  <data name="BoughtAmountUnit" xml:space="preserve">
+    <value>Hvor meget, i {0}</value>
+  </data>
+  <data name="BoughtPrice" xml:space="preserve">
+    <value>Pris</value>
+  </data>
+  <data name="BoughtRaisePot" xml:space="preserve">
+    <value>Læg dem til de potter jeg har</value>
+  </data>
+  <data name="BoughtHint" xml:space="preserve">
+    <value>Alt er valgfrit. Prisen er det du betalte for det hele.</value>
+  </data>
+  <data name="CountedTitle" xml:space="preserve">
+    <value>Talte {0}</value>
+  </data>
+  <data name="CountedAmount" xml:space="preserve">
+    <value>Hvor meget er der tilbage</value>
+  </data>
+  <data name="CountedAmountUnit" xml:space="preserve">
+    <value>Hvor meget er der tilbage, i {0}</value>
+  </data>
+  <data name="CountedHint" xml:space="preserve">
+    <value>Hvis der ikke er mere, bliver den markeret som brugt op.</value>
+  </data>
+  <data name="ShoppingPageTitle" xml:space="preserve">
+    <value>Indkøbsliste</value>
+  </data>
+  <data name="ShoppingTitle" xml:space="preserve">
+    <value>Indkøbsliste</value>
+  </data>
+  <data name="ShoppingAddLabel" xml:space="preserve">
+    <value>Tilføj noget at købe</value>
+  </data>
+  <data name="ShoppingAddPlaceholder" xml:space="preserve">
+    <value>Limfælder, etiketter, en større potte</value>
+  </data>
+  <data name="ShoppingAddButton" xml:space="preserve">
+    <value>Tilføj</value>
+  </data>
+  <data name="ShoppingToBuyHeading" xml:space="preserve">
+    <value>At købe</value>
+  </data>
+  <data name="ShoppingBoughtToday" xml:space="preserve">
+    <value>Købt i dag</value>
+  </data>
+  <data name="ShoppingTick" xml:space="preserve">
+    <value>Købt: {0}</value>
+  </data>
+  <data name="ShoppingLastFrom" xml:space="preserve">
+    <value>Sidst fra {0}</value>
+  </data>
+  <data name="ShoppingUndo" xml:space="preserve">
+    <value>Fortryd</value>
+  </data>
+  <data name="ShoppingRemove" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="ShoppingAddDetails" xml:space="preserve">
+    <value>Tilføj mængde, pris og hvor</value>
+  </data>
+  <data name="ShoppingEmpty" xml:space="preserve">
+    <value>Intet at købe. Markér en vare som ved at løbe tør på siden {0}, så dukker den op her.</value>
+  </data>
+  <data name="ShoppingStockLink" xml:space="preserve">
+    <value>Lager</value>
+  </data>
+  <data name="ProductRunningLow" xml:space="preserve">
+    <value>Ved at løbe tør</value>
+  </data>
+  <data name="PotAddToList" xml:space="preserve">
+    <value>Læg på indkøbslisten</value>
+  </data>
+  <data name="PotOnList" xml:space="preserve">
+    <value>På indkøbslisten</value>
+  </data>
+</root>
