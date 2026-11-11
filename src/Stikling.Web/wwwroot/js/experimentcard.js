@@ -1,14 +1,18 @@
 // An experiment's result as a picture: the mediums one under the other, each with its photo, how
 // many rooted and a bar for how long it took. Drawn on a canvas in the look of the other cards
-// (sharecard.js), and kept here as a JPEG for the phone's share menu or for saving. The photos are
-// read here and never cross into .NET; C# only sends the words, the photo ids and their frames.
+// (sharecard.js), and kept here as a JPEG for the phone's share menu or for saving. The drawing
+// shell, reading the photos and the sharing are in cardkit.js; this file has the layout. The photos
+// are read in JavaScript and never cross into .NET; C# only sends the words, the photo ids and their
+// frames.
 
-import { getBlob } from "./db.js";
 import {
-    SIZES, SURFACE, BORDER, INK, MUTED, POTTING_GREEN, LEAF_TINT,
+    SURFACE, BORDER, INK, MUTED, POTTING_GREEN, LEAF_TINT,
     DISPLAY, BODY, MARGIN, ICONS,
-    setFont, wrap, paintIcon, paintFooter, drawCover, loadFonts, toBlob, keep,
+    setFont, wrap, paintIcon, paintFooter, drawCover,
 } from "./sharecard.js";
+import { cardKit } from "./cardkit.js";
+
+const kit = cardKit();
 
 const KICKER_SIZE = 28;
 const PHOTO_CORNER = 14;
@@ -18,83 +22,21 @@ const BAR_HEIGHT = 12;
 const FOOTER = 32;
 const FOOTER_BOTTOM = 52;
 
-// The pictures drawn, by id, for sharing and saving
-const kept = new Map(); // id to { blob, url }
+// Lets go of the pictures drawn under these ids
+export const release = kit.release;
 
 // Draws the picture on the canvas. Returns { url, missing }: an object URL of the JPEG and how many
 // photos were not on this device. Null when a newer draw on this canvas has taken over before this
 // one finished.
 // spec: { id, format, kicker, title, more, rows: [{ name, result, days, photo: { photoId, frame } | null }] }
 // days is the average days to root, or null for a medium with no bar; more is "and 3 more" or null.
-export async function draw(canvas, spec) {
-    const token = canvas.stiklingToken = (canvas.stiklingToken ?? 0) + 1;
-    const size = SIZES[spec.format] ?? SIZES.square;
+export function draw(canvas, spec) {
     const rows = spec.rows ?? [];
-
-    await loadFonts();
-    const photos = await readPhotos(rows);
-    if (canvas.stiklingToken !== token) {
-        closeAll(photos);
-        return null;
-    }
-
-    canvas.width = size.width;
-    canvas.height = size.height;
-    const ctx = canvas.getContext("2d");
-    ctx.textBaseline = "alphabetic";
-
-    // Counted before the bitmaps are closed
-    const missing = rows.filter(r => r.photo && !photos.has(r.photo.photoId)).length;
-    try {
-        paint(ctx, size, spec, rows, photos);
-    } finally {
-        closeAll(photos);
-    }
-
-    const blob = await toBlob(canvas);
-    if (canvas.stiklingToken !== token || !blob)
-        return null;
-
-    const old = kept.get(spec.id);
-    if (old)
-        URL.revokeObjectURL(old.url);
-    const url = URL.createObjectURL(blob);
-    kept.set(spec.id, { blob, url });
-    return { url, missing };
-}
-
-// Lets go of the pictures drawn under these ids
-export function release(ids) {
-    for (const id of ids) {
-        const entry = kept.get(id);
-        if (entry) {
-            URL.revokeObjectURL(entry.url);
-            kept.delete(id);
-        }
-    }
-}
-
-// The full photo, or its thumbnail when the full one is not on this device. Missing ones are left out.
-async function readPhotos(rows) {
-    const photos = new Map();
-    for (const { photo } of rows) {
-        if (!photo || photos.has(photo.photoId))
-            continue;
-        const blob = (await getBlob(photo.photoId)) ?? (await getBlob(`${photo.photoId}:thumb`));
-        if (!blob)
-            continue;
-        try {
-            photos.set(photo.photoId, await createImageBitmap(blob));
-        } catch {
-            // Treated as missing
-        }
-    }
-    return photos;
-}
-
-function closeAll(photos) {
-    for (const bitmap of photos.values())
-        bitmap.close();
+    return kit.draw(canvas, spec, {
+        format: "square",
+        photos: rows.map(r => r.photo).filter(Boolean),
+        paint: (ctx, size, photos) => paint(ctx, size, spec, rows, photos),
+    });
 }
 
 // ---- Layout ----
@@ -206,43 +148,5 @@ function paintRow(ctx, row, photos, longest, x, y, photoSize, rowWidth) {
 
 // ---- Sharing and saving ----
 
-function fileOf(id, fileName) {
-    const entry = kept.get(id);
-    return entry ? new File([entry.blob], fileName, { type: "image/jpeg" }) : null;
-}
-
-function canShareFiles(files) {
-    try {
-        return typeof navigator.share === "function" && navigator.canShare?.({ files }) === true;
-    } catch {
-        return false;
-    }
-}
-
-// "shared", "cancelled" (closed the share menu), "saved" (it couldn't share, so it was saved) or "failed"
-export async function share(id, fileName) {
-    const file = fileOf(id, fileName);
-    if (!file)
-        return "failed";
-    if (canShareFiles([file])) {
-        try {
-            await navigator.share({ files: [file] });
-            return "shared";
-        } catch (error) {
-            if (error?.name === "AbortError")
-                return "cancelled";
-            // Something else went wrong with sharing, so fall back to saving it
-        }
-    }
-    await keep(file, file.name);
-    return "saved";
-}
-
-// "saved" or "failed"
-export async function save(id, fileName) {
-    const file = fileOf(id, fileName);
-    if (!file)
-        return "failed";
-    await keep(file, file.name);
-    return "saved";
-}
+export const share = kit.share;
+export const save = kit.save;

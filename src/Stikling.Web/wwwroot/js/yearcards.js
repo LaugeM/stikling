@@ -1,20 +1,22 @@
-// The cards of "Your year with your plants": pictures drawn on a canvas, kept here as JPEG files and
-// handed to the phone's share menu or saved. The photos are read here and never cross into .NET;
-// C# only sends the words and the photo ids.
+// The cards of "Your year with your plants": pictures drawn on a canvas, kept as JPEG files and
+// handed to the phone's share menu or saved. The drawing shell, reading the photos and the sharing
+// are in cardkit.js; this file has the layouts and the swiping. The photos are read in JavaScript and
+// never cross into .NET; C# only sends the words and the photo ids.
 //
 // The cards follow the share card (sharecard.js): always light, 1080 wide, the same sizes, and in
 // 9:16 everything that is read stays above the safe line.
 
-import { getBlob, hasBlob } from "./db.js";
+import { hasBlob } from "./db.js";
 import {
-    SIZES, SURFACE, INK, MUTED, DEEP_MOSS, POTTING_GREEN, LEAF_TINT, CLAY, CLAY_SOFT,
+    SURFACE, INK, MUTED, DEEP_MOSS, POTTING_GREEN, LEAF_TINT, CLAY, CLAY_SOFT,
     DISPLAY, BODY, MARGIN, PAIR_GAP, PILL_INSET, ICONS,
-    setFont, wrap, paintFooter, paintIcon, paintPhotoCard, paintDatePill, drawCover, loadFonts, toBlob, keep,
+    setFont, wrap, paintFooter, paintIcon, paintPhotoCard, paintDatePill, drawCover,
 } from "./sharecard.js";
+import { cardKit } from "./cardkit.js";
 import { makeFromPictures } from "./timelapse.js";
 
-// The picture of each card that was drawn, by card id, for sharing and saving
-const kept = new Map(); // id to { blob, url }
+// The picture of each card that was drawn is kept by the kit, by card id, for sharing and saving
+const kit = cardKit();
 
 // Which of these photos are only small on this device, and which aren't here at all
 export async function check(ids) {
@@ -31,80 +33,47 @@ export async function check(ids) {
     return { small, missing };
 }
 
+// Lets go of the pictures drawn under these ids. Today and the year page each pass their own,
+// so leaving one page never blanks a picture the other is showing.
+export const release = kit.release;
+
 // Draws one card on the canvas. Returns { url, missing, cells }: an object URL of the JPEG, how many
 // photos weren't on this device, and for a collage each photo's box as fractions of the card. Null
 // when a newer draw on this canvas has taken over before this one finished.
 // spec: the card (id, kind, tone, kicker, title, latin, cultivar, line, figures, photo, before, after,
 // beforeLabel, afterLabel) with format, and for the collage the photos to draw.
-export async function draw(canvas, spec) {
-    const token = canvas.stiklingToken = (canvas.stiklingToken ?? 0) + 1;
-    const size = SIZES[spec.format] ?? SIZES.story;
-
-    await loadFonts();
-    const photos = await readPhotos(wantedBy(spec));
-    if (canvas.stiklingToken !== token) {
-        closeAll(photos);
-        return null;
-    }
-
-    canvas.width = size.width;
-    canvas.height = size.height;
-    const ctx = canvas.getContext("2d");
-    ctx.textBaseline = "alphabetic";
-
-    let cells = null;
-    try {
-        if (spec.kind === "Title")
-            paintTitle(ctx, size, spec, photos);
-        else if (spec.kind === "Number")
-            paintNumber(ctx, size, spec);
-        else if (spec.kind === "Photo")
-            paintPhoto(ctx, size, spec, photos);
-        else if (spec.kind === "Pair")
-            paintPair(ctx, size, spec, photos);
-        else
-            cells = paintCollage(ctx, size, spec, photos);
-    } finally {
-        closeAll(photos);
-    }
-
-    const blob = await toBlob(canvas);
-    if (canvas.stiklingToken !== token || !blob)
-        return null;
-
-    const old = kept.get(spec.id);
-    if (old)
-        URL.revokeObjectURL(old.url);
-    const url = URL.createObjectURL(blob);
-    kept.set(spec.id, { blob, url });
-
-    const missing = wantedBy(spec).filter(w => !photos.get(w.photoId)).length;
-    return { url, missing, cells };
-}
-
-// Lets go of the pictures drawn under these ids. Today and the year page each pass their own,
-// so leaving one page never blanks a picture the other is showing.
-export function release(ids) {
-    for (const id of ids) {
-        const entry = kept.get(id);
-        if (entry) {
-            URL.revokeObjectURL(entry.url);
-            kept.delete(id);
-        }
-    }
+export function draw(canvas, spec) {
+    return kit.draw(canvas, spec, {
+        format: "story",
+        photos: wantedBy(spec),
+        paint: (ctx, size, photos) => {
+            let cells = null;
+            if (spec.kind === "Title")
+                paintTitle(ctx, size, spec, photos);
+            else if (spec.kind === "Number")
+                paintNumber(ctx, size, spec);
+            else if (spec.kind === "Photo")
+                paintPhoto(ctx, size, spec, photos);
+            else if (spec.kind === "Pair")
+                paintPair(ctx, size, spec, photos);
+            else
+                cells = paintCollage(ctx, size, spec, photos);
+            return { cells };
+        },
+    });
 }
 
 // Makes the video of these cards from their pictures, so it shows just what the deck shows. The video
 // stays in timelapse.js, which shares and saves it. "done", "cancelled", "unsupported", "offline" or "failed".
 // spec: { format, crossfade, total, shots: [{ cardId, start, hold }] }
 export async function makeVideo(spec, progress) {
-    const pictures = spec.shots.map(shot => kept.get(shot.cardId)?.blob);
+    const pictures = spec.shots.map(shot => kit.blobOf(shot.cardId));
     if (pictures.some(picture => !picture))
         return "failed";
     return await makeFromPictures(pictures, spec, progress);
 }
 
-// ---- Which photos a card needs, and reading them ----
+// ---- Which photos a card needs ----
 
 function wantedBy(spec) {
     const list = [];
@@ -115,30 +84,6 @@ function wantedBy(spec) {
     else if (spec.photo)
         list.push(spec.photo);
     return list.filter(Boolean);
-}
-
-// A photo is decoded once per card, even when two places on the card use it. The thumbnail stands in
-// when the full photo isn't on this device. Missing ones are left out of the map.
-async function readPhotos(wanted) {
-    const photos = new Map();
-    for (const { photoId } of wanted) {
-        if (photos.has(photoId))
-            continue;
-        const blob = (await getBlob(photoId)) ?? (await getBlob(`${photoId}:thumb`));
-        if (!blob)
-            continue;
-        try {
-            photos.set(photoId, await createImageBitmap(blob));
-        } catch {
-            // Treated as missing
-        }
-    }
-    return photos;
-}
-
-function closeAll(photos) {
-    for (const bitmap of photos.values())
-        bitmap.close();
 }
 
 // ---- Layouts ----
@@ -360,71 +305,10 @@ function collageRows(count, maxRows) {
 
 // ---- Sharing and saving ----
 
-function fileOf(id, fileName) {
-    const entry = kept.get(id);
-    return entry ? new File([entry.blob], fileName, { type: "image/jpeg" }) : null;
-}
-
-function canShareFiles(files) {
-    try {
-        return typeof navigator.share === "function" && navigator.canShare?.({ files }) === true;
-    } catch {
-        return false;
-    }
-}
-
-// Whether the browser can share this many pictures in one go
-export function canShareAll(count) {
-    const files = Array.from({ length: count }, (_, i) => new File([new Blob()], `card-${i}.jpg`, { type: "image/jpeg" }));
-    return canShareFiles(files);
-}
-
-// "shared", "cancelled" (closed the share menu), "saved" (it couldn't share, so it was saved) or "failed"
-export async function share(id, fileName) {
-    const file = fileOf(id, fileName);
-    if (!file)
-        return "failed";
-    if (canShareFiles([file])) {
-        try {
-            await navigator.share({ files: [file] });
-            return "shared";
-        } catch (error) {
-            if (error?.name === "AbortError")
-                return "cancelled";
-            // Something else went wrong with sharing, so fall back to saving it
-        }
-    }
-    return await keep(file, fileName);
-}
-
-// "saved" or "failed"
-export async function save(id, fileName) {
-    const entry = kept.get(id);
-    return entry ? await keep(entry.blob, fileName) : "failed";
-}
-
-// All the pictures through one share menu when the browser allows it, otherwise saved one by one
-export async function shareAll(ids, fileNames) {
-    const files = ids.map((id, i) => fileOf(id, fileNames[i])).filter(Boolean);
-    if (files.length === 0)
-        return "failed";
-    if (canShareFiles(files)) {
-        try {
-            await navigator.share({ files });
-            return "shared";
-        } catch (error) {
-            if (error?.name === "AbortError")
-                return "cancelled";
-        }
-    }
-
-    for (let i = 0; i < files.length; i++) {
-        if (i > 0)
-            await new Promise(resolve => setTimeout(resolve, 400));
-        await keep(files[i], files[i].name);
-    }
-    return "saved";
-}
+export const canShareAll = kit.canShareAll;
+export const share = kit.share;
+export const save = kit.save;
+export const shareAll = kit.shareAll;
 
 // ---- Swiping through the deck ----
 
