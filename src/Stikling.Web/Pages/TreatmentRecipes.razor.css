@@ -97,6 +97,7 @@
 
 .recipe-contents li {
     padding: 0.1rem 0;
+    display: flow-root; /* holds its own measure, so a float never spills into the next line */
 }
 
 .recipe-dose {
