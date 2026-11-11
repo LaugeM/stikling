@@ -7,7 +7,7 @@
 @using Stikling.Core.Identification
 @inject PlantNameService Names
 @inject IdentificationService Identification
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 
 <div class="mb-3">
     <label class="form-label" for="@(IdPrefix)name-search">@Strings.Plants.NameWhatPlant</label>
@@ -369,10 +369,7 @@ else
         // Enter in the search box picks the first plant found, rather than saving the form
         if (firstRender)
         {
-            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-            if (disposed)
-                return;
-            enterPicks = await module.InvokeAsync<IJSObjectReference>("enterPicksFirst", searchInput);
+            enterPicks = await Scripts.EnterPicksFirstAsync(searchInput);
             if (disposed)
             {
                 await ReleaseEnterPicksAsync();

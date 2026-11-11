@@ -59,7 +59,7 @@ public sealed class NotificationService(
     TodayService today,
     IndexedDb db,
     TimeProvider time,
-    ILogger<NotificationService> logger) : IAsyncDisposable
+    ILogger<NotificationService> logger) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/notifications.js";
     internal const string OnKey = "notifications-on";
@@ -70,13 +70,9 @@ public sealed class NotificationService(
     private static readonly TimeSpan AfterChange = TimeSpan.FromSeconds(10);
 
     private readonly SemaphoreSlim uploading = new(1, 1);
-    private Task<IJSObjectReference>? module;
     private CancellationTokenSource? waiting;
     private string? key;
     private bool started;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>"ok", "needs-home-screen" or "unsupported".</summary>
     public async Task<string> SupportAsync()
@@ -369,12 +365,11 @@ public sealed class NotificationService(
         return endpoint;
     }
 
-    public async ValueTask DisposeAsync()
+    public override async ValueTask DisposeAsync()
     {
         db.Changed -= OnLocalChange;
         waiting?.Cancel();
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
+        await base.DisposeAsync();
     }
 
     private sealed record SubscriptionInfo(string? Endpoint, string? P256dh, string? Auth, string? Reason);

@@ -8,13 +8,8 @@ namespace Stikling.Web.Services;
 /// Drawing, sharing and printing labels, which only the browser can do. The labels are drawn in
 /// wwwroot/js/labels.js; only the words and the size cross into JavaScript.
 /// </summary>
-public sealed class LabelPrinter(IJSRuntime js) : IAsyncDisposable
+public sealed class LabelPrinter(IJSRuntime js) : JsModule(js, "./js/labels.js")
 {
-    private Task<IJSObjectReference>? module;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", "./js/labels.js").AsTask();
-
     /// <summary>Draws each label on its canvas in the container, in order.</summary>
     public async Task DrawAsync(ElementReference container, IReadOnlyList<LabelContent> labels, LabelParts parts, LabelShape shape) =>
         await (await Module).InvokeVoidAsync("render", container, labels, parts, shape);
@@ -30,10 +25,4 @@ public sealed class LabelPrinter(IJSRuntime js) : IAsyncDisposable
     /// <summary>Opens the print dialog with the page the size the rule says.</summary>
     public async Task PrintAsync(string pageRule) =>
         await (await Module).InvokeVoidAsync("print", pageRule);
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

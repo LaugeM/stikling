@@ -23,15 +23,11 @@ public enum CameraStart
 /// wwwroot/js/camera.js, and the image goes through photos.js without reaching C#. Only the
 /// details of the stored photo come back, to be recorded by <see cref="PhotoService"/>.
 /// </summary>
-public sealed class CameraService(IJSRuntime js, PhotoService photos) : IAsyncDisposable
+public sealed class CameraService(IJSRuntime js, PhotoService photos) : JsModule(js, ModulePath)
 {
     private const string ModulePath = "./js/camera.js";
 
-    private Task<IJSObjectReference>? module;
     private bool? available;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", ModulePath).AsTask();
 
     /// <summary>True when the browser lists a camera. Asked once, then remembered.</summary>
     public async Task<bool> IsAvailableAsync()
@@ -87,10 +83,4 @@ public sealed class CameraService(IJSRuntime js, PhotoService photos) : IAsyncDi
     /// <summary>Clicks a file input, for falling back on the phone's own picker.</summary>
     public async Task ClickInputAsync(string id) =>
         await (await Module).InvokeVoidAsync("clickInput", id);
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-            await module.Result.DisposeAsync();
-    }
 }

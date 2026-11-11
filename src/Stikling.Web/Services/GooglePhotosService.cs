@@ -17,11 +17,10 @@ public sealed record GooglePhotosStart(string Status, string? PickerUri = null);
 /// holds Google's token and the session. The token never comes here. Google's script is only loaded
 /// by <see cref="PrepareAsync"/>, so nobody who doesn't use it loads anything from Google.
 /// </summary>
-public sealed class GooglePhotosService(IJSRuntime js, GoogleSettings settings, SettingsService userSettings) : IAsyncDisposable
+public sealed class GooglePhotosService(IJSRuntime js, GoogleSettings settings, SettingsService userSettings) : JsModule(js, "./js/googlephotos.js")
 {
     private const int MaxItems = 50;
 
-    private Task<IJSObjectReference>? module;
     private IJSObjectReference? loaded;
 
     /// <summary>False when there is no Google client ID, and then the feature is hidden.</summary>
@@ -29,9 +28,6 @@ public sealed class GooglePhotosService(IJSRuntime js, GoogleSettings settings, 
 
     /// <summary>True when the client ID is there and the person turned it on in Settings.</summary>
     public async Task<bool> IsEnabledAsync() => IsConfigured && (await userSettings.GetAsync()).GooglePhotos;
-
-    private Task<IJSObjectReference> Module =>
-        module ??= js.InvokeAsync<IJSObjectReference>("import", "./js/googlephotos.js").AsTask();
 
     /// <summary>Loads Google's script. Call it before the first tap, so the tap can open Google's popup at once.</summary>
     public async Task<bool> PrepareAsync()
@@ -111,19 +107,5 @@ public sealed class GooglePhotosService(IJSRuntime js, GoogleSettings settings, 
     {
         [JSInvokable]
         public Task Progress(int number, int total) => progress(number, total);
-    }
-
-    public async ValueTask DisposeAsync()
-    {
-        if (module is { IsCompletedSuccessfully: true })
-        {
-            try
-            {
-                await module.Result.DisposeAsync();
-            }
-            catch (JSDisconnectedException)
-            {
-            }
-        }
     }
 }

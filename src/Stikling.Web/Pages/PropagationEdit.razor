@@ -8,7 +8,7 @@
 @inject PhotoService Photos
 @inject ShareInbox Inbox
 @inject GooglePhotosService Google
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 @implements IAsyncDisposable
 
 <PageTitle>@(IsNew ? Strings.Propagations.EditPageTitleNew : Strings.Propagations.EditPageTitleEdit)</PageTitle>
@@ -464,15 +464,13 @@ else
         if (focusFieldId is { } fieldId && propagation is not null)
         {
             focusFieldId = null;
-            await using var focusModule = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-            await focusModule.InvokeVoidAsync("focusField", fieldId);
+            await Scripts.FocusFieldAsync(fieldId);
         }
 
         if (!showErrors)
             return;
         showErrors = false;
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("showAlert", "form-errors");
+        await Scripts.ShowAlertAsync("form-errors");
     }
 
     /// <summary>The one field to open and focus, "first-root" or "first-leaf", from a date on the propagation's page.</summary>

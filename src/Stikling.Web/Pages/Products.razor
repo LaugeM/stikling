@@ -4,7 +4,7 @@
 @inject IProductRepository Repository
 @inject ProductService ProductService
 @inject StockService StockService
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 
 <PageTitle>@Strings.Supplies.ProductsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -229,8 +229,7 @@ else
         if (!showErrors)
             return;
         showErrors = false;
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("showAlert", "form-errors");
+        await Scripts.ShowAlertAsync("form-errors");
     }
 
     private Product? draft;

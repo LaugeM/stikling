@@ -10,7 +10,7 @@
 @inject GooglePhotosService Google
 @inject NavigationManager Navigation
 @inject TimeProvider Time
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 @implements IAsyncDisposable
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, RouteNew ? Strings.PlantEdit.AddPlant : Strings.PlantEdit.EditPlant)</PageTitle>
@@ -616,8 +616,7 @@ else
         if (!showErrors)
             return;
         showErrors = false;
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("showAlert", "form-errors");
+        await Scripts.ShowAlertAsync("form-errors");
     }
 
     [Parameter]

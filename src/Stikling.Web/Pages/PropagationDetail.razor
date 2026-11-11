@@ -15,7 +15,7 @@
 @inject SellerService SellerService
 @inject NavigationManager Navigation
 @inject TimeProvider Time
-@inject IJSRuntime JS
+@inject PageScripts Scripts
 @inject PlantNameService Names
 @inject PlantCareService CommonCare
 @inject GooglePhotosService Google
@@ -1452,8 +1452,7 @@ else
         if (!scrollToPlants || propagation is null)
             return;
         scrollToPlants = false;
-        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-        await module.InvokeVoidAsync("scrollToId", "propagation-plants");
+        await Scripts.ScrollToIdAsync("propagation-plants");
     }
 
     private void OpenStage()

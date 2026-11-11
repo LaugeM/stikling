@@ -7,6 +7,7 @@
 @implements IAsyncDisposable
 @using System.Net
 @inject IJSRuntime JS
+@inject PageScripts Scripts
 @inject AccountService Account
 
 <PageTitle>@Strings.Help.PageTitle</PageTitle>
@@ -1063,8 +1064,7 @@
     {
         if (firstRender)
         {
-            await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
-            await module.InvokeVoidAsync("scrollToFragment");
+            await Scripts.ScrollToFragmentAsync();
             if (disposed)
                 return;
             searchReady = true;
