@@ -199,10 +199,12 @@
     min-width: 0;
 }
 
+/* Never wider than the file, and a tall photo no taller than about half a desktop screen */
 .guide-photo img {
     display: block;
-    width: 100%;
+    width: auto;
     max-width: 100%;
+    max-height: 32rem;
     height: auto;
     border-radius: 0.75rem;
 }
