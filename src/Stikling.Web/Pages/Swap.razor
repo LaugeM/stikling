@@ -17,10 +17,13 @@
 
 <div class="page-heading">
     <h1>@Strings.Shared.SwapTitle</h1>
-    @if (list is { IsEmpty: false })
-    {
-        <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">@Strings.Shared.ShareButton</button>
-    }
+    <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
+        <a class="btn btn-link btn-sm link-action" href="compare">@Strings.Compare.EntryLink</a>
+        @if (list is { IsEmpty: false })
+        {
+            <button type="button" class="btn btn-outline-primary swap-share" @onclick="OpenShare">@Strings.Shared.ShareButton</button>
+        }
+    </div>
 </div>
 
 @if (list is null)

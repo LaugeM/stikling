@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.JSInterop;
+using Stikling.Core.Compare;
 using Stikling.Core.Notifications;
 using Stikling.Core.PlantFacts;
 using Stikling.Core.Sharing;
@@ -23,7 +24,7 @@ public sealed record MeCollection(Guid Id, string Name, string Role);
 /// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
 /// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer, IPublicPageServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer, IPublicPageServer, IFriendPageServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -311,6 +312,35 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException or JsonException)
         {
             return ShareOutcome<T?>.Failure(Strings.Account.ShareUnreachable, offline: true);
+        }
+    }
+
+    // A friend's page as a list to compare with. It needs no sign-in, so no token is sent, and the
+    // statuses 404 and 410 come back as they are for the page to explain.
+
+    public async Task<ShareOutcome<FriendPageResponse>> GetFriendPageAsync(string address)
+    {
+        if (settings.ApiAddress is null)
+            return ShareOutcome<FriendPageResponse>.Failure(Strings.Account.ShareUnreachable, offline: true);
+
+        try
+        {
+            // The @ in a name stays as it is, which the route reads the same either way
+            var path = $"s/{Uri.EscapeDataString(address).Replace("%40", "@")}/compare";
+            using var response = await http.GetAsync(path);
+            if (!response.IsSuccessStatusCode)
+            {
+                var status = (int)response.StatusCode;
+                return ShareOutcome<FriendPageResponse>.Failure($"The API answered {status}.", status: status);
+            }
+
+            return await response.Content.ReadFromJsonAsync<FriendPageResponse>() is { } page
+                ? ShareOutcome<FriendPageResponse>.Success(page)
+                : ShareOutcome<FriendPageResponse>.Failure(Strings.Account.ShareEmptyAnswer);
+        }
+        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or JsonException)
+        {
+            return ShareOutcome<FriendPageResponse>.Failure(Strings.Account.ShareUnreachable, offline: true);
         }
     }
 

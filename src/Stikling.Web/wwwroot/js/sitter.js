@@ -27,6 +27,11 @@ export async function shareText(text) {
     return (await copy(text)) ? "copied" : "failed";
 }
 
+// Opens a link in a new tab, for the contact on a friend's page. It has to be called from a tap.
+export function openLink(url) {
+    window.open(url, "_blank", "noopener");
+}
+
 async function copy(text) {
     try {
         await navigator.clipboard.writeText(text);

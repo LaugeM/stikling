@@ -1,0 +1,581 @@
+@page "/compare"
+@page "/compare/{Address}"
+@layout WideLayout
+@using Stikling.Core.Compare
+@implements IDisposable
+@inject IFriendPageServer Server
+@inject WishService WishService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject PlantService PlantService
+@inject PlantNameService Names
+@inject SitterSheetActions Sharer
+@inject ShareCardService Cards
+@inject NavigationManager Navigation
+
+@* Compares a friend's list with my own wishlist and plants. The friend's list comes from their public page
+   or from text that was pasted. Nothing about the friend is stored: it lives in this component and is gone
+   when the page is left. What the person does from here (a wish added, a plant marked up for swap) goes
+   through the services like anywhere else. *@
+
+<PageTitle>@Strings.Compare.PageTitle</PageTitle>
+<ReloadOnSync Reload="ReloadAsync" />
+
+@if (view == View.Result && friend is not null && result is not null)
+{
+    <div class="compare-page">
+        <div class="page-heading compare-heading">
+            <div class="compare-title">
+                <h1>@(string.IsNullOrWhiteSpace(friend.Title) ? Strings.Compare.TheirList : friend.Title)</h1>
+                <p class="compare-counts">
+                    <span>@ListComparison.CountsLine(result)</span>
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="Change">@Strings.Compare.Change</button>
+                </p>
+            </div>
+            <div class="compare-reply compare-reply-desktop">@ReplyControls</div>
+        </div>
+
+        @if (nothingMatches)
+        {
+            <div class="empty-state compare-nothing">
+                <p><strong>@Strings.Compare.NothingTitle</strong></p>
+                <p>@Strings.Compare.NothingBody</p>
+            </div>
+        }
+        else
+        {
+            <div class="compare-columns">
+                <section aria-labelledby="compare-for-you">
+                    <h2 class="section-label" id="compare-for-you">@Strings.Compare.ForYou</h2>
+                    @if (result.ForYou.Count == 0)
+                    {
+                        <p class="compare-none">@Strings.Compare.NoneForYou</p>
+                    }
+                    else
+                    {
+                        <ul class="item-list compare-list">
+                            @foreach (var match in result.ForYou)
+                            {
+                                <li>
+                                    <div class="item-card">
+                                        @TheirThumb(match.Theirs)
+                                        <div class="item-text">
+                                            <div class="item-name">@match.Theirs.Name</div>
+                                            @if (match.Theirs.SpareText() is { } spare)
+                                            {
+                                                <div class="item-meta wraps compare-spare">@spare</div>
+                                            }
+                                            else
+                                            {
+                                                <div class="item-meta wraps">@Strings.Compare.TheyHaveIt</div>
+                                            }
+                                            @if (match.Difference is { } difference)
+                                            {
+                                                <div class="item-meta wraps">@difference</div>
+                                            }
+                                        </div>
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+
+                <section aria-labelledby="compare-for-them">
+                    <h2 class="section-label" id="compare-for-them">@Strings.Compare.ForThem</h2>
+                    @if (!friend.WishlistShared)
+                    {
+                        <p class="compare-none">@(fromPage ? Strings.Compare.NoWishlistPage : Strings.Compare.NoWishlistList)</p>
+                    }
+                    else if (result.ForThem.Count == 0)
+                    {
+                        <p class="compare-none">@Strings.Compare.NoneForThem</p>
+                    }
+                    else
+                    {
+                        <ul class="item-list compare-list">
+                            @foreach (var match in result.ForThem)
+                            {
+                                <li>
+                                    <div class="item-card">
+                                        @MyThumb(match)
+                                        <div class="item-text">
+                                            <a class="item-name compare-link" href="@LinkFor(match)">@match.Name</a>
+                                            @if (MarkOf(match) is { } mark)
+                                            {
+                                                <div class="item-meta wraps compare-spare">@mark</div>
+                                            }
+                                            <div class="item-meta wraps">@F(Strings.Compare.TheyWant, match.Theirs.Name)</div>
+                                            @if (match.Difference is { } difference)
+                                            {
+                                                <div class="item-meta wraps">@difference</div>
+                                            }
+                                        </div>
+                                        @if (match.CanMarkUpForSwap)
+                                        {
+                                            <button type="button" class="btn btn-outline-primary btn-sm compare-act" disabled="@busy"
+                                                    aria-label="@F(Strings.Compare.MarkLabel, match.Name)"
+                                                    @onclick="() => MarkUpForSwapAsync(match)">@SwapLists.MarkText(SpareMark.UpForSwap)</button>
+                                        }
+                                    </div>
+                                </li>
+                            }
+                        </ul>
+                    }
+                </section>
+            </div>
+        }
+
+        @if (result.More.Count > 0)
+        {
+            <details class="compare-more" open="@nothingMatches">
+                <summary>@F(Strings.Compare.More, result.More.Count)</summary>
+                @if (status.Length > 0)
+                {
+                    <p class="compare-status" role="status">@status</p>
+                }
+                <ul class="item-list compare-list">
+                    @foreach (var plant in result.More)
+                    {
+                        <li>
+                            <div class="item-card">
+                                @TheirThumb(plant)
+                                <div class="item-text">
+                                    <div class="item-name">@plant.Name</div>
+                                    @if (plant.SpareText() is { } spare)
+                                    {
+                                        <div class="item-meta wraps compare-spare">@spare</div>
+                                    }
+                                </div>
+                                <button type="button" class="btn btn-outline-primary btn-sm compare-act" disabled="@busy"
+                                        aria-label="@F(Strings.Compare.AddLabel, plant.Name)"
+                                        @onclick="() => AddWishAsync(plant)">@Strings.Compare.AddToWishlist</button>
+                            </div>
+                        </li>
+                    }
+                </ul>
+            </details>
+        }
+        else if (status.Length > 0)
+        {
+            <p class="compare-status" role="status">@status</p>
+        }
+
+        @if (friend.UnreadLines.Count > 0)
+        {
+            <details class="compare-unread">
+                <summary>@Plural.Of(friend.UnreadLines.Count, Strings.Compare.Unread_One, Strings.Compare.Unread_Other)</summary>
+                <ul>
+                    @foreach (var line in friend.UnreadLines)
+                    {
+                        <li>@line</li>
+                    }
+                </ul>
+            </details>
+        }
+    </div>
+
+    <div class="compare-reply compare-reply-bar">@ReplyControls</div>
+
+    <Sheet Title="@Strings.Compare.ReplyTitle" @bind-Open="replyOpen">
+        <label class="form-label" for="compare-reply-text">@Strings.Compare.ReplyLabel</label>
+        <textarea id="compare-reply-text" class="form-control compare-reply-text" rows="10" @bind="replyText" @bind:event="oninput"></textarea>
+        <div class="form-actions compare-sheet-actions">
+            <button type="button" class="btn btn-primary" @onclick="ShareReplyAsync">@Strings.Shared.ShareButton</button>
+            <button type="button" class="btn btn-outline-primary" @onclick="CopyReplyAsync">@Strings.Compare.Copy</button>
+            @if (sheetStatus.Length > 0)
+            {
+                <span class="compare-status" role="status">@sheetStatus</span>
+            }
+        </div>
+    </Sheet>
+}
+else
+{
+    <div class="compare-input">
+        <h1>@Strings.Compare.Heading</h1>
+
+        @if (view == View.Loading)
+        {
+            <div class="compare-loading" role="status">
+                <span class="visually-hidden">@Strings.Compare.Loading</span>
+                <div class="compare-bar" aria-hidden="true"></div>
+            </div>
+        }
+        else if (view is View.NotFound or View.Gone or View.Offline or View.Failed)
+        {
+            <div class="empty-state">
+                <p>@(view switch
+                {
+                    View.NotFound => Strings.Compare.NotFound,
+                    View.Gone => Strings.Compare.Gone,
+                    View.Offline => Strings.Compare.Offline,
+                    _ => Strings.Compare.Failed
+                })</p>
+                <button type="button" class="btn btn-outline-primary mt-3" @onclick="Change">@Strings.Compare.PasteInstead</button>
+            </div>
+        }
+        else
+        {
+            <p class="compare-intro">@Strings.Compare.Intro</p>
+            <label class="form-label" for="compare-text">@Strings.Compare.InputLabel</label>
+            <textarea id="compare-text" class="form-control compare-text" rows="6" autocapitalize="none" spellcheck="false"
+                      aria-describedby="compare-hint@(error is null ? null : " compare-error")"
+                      aria-invalid="@(error is null ? null : "true")"
+                      @bind="text" @bind:event="oninput" @bind:after="TextChanged"></textarea>
+            @if (error is not null)
+            {
+                <p class="compare-error" id="compare-error" role="alert">@error</p>
+            }
+
+            @if (plain is not null)
+            {
+                <div class="compare-plain" role="group" aria-labelledby="compare-plain-q">
+                    <p id="compare-plain-q">@Strings.Compare.PlainQuestion</p>
+                    <div class="compare-plain-actions">
+                        <button type="button" class="btn btn-outline-primary" @onclick="() => ChoosePlain(true)">@Strings.Compare.PlainHave</button>
+                        <button type="button" class="btn btn-outline-primary" @onclick="() => ChoosePlain(false)">@Strings.Compare.PlainWant</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="form-actions compare-go">
+                    <button type="button" class="btn btn-primary" @onclick="CompareAsync">@Strings.Compare.Go</button>
+                </div>
+            }
+            <p class="settings-hint" id="compare-hint">@Strings.Compare.InputHint</p>
+        }
+    </div>
+}
+
+@code {
+    private enum View { Input, Loading, NotFound, Gone, Offline, Failed, Result }
+
+    [Parameter]
+    public string? Address { get; set; }
+
+    private View view = View.Input;
+    private string text = "";
+    private string? error;
+    private ListTextResult? plain;
+    private FriendList? friend;
+    private IReadOnlyDictionary<Guid, string> coverUrls = new Dictionary<Guid, string>();
+    private ListComparisonResult? result;
+    private string? loadedAddress;
+    private string status = "";
+    private string sheetStatus = "";
+    private bool busy;
+    private bool replyOpen;
+    private string replyText = "";
+    private bool fromPage;
+    private bool disposed;
+
+    // My own side
+    private PlantDictionary? dictionary;
+    private IReadOnlyList<Wish> wishes = [];
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> propagations = [];
+    private Dictionary<Guid, Plant> plantsById = [];
+    private Dictionary<Guid, Propagation> propagationsById = [];
+
+    private bool nothingMatches => result is { ForYou.Count: 0, ForThem.Count: 0 };
+
+    protected override async Task OnInitializedAsync() => await LoadMineAsync();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Address == loadedAddress)
+            return;
+
+        loadedAddress = Address;
+        if (string.IsNullOrEmpty(Address))
+        {
+            // Back at the plain address, from Change or the browser's back button
+            Reset();
+            return;
+        }
+
+        await LoadFriendAsync(Address);
+    }
+
+    private async Task LoadMineAsync()
+    {
+        dictionary = await Names.GetDictionaryAsync();
+        wishes = await WishService.GetAllAsync();
+        plants = await PlantRepository.GetAllAsync();
+        propagations = await PropagationRepository.GetAllAsync();
+        plantsById = plants.ToDictionary(p => p.Id);
+        propagationsById = propagations.ToDictionary(p => p.Id);
+    }
+
+    // Another device's changes only change my side, so the friend isn't fetched again
+    private async Task ReloadAsync()
+    {
+        await LoadMineAsync();
+        Recompute();
+    }
+
+    private void Recompute() =>
+        result = friend is null ? null : ListComparison.Compare(friend, wishes, plants, propagations, dictionary);
+
+    private void Reset()
+    {
+        view = View.Input;
+        friend = null;
+        result = null;
+        plain = null;
+        error = null;
+        status = "";
+        replyOpen = false;
+    }
+
+    private async Task LoadFriendAsync(string address)
+    {
+        view = View.Loading;
+        friend = null;
+        result = null;
+        StateHasChanged();
+
+        var outcome = await Server.GetFriendPageAsync(address);
+        if (loadedAddress != address || disposed)
+            return;
+
+        if (outcome is { Ok: true, Value: { } page })
+        {
+            friend = page.List;
+            fromPage = true;
+            coverUrls = page.CoverUrls;
+            Recompute();
+            view = View.Result;
+            return;
+        }
+
+        view = outcome.Offline ? View.Offline
+            : outcome.Status == 404 ? View.NotFound
+            : outcome.Status == 410 ? View.Gone
+            : View.Failed;
+    }
+
+    private void TextChanged()
+    {
+        plain = null;
+        error = null;
+    }
+
+    private async Task CompareAsync()
+    {
+        error = null;
+        plain = null;
+
+        if (FriendAddress.Of(text) is { } address)
+        {
+            Navigation.NavigateTo($"compare/{address}");
+            return;
+        }
+
+        var read = ListTextReader.Read(text, dictionary ?? await Names.GetDictionaryAsync());
+        switch (read.Kind)
+        {
+            case ListTextKind.Empty:
+                error = Strings.Compare.ErrorEmpty;
+                break;
+            case ListTextKind.Plain:
+                plain = read;
+                break;
+            default:
+                ShowList(new FriendList(null, read.Plants, read.Wishes, read.Kind == ListTextKind.Wishlist, null, read.UnreadLines));
+                break;
+        }
+    }
+
+    // A list typed by hand says nothing about what it is, so the person says which it is
+    private void ChoosePlain(bool theyHaveThese)
+    {
+        if (plain is null)
+            return;
+
+        ShowList(theyHaveThese
+            ? new FriendList(null, plain.Plants, [], false, null, plain.UnreadLines)
+            : new FriendList(null, [], plain.Wishes, true, null, plain.UnreadLines));
+        plain = null;
+    }
+
+    private void ShowList(FriendList list)
+    {
+        friend = list;
+        fromPage = false;
+        coverUrls = new Dictionary<Guid, string>();
+        status = "";
+        Recompute();
+        view = View.Result;
+    }
+
+    // Back to the box, where a link or a list is pasted
+    private void Change()
+    {
+        replyOpen = false;
+        if (!string.IsNullOrEmpty(Address))
+            Navigation.NavigateTo("compare");
+        else
+            Reset();
+    }
+
+    // What I can do from the result
+
+    private async Task AddWishAsync(FriendPlant plant)
+    {
+        if (busy)
+            return;
+
+        busy = true;
+        try
+        {
+            var hasGenus = !string.IsNullOrWhiteSpace(plant.Genus);
+            await WishService.SaveAsync(new Wish
+            {
+                Genus = hasGenus ? plant.Genus!.Trim() : null,
+                Species = hasGenus && !string.IsNullOrWhiteSpace(plant.Species) ? plant.Species.Trim() : null,
+                Cultivar = hasGenus && !string.IsNullOrWhiteSpace(plant.Cultivar) ? plant.Cultivar.Trim() : null,
+                Name = hasGenus ? null : plant.Name.Trim()
+            });
+            await LoadMineAsync();
+            Recompute();
+            await ShowStatusAsync(F(Strings.Compare.AddedToWishlist, plant.Name));
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task MarkUpForSwapAsync(ForThemMatch match)
+    {
+        if (busy || !plantsById.TryGetValue(match.Id, out var plant))
+            return;
+
+        busy = true;
+        try
+        {
+            await PlantService.SetSpareAsync([plant], SpareMark.UpForSwap);
+            await LoadMineAsync();
+            Recompute();
+            await ShowStatusAsync(F(Strings.Compare.MarkedUpForSwap, match.Name));
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ShowStatusAsync(string message)
+    {
+        status = message;
+        StateHasChanged();
+        await Task.Delay(4000);
+        if (!disposed && status == message)
+        {
+            status = "";
+            StateHasChanged();
+        }
+    }
+
+    // Replying
+
+    private string ReplyText => result is null || friend is null ? "" : SwapReplyText.Write(result, friend.Title);
+
+    private string? Contact => friend?.SwapContact is { } contact && PublicPageRules.IsContact(contact) ? contact : null;
+
+    private string ReplyLabel => Contact is not null ? Strings.Compare.AskForSwap : Strings.Compare.SendReply;
+
+    private string replyStatus = "";
+
+    private async Task ReplyAsync()
+    {
+        replyStatus = "";
+        if (Contact is not { } contact)
+        {
+            replyText = ReplyText;
+            sheetStatus = "";
+            replyOpen = true;
+            return;
+        }
+
+        // The message is copied first, since a link can't carry it and a mail app may not take it
+        var text = ReplyText;
+        if (!await Cards.CopyTextAsync(text))
+        {
+            replyStatus = Strings.Shared.ShareFailed;
+            return;
+        }
+
+        replyStatus = Strings.Compare.CopiedPaste;
+        if (contact.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            await Sharer.OpenLinkAsync(contact);
+        else
+            Navigation.NavigateTo($"mailto:{contact}?body={Uri.EscapeDataString(text.ReplaceLineEndings("\r\n"))}", forceLoad: true);
+    }
+
+    private async Task ShareReplyAsync() => sheetStatus = await Sharer.ShareTextAsync(replyText) switch
+    {
+        "copied" => Strings.Shared.ShareCopied,
+        "failed" => Strings.Shared.ShareFailed,
+        _ => ""
+    };
+
+    private async Task CopyReplyAsync() =>
+        sheetStatus = await Cards.CopyTextAsync(replyText) ? Strings.Shared.ShareCopied : Strings.Shared.ShareFailed;
+
+    // Pieces of the rows
+
+    private RenderFragment ReplyControls => @<text>
+        @if (replyStatus.Length > 0)
+        {
+            <span class="compare-status" role="status">@replyStatus</span>
+        }
+        <button type="button" class="btn btn-primary compare-reply-button" @onclick="ReplyAsync">@ReplyLabel</button>
+    </text>;
+
+    // Their cover, or the tile a plant or a cutting gets without a photo
+    private RenderFragment TheirThumb(FriendPlant plant) => @<div class="item-thumb @(plant.Type == SubjectType.Propagation ? null : "potted")" aria-hidden="true">
+        @if (plant.Cover is { } cover && coverUrls.TryGetValue(cover.Id, out var url))
+        {
+            <img src="@url" alt="" loading="lazy" decoding="async" />
+        }
+        else if (plant.Type == SubjectType.Propagation)
+        {
+            <svg viewBox="0 0 24 24">@Icons.Feed</svg>
+        }
+        else
+        {
+            <svg viewBox="0 0 24 24">@Icons.Sprout</svg>
+        }
+    </div>;
+
+    private RenderFragment MyThumb(ForThemMatch match) => @<text>
+        @if (match.Type == SubjectType.Plant && plantsById.TryGetValue(match.Id, out var plant))
+        {
+            <SubjectThumb Subject="plant" />
+        }
+        else if (propagationsById.TryGetValue(match.Id, out var propagation))
+        {
+            <SubjectThumb Subject="propagation" />
+        }
+    </text>;
+
+    private string LinkFor(ForThemMatch match) =>
+        match.Type == SubjectType.Plant ? $"plants/{match.Id}" : $"propagations/{match.Id}";
+
+    // What I have marked it as, when it is up for swap
+    private string? MarkOf(ForThemMatch match)
+    {
+        if (!match.IsSpare)
+            return null;
+
+        return match.Type == SubjectType.Plant && plantsById.TryGetValue(match.Id, out var plant) && plant.Spare is { } mark
+            ? SwapLists.MarkText(mark)
+            : SwapLists.MarkText(SpareMark.CuttingsToSpare);
+    }
+
+    public void Dispose() => disposed = true;
+}

@@ -154,7 +154,9 @@ public sealed class PublicPageService(
                 settings.ShowStories,
                 settings.Searchable,
                 PublicPageLanguages.Normalize(language),
-                timeZone));
+                timeZone,
+                settings.SwapRequests,
+                PublicPageRules.CleanContact(settings.SwapContact)));
             if (result.Ok && result.Value is { } saved)
                 Keep(saved);
             return result;
