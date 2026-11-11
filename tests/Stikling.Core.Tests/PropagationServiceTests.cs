@@ -399,6 +399,90 @@ public class PropagationServiceTests
     }
 
     [Fact]
+    public async Task Splitting_one_off_makes_a_propagation_of_its_own_linked_to_the_batch()
+    {
+        var corms = await StartCormsAsync(2);
+        corms.Nickname = "Gladiolus";
+        corms.CollectionNumber = "117a";
+        corms.CormSizeMm = 30;
+        corms.DriedForHours = 12;
+        corms.RootingAids = [RootingAid.Cinnamon];
+        corms.Notes = "stays";
+        corms.StartedOn = Today.AddDays(-10);
+
+        var split = await service.SplitOffAsync(corms, 1, PropagationStage.Rooting);
+
+        Assert.Equal(1, corms.RemainingCount);
+        Assert.Equal(1, corms.SplitOffCount);
+        Assert.Equal(PropagationStage.Started, corms.Stage);
+        Assert.Equal(1, split.InitialCount);
+        Assert.Equal(1, split.RemainingCount);
+        Assert.Equal(corms.Id, split.SplitFromId);
+        Assert.NotEqual(corms.Id, split.Id);
+        Assert.Equal(PropagationStage.Rooting, split.Stage);
+        Assert.Equal(Today, split.FirstRootOn);
+        Assert.Null(split.RootedOn);
+        Assert.Equal("Gladiolus", split.Nickname);
+        Assert.Equal("117a", split.CollectionNumber);
+        Assert.Equal(parent.Id, split.ParentPlantId);
+        Assert.Equal(PropagationType.Corm, split.Type);
+        Assert.Equal(GrowingMedium.Leca, split.Medium);
+        Assert.Equal(30, split.CormSizeMm);
+        Assert.Equal(12, split.DriedForHours);
+        Assert.Equal(corms.StartedOn, split.StartedOn);
+        Assert.Equal([RootingAid.Cinnamon], split.RootingAids);
+        Assert.NotSame(corms.RootingAids, split.RootingAids);
+        Assert.Null(split.Notes);
+        Assert.Equal(1, propagations.Propagations[corms.Id].SplitOffCount);
+        Assert.Equal(corms.Id, propagations.Propagations[split.Id].SplitFromId);
+    }
+
+    [Fact]
+    public async Task Splitting_off_rooted_units_sets_the_rooted_day_unless_the_batch_has_one()
+    {
+        var corms = await StartCormsAsync(3);
+        var first = await service.SplitOffAsync(corms, 1, PropagationStage.Rooted);
+        Assert.Equal(Today, first.RootedOn);
+
+        corms.RootedOn = Today.AddDays(-2);
+        corms.StartedOn = Today.AddDays(-5);
+        var second = await service.SplitOffAsync(corms, 1, PropagationStage.Rooted);
+        Assert.Equal(Today.AddDays(-2), second.RootedOn);
+    }
+
+    [Fact]
+    public async Task Splitting_off_cant_take_every_unit_or_none_or_from_a_finished_one()
+    {
+        var corms = await StartCormsAsync(2);
+
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.SplitOffAsync(corms, 2, PropagationStage.Rooting));
+        await Assert.ThrowsAsync<ArgumentOutOfRangeException>(() => service.SplitOffAsync(corms, 0, PropagationStage.Rooting));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SplitOffAsync(corms, 1, PropagationStage.Rooting, Today.AddDays(1)));
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SplitOffAsync(corms, 1, PropagationStage.Rooting, corms.StartedOn.AddDays(-1)));
+        Assert.Equal(0, corms.SplitOffCount);
+        Assert.Single(propagations.Propagations);
+
+        await service.GiveAwayAsync(corms, 2);
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.SplitOffAsync(corms, 1, PropagationStage.Rooting));
+    }
+
+    [Fact]
+    public async Task Splitting_off_adds_a_history_line_on_both()
+    {
+        var corms = await StartCormsAsync(2);
+        corms.Nickname = "Gladiolus";
+
+        var split = await service.SplitOffAsync(corms, 1, PropagationStage.Rooting);
+
+        var onSource = HistoryOf(corms.Id).Last();
+        var onSplit = HistoryOf(split.Id).Last();
+        Assert.Equal("Split 1 off into its own propagation", onSource.Text);
+        Assert.Null(onSource.Event);
+        Assert.Equal("Split off from Gladiolus", onSplit.Text);
+        Assert.Null(onSplit.Event);
+    }
+
+    [Fact]
     public async Task Giving_away_checks_the_count_and_the_date()
     {
         var corms = await StartCormsAsync(2);
