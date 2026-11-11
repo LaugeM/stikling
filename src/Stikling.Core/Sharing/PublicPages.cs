@@ -39,6 +39,8 @@ public enum PublicPageOrder
 /// <param name="Line">A sentence under the title, or null.</param>
 /// <param name="Searchable">Whether search engines may list the page. Off unless the person turns it on.</param>
 /// <param name="Language">en or da, the language the page is written in.</param>
+/// <param name="SwapRequests">Whether the page says its owner is open to swap requests.</param>
+/// <param name="SwapContact">The link or address a swap request goes to, or null.</param>
 public sealed record PublicPageInfo(
     Guid Id,
     string Url,
@@ -54,14 +56,20 @@ public sealed record PublicPageInfo(
     bool ShowStories,
     bool Searchable,
     string Language,
-    DateTimeOffset CreatedAt);
+    DateTimeOffset CreatedAt,
+    bool SwapRequests = false,
+    string? SwapContact = null);
 
 /// <summary>Turns on the public page of a collection.</summary>
 /// <param name="TimeZone">The device's IANA time zone id, so the page counts days the way the device does.</param>
 /// <param name="Language">The app's language, which the page is written in.</param>
 public sealed record TurnOnPublicPageRequest(string? TimeZone, string? Language);
 
-/// <summary>Replaces the settings of the page whole, so anything left out here goes back to its default.</summary>
+/// <summary>
+/// Replaces the settings of the page whole, so anything left out here goes back to its default. The
+/// exception is <paramref name="SwapRequests"/> and <paramref name="SwapContact"/>, which older versions of
+/// the app don't send: null leaves them as they are, and an empty contact clears it.
+/// </summary>
 public sealed record UpdatePublicPageRequest(
     string? Title,
     string? Line,
@@ -73,7 +81,9 @@ public sealed record UpdatePublicPageRequest(
     bool ShowStories,
     bool Searchable,
     string? Language,
-    string? TimeZone);
+    string? TimeZone,
+    bool? SwapRequests = null,
+    string? SwapContact = null);
 
 /// <summary>Gives the page a name, or null to give its name up.</summary>
 public sealed record SetPublicPageNameRequest(string? Name);
@@ -97,6 +107,9 @@ public static class PublicPageRules
     public const int MinNameLength = 3;
     public const int MaxNameLength = 30;
 
+    /// <summary>The longest contact link or address a page can carry.</summary>
+    public const int MaxContactLength = 200;
+
     /// <summary>The most times one page can change its name in a day.</summary>
     public const int MaxNamesPerPagePerDay = 3;
 
@@ -119,6 +132,23 @@ public static class PublicPageRules
         "admin administrator support help about api app www share s static assets photos plants cuttings swap wishlist sitemap robots login signin sign-in signup sign-up account settings privacy terms security official team staff moderator mod root system null undefined contact abuse report mail email status blog news docs dev test"
             .Split(' '),
         StringComparer.Ordinal);
+
+    /// <summary>The contact trimmed, or null when nothing is left.</summary>
+    public static string? CleanContact(string? contact) =>
+        string.IsNullOrWhiteSpace(contact) ? null : contact.Trim();
+
+    /// <summary>Whether a contact is something a visitor can use: an https link with a host, or an email address.</summary>
+    public static bool IsContact(string contact)
+    {
+        if (contact.Length == 0 || contact.Length > MaxContactLength || contact.Any(char.IsWhiteSpace))
+            return false;
+
+        if (contact.StartsWith("https://", StringComparison.OrdinalIgnoreCase))
+            return Uri.TryCreate(contact, UriKind.Absolute, out var uri) && uri.Scheme == Uri.UriSchemeHttps && uri.Host.Length > 0;
+
+        var at = contact.IndexOf('@');
+        return at > 0 && at == contact.LastIndexOf('@') && contact.IndexOf('.', at) is var dot && dot > at + 1 && dot < contact.Length - 1;
+    }
 
     /// <summary>The name trimmed, in lower case and without a leading @, or null when nothing is left.</summary>
     public static string? NormalizeName(string? name)

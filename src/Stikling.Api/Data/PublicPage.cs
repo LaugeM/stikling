@@ -49,6 +49,12 @@ public class PublicPage
     /// <summary>en or da, the language the page is written in.</summary>
     public string Language { get; set; } = "en";
 
+    /// <summary>Whether the page says its owner is open to swap requests. Only shown with a contact.</summary>
+    public bool SwapRequests { get; set; }
+
+    /// <summary>An https link or an email address that swap requests go to, or null.</summary>
+    public string? SwapContact { get; set; }
+
     /// <summary>The device's IANA time zone, so the page counts days the way the device does.</summary>
     public string? TimeZone { get; set; }
 

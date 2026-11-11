@@ -90,12 +90,24 @@ public static class PublicPageEndpoints
                 errors["layout"] = ["Unknown layout."];
             if (!Enum.IsDefined(request.Order))
                 errors["order"] = ["Unknown order."];
+
+            // Older versions of the app don't send the swap settings, so null leaves them as they are and an empty contact clears it
+            var contactSent = request.SwapContact is not null;
+            var contact = PublicPageRules.CleanContact(request.SwapContact);
+            if (contact is { Length: > PublicPageRules.MaxContactLength })
+                errors["swapContact"] = [$"The contact can have at most {PublicPageRules.MaxContactLength} characters."];
+            else if (contact is not null && !PublicPageRules.IsContact(contact))
+                errors["swapContact"] = ["The contact has to be an https link or an email address."];
             if (errors.Count > 0)
                 return Results.ValidationProblem(errors);
 
             var page = await db.PublicPages.SingleOrDefaultAsync(p => p.CollectionId == collectionId && p.TurnedOffAt == null);
             if (page is null)
                 return Results.NotFound();
+
+            var swapContact = contactSent ? contact : page.SwapContact;
+            if (request.SwapRequests == true && swapContact is null)
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["swapContact"] = ["Add a contact to turn on swap requests."] });
 
             page.Title = title;
             page.Line = line;
@@ -110,6 +122,9 @@ public static class PublicPageEndpoints
             if (request.Language is not null)
                 page.Language = PublicPageLanguages.Normalize(request.Language);
             page.TimeZone = ShareLinkEndpoints.KnownZone(request.TimeZone);
+            if (request.SwapRequests is { } swapRequests)
+                page.SwapRequests = swapRequests;
+            page.SwapContact = swapContact;
             page.UpdatedAt = clock.GetUtcNow();
             await db.SaveChangesAsync();
 
@@ -216,7 +231,7 @@ public static class PublicPageEndpoints
     internal static PublicPageInfo Info(PublicPage page, ShareOptions options) =>
         new(page.Id, options.UrlOf(page.Token), page.Name is null ? null : options.NamedUrlOf(page.Name), page.Name, page.Title, page.Line,
             page.Layout, page.Order, page.ShowPropagations, page.ShowSwap, page.ShowWishlist, page.ShowStories, page.Searchable,
-            page.Language, page.CreatedAt);
+            page.Language, page.CreatedAt, page.SwapRequests, page.SwapContact);
 
     /// <summary>16 random bytes as base64url without padding, 22 characters that can't be guessed.</summary>
     private static string NewToken() => WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(16));

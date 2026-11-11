@@ -156,10 +156,16 @@ public class ExportTests(ApiFactory api)
         var named = await me.Client.PutAsJsonAsync($"/collections/{me.CollectionId}/public-page/name",
             new Stikling.Core.Sharing.SetPublicPageNameRequest("export" + Guid.NewGuid().ToString("N")[..10]), ApiFactory.Json);
         Assert.Equal(HttpStatusCode.OK, named.StatusCode);
+        var changed = await me.Client.PutAsJsonAsync($"/collections/{me.CollectionId}/public-page",
+            new Stikling.Core.Sharing.UpdatePublicPageRequest(null, null, Stikling.Core.Sharing.PublicPageLayout.Shelves, Stikling.Core.Sharing.PublicPageOrder.Newest,
+                true, false, false, false, false, null, null, true, "fern@example.com"), ApiFactory.Json);
+        Assert.Equal(HttpStatusCode.OK, changed.StatusCode);
 
         using var zip = await Export(me);
 
         var page = Assert.Single(Read(zip, $"collections/{me.CollectionId}/publicPages.json").EnumerateArray());
+        Assert.True(page.GetProperty("swapRequests").GetBoolean());
+        Assert.Equal("fern@example.com", page.GetProperty("swapContact").GetString());
         Assert.Equal("da", page.GetProperty("language").GetString());
         Assert.Equal("Shelves", page.GetProperty("layout").GetString());
         Assert.StartsWith("export", page.GetProperty("name").GetString());

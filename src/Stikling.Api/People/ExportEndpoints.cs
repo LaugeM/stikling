@@ -190,6 +190,8 @@ public static class ExportEndpoints
                     p.ShowStories,
                     p.Searchable,
                     p.Language,
+                    p.SwapRequests,
+                    p.SwapContact,
                     p.TimeZone,
                 }), cancel);
         }
