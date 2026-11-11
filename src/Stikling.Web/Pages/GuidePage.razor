@@ -237,12 +237,10 @@ else
             case GuidePestLinks pestLinks:
                 <p>@GuideLinks.Text(pestLinks.TextKey)</p>
                 <p class="guide-pest-links">@GuideLinks.Text("GuidesFor")
-                    @for (var i = 0; i < pestLinks.GuideIds.Count; i++)
+                    @{ var pests = pestLinks.GuideIds.Select(GuideBook.Find).OfType<Guide>().ToList(); }
+                    @for (var i = 0; i < pests.Count; i++)
                     {
-                        if (GuideBook.Find(pestLinks.GuideIds[i]) is { } pest)
-                        {
-                            <a href="@GuideLinks.Href(pest.Id, From)">@GuideLinks.Text(pest.TitleKey)</a>@(i < pestLinks.GuideIds.Count - 1 ? "," : null)
-                        }
+                        <a href="@GuideLinks.Href(pests[i].Id, From)">@GuideLinks.Text(pests[i].TitleKey)</a>@(i < pests.Count - 1 ? "," : null)
                     }
                 </p>
                 break;
