@@ -527,4 +527,12 @@
     <value>All white</value>
     <comment>How variegated a new leaf is: no green at all.</comment>
   </data>
+  <data name="PlanRepeatTooShort" xml:space="preserve">
+    <value>A plan that starts over waits at least a day before step 1 comes again.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="PlanSummaryRepeats" xml:space="preserve">
+    <value>{0}, starts over after {1}</value>
+    <comment>Summary of a treatment plan that starts over. {0} is the usual summary, like '2 steps over 4 days'. {1} is the time, like '4 days'.</comment>
+  </data>
 </root>

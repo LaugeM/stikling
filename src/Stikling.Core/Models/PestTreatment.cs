@@ -30,6 +30,12 @@ public sealed class PestTreatment : Entity
     public Guid CaseId { get; set; }
 
     /// <summary>
+    /// The round of the case's plan this treatment was made for, when the plan starts over. 0 is
+    /// every treatment from before rounds existed and is read as round 1.
+    /// </summary>
+    public int PlanRound { get; set; }
+
+    /// <summary>
     /// The plant a check outside a case was for, and then <see cref="CaseId"/> is empty. It's a
     /// check on a single plant ("checked, no signs"). It is not a new care kind, because an
     /// unknown enum value would stop older versions on other devices from loading care logs,

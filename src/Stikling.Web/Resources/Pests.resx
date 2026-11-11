@@ -1397,4 +1397,16 @@
     <value>Other</value>
     <comment>Small heading over the remaining signs.</comment>
   </data>
+  <data name="PlansRepeat" xml:space="preserve">
+    <value>Start over after the last step</value>
+    <comment>Label of the checkbox that makes a treatment plan start over with step 1 after its last step.</comment>
+  </data>
+  <data name="PlansRepeatDays" xml:space="preserve">
+    <value>Days before step 1 again</value>
+    <comment>Label of the field for how many days after the last step step 1 comes again.</comment>
+  </data>
+  <data name="CaseRound" xml:space="preserve">
+    <value>Round {0}</value>
+    <comment>Which round a treatment plan that starts over is on, like Round 2. {0} is the number.</comment>
+  </data>
 </root>

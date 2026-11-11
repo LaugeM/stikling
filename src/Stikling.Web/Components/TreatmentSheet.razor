@@ -185,7 +185,7 @@
     {
         offPlan = false;
         var draft = Step is { } step
-            ? PlanProgress.StartStep(Case, step, Today, recipes)
+            ? PlanProgress.StartStep(Case, step, Today, recipes, PlanProgress.CurrentRound(Case, Existing))
             : PestService.StartTreatment(Case, Existing, Today, recipes);
         recipeId = draft.RecipeId;
         what = draft.RecipeId is null ? draft.What : null;
