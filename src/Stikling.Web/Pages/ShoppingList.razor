@@ -1,0 +1,219 @@
+@page "/shopping-list"
+@inject StockService StockService
+@inject SellerService SellerService
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Stock.ShoppingPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Stock.ShoppingTitle</h1>
+
+<form class="shop-add" @onsubmit="AddAsync">
+    <label class="form-label" for="shop-add">@Strings.Stock.ShoppingAddLabel</label>
+    <div class="shop-add-row">
+        <input id="shop-add" class="form-control" placeholder="@Strings.Stock.ShoppingAddPlaceholder" autocomplete="off"
+               @bind="newText" @bind:event="oninput" />
+        <button type="submit" class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(newText))">@Strings.Stock.ShoppingAddButton</button>
+    </div>
+</form>
+
+@if (loading)
+{
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
+}
+else
+{
+    @if (view.ToBuy.Count == 0)
+    {
+        <div class="empty-state">
+            <p>@Markup.Html(Strings.Stock.ShoppingEmpty, Markup.Link("stock", Strings.Stock.ShoppingStockLink))</p>
+        </div>
+    }
+    else
+    {
+        <section class="settings-section">
+            <h2 class="section-label">@Strings.Stock.ShoppingToBuyHeading</h2>
+            <ul class="shop-list">
+                @foreach (var row in view.ToBuy)
+                {
+                    <li>
+                        <button type="button" class="shop-tick" role="checkbox" aria-checked="false" disabled="@busy"
+                                aria-label="@F(Strings.Stock.ShoppingTick, row.Name)" @onclick="() => TickAsync(row)"></button>
+                        <div class="shop-main">
+                            <span class="shop-name">@row.Name</span>
+                            @if (row.Level is { } rowLevel && Labels.For(rowLevel) is { } levelText)
+                            {
+                                <span class="shop-sub">@levelText</span>
+                            }
+                            @if (sellers.NameOf(row.LastSellerId) is { } seller)
+                            {
+                                <span class="shop-sub">@F(Strings.Stock.ShoppingLastFrom, seller)</span>
+                            }
+                        </div>
+                        @if (row.Item is { } line)
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                    @onclick="() => RemoveAsync(line)">@Strings.Stock.ShoppingRemove</button>
+                        }
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (view.BoughtToday.Count > 0)
+    {
+        <section class="settings-section">
+            <h2 class="section-label">@Strings.Stock.ShoppingBoughtToday</h2>
+            <ul class="shop-list">
+                @foreach (var row in view.BoughtToday)
+                {
+                    <li class="bought">
+                        <span class="shop-tick ticked" aria-hidden="true"><svg viewBox="0 0 24 24">@Icons.Check</svg></span>
+                        <button type="button" class="shop-main shop-edit" @onclick="() => OpenDetails(row)">
+                            <span class="shop-name">@row.Name</span>
+                            <span class="shop-sub">@(Details(row) ?? Strings.Stock.ShoppingAddDetails)</span>
+                        </button>
+                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                @onclick="() => UndoAsync(row)">@Strings.Stock.ShoppingUndo</button>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+<Sheet Title="@F(Strings.Stock.BoughtTitle, editing?.Name ?? "")" Open="sheetOpen" OpenChanged="open => sheetOpen = open">
+    @if (editing is not null)
+    {
+        <SupplyBoughtSheet Unit="editing.Supply?.Supply.Unit"
+                           Day="@EditingDay" Amount="@(editing.Entry?.Amount ?? editing.Item?.Amount)"
+                           Price="@(editing.Entry?.Price ?? editing.Item?.Price)" SellerId="@(editing.Entry?.SellerId ?? editing.Item?.SellerId)"
+                           ShowRaisePot="@(editing.Item is { PotId: not null, Amount: null })"
+                           OnSave="SaveDetailsAsync" OnCancel="() => sheetOpen = false" />
+    }
+</Sheet>
+
+@code {
+    private StockView view = default!;
+    private SellerList sellers = SellerList.None;
+    private bool loading = true;
+    private bool busy;
+    private string? newText;
+
+    private ShoppingRow? editing;
+    private bool sheetOpen;
+
+    protected override async Task OnInitializedAsync()
+    {
+        view = StockView.Build([], [], [], [], [], Time.LocalDay, Time.Today());
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        view = await StockService.GetAsync();
+        sellers = await SellerService.GetSellersAsync();
+        loading = false;
+    }
+
+    private async Task AddAsync()
+    {
+        busy = true;
+        try
+        {
+            if (await StockService.AddLineAsync(newText) is not null)
+                newText = null;
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>Ticking records the purchase at once, with no sheet. The details can be added afterwards.</summary>
+    private async Task TickAsync(ShoppingRow row)
+    {
+        busy = true;
+        try
+        {
+            if (row.Supply is { } status)
+                await StockService.MarkAsync(status.Supply.Id, SupplyEntryKind.Bought, null, null, null, Time.GetLocalNow());
+            else if (row.Item is { } item)
+                await StockService.TickAsync(item);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task UndoAsync(ShoppingRow row)
+    {
+        busy = true;
+        try
+        {
+            if (row.Entry is { } entry)
+                await StockService.UndoAsync(entry.Id);
+            else if (row.Item is { } item)
+                await StockService.UntickAsync(item);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RemoveAsync(ShoppingItem item)
+    {
+        busy = true;
+        try
+        {
+            await StockService.DeleteLineAsync(item.Id);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private DateOnly EditingDay => Time.LocalDay(editing?.Entry?.At ?? editing?.Item?.BoughtAt ?? Time.GetLocalNow());
+
+    private void OpenDetails(ShoppingRow row)
+    {
+        editing = row;
+        sheetOpen = true;
+    }
+
+    private async Task SaveDetailsAsync(BoughtDetails details)
+    {
+        if (editing?.Entry is { } entry)
+            await StockService.UpdateBoughtAsync(entry.Id, details);
+        else if (editing?.Item is { } item)
+            await StockService.UpdateBoughtAsync(item, details);
+        sheetOpen = false;
+        await LoadAsync();
+    }
+
+    /// <summary>"10 L · 45 · Plantorama" of what was written down, or null when nothing was.</summary>
+    private string? Details(ShoppingRow row)
+    {
+        var amount = row.Entry?.Amount ?? row.Item?.Amount;
+        var price = row.Entry?.Price ?? row.Item?.Price;
+        var sellerId = row.Entry?.SellerId ?? row.Item?.SellerId;
+
+        var parts = new List<string>();
+        if (amount is { } a)
+            parts.Add(Labels.Amount(a, row.Supply?.Supply.Unit));
+        if (price is { } p)
+            parts.Add(Labels.Money(p));
+        if (sellers.NameOf(sellerId) is { } seller)
+            parts.Add(seller);
+        return parts.Count == 0 ? null : string.Join(" · ", parts);
+    }
+}

@@ -3,6 +3,7 @@
 @layout WideLayout
 @inject IProductRepository Repository
 @inject ProductService ProductService
+@inject StockService StockService
 @inject IJSRuntime JS
 
 <PageTitle>@Strings.Supplies.ProductsPageTitle</PageTitle>
@@ -176,6 +177,10 @@ else
                     {
                         <div class="product-head">
                             <span class="product-title">@use.Product.Name</span>
+                            @if (Labels.For(LevelOf(use.Product)) is { } levelBadge)
+                            {
+                                <span class="product-badge">@levelBadge</span>
+                            }
                             <span class="product-dose-text">@(use.Product.DoseText ?? Strings.Supplies.ProductNoUsualDose)</span>
                         </div>
                         <div class="product-use">@Labels.For(use.Product.Kind) · @Used(use)</div>
@@ -188,6 +193,11 @@ else
                             <div class="product-use">@use.Product.Notes</div>
                         }
                         <div class="care-actions">
+                            @if (LevelOf(use.Product) == SupplyLevel.Have)
+                            {
+                                <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                        @onclick="() => RunningLowAsync(use.Product)">@Strings.Stock.ProductRunningLow</button>
+                            }
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => StartEdit(use.Product)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
@@ -206,6 +216,7 @@ else
     public Guid? Show { get; set; }
 
     private IReadOnlyList<ProductUse> uses = [];
+    private StockView? stock;
     private bool loading = true;
     private bool busy;
     private List<string> errors = [];
@@ -231,10 +242,28 @@ else
     private async Task LoadAsync()
     {
         uses = await ProductService.GetAllAsync();
+        stock = await StockService.GetAsync();
         loading = false;
     }
 
     private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    /// <summary>Whether the supply for a product is running low or out. A product with no supply counts as had.</summary>
+    private SupplyLevel LevelOf(Product product) => stock?.ForProduct(product.Id)?.Level ?? SupplyLevel.Have;
+
+    private async Task RunningLowAsync(Product product)
+    {
+        busy = true;
+        try
+        {
+            await StockService.RunningLowForProductAsync(product);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
 
     private static readonly Nutrient[] Npk = [Nutrient.Nitrogen, Nutrient.Phosphorus, Nutrient.Potassium];
 

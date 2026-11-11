@@ -45,7 +45,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             Stores.Feeds, Stores.TreatmentRecipes, Stores.Places, Stores.GrowLights,
             Stores.ReceivedHistories, Stores.AwayStretches, Stores.PropagationCareLogs, Stores.FloweringMarks,
             Stores.Problems, Stores.ProblemUpdates, Stores.Wishes, Stores.Sellers, Stores.OwnCareKinds, Stores.CareIntervals,
-            Stores.TreatmentPlans, Stores.OwnFields, Stores.Orders, Stores.OrderItems, Stores.Leaves, Stores.PhotoMarks
+            Stores.TreatmentPlans, Stores.OwnFields, Stores.Orders, Stores.OrderItems, Stores.Leaves, Stores.PhotoMarks,
+            Stores.Supplies, Stores.SupplyEntries, Stores.ShoppingItems
         ];
         foreach (var store in stores)
         {
@@ -94,7 +95,10 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             Orders = await db.GetAllAsync<Order>(Stores.Orders),
             OrderItems = await db.GetAllAsync<OrderItem>(Stores.OrderItems),
             Leaves = await db.GetAllAsync<Leaf>(Stores.Leaves),
-            PhotoMarks = await db.GetAllAsync<PhotoMark>(Stores.PhotoMarks)
+            PhotoMarks = await db.GetAllAsync<PhotoMark>(Stores.PhotoMarks),
+            Supplies = await db.GetAllAsync<Supply>(Stores.Supplies),
+            SupplyEntries = await db.GetAllAsync<SupplyEntry>(Stores.SupplyEntries),
+            ShoppingItems = await db.GetAllAsync<ShoppingItem>(Stores.ShoppingItems)
         };
 
         using var buffer = new MemoryStream();
@@ -249,6 +253,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         await Restore(Stores.OrderItems, data.OrderItems);
         await Restore(Stores.Leaves, data.Leaves);
         await Restore(Stores.PhotoMarks, data.PhotoMarks);
+        await Restore(Stores.Supplies, data.Supplies);
+        await Restore(Stores.SupplyEntries, data.SupplyEntries);
+        await Restore(Stores.ShoppingItems, data.ShoppingItems);
 
         // A delete carried over from the backup frees the image too
         foreach (var photo in photoMeta.ToSave.Where(p => p.IsDeleted))

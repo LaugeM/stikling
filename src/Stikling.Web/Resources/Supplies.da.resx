@@ -115,7 +115,7 @@
     <value>Udstyr · Stikling</value>
   </data>
   <data name="SuppliesIntro" xml:space="preserve">
-    <value>Sælgerne dine planter kommer fra, og de potter, blandinger og produkter du bruger, så en plante eller en behandling kan pege på dem i stedet for at du skal skrive dem igen.</value>
+    <value>Sælgerne dine planter kommer fra, og de potter, blandinger og produkter du bruger, så en plante eller en behandling kan pege på dem i stedet for at du skal skrive dem igen. Lageret holder styr på hvad du har, og indkøbslisten på hvad du skal købe.</value>
   </data>
   <data name="SuppliesSellers" xml:space="preserve">
     <value>Sælgere</value>
@@ -717,6 +717,9 @@
   <data name="MixesEditWarning_Other" xml:space="preserve">
     <value>{0} planter står i denne blanding. Gemmer du, ændres det de alle viser, for en plante peger på blandingen og har ikke sin egen kopi af opskriften.</value>
   </data>
+  <data name="MixesEditWarningWithCuttings" xml:space="preserve">
+    <value>{0} planter og stiklinger står i denne blanding. Gemmer du, ændres det de alle viser, for de peger på blandingen og har ikke deres egen kopi af opskriften.</value>
+  </data>
   <data name="MixesCopyHint_One" xml:space="preserve">
     <value>Gemmer du den som en ny blanding, bliver planten på den gamle som den var, og den nye kan du bruge til det du potter fra nu af.</value>
   </data>
@@ -776,6 +779,9 @@
   </data>
   <data name="MixesDeleteInUse_Other" xml:space="preserve">
     <value>{0} planter står i denne blanding. Sletter du blandingen, bliver den bare fjernet fra dem. Ellers ændres intet.</value>
+  </data>
+  <data name="MixesDeleteInUseWithCuttings" xml:space="preserve">
+    <value>{0} planter og stiklinger står i denne blanding. Sletter du blandingen, bliver den bare fjernet fra dem. Ellers ændres intet.</value>
   </data>
   <data name="FeedsTitle" xml:space="preserve">
     <value>Gødninger</value>

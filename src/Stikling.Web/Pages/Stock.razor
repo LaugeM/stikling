@@ -1,0 +1,475 @@
+@page "/stock"
+@layout WideLayout
+@inject StockService StockService
+@inject ISupplyRepository SupplyRepository
+@inject IProductRepository ProductRepository
+@inject ISoilMixRepository MixRepository
+@inject ITreatmentRecipeRepository RecipeRepository
+@inject SellerService SellerService
+@inject TimeProvider Time
+@inject IJSRuntime JS
+
+<PageTitle>@Strings.Stock.StockPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+<h1>@Strings.Stock.StockTitle</h1>
+
+<p class="settings-hint">
+    @Markup.Html(Strings.Stock.StockIntro, Markup.Link("pots", Strings.Stock.StockPotsLink))
+</p>
+<p class="mt-2 mb-0"><a class="link-action" href="shopping-list">@Strings.Stock.StockShoppingLink</a></p>
+
+@if (errors.Count > 0)
+{
+    <div id="form-errors" class="alert alert-danger mt-3" role="alert" tabindex="-1">
+        @foreach (var error in errors)
+        {
+            <div>@error</div>
+        }
+    </div>
+}
+
+@if (draft is not null)
+{
+    <section class="settings-section supply-form">
+        <h2>@(editing ? Strings.Stock.StockFormEdit : Strings.Stock.StockFormAdd)</h2>
+
+        <div class="mb-3">
+            <div class="form-label">@Strings.Stock.StockFormKind</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Stock.StockFormKind">
+                @foreach (var kind in Enum.GetValues<SupplyKind>())
+                {
+                    <button type="button" class="chip @Picked(draft.EffectiveKind == kind)"
+                            aria-pressed="@(draft.EffectiveKind == kind ? "true" : "false")"
+                            @onclick="() => PickKind(kind)">@Labels.For(kind)</button>
+                }
+            </div>
+        </div>
+
+        <div class="mb-3">
+            @if (draft.ProductId is not null)
+            {
+                <div class="form-label">@Strings.Stock.StockFormName</div>
+                <div class="stock-product-name">@draft.Name</div>
+                <div class="form-text">@Strings.Stock.StockFormIsProduct</div>
+            }
+            else
+            {
+                <label class="form-label" for="supply-name">@Strings.Stock.StockFormName</label>
+                @if (Suggestions.Count > 0)
+                {
+                    <div class="chip-row mb-2" role="group" aria-label="@Strings.Stock.StockFormSuggestions">
+                        @foreach (var name in Suggestions)
+                        {
+                            <button type="button" class="chip name-chip @Picked(Same(name, draft.Name))"
+                                    @onclick="() => draft.Name = name">@name</button>
+                        }
+                    </div>
+                }
+                @* Not while editing: picking a product gives the supply the product's fixed id, which would
+                   leave this one behind with its history and make a second *@
+                @if (!editing && draft.EffectiveKind == SupplyKind.Water && StockableProducts.Count > 0)
+                {
+                    <div class="chip-row mb-2" role="group" aria-label="@Strings.Stock.StockFormProducts">
+                        @foreach (var product in StockableProducts)
+                        {
+                            <button type="button" class="chip name-chip" @onclick="() => PickProduct(product)">@product.Name</button>
+                        }
+                    </div>
+                }
+                <input id="supply-name" class="form-control" placeholder="@Strings.Stock.StockFormNamePlaceholder" autocomplete="off"
+                       value="@draft.Name" @oninput="e => draft.Name = e.Value?.ToString()" />
+                @if (draft.EffectiveKind == SupplyKind.Water)
+                {
+                    <div class="form-text">@Strings.Stock.StockFormProductHint</div>
+                }
+            }
+        </div>
+
+        <div class="mb-3">
+            <div class="form-label">@Strings.Stock.StockFormUnit</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Stock.StockFormUnit">
+                @foreach (var unit in Enum.GetValues<SupplyUnit>())
+                {
+                    <button type="button" class="chip @Picked(draft.Unit == unit)"
+                            aria-pressed="@(draft.Unit == unit ? "true" : "false")"
+                            @onclick="() => draft.Unit = draft.Unit == unit ? null : unit">@Labels.For(unit)</button>
+                }
+            </div>
+        </div>
+
+        @if (!editing)
+        {
+            <div class="mb-3">
+                <div class="form-label">@Strings.Stock.StockFormLevel</div>
+                <div class="chip-row" role="group" aria-label="@Strings.Stock.StockFormLevel">
+                    @foreach (var choice in Levels)
+                    {
+                        <button type="button" class="chip @Picked(level == choice)"
+                                aria-pressed="@(level == choice ? "true" : "false")"
+                                @onclick="() => level = choice">@LevelText(choice)</button>
+                    }
+                </div>
+            </div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label" for="supply-notes">@Strings.Supplies.Notes</label>
+            <textarea id="supply-notes" class="form-control" rows="2" @bind="draft.Notes"></textarea>
+        </div>
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">
+                @(editing ? Strings.Supplies.SaveChanges : Strings.Stock.StockSubmitAdd)
+            </button>
+            <button type="button" class="btn btn-link" @onclick="Cancel">@Strings.Common.Cancel</button>
+        </div>
+    </section>
+}
+else
+{
+    <div class="form-actions my-3">
+        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Stock.StockAddButton</button>
+    </div>
+}
+
+@if (loading)
+{
+    <p class="text-body-secondary">@Strings.Supplies.Loading</p>
+}
+else if (view.Supplies.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Stock.StockEmptyTitle</p>
+        <p class="text-body-secondary">@Strings.Stock.StockEmptyHint</p>
+    </div>
+}
+else
+{
+    @foreach (var group in Groups)
+    {
+        <section class="settings-section">
+            <h2 class="section-label">@Labels.For(group.Key)</h2>
+
+            <ul class="stock-list supply-grid" aria-label="@Labels.For(group.Key)">
+                @foreach (var status in group)
+                {
+                    <li id="item-@status.Supply.Id">
+                        @if (confirming == status.Supply.Id)
+                        {
+                            <div class="stock-confirm">
+                                <p>@F(Strings.Stock.StockDeleteConfirm, status.Name)</p>
+                                <div class="care-actions">
+                                    <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                            @onclick="() => DeleteAsync(status)">@Strings.Common.Delete</button>
+                                    <button type="button" class="btn btn-link btn-sm"
+                                            @onclick="() => confirming = null">@Strings.Common.Cancel</button>
+                                </div>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="stock-head">
+                                <span class="stock-name">@status.Name</span>
+                                @if (Labels.For(status.Level) is { } badge)
+                                {
+                                    <span class="stock-badge @(status.Level == SupplyLevel.Out ? "out" : null)">@badge</span>
+                                }
+                            </div>
+                            @if (SubLine(status) is { } sub)
+                            {
+                                <div class="stock-sub">@sub</div>
+                            }
+                            @if (!string.IsNullOrWhiteSpace(status.Supply.Notes))
+                            {
+                                <div class="stock-sub">@status.Supply.Notes</div>
+                            }
+                            <div class="chip-row stock-levels" role="group" aria-label="@F(Strings.Stock.StockLevelAria, status.Name)">
+                                @foreach (var choice in Levels.Where(l => l != status.Level))
+                                {
+                                    <button type="button" class="chip" disabled="@busy"
+                                            @onclick="() => SetLevelAsync(status, choice)">@LevelText(choice)</button>
+                                }
+                            </div>
+                            <div class="stock-actions">
+                                <button type="button" class="btn btn-link btn-sm link-action"
+                                        @onclick="() => OpenBought(status)">@Strings.Stock.ActionBought</button>
+                                <button type="button" class="btn btn-link btn-sm link-action"
+                                        @onclick="() => OpenCounted(status)">@Strings.Stock.ActionCounted</button>
+                                <button type="button" class="btn btn-link btn-sm link-action"
+                                        @onclick="() => StartEdit(status)">@Strings.Common.Edit</button>
+                                <button type="button" class="btn btn-link btn-sm link-action"
+                                        @onclick="() => confirming = status.Supply.Id">@Strings.Common.Delete</button>
+                            </div>
+                        }
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+}
+
+<Sheet Title="@F(Strings.Stock.BoughtTitle, boughtFor?.Name ?? "")" Open="boughtOpen" OpenChanged="open => boughtOpen = open">
+    @if (boughtFor is not null)
+    {
+        <SupplyBoughtSheet Unit="boughtFor.Supply.Unit" OnSave="SaveBoughtAsync" OnCancel="CloseSheets" />
+    }
+</Sheet>
+
+<Sheet Title="@F(Strings.Stock.CountedTitle, countedFor?.Name ?? "")" Open="countedOpen" OpenChanged="open => countedOpen = open">
+    @if (countedFor is not null)
+    {
+        <SupplyCountSheet Unit="countedFor.Supply.Unit" Amount="countedFor.Amount" OnSave="SaveCountedAsync" OnCancel="CloseSheets" />
+    }
+</Sheet>
+
+@code {
+    private StockView view = default!;
+    private SellerList sellers = SellerList.None;
+    private IReadOnlyList<Product> products = [];
+    private IReadOnlyList<SoilMix> mixes = [];
+    private IReadOnlyList<TreatmentRecipe> recipes = [];
+    private bool loading = true;
+    private bool busy;
+    private bool showErrors;
+    private List<string> errors = [];
+
+    private Supply? draft;
+    private bool editing;
+    private SupplyLevel level = SupplyLevel.Have;
+    private Guid? confirming;
+
+    private SupplyStatus? boughtFor;
+    private bool boughtOpen;
+    private SupplyStatus? countedFor;
+    private bool countedOpen;
+
+    private static readonly SupplyLevel[] Levels = [SupplyLevel.Have, SupplyLevel.Low, SupplyLevel.Out];
+
+    protected override async Task OnInitializedAsync()
+    {
+        view = StockView.Build([], [], [], [], [], Time.LocalDay, Time.Today());
+        await LoadAsync();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!showErrors)
+            return;
+        showErrors = false;
+        await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/page.js");
+        await module.InvokeVoidAsync("showAlert", "form-errors");
+    }
+
+    private async Task LoadAsync()
+    {
+        view = await StockService.GetAsync();
+        sellers = await SellerService.GetSellersAsync();
+        products = [.. (await ProductRepository.GetAllAsync()).OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)];
+        mixes = await MixRepository.GetAllAsync();
+        recipes = await RecipeRepository.GetAllAsync();
+        loading = false;
+    }
+
+    private static string? Picked(bool picked) => picked ? "picked" : null;
+
+    private static bool Same(string name, string? other) => string.Equals(name.Trim(), other?.Trim(), StringComparison.CurrentCultureIgnoreCase);
+
+    /// <summary>The supplies grouped by what they are for, in a fixed order, leaving out groups with nothing in them.</summary>
+    private IEnumerable<IGrouping<SupplyKind, SupplyStatus>> Groups =>
+        view.Supplies.GroupBy(s => s.Kind).OrderBy(g => g.Key);
+
+    private static string LevelText(SupplyLevel choice) => choice switch
+    {
+        SupplyLevel.Low => Strings.Stock.LevelLow,
+        SupplyLevel.Out => Strings.Stock.LevelOut,
+        _ => Strings.Stock.ActionHaveIt
+    };
+
+    private string Day(DateOnly day) => day.Year == Time.Today().Year ? Labels.DayMonth(day) : Labels.Date(day);
+
+    /// <summary>"About 5 L, counted 3 Nov", else what the last purchase was, else nothing.</summary>
+    private string? SubLine(SupplyStatus status)
+    {
+        if (status.Amount is { } amount && status.CountedOn is { } counted && status.Level != SupplyLevel.Out)
+            return F(Strings.Stock.StockAbout, Labels.Amount(amount, status.Supply.Unit), Day(counted));
+
+        if (status.LastBought is not { } last)
+            return null;
+
+        var parts = new List<string> { F(Strings.Stock.StockLastBought, Day(last.Day)) };
+        if (last.Amount is { } bought)
+            parts.Add(Labels.Amount(bought, status.Supply.Unit));
+        if (last.Price is { } price)
+            parts.Add(Labels.Money(price));
+        if (sellers.NameOf(last.SellerId) is { } seller)
+            parts.Add(seller);
+        return string.Join(" · ", parts);
+    }
+
+    // The form
+
+    private IReadOnlyList<string> Suggestions => draft is null
+        ? []
+        : SupplySuggestions.For(draft.EffectiveKind, mixes, recipes,
+            view.Supplies.Where(s => s.Supply.Id != draft.Id).Select(s => s.Name));
+
+    /// <summary>The products that don't have a supply yet. One that does is already in the stock.</summary>
+    private IReadOnlyList<Product> StockableProducts =>
+        [.. products.Where(p => !view.Supplies.Any(s => s.Supply.ProductId == p.Id))];
+
+    private void PickKind(SupplyKind kind)
+    {
+        if (draft is null || draft.EffectiveKind == kind)
+            return;
+        draft.Kind = kind;
+        draft.Unit = Supply.DefaultUnit(kind);
+        if (kind != SupplyKind.Water && draft.ProductId is not null)
+        {
+            draft.ProductId = null;
+            draft.Name = null;
+        }
+    }
+
+    private void PickProduct(Product product)
+    {
+        draft!.ProductId = product.Id;
+        draft.Name = product.Name;
+    }
+
+    private void StartNew()
+    {
+        editing = false;
+        errors = [];
+        confirming = null;
+        level = SupplyLevel.Have;
+        draft = new Supply { Kind = SupplyKind.Mixing, Unit = Supply.DefaultUnit(SupplyKind.Mixing) };
+    }
+
+    private void StartEdit(SupplyStatus status)
+    {
+        editing = true;
+        errors = [];
+        confirming = null;
+        draft = status.Supply.Copy();
+        draft.Name = status.Name;
+    }
+
+    private void Cancel()
+    {
+        draft = null;
+        editing = false;
+        errors = [];
+    }
+
+    private async Task SaveAsync()
+    {
+        if (draft is null)
+            return;
+
+        draft.Name = draft.Name?.Trim();
+        errors = draft.Validate().ToList();
+        if (errors.Count > 0)
+        {
+            showErrors = true;
+            return;
+        }
+
+        busy = true;
+        try
+        {
+            await StockService.SaveSupplyAsync(draft);
+            if (!editing && level != SupplyLevel.Have)
+                await StockService.MarkAsync(draft.Id, level == SupplyLevel.Low ? SupplyEntryKind.RunningLow : SupplyEntryKind.Out,
+                    null, null, null, Time.GetLocalNow());
+            await LoadAsync();
+            Cancel();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+            showErrors = true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Marking
+
+    private async Task SetLevelAsync(SupplyStatus status, SupplyLevel choice)
+    {
+        busy = true;
+        try
+        {
+            // Having it again is a count with no number, since it says there is some without saying how much
+            var kind = choice switch
+            {
+                SupplyLevel.Low => SupplyEntryKind.RunningLow,
+                SupplyLevel.Out => SupplyEntryKind.Out,
+                _ => SupplyEntryKind.Counted
+            };
+            await StockService.MarkAsync(status.Supply.Id, kind, null, null, null, Time.GetLocalNow());
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void OpenBought(SupplyStatus status)
+    {
+        boughtFor = status;
+        boughtOpen = true;
+    }
+
+    private void OpenCounted(SupplyStatus status)
+    {
+        countedFor = status;
+        countedOpen = true;
+    }
+
+    private void CloseSheets()
+    {
+        boughtOpen = false;
+        countedOpen = false;
+    }
+
+    private async Task SaveBoughtAsync(BoughtDetails details)
+    {
+        if (boughtFor is null)
+            return;
+        await StockService.MarkAsync(boughtFor.Supply.Id, SupplyEntryKind.Bought, details.Amount, details.Price, details.SellerId, Time.MomentOn(details.Day));
+        boughtOpen = false;
+        await LoadAsync();
+    }
+
+    private async Task SaveCountedAsync(decimal amount)
+    {
+        if (countedFor is null)
+            return;
+        await StockService.MarkAsync(countedFor.Supply.Id, SupplyEntryKind.Counted, amount, null, null, Time.GetLocalNow());
+        countedOpen = false;
+        await LoadAsync();
+    }
+
+    private async Task DeleteAsync(SupplyStatus status)
+    {
+        busy = true;
+        try
+        {
+            await StockService.DeleteSupplyAsync(status.Supply.Id);
+            confirming = null;
+            if (draft?.Id == status.Supply.Id)
+                Cancel();
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

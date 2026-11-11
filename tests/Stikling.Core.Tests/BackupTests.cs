@@ -149,12 +149,15 @@ public class BackupTests
             Orders = [new Order { SellerName = "Plantorama" }, new Order { DeletedAt = Now }],
             OrderItems = [new OrderItem { Name = "Monstera" }, new OrderItem { Name = "Old", DeletedAt = Now }],
             Leaves = [new Leaf { Rating = Variegation.High }, new Leaf { DeletedAt = Now }],
-            PhotoMarks = [new PhotoMark { X = 0.5, Y = 0.5 }, new PhotoMark { DeletedAt = Now }]
+            PhotoMarks = [new PhotoMark { X = 0.5, Y = 0.5 }, new PhotoMark { DeletedAt = Now }],
+            Supplies = [new Supply { Name = "LECA" }, new Supply { DeletedAt = Now }],
+            SupplyEntries = [new SupplyEntry { Kind = SupplyEntryKind.Out }, new SupplyEntry { DeletedAt = Now }],
+            ShoppingItems = [new ShoppingItem { Text = "Sticky traps" }, new ShoppingItem { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -182,6 +185,9 @@ public class BackupTests
         Assert.Empty(data.OrderItems);
         Assert.Empty(data.Leaves);
         Assert.Empty(data.PhotoMarks);
+        Assert.Empty(data.Supplies);
+        Assert.Empty(data.SupplyEntries);
+        Assert.Empty(data.ShoppingItems);
     }
 
     [Fact]
@@ -344,6 +350,46 @@ public class BackupTests
 
         var later = JsonSerializer.Deserialize<BackupData>(json.Replace("AllWhite", "Sparkly"), options)!;
         Assert.Null(Assert.Single(later.Leaves).Rating);
+    }
+
+    [Fact]
+    public void Supplies_their_entries_and_the_shopping_list_survive_a_backup_and_unknown_names_read_as_null()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var supply = new Supply { Name = "LECA", Kind = SupplyKind.Mixing, Unit = SupplyUnit.Litres, Notes = "Big bag", UpdatedAt = Now };
+        var entry = new SupplyEntry
+        {
+            SupplyId = supply.Id, At = Now, Kind = SupplyEntryKind.Bought, Amount = 10, Price = 45.5m,
+            SellerId = Guid.NewGuid(), UpdatedAt = Now
+        };
+        var line = new ShoppingItem { Text = "Sticky traps", Amount = 2, UpdatedAt = Now };
+
+        var json = JsonSerializer.Serialize(new BackupData { Supplies = [supply], SupplyEntries = [entry], ShoppingItems = [line] }, options);
+        Assert.Contains("\"kind\":\"Mixing\"", json);
+        Assert.Contains("\"unit\":\"Litres\"", json);
+        Assert.Contains("\"kind\":\"Bought\"", json);
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restoredSupply = Assert.Single(back.Supplies);
+        Assert.Equal((supply.Id, "LECA", SupplyKind.Mixing, SupplyUnit.Litres), (restoredSupply.Id, restoredSupply.Name, restoredSupply.Kind, restoredSupply.Unit));
+        var restoredEntry = Assert.Single(back.SupplyEntries);
+        Assert.Equal((supply.Id, SupplyEntryKind.Bought, 10m, 45.5m, entry.SellerId),
+            (restoredEntry.SupplyId, restoredEntry.Kind, restoredEntry.Amount, restoredEntry.Price, restoredEntry.SellerId));
+        Assert.Equal("Sticky traps", Assert.Single(back.ShoppingItems).Text);
+        Assert.Equal((1, 1, 1), (back.Counts.Supplies, back.Counts.SupplyEntries, back.Counts.ShoppingItems));
+        Assert.Equal(1, BackupMerge.Merge<Supply>([], back.Supplies).Added);
+        Assert.Equal(0, BackupMerge.Merge([supply], back.Supplies).Added);
+        Assert.Equal(1, BackupMerge.Merge<SupplyEntry>([], back.SupplyEntries).Added);
+        Assert.Equal(1, BackupMerge.Merge<ShoppingItem>([], back.ShoppingItems).Added);
+
+        // A kind or unit a later version adds reads as null here, so the supply still opens
+        var later = JsonSerializer.Deserialize<BackupData>(
+            json.Replace("Mixing", "Tools").Replace("Litres", "Bags").Replace("Bought", "Reserved"), options)!;
+        var laterSupply = Assert.Single(later.Supplies);
+        Assert.Null(laterSupply.Kind);
+        Assert.Null(laterSupply.Unit);
+        Assert.Equal(SupplyKind.Other, laterSupply.EffectiveKind);
+        Assert.Null(Assert.Single(later.SupplyEntries).Kind);
     }
 
     [Fact]
