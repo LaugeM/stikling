@@ -15,7 +15,7 @@ public static class GuideLinks
     /// <summary>
     /// The address of a guide. <paramref name="from"/> says where it was opened from, so the back link can name it
     /// and the guide can open on the method that fits: "plant:{id}" or "propagation:{id}", or "pots", "soil-mixes",
-    /// "propagations", "pests" or "help", or "pest-case:{id}".
+    /// "propagations", "pests" or "help", or "pest-case:{id}" or "genus:{name}".
     /// </summary>
     public static string Href(string guideId, string? from = null) =>
         from is null ? $"guides/{guideId}" : $"guides/{guideId}?from={Uri.EscapeDataString(from)}";
@@ -25,6 +25,9 @@ public static class GuideLinks
     public static string FromPropagation(Guid id) => $"propagation:{id}";
 
     public static string FromPestCase(Guid id) => $"pest-case:{id}";
+
+    /// <summary>Opened from the dictionary page of a genus, which is named in the back link.</summary>
+    public static string FromGenus(string name) => $"genus:{name}";
 
     /// <summary>The guides whose name or line in the list contains the text, ignoring case and accents.</summary>
     public static IReadOnlyList<Guide> Matching(string query)

@@ -106,6 +106,9 @@ else
             case "pest-case" when id is { } caseId && await PestCaseRepository.GetAsync(caseId) is { IsDeleted: false } pestCase:
                 (backHref, backText) = ($"pests/{caseId}", Back(Labels.For(pestCase.Pest)));
                 break;
+            case "genus" when RawFrom(From) is { Length: > 0 } genus:
+                (backHref, backText) = (DictionaryLinks.Genus(genus), Back(genus));
+                break;
             case "pests":
                 (backHref, backText) = ("pests", Back(Strings.Pests.PestsTitle));
                 break;
@@ -130,6 +133,10 @@ else
 
     private static string Back(string name) =>
         F(Strings.Guides.BackTo, name);
+
+    /// <summary>The text after the colon, for a place that is named and not an id, like a genus.</summary>
+    private static string? RawFrom(string? from) =>
+        from?.Split(':', 2) is [_, var rest] ? rest : null;
 
     private static (string? Kind, Guid? Id) SplitFrom(string? from)
     {
@@ -226,6 +233,18 @@ else
                 break;
             case GuideSeeAlso seeAlso:
                 <p>@GuideLinks.Text(seeAlso.TextKey) <GuideLink Guide="@seeAlso.GuideId" From="@From" Text="@(GuideBook.Find(seeAlso.GuideId) is { } other ? GuideLinks.Text(other.TitleKey) : null)" /></p>
+                break;
+            case GuidePestLinks pestLinks:
+                <p>@GuideLinks.Text(pestLinks.TextKey)</p>
+                <p class="guide-pest-links">@GuideLinks.Text("GuidesFor")
+                    @for (var i = 0; i < pestLinks.GuideIds.Count; i++)
+                    {
+                        if (GuideBook.Find(pestLinks.GuideIds[i]) is { } pest)
+                        {
+                            <a href="@GuideLinks.Href(pest.Id, From)">@GuideLinks.Text(pest.TitleKey)</a>@(i < pestLinks.GuideIds.Count - 1 ? "," : null)
+                        }
+                    }
+                </p>
                 break;
             case GuideMethods methods:
                 @RenderMethods(methods)
