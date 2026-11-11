@@ -1,0 +1,71 @@
+.stock-list {
+    list-style: none;
+    margin: 0.75rem 0 0;
+    padding: 0;
+}
+
+.stock-list > li {
+    padding: 0.6rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.stock-list > li:first-child {
+    border-top: 0;
+}
+
+.stock-head {
+    display: flex;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 0.25rem 0.5rem;
+}
+
+.stock-name {
+    font-weight: 600;
+}
+
+/* Running low and Out, in the quiet outline of the other neutral badges: red is for pests and overdue */
+.stock-badge {
+    padding: 0.05rem 0.5rem;
+    border: 1px solid var(--pa-muted);
+    border-radius: 0.6rem;
+    color: var(--pa-muted);
+    font-size: 0.8rem;
+    font-weight: 600;
+    line-height: 1.4;
+}
+
+.stock-badge.out {
+    border-color: var(--pa-text);
+    color: var(--pa-text);
+}
+
+.stock-sub {
+    margin: 0.15rem 0 0;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.stock-levels {
+    margin-top: 0.5rem;
+}
+
+.chip {
+    min-height: 2.75rem;
+}
+
+.stock-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    margin-top: 0.5rem;
+}
+
+.stock-confirm p {
+    margin-bottom: 0.5rem;
+}
+
+.stock-product-name {
+    font-weight: 600;
+}

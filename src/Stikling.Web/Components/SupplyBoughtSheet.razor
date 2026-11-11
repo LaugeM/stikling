@@ -1,0 +1,123 @@
+@* The form for writing down a purchase, for the inside of a Sheet: from the stock page for a supply, and
+   from the shopping list to add what was paid to something just ticked off. Everything but the day is
+   optional. The page that shows it owns the Sheet and its title. *@
+@inject SellerService SellerService
+@inject TimeProvider Time
+
+<div class="bought-sheet">
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
+    }
+
+    <div class="mb-3">
+        <label class="form-label" for="@dayId">@Strings.Stock.BoughtDay</label>
+        <input id="@dayId" type="date" class="form-control" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
+    </div>
+
+    <div class="row g-2 mb-3">
+        <div class="col-6">
+            <label class="form-label" for="@amountId">@(Unit is { } unit ? F(Strings.Stock.BoughtAmountUnit, Labels.Short(unit)) : Strings.Stock.BoughtAmount)</label>
+            <input id="@amountId" class="form-control" type="number" inputmode="decimal" min="0" step="any" @bind="amount" />
+        </div>
+        <div class="col-6">
+            <label class="form-label" for="@priceId">@Strings.Stock.BoughtPrice</label>
+            <input id="@priceId" class="form-control" type="number" inputmode="decimal" min="0" step="any" @bind="price" />
+        </div>
+    </div>
+
+    <div class="mb-3">
+        <SellerPicker @bind-Value="sellerText" Names="sellerNames" Id="@sellerId" />
+    </div>
+
+    @if (ShowRaisePot && amount is > 0)
+    {
+        <div class="form-check mb-3">
+            <input class="form-check-input" type="checkbox" id="@raiseId" @bind="raisePot" />
+            <label class="form-check-label" for="@raiseId">@Strings.Stock.BoughtRaisePot</label>
+        </div>
+    }
+
+    <div class="form-text mb-3">@Strings.Stock.BoughtHint</div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || day > Today)" @onclick="SaveAsync">@Strings.Common.Save</button>
+        <button type="button" class="btn btn-link" @onclick="() => OnCancel.InvokeAsync()">@Strings.Common.Cancel</button>
+    </div>
+</div>
+
+@code {
+    /// <summary>What the supply is counted in, for the label of the amount. Null for a line with no unit.</summary>
+    [Parameter]
+    public SupplyUnit? Unit { get; set; }
+
+    /// <summary>The day to start on. Today when not given.</summary>
+    [Parameter]
+    public DateOnly? Day { get; set; }
+
+    [Parameter]
+    public decimal? Amount { get; set; }
+
+    [Parameter]
+    public decimal? Price { get; set; }
+
+    [Parameter]
+    public Guid? SellerId { get; set; }
+
+    /// <summary>Offers to raise how many of a pot are owned. For a pot line that has no amount yet.</summary>
+    [Parameter]
+    public bool ShowRaisePot { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<BoughtDetails> OnSave { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnCancel { get; set; }
+
+    private readonly string dayId = $"bought-day-{Guid.NewGuid():N}";
+    private readonly string amountId = $"bought-amount-{Guid.NewGuid():N}";
+    private readonly string priceId = $"bought-price-{Guid.NewGuid():N}";
+    private readonly string sellerId = $"bought-seller-{Guid.NewGuid():N}";
+    private readonly string raiseId = $"bought-raise-{Guid.NewGuid():N}";
+
+    private DateOnly day;
+    private decimal? amount;
+    private decimal? price;
+    private string? sellerText;
+    private bool raisePot = true;
+    private bool busy;
+    private string? error;
+    private IReadOnlyList<string> sellerNames = [];
+
+    private DateOnly Today => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        day = Day ?? Today;
+        amount = Amount;
+        price = Price;
+
+        var sellers = await SellerService.GetSellersAsync();
+        sellerNames = [.. sellers.Live.Select(s => s.Name).OrderBy(n => n, StringComparer.CurrentCultureIgnoreCase)];
+        sellerText = sellers.NameOf(SellerId);
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var choice = await SellerService.ChooseAsync(sellerText, SellerKind.Shop, SellerId);
+            await OnSave.InvokeAsync(new BoughtDetails(day, amount, price, choice.SellerId, ShowRaisePot && raisePot && amount is > 0));
+        }
+        catch (InvalidOperationException e)
+        {
+            error = e.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

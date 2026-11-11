@@ -1,0 +1,35 @@
+@* The form for writing down how much of a supply is left, for the inside of a Sheet. Counting none left
+   marks the supply as out. The page that shows it owns the Sheet and its title. *@
+
+<div class="count-sheet">
+    <div class="mb-3">
+        <label class="form-label" for="@amountId">@(Unit is { } unit ? F(Strings.Stock.CountedAmountUnit, Labels.Short(unit)) : Strings.Stock.CountedAmount)</label>
+        <input id="@amountId" class="form-control" type="number" inputmode="decimal" min="0" step="any" @bind="amount" />
+        <div class="form-text">@Strings.Stock.CountedHint</div>
+    </div>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@(amount is null or < 0)" @onclick="() => OnSave.InvokeAsync(amount!.Value)">@Strings.Common.Save</button>
+        <button type="button" class="btn btn-link" @onclick="() => OnCancel.InvokeAsync()">@Strings.Common.Cancel</button>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public SupplyUnit? Unit { get; set; }
+
+    [Parameter]
+    public decimal? Amount { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback<decimal> OnSave { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnCancel { get; set; }
+
+    private readonly string amountId = $"count-amount-{Guid.NewGuid():N}";
+
+    private decimal? amount;
+
+    protected override void OnInitialized() => amount = Amount;
+}

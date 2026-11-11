@@ -19,6 +19,7 @@ using Stikling.Core.Sellers;
 using Stikling.Core.Settings;
 using Stikling.Core.Sharing;
 using Stikling.Core.SoilMixes;
+using Stikling.Core.Stock;
 using Stikling.Core.Today;
 using Stikling.Core.Wishlist;
 
@@ -234,4 +235,22 @@ public sealed class IndexedDbPestTreatmentRepository(IndexedDb db, TimeProvider 
     : IndexedDbEntityRepository<PestTreatment>(db, time, Stores.PestTreatments), IPestTreatmentRepository
 {
     protected override IReadOnlyList<string> Validate(PestTreatment treatment) => treatment.Validate(Today);
+}
+
+public sealed class IndexedDbSupplyRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Supply>(db, time, Stores.Supplies), ISupplyRepository
+{
+    protected override IReadOnlyList<string> Validate(Supply supply) => supply.Validate();
+}
+
+public sealed class IndexedDbSupplyEntryRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<SupplyEntry>(db, time, Stores.SupplyEntries), ISupplyEntryRepository
+{
+    protected override IReadOnlyList<string> Validate(SupplyEntry entry) => entry.Validate();
+}
+
+public sealed class IndexedDbShoppingItemRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<ShoppingItem>(db, time, Stores.ShoppingItems), IShoppingItemRepository
+{
+    protected override IReadOnlyList<string> Validate(ShoppingItem item) => item.Validate();
 }

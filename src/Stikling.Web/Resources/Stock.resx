@@ -1,0 +1,349 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SuppliesShoppingList" xml:space="preserve">
+    <value>Shopping list</value>
+    <comment>Title of the row on Supplies that opens the shopping list.</comment>
+  </data>
+  <data name="ShoppingToBuy_One" xml:space="preserve">
+    <value>{0} thing to buy</value>
+    <comment>Line under the Shopping list row on Supplies. {0} is the number of things.</comment>
+  </data>
+  <data name="ShoppingToBuy_Other" xml:space="preserve">
+    <value>{0} things to buy</value>
+  </data>
+  <data name="ShoppingNothing" xml:space="preserve">
+    <value>Nothing to buy</value>
+    <comment>Line under the Shopping list row on Supplies when the list is empty.</comment>
+  </data>
+  <data name="SuppliesStock" xml:space="preserve">
+    <value>Stock</value>
+    <comment>Title of the row on Supplies that opens the stock of loose supplies.</comment>
+  </data>
+  <data name="StockSupply_One" xml:space="preserve">
+    <value>{0} supply</value>
+    <comment>A number of supplies in the stock, put into the line under the Stock row on Supplies.</comment>
+  </data>
+  <data name="StockSupply_Other" xml:space="preserve">
+    <value>{0} supplies</value>
+  </data>
+  <data name="StockDetailLow" xml:space="preserve">
+    <value>{0}, {1} running low</value>
+    <comment>Line under the Stock row on Supplies. {0} is the number of supplies, like 12 supplies, and {1} is how many are running low or out.</comment>
+  </data>
+  <data name="StockNone" xml:space="preserve">
+    <value>LECA, fertiliser, sticky traps and the rest</value>
+    <comment>Line under the Stock row on Supplies when nothing is in the stock yet. Says what goes there.</comment>
+  </data>
+  <data name="StockPageTitle" xml:space="preserve">
+    <value>Stock</value>
+    <comment>Title of the Stock page in the browser.</comment>
+  </data>
+  <data name="StockTitle" xml:space="preserve">
+    <value>Stock</value>
+    <comment>Heading of the Stock page.</comment>
+  </data>
+  <data name="StockIntro" xml:space="preserve">
+    <value>What you have of the loose things, like LECA, perlite, fertiliser and sticky traps. Mark what is running low or out and it goes on the shopping list. Pots are counted on the {0} page.</value>
+    <comment>Intro on the Stock page. {0} is a link to the Pots page.</comment>
+  </data>
+  <data name="StockPotsLink" xml:space="preserve">
+    <value>Pots</value>
+    <comment>Text of the link to the Pots page inside the Stock intro.</comment>
+  </data>
+  <data name="StockShoppingLink" xml:space="preserve">
+    <value>Shopping list</value>
+    <comment>Link at the top of the Stock page to the shopping list.</comment>
+  </data>
+  <data name="KindMixing" xml:space="preserve">
+    <value>For soil mixes</value>
+    <comment>Section label on Stock and a choice on the form, for supplies that go in soil mixes.</comment>
+  </data>
+  <data name="KindWater" xml:space="preserve">
+    <value>For the water</value>
+    <comment>Section label on Stock and a choice on the form, for supplies that go in the water.</comment>
+  </data>
+  <data name="KindPests" xml:space="preserve">
+    <value>For pests</value>
+    <comment>Section label on Stock and a choice on the form, for supplies used against pests.</comment>
+  </data>
+  <data name="KindOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>Section label on Stock and a choice on the form.</comment>
+  </data>
+  <data name="LevelLow" xml:space="preserve">
+    <value>Running low</value>
+    <comment>Badge next to a supply or product that is running low, and the name of the choice that marks it.</comment>
+  </data>
+  <data name="LevelOut" xml:space="preserve">
+    <value>Out</value>
+    <comment>Badge next to a supply or product that is out, and the name of the choice that marks it.</comment>
+  </data>
+  <data name="ActionHaveIt" xml:space="preserve">
+    <value>Have it</value>
+    <comment>Quick choice on a supply that is low or out. Marks it as in stock again.</comment>
+  </data>
+  <data name="ActionBought" xml:space="preserve">
+    <value>Bought…</value>
+    <comment>Link on a supply that opens a sheet to write down a purchase.</comment>
+  </data>
+  <data name="ActionCounted" xml:space="preserve">
+    <value>Counted…</value>
+    <comment>Link on a supply that opens a sheet to write down how much is left.</comment>
+  </data>
+  <data name="StockAbout" xml:space="preserve">
+    <value>About {0}, counted {1}</value>
+    <comment>Line under a supply. {0} is an amount with its unit, like 5 L. {1} is the day it was counted.</comment>
+  </data>
+  <data name="StockLastBought" xml:space="preserve">
+    <value>Last bought {0}</value>
+    <comment>First part of the line under a supply. {0} is the day.</comment>
+  </data>
+  <data name="StockAddButton" xml:space="preserve">
+    <value>Add a supply</value>
+    <comment>Button on the Stock page.</comment>
+  </data>
+  <data name="StockFormAdd" xml:space="preserve">
+    <value>Add a supply</value>
+    <comment>Heading of the form to add a supply.</comment>
+  </data>
+  <data name="StockFormEdit" xml:space="preserve">
+    <value>Edit supply</value>
+    <comment>Heading of the form to change a supply.</comment>
+  </data>
+  <data name="StockFormKind" xml:space="preserve">
+    <value>What is it for?</value>
+    <comment>Label over the choice of what a supply is for.</comment>
+  </data>
+  <data name="StockFormName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Label of the name of a supply.</comment>
+  </data>
+  <data name="StockFormNamePlaceholder" xml:space="preserve">
+    <value>Name, like LECA</value>
+    <comment>Placeholder of the name of a supply.</comment>
+  </data>
+  <data name="StockFormSuggestions" xml:space="preserve">
+    <value>Names to pick from</value>
+    <comment>Read out for the group of name suggestions under the name of a supply.</comment>
+  </data>
+  <data name="StockFormProducts" xml:space="preserve">
+    <value>Your products</value>
+    <comment>Read out for the group of the person's products under the name of a supply for the water.</comment>
+  </data>
+  <data name="StockFormProductHint" xml:space="preserve">
+    <value>Pick one of your products, or type a name for something that isn't a product.</value>
+    <comment>Hint under the name when a supply is for the water.</comment>
+  </data>
+  <data name="StockFormIsProduct" xml:space="preserve">
+    <value>One of your products, so the name comes from there.</value>
+    <comment>Shown instead of the name field when a supply is one of the person's products.</comment>
+  </data>
+  <data name="StockFormUnit" xml:space="preserve">
+    <value>Counted in</value>
+    <comment>Label over the choice of unit.</comment>
+  </data>
+  <data name="StockFormLevel" xml:space="preserve">
+    <value>How much is there?</value>
+    <comment>Label over the choice of Have it, Running low or Out when adding a supply.</comment>
+  </data>
+  <data name="StockSubmitAdd" xml:space="preserve">
+    <value>Add supply</value>
+    <comment>Button that saves a new supply.</comment>
+  </data>
+  <data name="StockEmptyTitle" xml:space="preserve">
+    <value>No supplies yet</value>
+    <comment>Empty Stock page.</comment>
+  </data>
+  <data name="StockEmptyHint" xml:space="preserve">
+    <value>Add what you keep in stock, like LECA, perlite, fertiliser or sticky traps. Mark one as running low and it lands on the shopping list.</value>
+    <comment>Empty Stock page.</comment>
+  </data>
+  <data name="StockDeleteConfirm" xml:space="preserve">
+    <value>Delete {0} from the stock? It leaves the shopping list too.</value>
+    <comment>Asked before deleting a supply. {0} is its name.</comment>
+  </data>
+  <data name="StockSuppliesList" xml:space="preserve">
+    <value>Your supplies</value>
+    <comment>Read out for a list of supplies.</comment>
+  </data>
+  <data name="StockLevelAria" xml:space="preserve">
+    <value>Mark {0}</value>
+    <comment>Read out for the group of quick choices on a supply. {0} is the name of the supply.</comment>
+  </data>
+  <data name="UnitLitres" xml:space="preserve">
+    <value>Litres</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitKilograms" xml:space="preserve">
+    <value>Kilograms</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitGrams" xml:space="preserve">
+    <value>Grams</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitMillilitres" xml:space="preserve">
+    <value>Millilitres</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitPieces" xml:space="preserve">
+    <value>Pieces</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitPacks" xml:space="preserve">
+    <value>Packs</value>
+    <comment>Name of a unit on the supply form.</comment>
+  </data>
+  <data name="UnitShortLitres" xml:space="preserve">
+    <value>L</value>
+    <comment>Short form of litres, after a number.</comment>
+  </data>
+  <data name="UnitShortKilograms" xml:space="preserve">
+    <value>kg</value>
+    <comment>Short form of kilograms, after a number.</comment>
+  </data>
+  <data name="UnitShortGrams" xml:space="preserve">
+    <value>g</value>
+    <comment>Short form of grams, after a number.</comment>
+  </data>
+  <data name="UnitShortMillilitres" xml:space="preserve">
+    <value>ml</value>
+    <comment>Short form of millilitres, after a number.</comment>
+  </data>
+  <data name="UnitShortPieces" xml:space="preserve">
+    <value>pcs</value>
+    <comment>Short form of pieces, after a number.</comment>
+  </data>
+  <data name="UnitShortPacks" xml:space="preserve">
+    <value>packs</value>
+    <comment>Short form of packs, after a number.</comment>
+  </data>
+  <data name="AmountWithUnit" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>An amount with its unit. {0} is the number and {1} the short unit, like 5 L.</comment>
+  </data>
+  <data name="BoughtTitle" xml:space="preserve">
+    <value>Bought {0}</value>
+    <comment>Heading of the sheet for writing down a purchase. {0} is the name of the supply or line.</comment>
+  </data>
+  <data name="BoughtDay" xml:space="preserve">
+    <value>Day</value>
+    <comment>Label of the day it was bought.</comment>
+  </data>
+  <data name="BoughtAmount" xml:space="preserve">
+    <value>How much</value>
+    <comment>Label of the amount bought.</comment>
+  </data>
+  <data name="BoughtAmountUnit" xml:space="preserve">
+    <value>How much, in {0}</value>
+    <comment>Label of the amount bought when the unit is known. {0} is the unit.</comment>
+  </data>
+  <data name="BoughtPrice" xml:space="preserve">
+    <value>Price</value>
+    <comment>Label of the price paid.</comment>
+  </data>
+  <data name="BoughtRaisePot" xml:space="preserve">
+    <value>Add them to the pots I own</value>
+    <comment>Checkbox in the sheet for a pot on the shopping list. Raises how many of that pot the person owns by the amount bought.</comment>
+  </data>
+  <data name="BoughtHint" xml:space="preserve">
+    <value>All optional. The price is what you paid for it all.</value>
+    <comment>Hint at the bottom of the sheet for writing down a purchase.</comment>
+  </data>
+  <data name="CountedTitle" xml:space="preserve">
+    <value>Counted {0}</value>
+    <comment>Heading of the sheet for writing down how much is left. {0} is the name of the supply.</comment>
+  </data>
+  <data name="CountedAmount" xml:space="preserve">
+    <value>How much is left</value>
+    <comment>Label of the amount counted.</comment>
+  </data>
+  <data name="CountedAmountUnit" xml:space="preserve">
+    <value>How much is left, in {0}</value>
+    <comment>Label of the amount counted when the unit is known. {0} is the unit.</comment>
+  </data>
+  <data name="CountedHint" xml:space="preserve">
+    <value>Counting none left marks it as out.</value>
+    <comment>Hint in the counted sheet.</comment>
+  </data>
+  <data name="ShoppingPageTitle" xml:space="preserve">
+    <value>Shopping list</value>
+    <comment>Title of the shopping list page in the browser.</comment>
+  </data>
+  <data name="ShoppingTitle" xml:space="preserve">
+    <value>Shopping list</value>
+    <comment>Heading of the shopping list page.</comment>
+  </data>
+  <data name="ShoppingAddLabel" xml:space="preserve">
+    <value>Add something to buy</value>
+    <comment>Label of the field at the top of the shopping list.</comment>
+  </data>
+  <data name="ShoppingAddPlaceholder" xml:space="preserve">
+    <value>Sticky traps, labels, a bigger pot</value>
+    <comment>Placeholder of the field at the top of the shopping list.</comment>
+  </data>
+  <data name="ShoppingAddButton" xml:space="preserve">
+    <value>Add</value>
+    <comment>Button next to the field at the top of the shopping list.</comment>
+  </data>
+  <data name="ShoppingToBuyHeading" xml:space="preserve">
+    <value>To buy</value>
+    <comment>Section label over what is left to buy.</comment>
+  </data>
+  <data name="ShoppingBoughtToday" xml:space="preserve">
+    <value>Bought today</value>
+    <comment>Section label over what was ticked off today.</comment>
+  </data>
+  <data name="ShoppingTick" xml:space="preserve">
+    <value>Bought {0}</value>
+    <comment>Read out for the tick box of a line that still has to be bought. {0} is its name.</comment>
+  </data>
+  <data name="ShoppingLastFrom" xml:space="preserve">
+    <value>Last from {0}</value>
+    <comment>Under a supply on the shopping list. {0} is where it was last bought.</comment>
+  </data>
+  <data name="ShoppingUndo" xml:space="preserve">
+    <value>Undo</value>
+    <comment>Link that takes a tick back.</comment>
+  </data>
+  <data name="ShoppingRemove" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Link that removes a line the person typed.</comment>
+  </data>
+  <data name="ShoppingAddDetails" xml:space="preserve">
+    <value>Add amount, price and where</value>
+    <comment>Under a ticked line that has no details yet. Tapping opens the sheet.</comment>
+  </data>
+  <data name="ShoppingEmpty" xml:space="preserve">
+    <value>Nothing to buy. Mark a supply as running low on the {0} page and it shows up here.</value>
+    <comment>Empty shopping list. {0} is a link to the Stock page.</comment>
+  </data>
+  <data name="ShoppingStockLink" xml:space="preserve">
+    <value>Stock</value>
+    <comment>Text of the link to the Stock page inside the empty shopping list.</comment>
+  </data>
+  <data name="ProductRunningLow" xml:space="preserve">
+    <value>Running low</value>
+    <comment>Action on a product that marks it as running low, which puts it on the shopping list.</comment>
+  </data>
+  <data name="PotAddToList" xml:space="preserve">
+    <value>Add to shopping list</value>
+    <comment>Link on a pot on the Pots page.</comment>
+  </data>
+  <data name="PotOnList" xml:space="preserve">
+    <value>On the shopping list</value>
+    <comment>Shown instead of the link when the pot is already on the list.</comment>
+  </data>
+</root>

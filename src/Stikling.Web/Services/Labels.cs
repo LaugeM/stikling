@@ -580,6 +580,48 @@ public static class Labels
         _ => kind.ToString()
     };
 
+    public static string For(SupplyKind kind) => kind switch
+    {
+        SupplyKind.Mixing => Strings.Stock.KindMixing,
+        SupplyKind.Water => Strings.Stock.KindWater,
+        SupplyKind.Pests => Strings.Stock.KindPests,
+        _ => Strings.Stock.KindOther
+    };
+
+    /// <summary>The name of a unit, like "Litres", for the choice on the supply form.</summary>
+    public static string For(SupplyUnit unit) => unit switch
+    {
+        SupplyUnit.Litres => Strings.Stock.UnitLitres,
+        SupplyUnit.Kilograms => Strings.Stock.UnitKilograms,
+        SupplyUnit.Grams => Strings.Stock.UnitGrams,
+        SupplyUnit.Millilitres => Strings.Stock.UnitMillilitres,
+        SupplyUnit.Pieces => Strings.Stock.UnitPieces,
+        _ => Strings.Stock.UnitPacks
+    };
+
+    /// <summary>The short form of a unit, like "L", that goes after a number.</summary>
+    public static string Short(SupplyUnit unit) => unit switch
+    {
+        SupplyUnit.Litres => Strings.Stock.UnitShortLitres,
+        SupplyUnit.Kilograms => Strings.Stock.UnitShortKilograms,
+        SupplyUnit.Grams => Strings.Stock.UnitShortGrams,
+        SupplyUnit.Millilitres => Strings.Stock.UnitShortMillilitres,
+        SupplyUnit.Pieces => Strings.Stock.UnitShortPieces,
+        _ => Strings.Stock.UnitShortPacks
+    };
+
+    /// <summary>"5 L", or just the number when the supply has no unit.</summary>
+    public static string Amount(decimal amount, SupplyUnit? unit) =>
+        unit is { } u ? F(Strings.Stock.AmountWithUnit, Money(amount), Short(u)) : Money(amount);
+
+    /// <summary>"Running low" or "Out", the badge on a supply that needs buying.</summary>
+    public static string? For(Stikling.Core.Stock.SupplyLevel level) => level switch
+    {
+        Stikling.Core.Stock.SupplyLevel.Low => Strings.Stock.LevelLow,
+        Stikling.Core.Stock.SupplyLevel.Out => Strings.Stock.LevelOut,
+        _ => null
+    };
+
     public static string For(Nutrient nutrient) => nutrient switch
     {
         Nutrient.Nitrogen => Strings.Labels.NutrientNitrogen,
