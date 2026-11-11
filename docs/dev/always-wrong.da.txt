@@ -1,0 +1,18 @@
+# Danish that is wrong in every sentence it could be in.
+# TranslationFileTests fails when a .da.resx value has one of these phrases.
+#
+# One phrase per line: phrase | write instead | why
+# A phrase matches whole words and ignores case, so "et plante" doesn't match "et plantenavn".
+# A word that is fine in some sentences and wrong in others doesn't go here. It goes in the
+# word list in translating.md, where a translator judges it in context.
+
+opponting | ompotning | misspelling
+blive potte op | blive pottet op | the verb is potte op, pottet op
+har en gødning på sig | er gødet med | word for word from English
+et jordstængel | en jordstængel | jordstængel is a fælleskøn noun
+et plante | en plante | plante is a fælleskøn noun
+et stikling | en stikling | stikling is a fælleskøn noun
+et potte | en potte | potte is a fælleskøn noun
+en billede | et billede | billede is an intetkøn noun
+en regneark | et regneark | regneark is an intetkøn noun
+en eksempel | et eksempel | eksempel is an intetkøn noun

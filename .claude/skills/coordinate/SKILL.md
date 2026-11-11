@@ -76,6 +76,8 @@ Don't run the parts in parallel. Each one builds on the one before, and they sha
 
 ## 6. Finish as usual
 
+If the workers added or changed text, run the `translator` agent once over the whole branch for the Danish pass, as "Before opening a pull request" in CLAUDE.md says. Workers still write the Danish, so the build and tests pass while they work; the pass is what makes it read naturally.
+
 Check any UI change in the browser at phone width by running the `browser-check` agent, not by driving the browser here, then follow "Before opening a pull request" in CLAUDE.md. Don't review the finished branch in this session. Run the `reviewer` agent, which reads it with a fresh context.
 
 ## 7. Report
@@ -84,6 +86,7 @@ In the chat, not in the pull request, tell the user:
 
 - the plan usage before and after
 - how many workers ran, how many came back with questions and how many were sent back for fixes
+- every Danish line the translator changed, with the English, the old Danish and the new
 - what the reviewer found
 
 ## A batch of small features
