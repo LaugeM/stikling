@@ -1,0 +1,138 @@
+@page "/pests/{CaseId:guid}/treatments/{TreatmentId:guid}"
+@layout WideLayout
+@inject IPestCaseRepository Cases
+@inject IPestTreatmentRepository Treatments
+@inject IPlantRepository PlantRepository
+@inject RoomService RoomService
+@inject ILogger<TreatmentChecklistPage> Logger
+
+<PageTitle>@Strings.Pests.TickPageTitle · Stikling</PageTitle>
+
+@* No ReloadOnSync: like an edit page, the rows stay put while someone is ticking *@
+
+@if (!loaded)
+{
+    <a class="back-link" href="@BackHref">@Strings.Pests.TickBackToCase</a>
+    <p class="text-body-secondary">@Strings.Pests.Loading</p>
+}
+else if (item is null || treatment is null)
+{
+    <a class="back-link" href="pests">@Strings.Pests.CaseBackToPests</a>
+    <div class="empty-state">
+        <p>@Strings.Pests.TickGone</p>
+        <a class="btn btn-primary mt-3" href="pests">@Strings.Pests.CaseBackToPests</a>
+    </div>
+}
+else
+{
+    var (ticked, total) = TreatmentChecklist.Progress(groups);
+
+    <a class="back-link" href="@BackHref">@Strings.Pests.TickBackToCase</a>
+
+    <h1>@Strings.Pests.TickHeading</h1>
+    <p class="tick-progress" role="status" aria-live="polite">@F(total == 1 ? Strings.Pests.TickProgress_One : Strings.Pests.TickProgress_Other, ticked, total)</p>
+
+    @if (error is not null)
+    {
+        <div class="alert alert-danger py-2 px-3" role="alert">@error</div>
+    }
+
+    @if (groups.Count == 0)
+    {
+        <p class="text-body-secondary">@Strings.Pests.TickNoPlants</p>
+    }
+
+    @foreach (var group in groups)
+    {
+        <section class="tick-group">
+            <h2 class="section-label">@(group.FoundOn ? Strings.Pests.TickFoundOn : group.Name)</h2>
+            <ul class="item-list">
+                @foreach (var row in group.Rows)
+                {
+                    var plant = row.Plant;
+                    <li>
+                        <button type="button" class="item-card tick-row @(row.Ticked ? "ticked" : null)"
+                                aria-pressed="@(row.Ticked ? "true" : "false")"
+                                @onclick="() => ToggleAsync(plant.Id)">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                            </div>
+                            <span class="tick-box" aria-hidden="true">
+                                @if (row.Ticked)
+                                {
+                                    <svg viewBox="0 0 24 24">@Icons.Check</svg>
+                                }
+                            </span>
+                        </button>
+                    </li>
+                }
+            </ul>
+        </section>
+    }
+
+    <div class="tick-actions">
+        <a class="btn btn-primary" href="@BackHref">@Strings.Common.Done</a>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public Guid CaseId { get; set; }
+
+    [Parameter]
+    public Guid TreatmentId { get; set; }
+
+    private bool loaded;
+    private string? error;
+    private PestCase? item;
+    private PestTreatment? treatment;
+    private IReadOnlyList<ChecklistGroup> groups = [];
+    private IReadOnlyList<Plant> plants = [];
+    private Places places = Places.None;
+
+    private string BackHref => $"pests/{CaseId}";
+
+    protected override async Task OnInitializedAsync()
+    {
+        var found = await Cases.GetAsync(CaseId);
+        var treated = await Treatments.GetAsync(TreatmentId);
+        if (found is { IsDeleted: false } && treated is { IsDeleted: false, Kind: PestTreatmentKind.Treated } && treated.CaseId == CaseId)
+        {
+            item = found;
+            treatment = treated;
+            plants = await PlantRepository.GetAllAsync();
+            places = await RoomService.GetPlacesAsync();
+            Compute();
+        }
+        loaded = true;
+    }
+
+    private void Compute() =>
+        groups = item is null || treatment is null ? [] : TreatmentChecklist.Rows(item, treatment, plants, places);
+
+    // Saves at once, so leaving the page loses nothing. The tick is taken back if saving fails.
+    private async Task ToggleAsync(Guid plantId)
+    {
+        if (treatment is null)
+            return;
+
+        error = null;
+        TreatmentChecklist.Toggle(treatment, plantId);
+        Compute();
+        try
+        {
+            await Treatments.SaveAsync(treatment);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a tick on a treatment failed");
+            TreatmentChecklist.Toggle(treatment, plantId);
+            error = F(Strings.Pests.TickFailed, ex.Message);
+        }
+        finally
+        {
+            Compute();
+        }
+    }
+}

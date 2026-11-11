@@ -1,0 +1,73 @@
+.tick-progress {
+    margin: 0 0 1.25rem;
+    font-weight: 600;
+    color: var(--pa-muted);
+}
+
+.tick-group {
+    margin-bottom: 1.5rem;
+}
+
+/* The whole card is the button. Plants that have had the treatment take the Leaf Tint like a plant watered on the watering page. */
+.tick-row {
+    width: 100%;
+    min-height: 3.5rem;
+    text-align: left;
+    font: inherit;
+    cursor: pointer;
+}
+
+.tick-row.ticked {
+    border-color: var(--pa-green);
+    background: var(--pa-green-soft);
+}
+
+.tick-row:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.tick-box {
+    flex: 0 0 auto;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    margin-left: auto;
+    border: 2px solid var(--pa-border);
+    border-radius: 50%;
+    color: var(--pa-green-dark);
+}
+
+.tick-row.ticked .tick-box {
+    border-color: var(--pa-green);
+}
+
+.tick-box svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.tick-actions {
+    margin: 1.5rem 0 1rem;
+}
+
+.tick-actions .btn {
+    min-height: 2.75rem;
+}
+
+/* A long list uses the width of a computer: the plants flow into columns */
+@media (min-width: 64rem) {
+    .tick-group ul.item-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+    }
+}

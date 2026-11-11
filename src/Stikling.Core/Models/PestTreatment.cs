@@ -95,9 +95,17 @@ public sealed class PestTreatment : Entity
     /// </summary>
     public bool Skipped { get; set; }
 
+    /// <summary>
+    /// The plants a treatment has reached so far, when it is being ticked off plant by plant.
+    /// Null means it covered the whole case, which is how every older treatment reads. An empty
+    /// list is a treatment just started, with nothing ticked yet.
+    /// </summary>
+    public List<Guid>? TreatedPlantIds { get; set; }
+
     public PestTreatment Copy()
     {
         var copy = (PestTreatment)MemberwiseClone();
+        copy.TreatedPlantIds = TreatedPlantIds is null ? null : [.. TreatedPlantIds];
         copy.Ingredients = [.. Ingredients.Select(i => i.Copy())];
         return copy;
     }

@@ -408,6 +408,23 @@ else
                             @* The recipe as it was that day, not as it is now *@
                             <div class="treatment-recipe">@string.Join(" · ", treatment.Ingredients)</div>
                         }
+                        @if (treatment.TreatedPlantIds is not null)
+                        {
+                            var (ticked, total) = TreatmentChecklist.Progress(treatment, view.Plants);
+                            var checklist = $"pests/{view.Case.Id}/treatments/{treatment.Id}";
+                            <div class="treatment-recipe">
+                                @if (treatment.OccurredOn >= Today.AddDays(-2))
+                                {
+                                    @TreatedText(ticked, total)
+                                    <span aria-hidden="true"> · </span>
+                                    <a href="@checklist">@Strings.Pests.TickMore</a>
+                                }
+                                else
+                                {
+                                    <a href="@checklist">@TreatedText(ticked, total)</a>
+                                }
+                            </div>
+                        }
                         @if (treatmentPhotos.TryGetValue(treatment.Id, out var rowPhotos))
                         {
                             <div class="log-photos">
@@ -805,6 +822,9 @@ else
         { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
         _ => Strings.Pests.CaseWhatTreated
     };
+
+    private static string TreatedText(int ticked, int total) =>
+        F(total == 1 ? Strings.Pests.TickTreated_One : Strings.Pests.TickTreated_Other, ticked, total);
 
     private IEnumerable<Plant> FoundFirst =>
         view is null ? [] : view.Plants.OrderBy(p => PestService.IsFoundOn(view.Case, p.Id) ? 0 : 1);
