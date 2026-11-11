@@ -10,8 +10,8 @@ public class ForCompareTests
     private static readonly DateTimeOffset Now = new(2026, 10, 15, 12, 0, 0, TimeSpan.Zero);
     private static readonly DateOnly Today = new(2026, 10, 15);
 
-    private static PublicPageSettings Settings(bool cuttings = true, bool swap = false, bool wishlist = false) =>
-        new(null, null, PublicPageLayout.Shelves, PublicPageOrder.Name, cuttings, swap, wishlist, false);
+    private static PublicPageSettings Settings(bool cuttings = true, bool swap = false, bool wishlist = false, bool stories = true) =>
+        new(null, null, PublicPageLayout.Shelves, PublicPageOrder.Name, cuttings, swap, wishlist, stories);
 
     private static Plant APlant(string? nickname, string? genus = null, string? species = null, string? cultivar = null, Action<Plant>? change = null)
     {
@@ -38,6 +38,14 @@ public class ForCompareTests
         IEnumerable<Wish>? wishes = null, IEnumerable<Photo>? photos = null, bool swapRequests = false, string? contact = null) =>
         PublicCollectionPage.ForCompare(
             PublicCollectionPage.Subjects(settings, plants ?? [], cuttings ?? [], wishes ?? []), photos ?? [], swapRequests, contact);
+
+    [Fact]
+    public void Ids_are_left_out_when_the_page_has_no_stories_to_link_to()
+    {
+        var plant = APlant(null, "Monstera", "deliciosa");
+        Assert.Null(Assert.Single(Compare(Settings(stories: false), [plant]).Plants).Id);
+        Assert.Equal(plant.Id, Assert.Single(Compare(Settings(stories: true), [plant]).Plants).Id);
+    }
 
     [Fact]
     public void Plants_come_with_the_botanical_parts_the_tile_shows_only_when_they_have_a_genus()

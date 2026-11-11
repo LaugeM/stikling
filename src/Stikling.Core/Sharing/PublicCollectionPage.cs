@@ -408,8 +408,9 @@ public static class PublicCollectionPage
                 { Mark: SpareMark.UpForSwap } => (FriendSpare.UpForSwap, 0, null),
                 _ => (FriendSpare.None, 0, null)
             };
+            // The page only links to a plant's own address when stories are on, so the id is left out otherwise
             return (Index: index, Plant: new FriendPlant(
-                subject.Id, subject.Type, subject.Name, subject.NameGenus, subject.NameSpecies, subject.NameCultivar, spare, count, stage,
+                subjects.Settings.ShowStories ? subject.Id : null, subject.Type, subject.Name, subject.NameGenus, subject.NameSpecies, subject.NameCultivar, spare, count, stage,
                 cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height)));
         })
         .OrderBy(p => p.Plant.Spare == FriendSpare.None ? int.MaxValue : (int)p.Plant.Spare)
