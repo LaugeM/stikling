@@ -245,7 +245,8 @@
                     // Only a date that isn't the plain interval is worth storing, so changing the
                     // interval later still moves the cases that never had a gap set by hand
                     NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
-                    PlanStepId = OnStep ? Step!.Id : null
+                    PlanStepId = OnStep ? Step!.Id : null,
+                    PlanRound = OnStep ? PlanProgress.CurrentRound(Case, Existing) : 0
                 };
                 if (!Check && Picked is { } recipe)
                     entry.Use(recipe);

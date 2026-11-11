@@ -1613,7 +1613,9 @@ else
 
     private void OpenSplitOff()
     {
-        split = Units.SplitOff(propagation!);
+        // After a failed try the same form is opened again, so its new propagation's id is reused
+        // and trying again can't make a second one
+        split ??= Units.SplitOff(propagation!);
         message = null;
         stageView = StageView.SplitOff;
     }
@@ -1755,6 +1757,7 @@ else
             await LoadAsync();
             message = F(Strings.Propagations.DetSplitFailed, later.Message);
             stageView = StageView.None;
+            split = null;
         }
         catch (Exception ex)
         {
