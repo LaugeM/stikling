@@ -196,12 +196,16 @@ else
     {
         <section class="detail-card">
             <h2>@F(Strings.Pests.CasePlanHeading, view.Case.PlanName)</h2>
+            @if (PlanProgress.Repeats(view.Case))
+            {
+                <p class="plan-progress-note">@F(Strings.Pests.CaseRound, view.Round)</p>
+            }
             <ol class="plan-progress">
                 @for (var i = 0; i < view.Case.PlanSteps.Count; i++)
                 {
                     var step = view.Case.PlanSteps[i];
                     var current = view.Step?.Id == step.Id;
-                    var done = PlanProgress.ForStep(view.Case, treatments, step.Id);
+                    var done = PlanProgress.ForStep(view.Case, treatments, step.Id, view.Round);
                     <li class="plan-progress-step @(current ? "current" : null)">
                         <div class="plan-progress-line">
                             <span class="plan-progress-what">@StepName(step)</span>
@@ -403,6 +407,23 @@ else
                         {
                             @* The recipe as it was that day, not as it is now *@
                             <div class="treatment-recipe">@string.Join(" · ", treatment.Ingredients)</div>
+                        }
+                        @if (treatment.TreatedPlantIds is not null)
+                        {
+                            var (ticked, total) = TreatmentChecklist.Progress(treatment, view.Plants);
+                            var checklist = $"pests/{view.Case.Id}/treatments/{treatment.Id}";
+                            <div class="treatment-recipe">
+                                @if (treatment.OccurredOn >= Today.AddDays(-2))
+                                {
+                                    @TreatedText(ticked, total)
+                                    <span aria-hidden="true"> · </span>
+                                    <a href="@checklist">@Strings.Pests.TickMore</a>
+                                }
+                                else
+                                {
+                                    <a href="@checklist">@TreatedText(ticked, total)</a>
+                                }
+                            </div>
                         }
                         @if (treatmentPhotos.TryGetValue(treatment.Id, out var rowPhotos))
                         {
@@ -802,6 +823,9 @@ else
         _ => Strings.Pests.CaseWhatTreated
     };
 
+    private static string TreatedText(int ticked, int total) =>
+        F(total == 1 ? Strings.Pests.TickTreated_One : Strings.Pests.TickTreated_Other, ticked, total);
+
     private IEnumerable<Plant> FoundFirst =>
         view is null ? [] : view.Plants.OrderBy(p => PestService.IsFoundOn(view.Case, p.Id) ? 0 : 1);
 
@@ -989,7 +1013,7 @@ else
         busy = true;
         try
         {
-            await Treatments.SaveAsync(PlanProgress.Skip(view.Case, step, Today));
+            await Treatments.SaveAsync(PlanProgress.Skip(view.Case, step, Today, view.Round));
             await ReloadAsync();
             message = Strings.Pests.CaseStepSkippedMessage;
         }
@@ -1026,7 +1050,7 @@ else
         busy = true;
         try
         {
-            await PutOffService.PutOffAsync(PutOffs.PlanStep(view.Case.Id, step.Id), moveTo);
+            await PutOffService.PutOffAsync(PutOffs.PlanStep(view.Case.Id, step.Id, view.Round), moveTo);
             movingStep = null;
             await ReloadAsync();
             message = F(Strings.Pests.CaseStepMoved, Labels.Date(moveTo));

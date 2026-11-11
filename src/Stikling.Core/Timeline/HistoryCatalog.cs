@@ -130,6 +130,7 @@ public static partial class HistoryText
         Add("FinishedNothing");
         Add("GaveToWho", Num(), Txt());
         Add("GaveAway", Num());
+        Add("SplitOff", Num());
         Add("FloweringBuds");
         Add("FloweringInFlower");
         Add("FloweringDone");

@@ -334,7 +334,7 @@
   </data>
   <data name="SplitOffFrom" xml:space="preserve">
     <value>Split off from {0}</value>
-    <comment>A plant was split off from another plant in the same pot. {0} is the name of that plant.</comment>
+    <comment>A plant was split off from another plant in the same pot, or a propagation from the batch it was split off. {0} is the name of that plant or batch.</comment>
   </data>
   <data name="PottedUpFromPropagation" xml:space="preserve">
     <value>Potted up from a propagation</value>
@@ -443,6 +443,10 @@
   <data name="GaveToWho" xml:space="preserve">
     <value>Gave {0} to {1}</value>
     <comment>Units of a propagation were given to someone. {0} is how many, {1} who got them.</comment>
+  </data>
+  <data name="SplitOff" xml:space="preserve">
+    <value>Split {0} off into its own propagation</value>
+    <comment>Units were split off a batch into a propagation of their own. {0} is how many.</comment>
   </data>
   <data name="GaveAway" xml:space="preserve">
     <value>Gave {0} away</value>

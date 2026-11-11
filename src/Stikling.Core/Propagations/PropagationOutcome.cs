@@ -65,7 +65,7 @@ public sealed record PropagationOutcome(
         return new PropagationOutcome(
             daysRan,
             DaysToFirstSign(propagation),
-            propagation.InitialCount,
+            propagation.StartedCount,
             propagation.PottedUpCount,
             propagation.GivenAwayCount,
             propagation.FailedCount,

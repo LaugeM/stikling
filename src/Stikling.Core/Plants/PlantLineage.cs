@@ -169,7 +169,7 @@ public static class PlantLineage
 
         return new PlantGiven(
             taken.GroupBy(p => p.Type)
-                 .Select(g => new KeyValuePair<PropagationType, int>(g.Key, g.Sum(p => p.InitialCount)))
+                 .Select(g => new KeyValuePair<PropagationType, int>(g.Key, g.Sum(p => p.StartedCount)))
                  .OrderByDescending(g => g.Value).ThenBy(g => g.Key)
                  .ToList(),
             taken.Sum(PropagationResults.Succeeded),

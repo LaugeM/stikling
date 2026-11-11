@@ -1,5 +1,6 @@
 using Stikling.Core.Models;
 using Stikling.Core.Propagations;
+using Stikling.Core.Rooms;
 
 namespace Stikling.Core.Tests;
 
@@ -42,6 +43,35 @@ public class PropagationResultsTests
         Assert.Equal(4, result.Succeeded);
         Assert.Equal(1, result.Failed);
         Assert.Equal(0.8, result.SuccessRate);
+    }
+
+    [Fact]
+    public void Units_split_off_are_neither_a_success_nor_a_failure_of_the_batch()
+    {
+        // 4 corms: 1 split off, 1 potted up, 1 failed, 1 left in the batch that has rooted
+        var batch = Batch(GrowingMedium.Leca, PropagationType.Corm, count: 4, pottedUp: 1, failed: 1, stage: PropagationStage.Rooted, rootedAfterDays: 9);
+        batch.SplitOffCount = 1;
+
+        var result = PropagationResults.ByMedium([batch]).Single();
+
+        Assert.Equal(2, result.Succeeded);
+        Assert.Equal(1, result.Failed);
+        Assert.Equal(3, batch.StartedCount);
+        Assert.Equal(1, batch.RemainingCount);
+    }
+
+    [Fact]
+    public void A_batch_that_finishes_after_a_split_counts_only_what_stayed()
+    {
+        var batch = Batch(GrowingMedium.Leca, PropagationType.Corm, count: 3, pottedUp: 1, failed: 1);
+        batch.SplitOffCount = 1;
+        batch.SyncStageWithCounts(new DateOnly(2026, 9, 20));
+
+        var result = PropagationResults.ByMedium([batch]).Single();
+
+        Assert.Equal(PropagationStage.Done, batch.Stage);
+        Assert.Equal(0.5, result.SuccessRate);
+        Assert.Equal(2, PropagationOutcome.For(batch, [], Places.None)!.Started);
     }
 
     [Fact]

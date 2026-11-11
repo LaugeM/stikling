@@ -88,7 +88,7 @@ else
                 {
                     <span class="rooted-in">· @Plural.Of(days, Strings.Propagations.CardRootedIn_One, Strings.Propagations.CardRootedIn_Other)</span>
                 }
-                @if (Propagation.RemainingCount != Propagation.InitialCount)
+                @if (Propagation.RemainingCount != Propagation.StartedCount)
                 {
                     <span>· @F(Strings.Propagations.CardLeft, Propagation.RemainingCount)</span>
                 }

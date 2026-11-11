@@ -34,7 +34,7 @@
     @if (all is { Count: > 0 })
     {
         <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
-            <span class="text-body-secondary small">@F(Strings.Plants.ListShown, visible.Count, all.Count)</span>
+            <span class="text-body-secondary small">@F(Strings.Plants.ListShown, visible.Count, total)</span>
             <a class="btn btn-outline-primary btn-sm phone-link" href="water?from=plants">@Strings.Plants.ListWaterPlants</a>
             <a class="btn btn-link btn-sm link-action phone-link" href="plants/flowering">@Strings.Plants.ListFlowering</a>
             <button type="button" class="btn btn-link btn-sm link-action phone-link" disabled="@(ShareCount == 0)" @onclick="OpenShare">@Strings.Plants.ListShareAsText</button>
@@ -695,6 +695,7 @@ else
     private IReadOnlyList<Room> roomsInUse = []; // what the room filter offers: no empty rooms
     private Places places = Places.None;
     private List<Plant> visible = [];
+    private int total; // plants under the status picked, so dead and given-away ones don't count while hidden
 
     private string? search;
     private StatusFilter status = StatusFilter.Active;
@@ -1012,12 +1013,12 @@ else
 
     private void Refresh()
     {
-        visible = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
+        var filter = new PlantFilter(search, status, PickedPlace is { } place ? places.IdsIn(place) : null,
                 pickedTags.Count > 0 ? pickedTags : null, quarantine, dormant, sort, places.NameOf, lastActivity,
                 p => everyday?.For(p.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(p.Species, p.NameQualifier), p.Cultivar), goneAs, problem ? problemPlants : null, likes, FieldWords, picks.Count > 0 ? [.. picks] : null,
-                genus, noGenus, FavouritesFirst: sort is not (PlantSort.Genus or PlantSort.Room), RoomName: id => places.RoomOf(id)?.Name)
-            .Apply(all ?? [])
-            .ToList();
+                genus, noGenus, FavouritesFirst: sort is not (PlantSort.Genus or PlantSort.Room), RoomName: id => places.RoomOf(id)?.Name);
+        visible = filter.Apply(all ?? []).ToList();
+        total = filter.Total(all ?? []);
         FindGroups();
         wishMatches = WishSearch.OpenWishes(wishes, search, dictionary);
         SortTable();

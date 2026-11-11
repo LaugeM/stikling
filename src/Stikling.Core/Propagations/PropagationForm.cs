@@ -155,8 +155,8 @@ public sealed class PropagationForm
     // Plants potted up from it that still exist. The potted up count can't be corrected below them
     public int PlantsFromIt => Plants.Count(p => p.FromPropagationId == Propagation.Id);
 
-    // Units already potted up, given away or failed can't be counted away
-    public int MinCount => Math.Max(1, Propagation.PottedUpCount + Propagation.FailedCount + Propagation.GivenAwayCount);
+    // Units already potted up, given away, split off or failed can't be counted away
+    public int MinCount => Math.Max(1, Propagation.PottedUpCount + Propagation.FailedCount + Propagation.GivenAwayCount + Propagation.SplitOffCount);
 
     // A new propagation from a plant with a number gets the next letter after it, until the person
     // has typed a number of their own
