@@ -138,6 +138,8 @@ Read the English for what it means, then write the sentence the way a Dane would
 
 Keep "Stikling" as the name of the app.
 
+`always-wrong.da.txt` in this folder lists Danish that is wrong in every sentence, like a misspelling or a noun with the wrong gender, and a test fails when a Danish text has one. Add a phrase there when you fix one. A word that is right in some sentences and wrong in others goes in the word list above instead.
+
 ## For developers
 
 ### Adding text
@@ -160,6 +162,13 @@ Text people see never goes in a Razor page or a C# file. Add it to the file for 
 - A length shown to people goes through `Lengths` (`Lengths.Cm(13)` gives "13 cm" or "5.12 in"), and a size typed in an input box through `LengthInput`, which gives back the stored cm or mm. Put the size with its unit in `{0}`, and write a unit in a label as `{0}` filled from `Lengths.UnitName` or `Lengths.SmallUnitName`. Nothing saved on a record may depend on the setting, so a pot's name for a history line is `Pot.StoredName`.
 - When a sentence has a link or an element inside it, put `{0}` where the element goes and fill it in on the page. Only text from the resource files may be shown as markup, never anything a person typed.
 - The app language is picked once, in `Program.cs`, before the app starts, so changing it restarts the app. A language that was chosen is saved in `UserSettings.Language` and `wwwroot/js/language.js` keeps a copy on the device for that first start.
+
+### Checking the translations
+
+The tests check placeholders, plural pairs, that every key exists in English and the always-wrong list. They can't tell whether a sentence reads well, so the `translator` agent (`.claude/agents/translator.md`) goes over every text a branch adds or changes:
+
+- **Danish pass**, for a branch that changed English or Danish text. It rewrites the Danish that sounds translated, by the rules in "Danish" above, and lists each line it changed with the English, the old Danish and the new, for the owner to read over.
+- **Check mode**, for a pull request from Weblate in a language the owner can't read. It changes nothing, and gives an English back-translation of every changed line, flagging meaning that drifted, text in the wrong language, spam and translated names.
 
 ### Lines in a plant's history
 
@@ -194,3 +203,5 @@ This is done once, by the owner of the repository.
 4. For each component, set English as the source language and the file format to ".NET resource file".
 5. Set it to push its changes as pull requests, not straight to `main`.
 6. Check that a new translation of one component opens a pull request, and that the tests pass on it.
+
+Each pull request from Weblate is then read with the `translator` agent in check mode before it is merged, see "Checking the translations".
