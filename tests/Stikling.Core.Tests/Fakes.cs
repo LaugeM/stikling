@@ -35,6 +35,12 @@ namespace Stikling.Core.Tests;
 /// </summary>
 internal abstract class FakeRepository<T> : IRepository<T> where T : Entity
 {
+    // Fakes that stamp dates give each save and delete a moment a second after the last
+    private readonly bool stampsDates;
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    protected FakeRepository(bool stampsDates = false) => this.stampsDates = stampsDates;
+
     protected Dictionary<Guid, T> Records { get; } = [];
 
     /// <summary>How many times a record was saved.</summary>
@@ -55,6 +61,12 @@ internal abstract class FakeRepository<T> : IRepository<T> where T : Entity
     {
         Check(item);
         Saves++;
+        if (stampsDates)
+        {
+            if (item.CreatedAt == default)
+                item.CreatedAt = clock;
+            item.UpdatedAt = clock = clock.AddSeconds(1);
+        }
         Records[item.Id] = item;
         return Task.CompletedTask;
     }
@@ -62,7 +74,12 @@ internal abstract class FakeRepository<T> : IRepository<T> where T : Entity
     public virtual Task DeleteAsync(Guid id)
     {
         if (Records.TryGetValue(id, out var item))
-            item.DeletedAt = DateTimeOffset.UtcNow;
+        {
+            if (stampsDates)
+                item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
+            else
+                item.DeletedAt = DateTimeOffset.UtcNow;
+        }
         return Task.CompletedTask;
     }
 }
@@ -417,28 +434,14 @@ internal sealed class FakeFeedRepository : FakeRepository<Feed>, IFeedRepository
     }
 }
 
-internal sealed class FakeAwayStretchRepository : FakeRepository<AwayStretch>, IAwayStretchRepository
+internal sealed class FakeAwayStretchRepository() : FakeRepository<AwayStretch>(stampsDates: true), IAwayStretchRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, AwayStretch> Stretches => Records;
 
-    public override Task SaveAsync(AwayStretch stretch)
+    protected override void Check(AwayStretch stretch)
     {
         if (stretch.Validate().Count > 0)
             throw new InvalidOperationException("Invalid stretch");
-        if (stretch.CreatedAt == default)
-            stretch.CreatedAt = clock;
-        stretch.UpdatedAt = clock = clock.AddSeconds(1);
-        Stretches[stretch.Id] = stretch;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Stretches.TryGetValue(id, out var stretch))
-            stretch.DeletedAt = stretch.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
@@ -1016,153 +1019,69 @@ internal sealed class FakePublicPageServer : IPublicPageServer
     }
 }
 
-internal sealed class FakeFloweringMarkRepository : FakeRepository<FloweringMark>, IFloweringMarkRepository
+internal sealed class FakeFloweringMarkRepository() : FakeRepository<FloweringMark>(stampsDates: true), IFloweringMarkRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, FloweringMark> Marks => Records;
 
-    public override Task SaveAsync(FloweringMark mark)
+    protected override void Check(FloweringMark mark)
     {
         if (mark.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid mark");
-        if (mark.CreatedAt == default)
-            mark.CreatedAt = clock;
-        mark.UpdatedAt = clock = clock.AddSeconds(1);
-        Marks[mark.Id] = mark;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Marks.TryGetValue(id, out var mark))
-            mark.DeletedAt = mark.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeLeafRepository : FakeRepository<Leaf>, ILeafRepository
+internal sealed class FakeLeafRepository() : FakeRepository<Leaf>(stampsDates: true), ILeafRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, Leaf> Leaves => Records;
 
-    public override Task SaveAsync(Leaf leaf)
+    protected override void Check(Leaf leaf)
     {
         if (leaf.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid leaf");
-        if (leaf.CreatedAt == default)
-            leaf.CreatedAt = clock;
-        leaf.UpdatedAt = clock = clock.AddSeconds(1);
-        Leaves[leaf.Id] = leaf;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Leaves.TryGetValue(id, out var leaf))
-            leaf.DeletedAt = leaf.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeProblemRepository : FakeRepository<Problem>, IProblemRepository
+internal sealed class FakeProblemRepository() : FakeRepository<Problem>(stampsDates: true), IProblemRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, Problem> Problems => Records;
 
-    public override Task SaveAsync(Problem problem)
+    protected override void Check(Problem problem)
     {
         if (problem.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid problem");
-        if (problem.CreatedAt == default)
-            problem.CreatedAt = clock;
-        problem.UpdatedAt = clock = clock.AddSeconds(1);
-        Problems[problem.Id] = problem;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Problems.TryGetValue(id, out var problem))
-            problem.DeletedAt = problem.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeProblemUpdateRepository : FakeRepository<ProblemUpdate>, IProblemUpdateRepository
+internal sealed class FakeProblemUpdateRepository() : FakeRepository<ProblemUpdate>(stampsDates: true), IProblemUpdateRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, ProblemUpdate> Updates => Records;
 
-    public override Task SaveAsync(ProblemUpdate update)
+    protected override void Check(ProblemUpdate update)
     {
         if (update.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid update");
-        if (update.CreatedAt == default)
-            update.CreatedAt = clock;
-        update.UpdatedAt = clock = clock.AddSeconds(1);
-        Updates[update.Id] = update;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Updates.TryGetValue(id, out var update))
-            update.DeletedAt = update.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeWishRepository : FakeRepository<Wish>, IWishRepository
+internal sealed class FakeWishRepository() : FakeRepository<Wish>(stampsDates: true), IWishRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, Wish> Wishes => Records;
 
-    public override Task SaveAsync(Wish wish)
+    protected override void Check(Wish wish)
     {
         if (wish.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid wish");
-        if (wish.CreatedAt == default)
-            wish.CreatedAt = clock;
-        wish.UpdatedAt = clock = clock.AddSeconds(1);
-        Wishes[wish.Id] = wish;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Wishes.TryGetValue(id, out var wish))
-            wish.DeletedAt = wish.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeOrderRepository : FakeRepository<Order>, IOrderRepository
+internal sealed class FakeOrderRepository() : FakeRepository<Order>(stampsDates: true), IOrderRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, Order> Orders => Records;
 
-    public override Task SaveAsync(Order order)
+    protected override void Check(Order order)
     {
         if (order.Validate(DateOnly.MaxValue).Count > 0)
             throw new InvalidOperationException("Invalid order");
-        if (order.CreatedAt == default)
-            order.CreatedAt = clock;
-        order.UpdatedAt = clock = clock.AddSeconds(1);
-        Orders[order.Id] = order;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Orders.TryGetValue(id, out var order))
-            order.DeletedAt = order.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
@@ -1228,77 +1147,35 @@ internal sealed class FakePhotoMarkRepository : IPhotoMarkRepository
 }
 
 
-internal sealed class FakeSupplyRepository : FakeRepository<Supply>, ISupplyRepository
+internal sealed class FakeSupplyRepository() : FakeRepository<Supply>(stampsDates: true), ISupplyRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, Supply> Supplies => Records;
 
-    public override Task SaveAsync(Supply supply)
+    protected override void Check(Supply supply)
     {
         if (supply.Validate().Count > 0)
             throw new InvalidOperationException("Invalid supply");
-        if (supply.CreatedAt == default)
-            supply.CreatedAt = clock;
-        supply.UpdatedAt = clock = clock.AddSeconds(1);
-        Supplies[supply.Id] = supply;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Supplies.TryGetValue(id, out var supply))
-            supply.DeletedAt = supply.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeSupplyEntryRepository : FakeRepository<SupplyEntry>, ISupplyEntryRepository
+internal sealed class FakeSupplyEntryRepository() : FakeRepository<SupplyEntry>(stampsDates: true), ISupplyEntryRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, SupplyEntry> Entries => Records;
 
-    public override Task SaveAsync(SupplyEntry entry)
+    protected override void Check(SupplyEntry entry)
     {
         if (entry.Validate().Count > 0)
             throw new InvalidOperationException("Invalid supply entry");
-        if (entry.CreatedAt == default)
-            entry.CreatedAt = clock;
-        entry.UpdatedAt = clock = clock.AddSeconds(1);
-        Entries[entry.Id] = entry;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Entries.TryGetValue(id, out var entry))
-            entry.DeletedAt = entry.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
 
-internal sealed class FakeShoppingItemRepository : FakeRepository<ShoppingItem>, IShoppingItemRepository
+internal sealed class FakeShoppingItemRepository() : FakeRepository<ShoppingItem>(stampsDates: true), IShoppingItemRepository
 {
-    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
-
     public Dictionary<Guid, ShoppingItem> Items => Records;
 
-    public override Task SaveAsync(ShoppingItem item)
+    protected override void Check(ShoppingItem item)
     {
         if (item.Validate().Count > 0)
             throw new InvalidOperationException("Invalid shopping item");
-        if (item.CreatedAt == default)
-            item.CreatedAt = clock;
-        item.UpdatedAt = clock = clock.AddSeconds(1);
-        Items[item.Id] = item;
-        return Task.CompletedTask;
-    }
-
-    public override Task DeleteAsync(Guid id)
-    {
-        if (Items.TryGetValue(id, out var item))
-            item.DeletedAt = item.UpdatedAt = clock = clock.AddSeconds(1);
-        return Task.CompletedTask;
     }
 }
