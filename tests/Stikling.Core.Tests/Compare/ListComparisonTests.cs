@@ -255,9 +255,9 @@ public class ListComparisonTests
         var result = Compare(Friend([Theirs("A", "Monstera", "deliciosa", "Albo")]), [AWish("Monstera", "deliciosa")]);
         var forThem = Compare(Friend(wishes: [TheirWish("M", "Monstera", "deliciosa")]), plants: [APlant("Monstera", "deliciosa")]);
 
-        Assert.Equal("Deres: 'Albo'", In("da", () => Compare(Friend([Theirs("A", "Monstera", "deliciosa", "Albo")]), [AWish("Monstera", "deliciosa")]).ForYou[0].Difference));
+        Assert.Equal("Hos dem: 'Albo'", In("da", () => Compare(Friend([Theirs("A", "Monstera", "deliciosa", "Albo")]), [AWish("Monstera", "deliciosa")]).ForYou[0].Difference));
         Assert.Null(Assert.Single(forThem.ForThem).Difference);
-        Assert.Equal("Din: ingen sort", In("da", () => Compare(Friend(wishes: [TheirWish("M", "Monstera", "deliciosa", "Albo")]), plants: [APlant("Monstera", "deliciosa")]).ForThem[0].Difference));
+        Assert.Equal("Hos dig: ingen kultivar", In("da", () => Compare(Friend(wishes: [TheirWish("M", "Monstera", "deliciosa", "Albo")]), plants: [APlant("Monstera", "deliciosa")]).ForThem[0].Difference));
         Assert.Single(result.ForYou);
     }
 }

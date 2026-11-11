@@ -33,7 +33,7 @@ public class SwapReplyTextTests
 
         Assert.Equal(
             "Hi! I compared our plant lists in Stikling.\n\n"
-            + "Could I have one of these?\n- Monstera Albo, Can spare 2 rooted cuttings\n- Hoya\n\n"
+            + "Could I have one of these?\n- Monstera Albo, can spare 2 rooted cuttings\n- Hoya\n\n"
             + "I could offer:\n- My Alocasia\n\n"
             + "Kept in Stikling, stikling.app", text);
     }
@@ -55,7 +55,7 @@ public class SwapReplyTextTests
     {
         var text = In("da", () => SwapReplyText.Write(Result([Theirs("B")], [Mine("A")]), null));
 
-        Assert.Contains("Hej! Jeg har sammenlignet vores plantelister i Stikling.", text);
+        Assert.Contains("Hej, jeg har sammenlignet vores plantelister i Stikling.", text);
         Assert.Contains("Må jeg få en af dem her?", text);
         Assert.Contains("Jeg kan tilbyde:", text);
         Assert.EndsWith("Samlet i Stikling, stikling.app", text);

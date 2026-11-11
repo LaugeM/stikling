@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Text;
 using Stikling.Core.Sharing;
 using Strings = Stikling.Core.Resources;
@@ -30,7 +31,8 @@ public static class SwapReplyText
                 foreach (var match in result.ForYou)
                 {
                     var spare = match.Theirs.SpareText();
-                    text.AppendLine(spare is null ? $"- {match.Theirs.Name}" : $"- {match.Theirs.Name}, {spare}");
+                    // Mid-line, so "can spare 2 rooted cuttings" in lower case, as the shared plant list writes its marks
+                    text.AppendLine(spare is null ? $"- {match.Theirs.Name}" : $"- {match.Theirs.Name}, {spare.ToLower(CultureInfo.CurrentCulture)}");
                 }
                 text.AppendLine();
             }
