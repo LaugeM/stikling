@@ -1,11 +1,12 @@
 using Stikling.Core.Models;
+using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
 
 /// <summary>
-/// Shared storage logic for plants and propagations: validation, timestamps and soft deletes.
+/// Shared storage logic for every kind of record: validation, timestamps and soft deletes.
 /// </summary>
-public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider time, string store) where T : Entity
+public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider time, RecordKind<T> kind) where T : Entity
 {
     /// <summary>For subclasses whose validation depends on the date.</summary>
     protected DateOnly Today => time.Today();
@@ -13,20 +14,20 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
     protected abstract IReadOnlyList<string> Validate(T entity);
 
     public async Task<IReadOnlyList<T>> GetAllAsync() =>
-        (await db.GetAllAsync<T>(store)).Where(e => !e.IsDeleted).ToList();
+        (await db.GetAllAsync<T>(kind)).Where(e => !e.IsDeleted).ToList();
 
-    /// <summary>Everything in the store, deleted items too.</summary>
-    protected Task<List<T>> GetStoredAsync() => db.GetAllAsync<T>(store);
+    /// <summary>Everything of the kind, deleted items too.</summary>
+    protected Task<List<T>> GetStoredAsync() => db.GetAllAsync<T>(kind);
 
     public async Task<T?> GetAsync(Guid id)
     {
-        var entity = await db.GetAsync<T>(store, id);
+        var entity = await db.GetAsync<T>(kind, id);
         return entity is { IsDeleted: false } ? entity : null;
     }
 
     /// <summary>True when a record with this id is stored and soft-deleted.</summary>
     public async Task<bool> IsDeletedAsync(Guid id) =>
-        await db.GetAsync<T>(store, id) is { IsDeleted: true };
+        await db.GetAsync<T>(kind, id) is { IsDeleted: true };
 
     public async Task SaveAsync(T entity)
     {
@@ -39,16 +40,16 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
             entity.CreatedAt = now;
         entity.UpdatedAt = now;
 
-        await db.PutAsync(store, entity);
+        await db.PutAsync(kind, entity);
     }
 
     public async Task DeleteAsync(Guid id)
     {
-        var entity = await db.GetAsync<T>(store, id);
+        var entity = await db.GetAsync<T>(kind, id);
         if (entity is null || entity.IsDeleted)
             return;
 
         entity.DeletedAt = entity.UpdatedAt = time.GetUtcNow();
-        await db.PutAsync(store, entity);
+        await db.PutAsync(kind, entity);
     }
 }

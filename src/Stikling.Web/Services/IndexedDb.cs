@@ -1,47 +1,16 @@
 using Microsoft.JSInterop;
+using Stikling.Core.Models;
+using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
 
-/// <summary>Names of the IndexedDB object stores (see wwwroot/js/db.js).</summary>
+/// <summary>
+/// Names of the IndexedDB object stores that don't hold records (see wwwroot/js/db.js). The record
+/// stores are in <c>RecordKinds</c> in Core.
+/// </summary>
 public static class Stores
 {
-    public const string Plants = "plants";
-    public const string Propagations = "propagations";
-    public const string Timeline = "timeline";
-    public const string Photos = "photos";
     public const string PhotoBlobs = "photoBlobs";
-    public const string CareLogs = "careLogs";
-    public const string PestCases = "pestCases";
-    public const string PestTreatments = "pestTreatments";
-    public const string Pots = "pots";
-    public const string SoilMixes = "soilMixes";
-    public const string Products = "products";
-    public const string Feeds = "feeds";
-    public const string GrowLights = "growLights";
-    public const string ReceivedHistories = "receivedHistories";
-    public const string AwayStretches = "awayStretches";
-    public const string SitterSheets = "sitterSheets";
-    public const string FloweringMarks = "floweringMarks";
-    public const string Problems = "problems";
-    public const string ProblemUpdates = "problemUpdates";
-    public const string Wishes = "wishes";
-    public const string Sellers = "sellers";
-    public const string OwnCareKinds = "ownCareKinds";
-    public const string CareIntervals = "careIntervals";
-    public const string TreatmentPlans = "treatmentPlans";
-    public const string OwnFields = "ownFields";
-    public const string Orders = "orders";
-    public const string OrderItems = "orderItems";
-    public const string Leaves = "leaves";
-    public const string PhotoMarks = "photoMarks";
-    public const string Supplies = "supplies";
-    public const string SupplyEntries = "supplyEntries";
-    public const string ShoppingItems = "shoppingItems";
-    public const string PropagationCareLogs = "propagationCareLogs";
-    public const string Settings = "settings";
-    public const string PutOffs = "putOffs";
-    public const string TreatmentRecipes = "treatmentRecipes";
-    public const string Places = "places";
 
     // Kept by sync, and not synced themselves
     public const string Changes = "changes";
@@ -54,7 +23,7 @@ public sealed record StorageEstimate(long Usage, long Quota, bool Persisted);
 /// Typed access to the IndexedDB module. Objects are serialised to JSON on the way in and
 /// back to C# types on the way out by Blazor's JS interop.
 /// </summary>
-public sealed class IndexedDb(IJSRuntime js) : JsModule(js, ModulePath)
+public sealed class IndexedDb(IJSRuntime js) : JsModule(js, ModulePath), IRecordStore
 {
     internal const string ModulePath = "./js/db.js";
 
@@ -63,6 +32,12 @@ public sealed class IndexedDb(IJSRuntime js) : JsModule(js, ModulePath)
 
     public async Task<List<T>> GetAllAsync<T>(string store) =>
         await (await Module).InvokeAsync<List<T>>("getAll", store);
+
+    public Task<List<T>> GetAllAsync<T>(RecordKind<T> kind) where T : Entity => GetAllAsync<T>(kind.Name);
+
+    public Task<T?> GetAsync<T>(RecordKind<T> kind, Guid id) where T : Entity => GetAsync<T>(kind.Name, id);
+
+    public Task PutAsync<T>(RecordKind<T> kind, T value) where T : Entity => PutAsync(kind.Name, value);
 
     public async Task<T?> GetAsync<T>(string store, Guid id) where T : class =>
         await (await Module).InvokeAsync<T?>("get", store, id);
