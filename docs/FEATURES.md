@@ -37,11 +37,13 @@ A working list of what Stikling could do, grouped by area. Each row has a priori
 
 In the order I would build them, with the ones that belong together built together. The demo plant and propagation is in, so a first visit shows the app with plants in it.
 
-The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is in, so every feature from now on is written in both languages from the start, and the Danish Facebook groups can be asked. The group for collectors is built too: the larger plant dictionary with a page to browse it, the leaf log for variegated plants, generation and orders. So is Showing it off: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print.
+The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is in, so every feature from now on is written in both languages from the start, and the Danish Facebook groups can be asked. The group for collectors is built too: the larger plant dictionary with a page to browse it, the leaf log for variegated plants, generation and orders. So is Showing it off: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print. So is On the server: plant identification from a photo, the plant facts card and the public collection page.
 
 1. **When something is wrong**: the symptom check, and built-in guides that open from the place they are about.
-2. **On the server**: plant identification from a photo, the plant facts card and a public read-only collection page. Identification services name the species, not the cultivar, so a variegated or lab-made cultivar still has to be picked by hand, from the dictionary. Check that Trefle is still kept up before planning the facts card.
-3. **Translating**: a way for others to help translate Stikling.
+2. **Supplies**: the supplies stock, and the shopping list a supply lands on when it runs low.
+3. **Photos and growth**: swiping through photos side by side, marking up a photo, measurements on an entry and the growth curve drawn from them.
+4. **Rooms and spots**: a note and photos on a room or spot, light readings and room climate, all shown on the spot and on the plants that stand there.
+5. **Translating**: a way for others to help translate Stikling, through Hosted Weblate once the Libre plan can be applied for on 19 December 2026. Your own words goes with it, since both are about the words the app uses.
 
 ---
 
