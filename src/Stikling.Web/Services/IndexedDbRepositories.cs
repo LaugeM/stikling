@@ -5,6 +5,7 @@ using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Leaves;
 using Stikling.Core.Lights;
+using Stikling.Core.Measurements;
 using Stikling.Core.Orders;
 using Stikling.Core.Models;
 using Stikling.Core.Sync;
@@ -254,4 +255,22 @@ public sealed class IndexedDbShoppingItemRepository(IndexedDb db, TimeProvider t
     : IndexedDbEntityRepository<ShoppingItem>(db, time, RecordKinds.ShoppingItems), IShoppingItemRepository
 {
     protected override IReadOnlyList<string> Validate(ShoppingItem item) => item.Validate();
+}
+
+public sealed class IndexedDbMeasurementRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Measurement>(db, time, RecordKinds.Measurements), IMeasurementRepository
+{
+    // Deleted measurements are kept in the list so an entry's value that was taken off can come back
+    async Task<IReadOnlyList<Measurement>> IMeasurementRepository.GetStoredAsync() => await GetStoredAsync();
+
+    protected override IReadOnlyList<string> Validate(Measurement measurement) => measurement.Validate();
+}
+
+public sealed class IndexedDbOwnMeasureKindRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<OwnMeasureKind>(db, time, RecordKinds.OwnMeasureKinds), IOwnMeasureKindRepository
+{
+    // Deleted kinds are kept in the list so a removed name can be brought back
+    async Task<IReadOnlyList<OwnMeasureKind>> IOwnMeasureKindRepository.GetStoredAsync() => await GetStoredAsync();
+
+    protected override IReadOnlyList<string> Validate(OwnMeasureKind kind) => kind.Validate();
 }

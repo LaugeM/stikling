@@ -144,7 +144,7 @@ public class ReferencePhotoTests
     public async Task A_reference_photo_moved_to_history_gets_an_entry_on_the_day_it_was_taken()
     {
         var timeline = new FakeTimelineRepository();
-        var service = new TimelineService(timeline, new FakePhotoRepository(), Time);
+        var service = new TimelineService(timeline, new FakePhotoRepository(), new FakeMeasurementRepository(), Time);
         var plantId = Guid.NewGuid();
         var photo = PhotoOf(plantId, At(9, 3), reference: true);
         photo.IsReference = false;
@@ -163,7 +163,7 @@ public class ReferencePhotoTests
     public async Task A_photo_an_entry_still_lists_gets_no_second_entry_when_moved_back()
     {
         var timeline = new FakeTimelineRepository();
-        var service = new TimelineService(timeline, new FakePhotoRepository(), Time);
+        var service = new TimelineService(timeline, new FakePhotoRepository(), new FakeMeasurementRepository(), Time);
         var plantId = Guid.NewGuid();
         var photo = PhotoOf(plantId, At(9, 3));
         await timeline.AddAsync(new TimelineEntry

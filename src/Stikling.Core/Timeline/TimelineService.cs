@@ -1,3 +1,4 @@
+using Stikling.Core.Measurements;
 using Stikling.Core.Models;
 using Strings = Stikling.Core.Resources;
 using static Stikling.Core.Text.Format;
@@ -5,7 +6,8 @@ using static Stikling.Core.Text.Format;
 namespace Stikling.Core.Timeline;
 
 /// <summary>Adding and correcting the notes and photos on a plant's or propagation's history.</summary>
-public sealed class TimelineService(ITimelineRepository timeline, IPhotoRepository photos, TimeProvider time)
+public sealed class TimelineService(
+    ITimelineRepository timeline, IPhotoRepository photos, IMeasurementRepository measurements, TimeProvider time)
 {
     /// <summary>
     /// Puts newly saved photos on the history, split by the day each was taken unless there is a
@@ -82,21 +84,36 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         return entry;
     }
 
-    /// <summary>Takes an entry off the history again (soft delete), e.g. a look over tapped by mistake.</summary>
-    public Task RemoveAsync(Guid entryId) => timeline.DeleteAsync(entryId);
+    /// <summary>Takes an entry off the history again (soft delete), e.g. a look over tapped by mistake. Its measurements go with it.</summary>
+    public async Task RemoveAsync(Guid entryId)
+    {
+        await timeline.DeleteAsync(entryId);
+        await RemoveMeasurementsAsync(entryId);
+    }
+
+    /// <summary>Takes the measurements written with an entry off (soft delete), for when the entry has been deleted another way.</summary>
+    public async Task RemoveMeasurementsAsync(Guid entryId)
+    {
+        foreach (var m in (await measurements.GetAllAsync()).Where(m => m.EntryId == entryId))
+            await measurements.DeleteAsync(m.Id);
+    }
 
     /// <summary>
-    /// Only what the user wrote can be corrected. Automatic entries copy something stored
-    /// elsewhere (a stage date, a care log), so they are fixed there instead.
+    /// Only what the user wrote can be corrected, and an entry of measurements, whose day and values
+    /// can be. Other automatic entries copy something stored elsewhere (a stage date, a care log), so
+    /// they are fixed there instead.
     /// </summary>
     public static bool CanCorrect(TimelineEntry entry) =>
-        !entry.IsDeleted && entry.Kind is TimelineKind.Note or TimelineKind.Photo;
+        !entry.IsDeleted && (entry.Kind is TimelineKind.Note or TimelineKind.Photo || MeasuredEntries.IsMeasured(entry));
 
     /// <summary>
-    /// Changes an entry's text and day, keeping the version it replaces. Photos on the entry
-    /// move to the new day with it. Returns false when nothing changed.
+    /// Changes an entry's text and day, keeping the version it replaces. Photos and measurements on the
+    /// entry move to the new day with it. Returns false when nothing changed. An entry of measurements has
+    /// no text of its own, so only its day changes. <paramref name="keepsMeasurements"/> says the entry has
+    /// measurements after this, so a note without text or photos becomes an entry of measurements (the
+    /// caller then writes them with <see cref="MeasurementService.SetForEntryAsync"/>).
     /// </summary>
-    public async Task<bool> CorrectAsync(TimelineEntry entry, string? text, DateOnly day)
+    public async Task<bool> CorrectAsync(TimelineEntry entry, string? text, DateOnly day, bool keepsMeasurements = false)
     {
         if (!CanCorrect(entry))
             throw new InvalidOperationException(Strings.Propagations.ErrOnlyNotesCorrected);
@@ -111,8 +128,10 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
                 entryPhotos.Add(photo);
         }
 
-        var cleanText = Clean(text);
-        if (cleanText is null && entryPhotos.Count == 0)
+        var measured = MeasuredEntries.IsMeasured(entry);
+        var cleanText = measured ? entry.Text : Clean(text);
+        var becomesMeasured = !measured && cleanText is null && entryPhotos.Count == 0 && keepsMeasurements;
+        if (cleanText is null && entryPhotos.Count == 0 && !measured && !becomesMeasured)
             throw new ArgumentException(Strings.Propagations.ErrNoteNeedsText, nameof(text));
 
         // The same day keeps the time it was recorded at
@@ -121,16 +140,41 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
         if (cleanText == entry.Text && occurredAt == entry.OccurredAt)
             return false;
 
-        entry.Edits.Add(new TimelineEdit
+        // The measurements are not kept as versions, and neither is the line written for them
+        if (!measured)
         {
-            Text = entry.Text,
-            OccurredAt = entry.OccurredAt,
-            ReplacedAt = time.GetUtcNow()
-        });
+            entry.Edits.Add(new TimelineEdit
+            {
+                Text = entry.Text,
+                OccurredAt = entry.OccurredAt,
+                ReplacedAt = time.GetUtcNow()
+            });
+        }
         entry.Text = cleanText;
         entry.OccurredAt = occurredAt;
-        entry.Kind = cleanText is null ? TimelineKind.Photo : TimelineKind.Note;
+        if (becomesMeasured)
+        {
+            entry.Kind = TimelineKind.Change;
+            entry.Event = TimelineEvent.Measured;
+
+            // Nothing is left to bring back
+            entry.ComesBackOn = null;
+            entry.CameBackDoneOn = null;
+        }
+        else if (!measured)
+        {
+            entry.Kind = cleanText is null ? TimelineKind.Photo : TimelineKind.Note;
+        }
         await timeline.UpdateAsync(entry);
+
+        if (!sameDay)
+        {
+            foreach (var m in (await measurements.GetAllAsync()).Where(m => m.EntryId == entry.Id))
+            {
+                m.MeasuredAt = occurredAt;
+                await measurements.SaveAsync(m);
+            }
+        }
 
         if (!sameDay)
         {
@@ -183,7 +227,8 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
 
     /// <summary>
     /// Call after deleting a photo. An entry that only held photos goes too once none of them
-    /// are left, so the history doesn't keep an empty "Photo" line. An entry with text stays.
+    /// are left, so the history doesn't keep an empty "Photo" line. An entry with text stays. So does
+    /// one with measurements, which is then an entry of measurements.
     /// </summary>
     public async Task RemoveEmptiedEntriesAsync(Guid subjectId, Guid photoId)
     {
@@ -196,8 +241,19 @@ public sealed class TimelineService(ITimelineRepository timeline, IPhotoReposito
             foreach (var id in entry.PhotoIds)
                 anyLeft |= await photos.GetAsync(id) is not null;
 
-            if (!anyLeft)
+            if (anyLeft)
+                continue;
+
+            var held = (await measurements.GetAllAsync()).Where(m => m.EntryId == entry.Id && m.HasKind).ToList();
+            if (held.Count == 0)
+            {
                 await timeline.DeleteAsync(entry.Id);
+                continue;
+            }
+
+            entry.PhotoIds = [];
+            MeasuredEntries.Apply(entry, held);
+            await timeline.UpdateAsync(entry);
         }
     }
 }

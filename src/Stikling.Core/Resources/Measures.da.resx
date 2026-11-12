@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="NeedsSubject" xml:space="preserve">
+    <value>En måling hører til en plante eller en stikling.</value>
+  </data>
+  <data name="NeedsEntry" xml:space="preserve">
+    <value>En måling hører til et punkt i historikken.</value>
+  </data>
+  <data name="NeedsOneKind" xml:space="preserve">
+    <value>En måling skal være af én type.</value>
+  </data>
+  <data name="OwnKindNeedsName" xml:space="preserve">
+    <value>En måling af en af dine egne typer skal have typens navn.</value>
+  </data>
+  <data name="ValueNegative" xml:space="preserve">
+    <value>En måling kan ikke være under 0.</value>
+  </data>
+  <data name="CountWhole" xml:space="preserve">
+    <value>Et antal skal være et helt tal.</value>
+  </data>
+  <data name="EntryNeedsValue" xml:space="preserve">
+    <value>Når du måler, skal du skrive mindst én værdi.</value>
+  </data>
+  <data name="KindNeedsName" xml:space="preserve">
+    <value>Giv typen et navn.</value>
+  </data>
+  <data name="KindGone" xml:space="preserve">
+    <value>Den type måling findes ikke mere.</value>
+  </data>
+  <data name="KindNameTaken" xml:space="preserve">
+    <value>Der er allerede en type der hedder {0}.</value>
+  </data>
+  <data name="KindNameBuiltIn" xml:space="preserve">
+    <value>{0} er en af de typer der altid er med.</value>
+  </data>
+  <data name="KindHeight" xml:space="preserve">
+    <value>Højde</value>
+  </data>
+  <data name="KindWidth" xml:space="preserve">
+    <value>Bredde</value>
+  </data>
+  <data name="KindLeaves" xml:space="preserve">
+    <value>Blade</value>
+  </data>
+  <data name="KindRootLength" xml:space="preserve">
+    <value>Rodlængde</value>
+  </data>
+  <data name="PhraseHeight" xml:space="preserve">
+    <value>{0} høj</value>
+  </data>
+  <data name="PhraseWidth" xml:space="preserve">
+    <value>{0} bred</value>
+  </data>
+  <data name="PhraseLeaves_One" xml:space="preserve">
+    <value>{0} blad</value>
+  </data>
+  <data name="PhraseLeaves_Other" xml:space="preserve">
+    <value>{0} blade</value>
+  </data>
+  <data name="PhraseRootLength" xml:space="preserve">
+    <value>{0} rødder</value>
+  </data>
+  <data name="PhraseOwn" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="MeasuredLine" xml:space="preserve">
+    <value>Målt: {0}</value>
+  </data>
+</root>

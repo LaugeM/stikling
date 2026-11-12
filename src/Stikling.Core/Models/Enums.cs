@@ -373,3 +373,29 @@ public sealed class TolerantNameQualifierConverter : JsonConverter<NameQualifier
             writer.WriteNullValue();
     }
 }
+
+/// <summary>
+/// What a measurement on a plant or cutting measures, apart from the kinds people add themselves.
+/// Stored as text. A kind added later reads as null on older versions, see <see cref="Measurement.Kind"/>.
+/// </summary>
+[JsonConverter(typeof(JsonStringEnumConverter<MeasureKind>))]
+public enum MeasureKind
+{
+    /// <summary>A length in cm.</summary>
+    Height,
+
+    /// <summary>A length in cm.</summary>
+    Width,
+
+    /// <summary>A count.</summary>
+    Leaves,
+
+    /// <summary>A length in cm.</summary>
+    RootLength
+}
+
+public static class MeasureKinds
+{
+    /// <summary>Whether the kind is a length in cm, and not a count.</summary>
+    public static bool IsLength(MeasureKind kind) => kind != MeasureKind.Leaves;
+}

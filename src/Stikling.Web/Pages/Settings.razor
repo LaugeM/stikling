@@ -23,6 +23,7 @@
 @inject ExampleService Example
 @inject TourService Tour
 @inject OwnCareKindService OwnCareKinds
+@inject MeasurementService MeasureService
 @inject OwnFieldService OwnFieldBook
 @inject ICareIntervalRepository CareIntervalRepository
 @inject NavigationManager Navigation
@@ -164,6 +165,7 @@
             </p>
             <div class="settings-rows mt-4">
                 <SettingsRow Href="kinds-of-care" Title="@Strings.Settings.KindsOfCare" Detail="@KindsOfCareLine" />
+                <SettingsRow Href="settings/measurements" Title="@Strings.Settings.Measurements" Detail="@MeasurementsLine" />
                 <SettingsRow Href="care-intervals" Title="@Strings.Settings.CareIntervals" Detail="@CareIntervalsLine" />
                 <SettingsRow Href="away" Title="@Strings.Settings.Away" Detail="@Strings.Settings.AwayDetail" />
             </div>
@@ -613,6 +615,7 @@
         roomCount = (await RoomService.GetAllAsync()).Count;
         tagCount = PlantTags.InUse(await Plants.GetAllAsync()).Count;
         ownKindCount = (await OwnCareKinds.GetAllAsync()).Count;
+        ownMeasureKindCount = (await MeasureService.GetOwnKindsAsync()).Count;
         ownFieldCount = (await OwnFieldBook.GetAllAsync()).Count;
         intervalCount = (await CareIntervalRepository.GetAllAsync()).Count;
     }
@@ -857,6 +860,11 @@
 
     private string CareIntervalsLine =>
         intervalCount == 0 ? Strings.Settings.CareIntervalsNone : Plural.Of(intervalCount, Strings.Settings.Interval_One, Strings.Settings.Interval_Other);
+
+    private int ownMeasureKindCount;
+
+    private string MeasurementsLine =>
+        ownMeasureKindCount == 0 ? Strings.Settings.MeasurementsNone : F(Strings.Settings.MeasurementsCount, ownMeasureKindCount);
 
     private string KindsOfCareLine =>
         ownKindCount == 0 ? Strings.Settings.KindsOfCareNone : F(Strings.Settings.KindsOfCareCount, ownKindCount);

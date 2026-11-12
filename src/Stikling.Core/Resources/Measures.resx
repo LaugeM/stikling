@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="NeedsSubject" xml:space="preserve">
+    <value>A measurement belongs to a plant or a cutting.</value>
+  </data>
+  <data name="NeedsEntry" xml:space="preserve">
+    <value>A measurement belongs to an entry in the history.</value>
+  </data>
+  <data name="NeedsOneKind" xml:space="preserve">
+    <value>A measurement is of one kind.</value>
+  </data>
+  <data name="OwnKindNeedsName" xml:space="preserve">
+    <value>A measurement of your own kind needs the name of the kind.</value>
+  </data>
+  <data name="ValueNegative" xml:space="preserve">
+    <value>A measurement can not be below 0.</value>
+  </data>
+  <data name="CountWhole" xml:space="preserve">
+    <value>A count has to be a whole number.</value>
+  </data>
+  <data name="EntryNeedsValue" xml:space="preserve">
+    <value>Measuring needs at least one value.</value>
+  </data>
+  <data name="KindNeedsName" xml:space="preserve">
+    <value>Give the kind a name.</value>
+  </data>
+  <data name="KindGone" xml:space="preserve">
+    <value>That kind of measurement is gone.</value>
+  </data>
+  <data name="KindNameTaken" xml:space="preserve">
+    <value>There is already a kind called {0}.</value>
+    <comment>{0} is the name someone typed.</comment>
+  </data>
+  <data name="KindNameBuiltIn" xml:space="preserve">
+    <value>{0} is one of the kinds that are always there.</value>
+    <comment>{0} is the name someone typed, like Height.</comment>
+  </data>
+  <data name="KindHeight" xml:space="preserve">
+    <value>Height</value>
+    <comment>The name of a kind of measurement, on a field, in a list and on the growth curve.</comment>
+  </data>
+  <data name="KindWidth" xml:space="preserve">
+    <value>Width</value>
+  </data>
+  <data name="KindLeaves" xml:space="preserve">
+    <value>Leaves</value>
+  </data>
+  <data name="KindRootLength" xml:space="preserve">
+    <value>Root length</value>
+  </data>
+  <data name="PhraseHeight" xml:space="preserve">
+    <value>{0} tall</value>
+    <comment>A measurement in the history. {0} is a length with its unit, like 34 cm.</comment>
+  </data>
+  <data name="PhraseWidth" xml:space="preserve">
+    <value>{0} wide</value>
+    <comment>A measurement in the history. {0} is a length with its unit, like 12 cm.</comment>
+  </data>
+  <data name="PhraseLeaves_One" xml:space="preserve">
+    <value>{0} leaf</value>
+    <comment>A measurement in the history. {0} is the number of leaves.</comment>
+  </data>
+  <data name="PhraseLeaves_Other" xml:space="preserve">
+    <value>{0} leaves</value>
+  </data>
+  <data name="PhraseRootLength" xml:space="preserve">
+    <value>{0} of roots</value>
+    <comment>A measurement in the history. {0} is a length with its unit, like 3 cm.</comment>
+  </data>
+  <data name="PhraseOwn" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>A measurement of a kind someone added, like Nodes 3 or Aerial root 4 cm. {0} is the name of the kind, {1} the value, with its unit when it is a length.</comment>
+  </data>
+  <data name="MeasuredLine" xml:space="preserve">
+    <value>Measured: {0}</value>
+    <comment>The line in the history of an entry that has measurements and nothing else. {0} is the measurements, like 34 cm tall, 7 leaves.</comment>
+  </data>
+</root>

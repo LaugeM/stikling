@@ -18,7 +18,7 @@ public interface ITimelineRepository
     Task<IReadOnlyList<TimelineEntry>> GetRecentAsync(
         int count, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, IReadOnlySet<Guid>? referencePhotoIds = null);
 
-    /// <summary>The change lines on plants' histories, for any plant, leaving out looking over. Kept apart from the rest for telling when plants were dormant.</summary>
+    /// <summary>The change lines on plants' histories, for any plant, leaving out looking over and measuring. Kept apart from the rest for telling when plants were dormant.</summary>
     Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync();
 
     /// <summary>

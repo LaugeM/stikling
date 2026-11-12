@@ -467,7 +467,11 @@ else
                 }
 
                 <LeafCard Leaves="leaves" PhotoOf="LeafPhoto" OnOpen="OpenLeaf" />
+            </div>
 
+            <GrowthBlock @key="@($"{historyVersion}-{growthVersion}")" SubjectId="propagation.Id" StartDay="PhotoDayCount.StartOf(propagation)" />
+
+            <div class="profile-details @(detailsOpen ? "open" : null)">
                 <section class="danger-zone">
                     @if (confirmDelete)
                     {
@@ -540,7 +544,8 @@ else
             @* The key reloads the history after stage changes and potting up *@
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)"
-                      OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" OnBeforeAfter="OpenShareBeforeAfter" />
+                      OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" OnBeforeAfter="OpenShareBeforeAfter"
+                      OnMeasurementsChanged="() => growthVersion++" />
         </div>
     </div>
 
@@ -1102,6 +1107,9 @@ else
     private bool detailsOpen;
     private bool scrollToPlants;
     private int historyVersion;
+
+    // Counts up when a correction or a deletion in the history changes the measurements, so the growth curves are drawn again
+    private int growthVersion;
 
     // A cover that is a reference photo shows as no cover. The propagation itself isn't changed.
     private Guid? ShownCover => Covers.Shown(propagation?.CoverPhotoId);

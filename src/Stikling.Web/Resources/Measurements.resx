@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Measure" xml:space="preserve">
+    <value>Measure</value>
+    <comment>Link under the note and date in the note sheet that opens the fields for height, width and the rest. It is a command.</comment>
+  </data>
+  <data name="MeasureGroup" xml:space="preserve">
+    <value>Measurements</value>
+    <comment>Name of the group of measurement fields, read out by a screen reader.</comment>
+  </data>
+  <data name="MeasureHint" xml:space="preserve">
+    <value>Leave out what you did not measure.</value>
+    <comment>Small line over the measurement fields.</comment>
+  </data>
+  <data name="AddMeasurements" xml:space="preserve">
+    <value>Add measurements</value>
+    <comment>Button in the note sheet that saves measurements typed with no note and no photos.</comment>
+  </data>
+  <data name="FieldError" xml:space="preserve">
+    <value>{0}: enter a number.</value>
+    <comment>Error under the measurement fields. {0} is the name of the kind, like Height.</comment>
+  </data>
+  <data name="AddKind" xml:space="preserve">
+    <value>Add a kind</value>
+    <comment>Link under the measurement fields that shows a form for a kind of measurement of your own, like nodes.</comment>
+  </data>
+  <data name="KindName" xml:space="preserve">
+    <value>Name of the kind</value>
+    <comment>Label of the box for the name of a new kind of measurement.</comment>
+  </data>
+  <data name="KindNamePlaceholder" xml:space="preserve">
+    <value>Nodes</value>
+    <comment>Example in the box for the name of a new kind of measurement.</comment>
+  </data>
+  <data name="KindMeasuredAs" xml:space="preserve">
+    <value>Measured as</value>
+    <comment>Label over the choice between Length and Count when adding a kind of measurement.</comment>
+  </data>
+  <data name="KindLength" xml:space="preserve">
+    <value>Length</value>
+    <comment>A kind of measurement that is a length, in cm or inches.</comment>
+  </data>
+  <data name="KindCount" xml:space="preserve">
+    <value>Count</value>
+    <comment>A kind of measurement that is a number of things, like nodes.</comment>
+  </data>
+  <data name="KindAdd" xml:space="preserve">
+    <value>Add kind</value>
+    <comment>Button that saves a new kind of measurement.</comment>
+  </data>
+  <data name="TlKindMeasured" xml:space="preserve">
+    <value>Measured</value>
+    <comment>Kind of an entry on the history: measurements were taken, with no note or photos.</comment>
+  </data>
+  <data name="GrowthTitle" xml:space="preserve">
+    <value>Growth</value>
+    <comment>Small heading over the growth curves on a plant or cutting.</comment>
+  </data>
+  <data name="GrowthDescription" xml:space="preserve">
+    <value>{0}: {1} measurements from {2} to {3}, latest {4}.</value>
+    <comment>Read out for a growth curve. {0} is the kind, like Height, {1} the number of measurements, {2} and {3} the first and last day or day count, {4} the latest value with its unit.</comment>
+  </data>
+  <data name="GrowthPoint" xml:space="preserve">
+    <value>{0}, {1}. Show it in the history.</value>
+    <comment>Name of a point on a growth curve, which is a button that scrolls to the entry. {0} is the value, {1} the day.</comment>
+  </data>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Measurements · Stikling</value>
+    <comment>Title of the browser tab.</comment>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Measurements</value>
+    <comment>Heading of the page for your own kinds of measurement.</comment>
+  </data>
+  <data name="Hint" xml:space="preserve">
+    <value>Height, width, leaves and root length are always there when you measure a plant or cutting. Here are the kinds you added yourself.</value>
+  </data>
+  <data name="EmptyTitle" xml:space="preserve">
+    <value>No kinds of your own yet.</value>
+  </data>
+  <data name="EmptyText" xml:space="preserve">
+    <value>Height, width, leaves and root length are always there. Add your own, like nodes or aerial roots, here or while you measure.</value>
+  </data>
+  <data name="AddFirst" xml:space="preserve">
+    <value>Add a kind</value>
+    <comment>Button on the page when there are no kinds of your own.</comment>
+  </data>
+  <data name="AddMore" xml:space="preserve">
+    <value>Add a kind</value>
+    <comment>Button on the page above the list.</comment>
+  </data>
+  <data name="YourKinds" xml:space="preserve">
+    <value>Your kinds</value>
+    <comment>Heading over the list of kinds you added.</comment>
+  </data>
+  <data name="SheetAdd" xml:space="preserve">
+    <value>Add a kind</value>
+    <comment>Title of the sheet for a new kind.</comment>
+  </data>
+  <data name="SheetEdit" xml:space="preserve">
+    <value>Change a kind</value>
+    <comment>Title of the sheet for a kind you added.</comment>
+  </data>
+  <data name="RemoveConfirm" xml:space="preserve">
+    <value>Remove {0}? The measurements you already took keep their name.</value>
+    <comment>{0} is the name of the kind of measurement.</comment>
+  </data>
+  <data name="AlreadyHave" xml:space="preserve">
+    <value>You already have {0}. Tap it in the list to change it.</value>
+    <comment>{0} is the name of the kind of measurement.</comment>
+  </data>
+  <data name="RowLength" xml:space="preserve">
+    <value>Length</value>
+    <comment>Line under a kind in the list: it is a length.</comment>
+  </data>
+  <data name="RowCount" xml:space="preserve">
+    <value>Count</value>
+    <comment>Line under a kind in the list: it is a count.</comment>
+  </data>
+  <data name="RowUsed_One" xml:space="preserve">
+    <value>{0} · used in {1} measurement</value>
+    <comment>Line under a kind in the list. {0} is Length or Count, {1} is how many measurements use it.</comment>
+  </data>
+  <data name="RowUsed_Other" xml:space="preserve">
+    <value>{0} · used in {1} measurements</value>
+  </data>
+  <data name="RowUnused" xml:space="preserve">
+    <value>{0} · not used yet</value>
+    <comment>Line under a kind in the list. {0} is Length or Count.</comment>
+  </data>
+  <data name="KindFixed" xml:space="preserve">
+    <value>It stays a {0} so the measurements already taken keep their meaning.</value>
+    <comment>Small line in the sheet of a kind you added. {0} is the word length or count.</comment>
+  </data>
+  <data name="KindFixedLength" xml:space="preserve">
+    <value>length</value>
+    <comment>Fills {0} in the line that says the kind stays a length.</comment>
+  </data>
+  <data name="KindFixedCount" xml:space="preserve">
+    <value>count</value>
+    <comment>Fills {0} in the line that says the kind stays a count.</comment>
+  </data>
+  <data name="Loading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown while the kinds load.</comment>
+  </data>
+</root>

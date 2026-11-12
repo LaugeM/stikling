@@ -165,6 +165,13 @@
     color: var(--pa-muted);
 }
 
+/* The measurements taken with the entry, in Meta */
+.entry-measures {
+    margin: 0.3rem 0 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
 .entry-text {
     margin: 0.3rem 0 0;
     white-space: pre-line;

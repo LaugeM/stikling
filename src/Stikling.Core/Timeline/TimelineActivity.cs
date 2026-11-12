@@ -10,7 +10,7 @@ public static class TimelineActivity
 {
     /// <summary>
     /// True for an entry on a plant or propagation that isn't deleted and is a creation, a note,
-    /// photos, a propagation taken, or a look over. Care logs count too, but they aren't timeline
+    /// photos, a propagation taken, a look over, or measurements. Care logs count too, but they aren't timeline
     /// entries, so the caller adds those.
     /// </summary>
     public static bool Counts(TimelineEntry entry)
@@ -21,7 +21,7 @@ public static class TimelineActivity
         return entry.Kind switch
         {
             TimelineKind.Created or TimelineKind.Note or TimelineKind.Photo or TimelineKind.Propagated => true,
-            TimelineKind.Change => TimelineEvents.Of(entry) == TimelineEvent.LookedOver,
+            TimelineKind.Change => TimelineEvents.Of(entry) is TimelineEvent.LookedOver or TimelineEvent.Measured,
             _ => false
         };
     }

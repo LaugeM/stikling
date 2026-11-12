@@ -1,0 +1,37 @@
+/* On a phone the details above, when open, bring their own 1.75rem. A wide screen has them open and without it. */
+.growth {
+    margin: 0 0 1.75rem;
+}
+
+@media (min-width: 64rem) {
+    .growth {
+        margin-top: 1.75rem;
+    }
+}
+
+.growth-curve + .growth-curve {
+    margin-top: 1.25rem;
+}
+
+.growth-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.growth-name {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+/* The latest value, big like a day count */
+.growth-latest {
+    font-family: var(--pa-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-green-dark);
+}

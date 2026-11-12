@@ -12,7 +12,7 @@ public class NotesComingBackTests
     private readonly FakeTimelineRepository timeline = new();
     private readonly TimelineService service;
 
-    public NotesComingBackTests() => service = new TimelineService(timeline, new FakePhotoRepository(), new FixedTime(Now));
+    public NotesComingBackTests() => service = new TimelineService(timeline, new FakePhotoRepository(), new FakeMeasurementRepository(), new FixedTime(Now));
 
     private static Plant Plant(string name = "Monstera") => new() { Nickname = name };
 

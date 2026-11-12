@@ -1,0 +1,145 @@
+@* The measurement fields of a note sheet or a correction: a link that opens a block with a box for each kind (height,
+   width, leaves, root length and the kinds you added), a unit after each length, and a way to add a kind on the spot.
+   What is typed is kept in the MeasureDraft the page gives it. *@
+@inject MeasurementService MeasureService
+@inject ILogger<MeasureFields> Logger
+
+<div class="measure">
+    <button type="button" class="btn btn-link btn-sm link-action measure-toggle" aria-expanded="@(Draft.Open ? "true" : "false")"
+            aria-controls="@blockId" @onclick="ToggleAsync">
+        @Strings.Measurements.Measure
+        <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
+    </button>
+
+    @if (Draft.Open)
+    {
+        <fieldset id="@blockId" class="measure-block">
+            <legend class="visually-hidden">@Strings.Measurements.MeasureGroup</legend>
+            <p class="measure-hint">@Strings.Measurements.MeasureHint</p>
+            <div class="measure-grid">
+                @foreach (var field in Draft.Fields())
+                {
+                    var key = field.Key;
+                    var id = $"{blockId}-{key}";
+                    <div class="measure-field">
+                        <label for="@id">@field.Label</label>
+                        <div class="measure-input">
+                            <input id="@id" type="number" inputmode="decimal" step="@(field.IsLength ? "any" : "1")" min="0"
+                                   class="form-control form-control-sm" value="@Draft.Get(key)" disabled="@Disabled"
+                                   @oninput="e => TypedAsync(key, e)" />
+                            @if (field.IsLength)
+                            {
+                                <span class="measure-unit">@MeasureText.UnitName()</span>
+                            }
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (adding)
+            {
+                <div class="measure-new">
+                    <label class="form-label" for="@(blockId)-new">@Strings.Measurements.KindName</label>
+                    <input id="@(blockId)-new" class="form-control form-control-sm" placeholder="@Strings.Measurements.KindNamePlaceholder"
+                           autocomplete="off" maxlength="60" @bind="newName" @bind:event="oninput" />
+                    <div class="form-label mt-2" id="@(blockId)-as">@Strings.Measurements.KindMeasuredAs</div>
+                    <div class="chip-row" role="group" aria-labelledby="@(blockId)-as">
+                        <button type="button" class="chip @(newIsLength ? "picked" : null)" aria-pressed="@(newIsLength ? "true" : "false")"
+                                @onclick="() => newIsLength = true">@Strings.Measurements.KindLength</button>
+                        <button type="button" class="chip @(newIsLength ? null : "picked")" aria-pressed="@(newIsLength ? "false" : "true")"
+                                @onclick="() => newIsLength = false">@Strings.Measurements.KindCount</button>
+                    </div>
+                    @if (kindError is not null)
+                    {
+                        <p class="measure-error" role="alert">@kindError</p>
+                    }
+                    <div class="measure-new-actions">
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@(Disabled || string.IsNullOrWhiteSpace(newName))"
+                                @onclick="AddKindAsync">@Strings.Measurements.KindAdd</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => adding = false">@Strings.Common.Cancel</button>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" @onclick="StartAdding" disabled="@Disabled">@Strings.Measurements.AddKind</button>
+            }
+        </fieldset>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required MeasureDraft Draft { get; set; }
+
+    /// <summary>Raised when something was typed or added, so the page can tell whether there is anything to save.</summary>
+    [Parameter]
+    public EventCallback Changed { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    private readonly string blockId = $"measure-{Guid.NewGuid():N}";
+    private bool loaded;
+    private bool adding;
+    private string newName = "";
+    private bool newIsLength = true;
+    private string? kindError;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // The kinds are read when the block is first shown, which is also when a correction starts out open
+        if (Draft.Open && !loaded)
+            await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        loaded = true;
+        Draft.Own = await MeasureService.GetOwnKindsAsync();
+    }
+
+    private async Task ToggleAsync()
+    {
+        Draft.Open = !Draft.Open;
+
+        // Read every time it opens, since kinds can be added or removed on Settings in between
+        if (Draft.Open)
+            await LoadAsync();
+    }
+
+    private async Task TypedAsync(string key, ChangeEventArgs e)
+    {
+        Draft.Type(key, e.Value?.ToString());
+        await Changed.InvokeAsync();
+    }
+
+    private void StartAdding()
+    {
+        newName = "";
+        newIsLength = true;
+        kindError = null;
+        adding = true;
+    }
+
+    private async Task AddKindAsync()
+    {
+        kindError = null;
+        try
+        {
+            await MeasureService.AddOwnKindAsync(newName, newIsLength);
+            Draft.Own = await MeasureService.GetOwnKindsAsync();
+            adding = false;
+            await Changed.InvokeAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            kindError = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a kind of measurement failed");
+            kindError = ex.Message;
+        }
+    }
+}

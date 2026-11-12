@@ -1,0 +1,93 @@
+.line-chart {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    column-gap: 0.4rem;
+    margin-top: 0.4rem;
+}
+
+.line-chart-y {
+    position: relative;
+    grid-row: 1;
+    min-width: 2.25rem;
+    font-size: 0.75rem;
+    color: var(--pa-muted);
+    font-variant-numeric: tabular-nums;
+}
+
+.line-chart-y span {
+    position: absolute;
+    right: 0;
+    transform: translateY(-50%);
+    white-space: nowrap;
+}
+
+.line-chart-plot {
+    position: relative;
+    grid-row: 1;
+    aspect-ratio: 3 / 1;
+}
+
+.line-chart-plot svg {
+    display: block;
+    width: 100%;
+    height: 100%;
+    overflow: visible;
+}
+
+.line-chart-base {
+    stroke: var(--pa-border);
+    stroke-width: 1;
+    vector-effect: non-scaling-stroke;
+}
+
+.line-chart-line {
+    fill: none;
+    stroke: var(--pa-green);
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    vector-effect: non-scaling-stroke;
+}
+
+.line-chart-dot {
+    fill: var(--pa-surface);
+    stroke: var(--pa-green);
+    stroke-width: 2;
+}
+
+.line-chart-dot.latest {
+    fill: var(--pa-green);
+}
+
+/* The tap area of a point, 44px square around it */
+.line-chart-hit {
+    position: absolute;
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+    transform: translate(-50%, -50%);
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+}
+
+.line-chart-hit:hover {
+    background: var(--pa-green-soft);
+    opacity: 0.7;
+}
+
+.line-chart-hit:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.line-chart-x {
+    grid-column: 2;
+    grid-row: 2;
+    display: flex;
+    justify-content: space-between;
+    gap: 0.5rem;
+    margin-top: 0.2rem;
+    font-size: 0.75rem;
+    color: var(--pa-muted);
+}
