@@ -6,7 +6,14 @@
 <PageTitle>@Strings.Shared.SpotHistoryPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+@if (place is { } there)
+{
+    <a class="back-link" href="rooms/@there.Id">@there.Name</a>
+}
+else
+{
+    <a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+}
 
 @if (!loaded)
 {

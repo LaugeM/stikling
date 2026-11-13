@@ -1,0 +1,99 @@
+/* The newest photo is the cover, at the size and radius of a plant's. The link fills it like the plant page's button */
+.room-cover a {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+/* Up to five more photos in a row under it, square, as in a plant's history */
+.room-tiles {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.5rem;
+    margin: 0 0 0.25rem;
+    padding: 0;
+    list-style: none;
+}
+
+.room-tile {
+    display: block;
+    aspect-ratio: 1;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--pa-green-soft);
+}
+
+.room-tile ::deep img,
+.room-tile ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.room-tile:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: 2px;
+}
+
+.room-photo-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0 0.75rem;
+    margin-bottom: 0.5rem;
+}
+
+.room-no-photo {
+    padding: 1.5rem 1rem;
+    margin-bottom: 1rem;
+}
+
+/* The room a spot is in, under its name */
+.room-meta {
+    margin: -0.5rem 0 0.5rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.room-meta a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-block: -0.7rem;
+}
+
+.room-section {
+    margin-top: 1.75rem;
+}
+
+.room-main > .room-section:first-child {
+    margin-top: 0;
+}
+
+/* Link-style buttons on their own line get a full tap area */
+.room-edit {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    margin-top: 0.25rem;
+}
+
+.room-no-photo .btn,
+.room-photo-links .btn {
+    min-height: 2.75rem;
+}
+
+.room-switches {
+    margin-top: 0.75rem;
+}
+
+.room-add-spot {
+    margin-top: 0.5rem;
+}
+
+.add-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}

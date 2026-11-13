@@ -335,4 +335,19 @@ public class ShelfTests
         Assert.Equal(1, await s.Service.CountForPlaceAsync(other.Id));
         Assert.Equal(4, await s.Service.CountAsync());
     }
+
+    [Fact]
+    public async Task The_photos_of_a_room_include_its_spots_newest_first()
+    {
+        var s = new Setup();
+        var room = s.Places.Add("Living room");
+        var spot = s.Places.Add("Windowsill", room);
+        var other = s.Places.Add("Bedroom");
+        var old = s.AddPhoto(room.Id, Day1);
+        var recent = s.AddPhoto(spot.Id, Day2);
+        s.AddPhoto(other.Id, Day2);
+
+        Assert.Equal([recent.Id, old.Id], (await s.Service.GetForPlaceAsync(room.Id)).Select(p => p.Id));
+        Assert.Equal([recent.Id], (await s.Service.GetForPlaceAsync(spot.Id)).Select(p => p.Id));
+    }
 }

@@ -473,7 +473,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="RoomsSpotsWorkA1" xml:space="preserve">
-    <value>A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of the PC". Pick one you have used before so the same room doesn't end up with two names. Filtering the plant list by a room includes its spots. Under Rooms and tags in Settings you can add a room or spot before any plant is in it, rename or merge them, remove one that is empty, and mark one as having a grow light or as outdoors.</value>
+    <value>A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of the PC". Pick one you have used before so the same room doesn't end up with two names. Filtering the plant list by a room includes its spots. Under Rooms and tags in Settings you can add a room or spot before any plant is in it, rename or merge them, remove one that is empty, and mark one as having a grow light or as outdoors. Each room and spot also has a page of its own, with a note and photos.</value>
     <comment>Answer to "How do rooms and spots work?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="HappensWhenPlantDiesOrQ" xml:space="preserve">
@@ -1823,6 +1823,14 @@
   <data name="FailedDifferedA1" xml:space="preserve">
     <value>Once you have at least 3 rooted batches of the same type, a failed propagation lists what was different from them: a medium, a rooting aid or a start month few of them had, an aid most of them had, or water changed much more or less often. It only uses what you have recorded, and says so when nothing stands out. It shows what was different, not why it failed.</value>
     <comment>Answer to "What is the list on a propagation that failed?" on the Help page.</comment>
+  </data>
+  <data name="RoomPageQ" xml:space="preserve">
+    <value>What is a room's page?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="RoomPageA1" xml:space="preserve">
+    <value>Every room and spot has a page with its photos, a note about what the place is like, the plants and cuttings that stand there and, for a room, its spots. Open it from Rooms and tags in Settings, from Location on a plant or a cutting, or from the Plants list when a room or spot is picked. The note and the photos belong to the room or spot, not to a plant, so they stay when the plants change. Renaming or removing a room is still done under Rooms and tags.</value>
+    <comment>Answer to "What is a room's page?" on the Help page.</comment>
   </data>
   <data name="SpotHistoryQ" xml:space="preserve">
     <value>Can I see which plants have stood in a room?</value>

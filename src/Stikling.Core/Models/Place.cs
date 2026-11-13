@@ -27,6 +27,13 @@ public sealed class Place : Entity
     /// </summary>
     public bool Outdoors { get; set; }
 
+    /// <summary>
+    /// One text about the place, like which window it is by or a draught in winter. It is edited as
+    /// a whole, so the newest version wins when two devices change it. Null when there is none, and
+    /// null on records from before it existed.
+    /// </summary>
+    public string? Notes { get; set; }
+
     [JsonIgnore]
     public bool IsSpot => RoomId is not null;
 

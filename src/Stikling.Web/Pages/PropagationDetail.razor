@@ -426,7 +426,16 @@ else
                         }
 
                         <dt>@Strings.Propagations.DetLocation</dt>
-                        <dd>@(places.NameOf(propagation.PlaceId) ?? Strings.Propagations.DetNotSet)</dd>
+                        <dd>
+                            @if (places.Find(propagation.PlaceId) is { } home)
+                            {
+                                <a href="rooms/@home.Id?propagation=@propagation.Id">@places.NameOf(home.Id)</a>
+                            }
+                            else
+                            {
+                                @Strings.Propagations.DetNotSet
+                            }
+                        </dd>
 
                         @if (propagation.DormantSince is { } dormantSince)
                         {

@@ -1,0 +1,466 @@
+@page "/rooms/{Id:guid}"
+@layout WideLayout
+@inject RoomService RoomService
+@inject ShelfService Shelf
+@inject PhotoService Photos
+@inject GrowLightService LightService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject TimeProvider Time
+@inject ILogger<RoomPage> Logger
+
+<PageTitle>@F(Strings.Shared.RoomPageTitle, view?.Place.Name ?? Strings.Shared.RoomsTitle)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+@* The back link waits for the load, so it never shows one place and then another *@
+@if (loaded)
+{
+    <a class="back-link" href="@back.Href">@back.Label</a>
+}
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (view is not { } here)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Shared.SpotHistoryGone</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+    </div>
+}
+else
+{
+    var placeId = here.Place.Id;
+    var name = here.Place.Name;
+    var outdoors = here.RoomIsOutdoors || here.Place.Outdoors;
+    var anything = here.Plants.Count + here.Propagations.Count > 0;
+
+    @* On a wide screen these are two columns: the place on the left, what stands there on the right *@
+    <div class="profile-layout">
+        <div class="profile-side">
+            <section aria-label="@Strings.Shared.RoomPagePhotos">
+                @if (photos.Count == 0)
+                {
+                    <div class="empty-state room-no-photo">
+                        <p>@F(Strings.Shared.RoomPageNoPhotos, name)</p>
+                        <p class="text-body-secondary">@Strings.Shared.RoomPageNoPhotosHint</p>
+                        <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button>
+                    </div>
+                }
+                else
+                {
+                    <div class="detail-hero room-cover">
+                        <a href="shelf/@photos[0].Id" aria-label="@TileLabel(photos[0])">
+                            <PhotoImage PhotoId="photos[0].Id" Thumbnail="false" Framed="false" />
+                        </a>
+                    </div>
+                    @if (photos.Count > 1)
+                    {
+                        <ul class="room-tiles">
+                            @foreach (var photo in photos.Skip(1).Take(5))
+                            {
+                                <li>
+                                    <a class="room-tile" href="shelf/@photo.Id" aria-label="@TileLabel(photo)">
+                                        <PhotoImage PhotoId="photo.Id" Framed="false" />
+                                    </a>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    <div class="room-photo-links">
+                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button>
+                        @if (photos.Count > 6)
+                        {
+                            <a class="btn btn-link btn-sm link-action" href="shelf?place=@placeId">@Strings.Shared.RoomPageAllPhotos</a>
+                        }
+                    </div>
+                }
+            </section>
+
+            <h1>@name</h1>
+            @if (here.Room is { } room)
+            {
+                <p class="room-meta"><a href="rooms/@room.Id">@room.Name</a></p>
+            }
+
+            <section class="room-section" aria-labelledby="room-note-heading">
+                <h2 class="section-label" id="room-note-heading">@Strings.Shared.RoomPageNote</h2>
+                @if (editingNote)
+                {
+                    <textarea class="form-control" rows="4" @ref="noteInput" aria-label="@F(Strings.Shared.RoomPageNoteFor, name)" disabled="@busy"
+                              @bind="draft" @bind:event="oninput"></textarea>
+                    <div class="add-actions">
+                        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveNoteAsync">@Strings.Common.Save</button>
+                        <button type="button" class="btn btn-link" disabled="@busy" @onclick="StopEditingNote">@Strings.Common.Cancel</button>
+                    </div>
+                }
+                else if (!string.IsNullOrWhiteSpace(here.Place.Notes))
+                {
+                    <p class="detail-notes">@here.Place.Notes</p>
+                    <button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Common.Edit</button>
+                }
+                else
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Shared.RoomPageAddNote</button>
+                    <p class="settings-hint">@Strings.Shared.RoomPageNoteHint</p>
+                }
+                @if (message is not null)
+                {
+                    <p class="settings-message" role="status">@message</p>
+                }
+            </section>
+
+            @* Light and climate readings come here, between the note and the switches *@
+
+            <div class="room-switches">
+                <div class="form-check form-switch room-light">
+                    <input class="form-check-input" type="checkbox" role="switch" id="room-light" disabled="@busy"
+                           aria-label="@F(Strings.Shared.RoomsGrowLightIn, name)"
+                           checked="@lit" @onchange="e => SetLitAsync(e.Value is true)" />
+                    <label class="form-check-label" for="room-light">@Strings.Shared.RoomsGrowLight</label>
+                </div>
+                <div class="form-check form-switch room-light">
+                    <input class="form-check-input" type="checkbox" role="switch" id="room-outdoors" disabled="@(busy || here.RoomIsOutdoors)"
+                           aria-label="@F(here.RoomIsOutdoors ? Strings.Shared.RoomsOutdoorsBecauseRoom : Strings.Shared.RoomsOutdoorsFor, name)"
+                           checked="@outdoors" @onchange="e => SetOutdoorsAsync(e.Value is true)" />
+                    <label class="form-check-label" for="room-outdoors">@Strings.Shared.RoomsOutdoors</label>
+                </div>
+            </div>
+        </div>
+
+        <div class="room-main">
+            @if (here.Plants.Count > 0)
+            {
+                <section class="room-section" aria-labelledby="room-plants-heading">
+                    <h2 class="section-label" id="room-plants-heading">@F(Strings.Shared.RoomPagePlantsHere, here.Plants.Count)</h2>
+                    <ul class="item-list list-grid">
+                        @foreach (var row in here.Plants)
+                        {
+                            <li><PlantCard Plant="row.Plant" Location="@row.SpotName" /></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @* A propagation card has no line for where it stands, so the spot isn't shown on it *@
+            @if (here.Propagations.Count > 0)
+            {
+                <section class="room-section" aria-labelledby="room-propagations-heading">
+                    <h2 class="section-label" id="room-propagations-heading">@F(Strings.Shared.RoomPagePropagationsHere, here.Propagations.Count)</h2>
+                    <ul class="item-list list-grid">
+                        @foreach (var row in here.Propagations)
+                        {
+                            <li><PropagationCard Propagation="row.Propagation" ShowStage="true" /></li>
+                        }
+                    </ul>
+                </section>
+            }
+
+            @if (!anything && here.Spots.Count == 0)
+            {
+                <div class="empty-state room-section">
+                    <p>@Strings.Shared.RoomPageNothing</p>
+                    <p class="text-body-secondary">@Strings.Shared.RoomPageNothingHint</p>
+                </div>
+            }
+
+            @* A spot whose room is gone is shown without a room, but still can't hold spots of its own *@
+            @if (!here.Place.IsSpot)
+            {
+                <section class="room-section" aria-labelledby="room-spots-heading">
+                    <h2 class="section-label" id="room-spots-heading">@Strings.Shared.RoomPageSpots</h2>
+                    @if (here.Spots.Count > 0)
+                    {
+                        <div class="settings-rows">
+                            @foreach (var spot in here.Spots)
+                            {
+                                <SettingsRow Href="@($"rooms/{spot.Id}")" Title="@spot.Name" Detail="@RoomText.Held(spot.Plants, spot.Propagations)" />
+                            }
+                        </div>
+                    }
+                    <div class="room-add-spot">
+                        @if (addingSpot)
+                        {
+                            <RoomRenameRow Label="@F(Strings.Shared.RoomsNewSpotIn, name)" Busy="busy" OnSave="AddSpotAsync" OnCancel="() => addingSpot = false" />
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                    @onclick="StartAddingSpot">@Strings.Shared.RoomsAddSpot</button>
+                        }
+                    </div>
+                </section>
+            }
+
+            <div class="settings-rows room-section">
+                @if (anything)
+                {
+                    <SettingsRow Href="@($"round/{placeId}?from=room")" Title="@Strings.Shared.RoomsGoRound" Detail="@Strings.Shared.RoomPageGoRoundDetail" />
+                }
+                <SettingsRow Href="@($"rooms-and-tags/history/{placeId}")" Title="@Strings.Shared.SpotHistoryPageTitle" Detail="@Strings.Shared.RoomPageHistoryDetail" />
+                <SettingsRow Href="@($"plants?room={placeId}")" Title="@Strings.Shared.RoomPageShowInPlants" Detail="@Strings.Shared.RoomPageShowInPlantsDetail" />
+                <SettingsRow Href="rooms-and-tags" Title="@Strings.Shared.RoomPageManage" Detail="@Strings.Shared.RoomPageManageDetail" />
+            </div>
+        </div>
+    </div>
+}
+
+<Sheet Title="@Strings.Shared.RoomPageAddPhoto" @bind-Open="addOpen">
+    <div class="composer-row">
+        <label class="btn btn-outline-primary btn-sm icon-btn @(busy ? "disabled" : null)" for="room-camera">
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
+            @Strings.Shelf.AddCamera
+        </label>
+        <input id="room-camera" type="file" accept="image/*" capture="environment" class="visually-hidden"
+               @ref="cameraInput" @onchange="() => AddPhotoAsync(cameraInput)" disabled="@busy" />
+        <label class="btn btn-outline-primary btn-sm icon-btn @(busy ? "disabled" : null)" for="room-gallery">
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Photo</svg>
+            @Strings.Shelf.AddGallery
+        </label>
+        <input id="room-gallery" type="file" accept="image/*" multiple class="visually-hidden"
+               @ref="galleryInput" @onchange="() => AddPhotoAsync(galleryInput)" disabled="@busy" />
+    </div>
+    @if (busy)
+    {
+        <p class="text-body-secondary small mt-2" role="status">@Strings.Shelf.AddSaving</p>
+    }
+    @if (photoMessage is not null)
+    {
+        <p class="text-danger small mt-2" role="alert">@photoMessage</p>
+    }
+</Sheet>
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    /// <summary>The plant this page was opened from, so the back link goes to it.</summary>
+    [SupplyParameterFromQuery(Name = "plant")]
+    public Guid? PlantId { get; set; }
+
+    /// <summary>The propagation this page was opened from, so the back link goes to it.</summary>
+    [SupplyParameterFromQuery(Name = "propagation")]
+    public Guid? PropagationId { get; set; }
+
+    /// <summary>"plants" when opened from the Plants list narrowed to this place.</summary>
+    [SupplyParameterFromQuery(Name = "from")]
+    public string? From { get; set; }
+
+    private bool loaded;
+    private Guid? loadedFor;
+    private RoomPageView? view;
+    private IReadOnlyList<Photo> photos = [];
+    private bool lit;
+    private (string Href, string Label) back = ("rooms-and-tags", Strings.Shared.RoomsTitle);
+    private bool editingNote;
+    private bool focusNote;
+    private ElementReference noteInput;
+    private string draft = "";
+    private bool addingSpot;
+    private bool addOpen;
+    private bool busy;
+    private string? message;
+    private string? photoMessage;
+    private ElementReference cameraInput;
+    private ElementReference galleryInput;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Another room or spot, from a link on this page, starts without what was half done here
+        if (loadedFor != Id)
+        {
+            loadedFor = Id;
+            editingNote = false;
+            addingSpot = false;
+            message = null;
+        }
+
+        await LoadAsync();
+    }
+
+    private async Task LoadAsync()
+    {
+        view = await RoomService.GetPageAsync(Id);
+        if (view is { } here)
+        {
+            photos = await Shelf.GetForPlaceAsync(here.Place.Id);
+            lit = (await LightService.GetAllAsync()).Any(l => !l.IsDeleted && l.PlaceId == here.Place.Id);
+        }
+        else
+            photos = [];
+
+        back = await BackAsync();
+        loaded = true;
+    }
+
+    // Back goes to what the page was opened from, else up one step
+    private async Task<(string Href, string Label)> BackAsync()
+    {
+        if (PlantId is { } plantId && await PlantRepository.GetAsync(plantId) is { IsDeleted: false } plant)
+            return ($"plants/{plantId}", plant.DisplayName);
+        if (PropagationId is { } propagationId && await PropagationRepository.GetAsync(propagationId) is { IsDeleted: false } propagation)
+            return ($"propagations/{propagationId}", propagation.DisplayName);
+        if (From == "plants" && view is { } here)
+            return ($"plants?room={here.Place.Id}", Strings.Shared.BackToPlants);
+        if (view?.Room is { } room)
+            return ($"rooms/{room.Id}", room.Name);
+        return ("rooms-and-tags", Strings.Shared.RoomsTitle);
+    }
+
+    private string TileLabel(Photo photo) =>
+        F(Strings.Shelf.TileLabel, Labels.Date(Time.LocalDay(photo.TakenAt)));
+
+    private void StartEditingNote()
+    {
+        draft = view?.Place.Notes ?? "";
+        message = null;
+        editingNote = true;
+        focusNote = true;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The box is ready to type in once it has been drawn
+        if (focusNote && editingNote)
+        {
+            focusNote = false;
+            await noteInput.FocusAsync();
+        }
+    }
+
+    private void StopEditingNote()
+    {
+        editingNote = false;
+        message = null;
+    }
+
+    private async Task SaveNoteAsync()
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        try
+        {
+            await RoomService.SetNotesAsync(here.Place.Id, draft);
+            editingNote = false;
+            message = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the note of a room or spot failed");
+            message = F(Strings.Shared.RoomsSaveError, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task SetLitAsync(bool on)
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        try
+        {
+            await LightService.SetLitAsync(here.Place.Id, on);
+            message = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing whether a spot has a grow light failed");
+            message = F(Strings.Shared.RoomsLightError, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task SetOutdoorsAsync(bool on)
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        try
+        {
+            await RoomService.SetOutdoorsAsync(here.Place.Id, on);
+            message = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Changing whether a room or spot is outdoors failed");
+            message = F(Strings.Shared.RoomsSaveError, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private void StartAddingSpot()
+    {
+        message = null;
+        addingSpot = true;
+    }
+
+    private async Task AddSpotAsync(string? spotName)
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        try
+        {
+            var (spot, existed) = await RoomService.AddPlaceAsync(spotName, here.Place.Id);
+            var written = (await RoomService.GetPlacesAsync()).NameOf(spot.Id);
+            addingSpot = false;
+            await LoadAsync();
+            message = existed ? F(Strings.Shared.RoomsAlreadyThere, written) : F(Strings.Shared.RoomsAdded, written);
+        }
+        catch (ArgumentException ex)
+        {
+            // The box stays open, so the name can be fixed
+            message = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void OpenAdd()
+    {
+        photoMessage = null;
+        addOpen = true;
+    }
+
+    private async Task AddPhotoAsync(ElementReference input)
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        photoMessage = null;
+        try
+        {
+            var result = await Photos.SaveFromInputAsync(input, SubjectType.Place, here.Place.Id);
+            photoMessage = result.Message(guessesMatter: false);
+            if (result.Saved.Count > 0)
+            {
+                addOpen = false;
+                await LoadAsync();
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Adding a photo of a room or spot failed");
+            photoMessage = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

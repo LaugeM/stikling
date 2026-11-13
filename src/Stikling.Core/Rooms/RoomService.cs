@@ -159,8 +159,83 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         await places.DeleteAsync(place.Id);
     }
 
+    /// <summary>
+    /// Sets the note of a room or spot. Empty text clears it. Throws when the place isn't there.
+    /// </summary>
+    public async Task SetNotesAsync(Guid id, string? text)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
+
+        var notes = string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+        if (place.Notes == notes)
+            return;
+        place.Notes = notes;
+        await places.SaveAsync(place);
+    }
+
+    /// <summary>
+    /// What a room or spot's own page shows: the place, what stands in it (and, for a room, in its
+    /// spots) and its spots. Null when the place isn't there. The id of a merged place gives the
+    /// place it went into.
+    /// </summary>
+    public async Task<RoomPageView?> GetPageAsync(Guid id)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            return null;
+
+        // A spot whose room was removed on another device is shown as a room of its own
+        var room = place.IsSpot ? all.Find(place.RoomId) : null;
+
+        // Plants no longer in the collection and finished propagations aren't listed, the same as
+        // in the Plants and Propagations lists
+        string? SpotNameOf(Guid? placeId) =>
+            room is null && all.Find(placeId) is { } at && at.Id != place.Id ? at.Name : null;
+
+        var here = (await plants.GetAllAsync())
+            .Where(p => !p.IsDeleted && p.InCollection && all.IsIn(p.PlaceId, place.Id))
+            .Select(p => new RoomPagePlant(p, SpotNameOf(p.PlaceId)))
+            .OrderBy(p => p.SpotName is not null).ThenBy(p => p.SpotName, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(p => p.Plant.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+        var cuttings = (await propagations.GetAllAsync())
+            .Where(p => !p.IsDeleted && p.IsActive && all.IsIn(p.PlaceId, place.Id))
+            .Select(p => new RoomPagePropagation(p, SpotNameOf(p.PlaceId)))
+            .OrderBy(p => p.SpotName is not null).ThenBy(p => p.SpotName, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(p => p.Propagation.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        var spots = room is not null ? []
+            : all.SpotsIn(place.Id)
+                .Select(s => new RoomSpot(s.Id, s.Name, all.NameOf(s.Id)!,
+                    here.Count(p => all.Find(p.Plant.PlaceId)?.Id == s.Id),
+                    cuttings.Count(p => all.Find(p.Propagation.PlaceId)?.Id == s.Id)))
+                .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+        return new RoomPageView(place, all.NameOf(place.Id) ?? place.Name, room, room?.Outdoors == true, spots, here, cuttings);
+    }
+
     private async Task MergeAsync(Place from, Place into)
     {
+        // The place that stays keeps its note and takes the other one's when it has none, or gets
+        // both, so nothing a person wrote is lost
+        var notes = (into.Notes, from.Notes) switch
+        {
+            (null or "", var other) => other,
+            (var kept, null or "") => kept,
+            // The same note on both, as after merging twice, is kept once
+            var (kept, other) when kept.Trim() == other.Trim() => kept,
+            var (kept, other) => kept + "\n\n" + other
+        };
+        if (notes != into.Notes)
+        {
+            into.Notes = notes;
+            await places.SaveAsync(into);
+        }
+
         from.MergedIntoId = into.Id;
         await places.SaveAsync(from);
         await places.DeleteAsync(from.Id);

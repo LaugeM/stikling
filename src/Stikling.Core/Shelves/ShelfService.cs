@@ -121,6 +121,15 @@ public sealed class ShelfService(
         return (await photos.GetOfKindAsync(SubjectType.Place)).Count(p => all.IsIn(p.SubjectId, placeId));
     }
 
+    /// <summary>The shelf photos of the place, counting its spots when it is a room, newest first.</summary>
+    public async Task<IReadOnlyList<Photo>> GetForPlaceAsync(Guid placeId)
+    {
+        var all = await places.GetPlacesAsync();
+        return [.. (await photos.GetOfKindAsync(SubjectType.Place))
+            .Where(p => all.IsIn(p.SubjectId, placeId))
+            .OrderByDescending(p => p.TakenAt)];
+    }
+
     /// <summary>
     /// The place each shelf photo is of, one id for each photo, as stored. For a page that counts the
     /// photos of several places with <see cref="Places.IsIn"/> without reading the photos again.

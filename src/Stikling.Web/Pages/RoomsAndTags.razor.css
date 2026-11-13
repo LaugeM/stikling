@@ -31,3 +31,11 @@
     margin: 0;
     flex: none;
 }
+
+/* The name of a room or spot opens its page, tall enough to tap without taking room */
+.room-link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+    margin-block: -0.7rem;
+}

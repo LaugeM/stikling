@@ -404,7 +404,16 @@ else
                         </dd>
 
                         <dt>@Strings.PlantDetail.Location</dt>
-                        <dd>@(places.NameOf(plant.PlaceId) ?? Strings.Plants.ListNotSet)</dd>
+                        <dd>
+                            @if (places.Find(plant.PlaceId) is { } home)
+                            {
+                                <a href="rooms/@home.Id?plant=@plant.Id">@places.NameOf(home.Id)</a>
+                            }
+                            else
+                            {
+                                @Strings.Plants.ListNotSet
+                            }
+                        </dd>
 
                         @if (plant.Light is { } light)
                         {

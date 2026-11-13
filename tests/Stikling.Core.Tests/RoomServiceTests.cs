@@ -364,4 +364,142 @@ public class RoomServiceTests
         Assert.Equal("Shelf", NameOf(shelf.Id));
         Assert.Same(shelf, Places.RoomOf(shelf.Id));
     }
+
+    [Fact]
+    public async Task A_note_is_trimmed_and_cleared_by_empty_text()
+    {
+        var living = places.Add("Living room");
+
+        await Service.SetNotesAsync(living.Id, "  East window, a draught in winter.  ");
+        Assert.Equal("East window, a draught in winter.", living.Notes);
+
+        await Service.SetNotesAsync(living.Id, "  \n ");
+        Assert.Null(living.Notes);
+    }
+
+    [Fact]
+    public async Task A_note_on_a_place_that_is_not_there_throws()
+    {
+        await Assert.ThrowsAsync<ArgumentException>(() => Service.SetNotesAsync(Guid.NewGuid(), "Bright"));
+    }
+
+    [Fact]
+    public async Task Merging_two_rooms_keeps_the_note_of_the_one_that_stays()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        living.Notes = "East window.";
+
+        await Service.RenameAsync(stue.Id, "Living room");
+
+        Assert.Equal("East window.", living.Notes);
+    }
+
+    [Fact]
+    public async Task Merging_two_rooms_takes_the_note_of_the_merged_one_when_the_other_has_none()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        stue.Notes = "Warm by the radiator.";
+
+        await Service.RenameAsync(stue.Id, "Living room");
+
+        Assert.Equal("Warm by the radiator.", living.Notes);
+    }
+
+    [Fact]
+    public async Task Merging_two_rooms_with_notes_keeps_both()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        living.Notes = "East window.";
+        stue.Notes = "Warm by the radiator.";
+
+        await Service.RenameAsync(stue.Id, "Living room");
+
+        Assert.Equal("East window.\n\nWarm by the radiator.", living.Notes);
+    }
+
+    [Fact]
+    public async Task The_page_of_a_room_lists_what_stands_in_its_spots_with_the_spot_name()
+    {
+        var living = places.Add("Living room");
+        var pc = places.Add("On top of the PC", living);
+        var bedroom = places.Add("Bedroom");
+        AddPlant("Monstera", living);
+        AddPlant("Pilea", pc);
+        AddPlant("Basil", bedroom);
+        AddPropagation("Coleus", pc);
+
+        var page = (await Service.GetPageAsync(living.Id))!;
+
+        Assert.Equal("Living room", page.Name);
+        Assert.Null(page.Room);
+        Assert.Equal(["Monstera", "Pilea"], page.Plants.Select(p => p.Plant.DisplayName));
+        Assert.Equal([null, "On top of the PC"], page.Plants.Select(p => p.SpotName));
+        Assert.Equal("On top of the PC", Assert.Single(page.Propagations).SpotName);
+        var spot = Assert.Single(page.Spots);
+        Assert.Equal((pc.Id, 1, 1), (spot.Id, spot.Plants, spot.Propagations));
+    }
+
+    [Fact]
+    public async Task The_page_of_a_spot_lists_only_its_own_and_knows_its_room()
+    {
+        var living = places.Add("Living room");
+        living.Outdoors = true;
+        var pc = places.Add("On top of the PC", living);
+        AddPlant("Monstera", living);
+        AddPlant("Pilea", pc);
+
+        var page = (await Service.GetPageAsync(pc.Id))!;
+
+        Assert.Equal("Living room / On top of the PC", page.Name);
+        Assert.Same(living, page.Room);
+        Assert.True(page.RoomIsOutdoors);
+        Assert.Empty(page.Spots);
+        var plant = Assert.Single(page.Plants);
+        Assert.Equal("Pilea", plant.Plant.DisplayName);
+        Assert.Null(plant.SpotName);
+    }
+
+    [Fact]
+    public async Task The_page_of_a_merged_place_is_the_page_of_the_one_it_went_into()
+    {
+        var stue = places.Add("Stue");
+        var living = places.Add("Living room");
+        AddPlant("Monstera", stue);
+        await Service.RenameAsync(stue.Id, "Living room");
+
+        var page = (await Service.GetPageAsync(stue.Id))!;
+
+        Assert.Equal(living.Id, page.Place.Id);
+        Assert.Single(page.Plants);
+    }
+
+    [Fact]
+    public async Task The_page_of_an_unknown_or_removed_place_is_null()
+    {
+        var shed = places.Add("Shed");
+        await Service.RemoveAsync(shed.Id);
+
+        Assert.Null(await Service.GetPageAsync(Guid.NewGuid()));
+        Assert.Null(await Service.GetPageAsync(shed.Id));
+    }
+
+    [Fact]
+    public async Task The_page_leaves_out_plants_that_left_the_collection_and_finished_cuttings()
+    {
+        var living = places.Add("Living room");
+        AddPlant("Monstera", living);
+        AddPlant("Dead fern", living).Status = PlantStatus.Died;
+        AddPlant("Grandma's ivy", living).LivesElsewhere = true;
+        AddPlant("Removed", living).DeletedAt = DateTimeOffset.UtcNow;
+        AddPropagation("Coleus", living);
+        AddPropagation("Rooted", living).Stage = PropagationStage.Done;
+
+        var page = (await Service.GetPageAsync(living.Id))!;
+
+        Assert.Equal("Monstera", Assert.Single(page.Plants).Plant.DisplayName);
+        Assert.Equal("Coleus", Assert.Single(page.Propagations).Propagation.DisplayName);
+    }
 }
