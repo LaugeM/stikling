@@ -273,9 +273,12 @@ else
 
     private bool IsDue => PlaceId == Guid.Empty && !IsBack && !IsNext;
 
-    private string BackHref => From switch { "plants" => "plants", "rooms" => "rooms-and-tags", _ => "" };
+    // From the page of a room it goes back there, with the name of the room as the link
+    private bool FromRoom => From == "room" && PlaceId != Guid.Empty && places.Find(PlaceId) is not null;
 
-    private string BackLabel => From switch { "plants" => Strings.Care.RoundBackPlants, "rooms" => Strings.Care.RoundBackRooms, _ => Strings.Care.RoundBackToday };
+    private string BackHref => FromRoom ? $"rooms/{PlaceId}" : From switch { "plants" => "plants", "rooms" => "rooms-and-tags", _ => "" };
+
+    private string BackLabel => FromRoom ? places.NameOf(PlaceId)! : From switch { "plants" => Strings.Care.RoundBackPlants, "rooms" => Strings.Care.RoundBackRooms, _ => Strings.Care.RoundBackToday };
 
     private string Title => IsBack ? Strings.Care.AwayLookFirst : IsNext ? Strings.Care.RoundTitleNext : IsDue ? Strings.Care.RoundTitleDue : places.NameOf(PlaceId) ?? Strings.Care.RoundGoingRound;
 

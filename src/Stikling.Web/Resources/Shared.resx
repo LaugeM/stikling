@@ -1626,4 +1626,92 @@ Maybe</value>
     <value>Label for the mark</value>
     <comment>Name of the field for the short text on a circle or arrow, for screen readers.</comment>
   </data>
+  <data name="RoomPageTitle" xml:space="preserve">
+    <value>{0} · Stikling</value>
+    <comment>Title of the browser tab on the page of a room or spot. {0} is its name.</comment>
+  </data>
+  <data name="RoomPagePhotos" xml:space="preserve">
+    <value>Photos</value>
+    <comment>Name of the photo section on the page of a room or spot, read out by a screen reader.</comment>
+  </data>
+  <data name="RoomPageAddPhoto" xml:space="preserve">
+    <value>Add a photo</value>
+    <comment>Button on the page of a room or spot that adds a shelf photo of it, and the title of the sheet it opens.</comment>
+  </data>
+  <data name="RoomPageAllPhotos" xml:space="preserve">
+    <value>All photos</value>
+    <comment>Link on the page of a room or spot to every shelf photo of it, shown when there are more than six.</comment>
+  </data>
+  <data name="RoomPageNoPhotos" xml:space="preserve">
+    <value>No photos of {0} yet.</value>
+    <comment>Shown on the page of a room or spot with no shelf photos. {0} is its name.</comment>
+  </data>
+  <data name="RoomPageNoPhotosHint" xml:space="preserve">
+    <value>A photo of the shelf shows where each plant stands.</value>
+    <comment>Under the line that says there are no photos of a room or spot.</comment>
+  </data>
+  <data name="RoomPageNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Heading of the note on the page of a room or spot.</comment>
+  </data>
+  <data name="RoomPageNoteFor" xml:space="preserve">
+    <value>Note about {0}</value>
+    <comment>Name of the box where the note of a room or spot is written, read out by a screen reader. {0} is its name.</comment>
+  </data>
+  <data name="RoomPageAddNote" xml:space="preserve">
+    <value>Add a note</value>
+    <comment>Link-style button that starts the note of a room or spot.</comment>
+  </data>
+  <data name="RoomPageNoteHint" xml:space="preserve">
+    <value>What the place is like: which window, a draught in winter, how warm it gets.</value>
+    <comment>Under Add a note on the page of a room or spot, saying what to write.</comment>
+  </data>
+  <data name="RoomPagePlantsHere" xml:space="preserve">
+    <value>Plants here ({0})</value>
+    <comment>Heading of the plants that stand in a room or spot. {0} is how many.</comment>
+  </data>
+  <data name="RoomPagePropagationsHere" xml:space="preserve">
+    <value>Propagations here ({0})</value>
+    <comment>Heading of the propagations that stand in a room or spot. {0} is how many.</comment>
+  </data>
+  <data name="RoomPageSpots" xml:space="preserve">
+    <value>Spots</value>
+    <comment>Heading of the spots inside a room, on its page.</comment>
+  </data>
+  <data name="RoomPageNothing" xml:space="preserve">
+    <value>Nothing stands here yet.</value>
+    <comment>Shown on the page of a room or spot with no plants, cuttings or spots.</comment>
+  </data>
+  <data name="RoomPageNothingHint" xml:space="preserve">
+    <value>Pick this place on a plant or a cutting to put it here.</value>
+    <comment>Under the line that says nothing stands in a room or spot.</comment>
+  </data>
+  <data name="RoomPageGoRoundDetail" xml:space="preserve">
+    <value>Look over what stands here, one at a time</value>
+    <comment>Line under Go round, a row on the page of a room or spot.</comment>
+  </data>
+  <data name="RoomPageHistoryDetail" xml:space="preserve">
+    <value>Every plant that has stood here, and for how long</value>
+    <comment>Line under What has lived here, a row on the page of a room or spot.</comment>
+  </data>
+  <data name="RoomPageShowInPlants" xml:space="preserve">
+    <value>Show in Plants</value>
+    <comment>Row on the page of a room or spot that opens the Plants list filtered to it.</comment>
+  </data>
+  <data name="RoomPageShowInPlantsDetail" xml:space="preserve">
+    <value>The Plants list, narrowed to this place</value>
+    <comment>Line under Show in Plants, a row on the page of a room or spot.</comment>
+  </data>
+  <data name="RoomPageManage" xml:space="preserve">
+    <value>Rename or remove</value>
+    <comment>Row on the page of a room or spot that goes to Rooms and tags, where it is renamed or removed.</comment>
+  </data>
+  <data name="RoomPageManageDetail" xml:space="preserve">
+    <value>On Rooms and tags in Settings</value>
+    <comment>Line under Rename or remove, a row on the page of a room or spot.</comment>
+  </data>
+  <data name="RoomPageAbout" xml:space="preserve">
+    <value>About {0}</value>
+    <comment>Quiet link on the Plants page, when it is narrowed to a room or spot, to the page of that room or spot. {0} is its name.</comment>
+  </data>
 </root>

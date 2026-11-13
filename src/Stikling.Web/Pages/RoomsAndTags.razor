@@ -36,8 +36,8 @@
                     else
                     {
                         <div class="room-row">
-                            <span class="room-name">@r.Name</span>
-                            <span class="room-count">@Held(r.AllPlants, r.AllPropagations)</span>
+                            <a class="room-name room-link" href="rooms/@r.Id">@r.Name</a>
+                            <span class="room-count">@RoomText.Held(r.AllPlants, r.AllPropagations)</span>
                             @if (r.Total > 0)
                             {
                                 <a class="btn btn-link btn-sm link-action" href="round/@r.Id?from=rooms">@Strings.Shared.RoomsGoRound</a>
@@ -67,8 +67,8 @@
                             else
                             {
                                 <div class="room-row">
-                                    <span class="room-name">@spot.Name</span>
-                                    <span class="room-count">@Held(spot.Plants, spot.Propagations)</span>
+                                    <a class="room-name room-link" href="rooms/@spot.Id">@spot.Name</a>
+                                    <span class="room-count">@RoomText.Held(spot.Plants, spot.Propagations)</span>
                                     <a class="btn btn-link btn-sm link-action" href="rooms-and-tags/history/@spot.Id" aria-label="@F(Strings.Shared.RoomsHistoryOf, spot.Place)">@Strings.Shared.RoomsHistory</a>
                                     <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                             @onclick="() => renaming = spot.Id">@Strings.Shared.RoomsRename</button>
@@ -437,15 +437,6 @@
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
     }
 
-    /// <summary>"3 plants, 1 propagation", for the line under a room.</summary>
-    private static string Held(int plants, int propagations) => (plants, propagations) switch
-    {
-        (0, 0) => Strings.Shared.RoomsEmptyPlace,
-        (_, 0) => Labels.Plants(plants),
-        (0, _) => Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other),
-        _ => F(Strings.Shared.RoomsPlantsAndPropagations, Labels.Plants(plants), Plural.Of(propagations, Strings.Shared.RoomsPropagations_One, Strings.Shared.RoomsPropagations_Other))
-    };
-
     private void StopRenaming()
     {
         renaming = null;
@@ -463,8 +454,8 @@
             roomMessage = (result.Total, result.Merged) switch
             {
                 (0, _) => F(Strings.Shared.RoomsNothingToRename, from),
-                (_, true) => F(Strings.Shared.RoomsMovedInto, Held(result.Plants, result.Propagations), result.Name),
-                _ => F(Strings.Shared.RoomsRenamedTo, result.Name, Held(result.Plants, result.Propagations))
+                (_, true) => F(Strings.Shared.RoomsMovedInto, RoomText.Held(result.Plants, result.Propagations), result.Name),
+                _ => F(Strings.Shared.RoomsRenamedTo, result.Name, RoomText.Held(result.Plants, result.Propagations))
             };
             renaming = null;
         }

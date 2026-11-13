@@ -243,6 +243,7 @@ else
         {
             var shelfCount = shelfPlaceIds.Count(id => places.IsIn(id, shelfPlace));
             <p class="shelf-link"><a href="shelf?place=@shelfPlace">@(shelfCount > 0 ? F(Strings.Shelf.PlantsLinkCount, shelfCount) : Strings.Shelf.PlantsLinkNone)</a></p>
+            <p class="shelf-link"><a href="rooms/@shelfPlace?from=plants">@F(Strings.Shared.RoomPageAbout, places.NameOf(shelfPlace) ?? "")</a></p>
         }
 
         @if (TagChoices.Count > 0 || all.Any(p => p.InQuarantine) || all.Any(p => p.IsDormant) || problemPlants.Count > 0)
