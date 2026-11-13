@@ -154,12 +154,13 @@ public class BackupTests
             SupplyEntries = [new SupplyEntry { Kind = SupplyEntryKind.Out }, new SupplyEntry { DeletedAt = Now }],
             ShoppingItems = [new ShoppingItem { Text = "Sticky traps" }, new ShoppingItem { DeletedAt = Now }],
             Measurements = [new Measurement { Kind = MeasureKind.Height, Value = 12 }, new Measurement { DeletedAt = Now }],
-            OwnMeasureKinds = [new OwnMeasureKind { Name = "Nodes" }, new OwnMeasureKind { Name = "Old", DeletedAt = Now }]
+            OwnMeasureKinds = [new OwnMeasureKind { Name = "Nodes" }, new OwnMeasureKind { Name = "Old", DeletedAt = Now }],
+            PhotoMarkups = [new PhotoMarkup { Shape = MarkupShape.Circle }, new PhotoMarkup { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -192,6 +193,7 @@ public class BackupTests
         Assert.Empty(data.ShoppingItems);
         Assert.Empty(data.Measurements);
         Assert.Empty(data.OwnMeasureKinds);
+        Assert.Empty(data.PhotoMarkups);
     }
 
     [Fact]
@@ -811,14 +813,14 @@ public class BackupTests
             "version,app,exportedAt,plants,propagations,propagationCareLogs,timeline,photos,careLogs,pestCases,pestTreatments,"
             + "pots,soilMixes,products,feeds,treatmentRecipes,places,settings,putOffs,growLights,receivedHistories,awayStretches,"
             + "sitterSheets,floweringMarks,problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,"
-            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,counts",
+            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,counts",
             string.Join(",", json.RootElement.EnumerateObject().Select(p => p.Name)));
 
         Assert.Equal(
             "plants,propagations,entries,photos,careEntries,pestCases,treatments,pots,soilMixes,products,feeds,recipes,rooms,"
             + "settings,putOffs,growLights,receivedHistories,awayStretches,sitterSheets,propagationCareEntries,floweringMarks,"
             + "problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,ownFields,orders,orderItems,"
-            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds",
+            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups",
             string.Join(",", json.RootElement.GetProperty("counts").EnumerateObject().Select(p => p.Name)));
     }
 }

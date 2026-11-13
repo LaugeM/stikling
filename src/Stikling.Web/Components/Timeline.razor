@@ -276,7 +276,7 @@ else
 }
 
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
-             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" OnCompare="OpenCompare" />
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" OnCompare="OpenCompare" CanMarkUp="true" />
 
 @if (compare is { } open)
 {

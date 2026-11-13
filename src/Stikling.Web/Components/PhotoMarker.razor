@@ -1,0 +1,364 @@
+@* Marking up a photo inside the viewer: circles and arrows, each with an optional short label. Every change is saved
+   at once as a record of its own, and the photo's image is never touched. The pointer work (drawing, tapping,
+   moving a mark or one of its points) is in wwwroot/js/markup.js, which calls back here; the state stays in this
+   component. While a mark is dragged it is only shown, and saved when the finger lifts. *@
+@implements IAsyncDisposable
+@using Stikling.Core.Photos
+@inject PhotoMarkupService Markups
+@inject IJSRuntime Js
+
+<div class="marker" tabindex="-1" role="group" aria-label="@Strings.Shared.MarkupLabel" @ref="root"
+     @onkeydown="OnKeyDown" @onkeydown:stopPropagation="true">
+    <div class="marker-stage" @ref="stage">
+        <PhotoImage PhotoId="Photo.Id" Thumbnail="false" Framed="false" Class="marker-img" Alt="@Strings.Shared.PhotoViewerAlt" />
+        <PhotoMarkupLayer Marks="Shown" PickedId="pickedId" Interactive="true" OnPick="PickAsync" />
+    </div>
+
+    <div class="marker-bar" @onkeydown="OnBarKeyDown" @onkeydown:stopPropagation="true">
+        @if (PickedMark is not null)
+        {
+            @* The hint's place is kept, so the photo and the row don't move when a mark is picked *@
+            <p class="marker-hint marker-hint-held" aria-hidden="true">@Strings.Shared.MarkupHint</p>
+            <div class="marker-row">
+                <input class="form-control form-control-sm marker-label" type="text" maxlength="@PhotoMarkup.MaxLabelLength" autocomplete="off"
+                       value="@labelText" placeholder="@Strings.Shared.MarkupLabelPlaceholder" aria-label="@Strings.Shared.MarkupLabelName"
+                       @oninput="OnLabelInput" @onblur="CommitLabelAsync" @onkeydown="OnLabelKeyDown" @onkeydown:stopPropagation="true" />
+                <button type="button" class="btn btn-outline-light btn-sm" @onclick="RemoveAsync">@Strings.Common.Remove</button>
+                <button type="button" class="btn btn-primary btn-sm marker-done" @onclick="DoneAsync">@Strings.Common.Done</button>
+            </div>
+        }
+        else
+        {
+            <p class="marker-hint">@Strings.Shared.MarkupHint</p>
+            <div class="marker-row">
+                <div class="btn-group marker-shape" role="radiogroup" aria-label="@Strings.Shared.MarkupShapeGroup">
+                    <input type="radio" class="btn-check" name="@shapeName" id="@circleId" checked="@(shape == MarkupShape.Circle)" @onchange="() => shape = MarkupShape.Circle" />
+                    <label class="btn btn-outline-light btn-sm" for="@circleId">@Strings.Shared.MarkupCircle</label>
+                    <input type="radio" class="btn-check" name="@shapeName" id="@arrowId" checked="@(shape == MarkupShape.Arrow)" @onchange="() => shape = MarkupShape.Arrow" />
+                    <label class="btn btn-outline-light btn-sm" for="@arrowId">@Strings.Shared.MarkupArrow</label>
+                </div>
+                <button type="button" class="btn btn-primary btn-sm marker-done" @onclick="DoneAsync">@Strings.Common.Done</button>
+            </div>
+        }
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public Photo Photo { get; set; } = null!;
+
+    /// <summary>Raised with the photo's marks as they are when marking ends, so the viewer shows them.</summary>
+    [Parameter]
+    public EventCallback<IReadOnlyList<PhotoMarkup>> OnDone { get; set; }
+
+    private readonly string shapeName = $"marker-shape-{Guid.NewGuid():N}";
+    private readonly string circleId = $"marker-circle-{Guid.NewGuid():N}";
+    private readonly string arrowId = $"marker-arrow-{Guid.NewGuid():N}";
+
+    private ElementReference root;
+    private ElementReference stage;
+    private DotNetObjectReference<PhotoMarker>? self;
+    private IJSObjectReference? module;
+    private IJSObjectReference? gestures;
+    private IJSObjectReference? viewport;
+    private bool disposed;
+    private bool focusRoot = true;
+
+    private List<PhotoMarkup> marks = [];
+    private Guid? pickedId;
+    private MarkupShape shape = MarkupShape.Circle;
+    private string labelText = "";
+
+    // A mark being dragged, shown but not saved. With no id it is a new one
+    private PhotoMarkup? live;
+
+    private PhotoMarkup? PickedMark => marks.FirstOrDefault(m => m.Id == pickedId);
+
+    // The marks as they are shown: the picked one with the label as it is typed, the dragged one where it is dragged
+    private IReadOnlyList<PhotoMarkup> Shown
+    {
+        get
+        {
+            var list = new List<PhotoMarkup>(marks.Count + 1);
+            foreach (var m in marks)
+            {
+                if (live is { } l && l.Id == m.Id)
+                    list.Add(Copy(m, l.X1, l.Y1, l.X2, l.Y2, m.Label));
+                else if (m.Id == pickedId)
+                    list.Add(Copy(m, m.X1, m.Y1, m.X2, m.Y2, PhotoMarkup.TidyLabel(labelText)));
+                else
+                    list.Add(m);
+            }
+            if (live is { Id: var id } draft && id == Guid.Empty)
+                list.Add(draft);
+            return list;
+        }
+    }
+
+    private static PhotoMarkup Copy(PhotoMarkup m, double x1, double y1, double x2, double y2, string? label) => new()
+    {
+        Id = m.Id, PhotoId = m.PhotoId, Shape = m.Shape, X1 = x1, Y1 = y1, X2 = x2, Y2 = y2, Label = label,
+    };
+
+    protected override async Task OnInitializedAsync()
+    {
+        var found = await Markups.GetForPhotosAsync([Photo.Id]);
+        marks = found.TryGetValue(Photo.Id, out var list) ? list.ToList() : [];
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (disposed)
+            return;
+
+        if (focusRoot)
+        {
+            // So Escape and the keys work straight away. The label field is not focused, so a phone's keyboard doesn't jump up
+            focusRoot = false;
+            await root.FocusAsync();
+        }
+
+        if (!firstRender)
+            return;
+        try
+        {
+            self = DotNetObjectReference.Create(this);
+            module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/markup.js");
+            // Done can be pressed before the module has loaded
+            if (disposed)
+                return;
+            gestures = await module.InvokeAsync<IJSObjectReference>("attach", stage, self);
+            viewport = await module.InvokeAsync<IJSObjectReference>("followViewport", root);
+            // Closed while those were being set up: take them down again, so the viewer gets its own size back
+            if (disposed)
+                await DisposeAsync();
+        }
+        catch (JSException)
+        {
+            // The keys still work without the pointer
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+            // Closed before its first render was done
+        }
+    }
+
+    // ---- From the pointer ----
+
+    [JSInvokable("Picked")]
+    public Task PickedFromJs(string? id) => InvokeAsync(async () =>
+    {
+        if (Guid.TryParse(id, out var guid))
+            await PickAsync(guid);
+    });
+
+    [JSInvokable]
+    public Task Tapped(double x, double y, double width, double height) => InvokeAsync(async () =>
+    {
+        if (pickedId is not null)
+        {
+            // Only lets go of the picked mark
+            await CommitLabelAsync();
+            pickedId = null;
+            StateHasChanged();
+            return;
+        }
+
+        var (x1, y1, x2, y2) = StandardMarkup.At(shape, x, y, width, height);
+        await AddAsync(x1, y1, x2, y2);
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task Dragging(string? id, double x1, double y1, double x2, double y2) => InvokeAsync(() =>
+    {
+        live = new PhotoMarkup { Id = Guid.TryParse(id, out var guid) ? guid : Guid.Empty, Shape = ShapeOf(id), X1 = x1, Y1 = y1, X2 = x2, Y2 = y2 };
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task Dropped(string? id, double x1, double y1, double x2, double y2) => InvokeAsync(async () =>
+    {
+        live = null;
+        if (Guid.TryParse(id, out var guid))
+        {
+            await MoveAsync(guid, x1, y1, x2, y2);
+            // Dragging a mark picks it, so its label shows
+            if (pickedId != guid)
+                await PickAsync(guid);
+        }
+        else
+        {
+            await CommitLabelAsync();
+            await AddAsync(x1, y1, x2, y2);
+        }
+        StateHasChanged();
+    });
+
+    // A press on the dark area around the photo
+    [JSInvokable]
+    public Task Outside() => InvokeAsync(async () =>
+    {
+        if (pickedId is null)
+            return;
+        await UnpickAsync();
+        StateHasChanged();
+    });
+
+    [JSInvokable]
+    public Task Cancelled() => InvokeAsync(() =>
+    {
+        live = null;
+        StateHasChanged();
+    });
+
+    private MarkupShape? ShapeOf(string? id) =>
+        Guid.TryParse(id, out var guid) ? marks.FirstOrDefault(m => m.Id == guid)?.Shape : shape;
+
+    // ---- Changes, each saved at once ----
+
+    private async Task AddAsync(double x1, double y1, double x2, double y2)
+    {
+        if (await Markups.AddAsync(Photo.Id, shape, x1, y1, x2, y2) is { } added)
+        {
+            marks.Add(added);
+            pickedId = added.Id;
+            labelText = "";
+        }
+    }
+
+    private async Task MoveAsync(Guid id, double x1, double y1, double x2, double y2)
+    {
+        if (await Markups.MoveAsync(id, x1, y1, x2, y2) is { } moved && marks.FindIndex(m => m.Id == id) is >= 0 and var at)
+            marks[at] = moved;
+    }
+
+    private async Task PickAsync(Guid id)
+    {
+        if (pickedId == id || marks.All(m => m.Id != id))
+            return;
+        await CommitLabelAsync();
+        pickedId = id;
+        labelText = PickedMark?.Label ?? "";
+        StateHasChanged();
+    }
+
+    // Saves the label when it differs from what is stored. Called when the field loses focus, on Enter, and before leaving the mark
+    // The label save that is under way, if any. Remove waits for it, so a save that started when the field
+    // lost focus can't land after the delete and bring the mark back
+    private Task labelSave = Task.CompletedTask;
+
+    private Task CommitLabelAsync() => labelSave = SaveLabelAsync(labelSave);
+
+    private async Task SaveLabelAsync(Task earlier)
+    {
+        await earlier;
+        if (PickedMark is not { } mark || PhotoMarkup.TidyLabel(labelText) == mark.Label)
+            return;
+        if (await Markups.SetLabelAsync(mark.Id, labelText) is { } saved && marks.FindIndex(m => m.Id == mark.Id) is >= 0 and var at)
+            marks[at] = saved;
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (PickedMark is not { } mark)
+            return;
+        pickedId = null;
+        marks.Remove(mark);
+        await labelSave;
+        await Markups.RemoveAsync(mark.Id);
+        focusRoot = true;
+    }
+
+    private async Task DoneAsync()
+    {
+        await CommitLabelAsync();
+        await OnDone.InvokeAsync(marks.ToList());
+    }
+
+    private async Task UnpickAsync()
+    {
+        await CommitLabelAsync();
+        pickedId = null;
+        focusRoot = true;
+        // Focus moves to the marking view now, not after the field is gone, so the next key is handled there
+        // (and doesn't fall through to the viewer behind it)
+        await root.FocusAsync();
+    }
+
+    // ---- From the keyboard ----
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "Escape": await EscapeAsync(); break;
+            case "Delete" or "Backspace": await RemoveAsync(); break;
+            case "ArrowLeft": await NudgeAsync(-0.01, 0); break;
+            case "ArrowRight": await NudgeAsync(0.01, 0); break;
+            case "ArrowUp": await NudgeAsync(0, -0.01); break;
+            case "ArrowDown": await NudgeAsync(0, 0.01); break;
+        }
+    }
+
+    // On the buttons and the shape switch, only Escape means something
+    private async Task OnBarKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await EscapeAsync();
+    }
+
+    private void OnLabelInput(ChangeEventArgs e) => labelText = e.Value?.ToString() ?? "";
+
+    private async Task OnLabelKeyDown(KeyboardEventArgs e)
+    {
+        switch (e.Key)
+        {
+            case "Enter": await CommitLabelAsync(); break;
+            case "Escape": await EscapeAsync(); break;
+        }
+    }
+
+    private async Task EscapeAsync()
+    {
+        if (pickedId is not null)
+            await UnpickAsync();
+        else
+            await DoneAsync();
+    }
+
+    private async Task NudgeAsync(double dx, double dy)
+    {
+        if (PickedMark is not { } mark)
+            return;
+        var (x1, y1, x2, y2) = StandardMarkup.Shift(mark.X1, mark.Y1, mark.X2, mark.Y2, dx, dy);
+        await MoveAsync(mark.Id, x1, y1, x2, y2);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (gestures is not null)
+            {
+                await gestures.InvokeVoidAsync("dispose");
+                await gestures.DisposeAsync();
+            }
+            if (viewport is not null)
+            {
+                await viewport.InvokeVoidAsync("dispose");
+                await viewport.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

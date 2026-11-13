@@ -7,6 +7,7 @@ using Stikling.Core.Leaves;
 using Stikling.Core.Lights;
 using Stikling.Core.Measurements;
 using Stikling.Core.Orders;
+using Stikling.Core.Photos;
 using Stikling.Core.Models;
 using Stikling.Core.Sync;
 using Stikling.Core.Pests;
@@ -213,6 +214,15 @@ public sealed class IndexedDbPhotoMarkRepository(IndexedDb db, TimeProvider time
         (await GetAllAsync()).Where(m => m.SubjectId == subjectId).ToList();
 
     protected override IReadOnlyList<string> Validate(PhotoMark mark) => mark.Validate();
+}
+
+public sealed class IndexedDbPhotoMarkupRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PhotoMarkup>(db, time, RecordKinds.PhotoMarkups), IPhotoMarkupRepository
+{
+    public async Task<IReadOnlyList<PhotoMarkup>> GetForPhotoAsync(Guid photoId) =>
+        (await GetAllAsync()).Where(m => m.PhotoId == photoId).ToList();
+
+    protected override IReadOnlyList<string> Validate(PhotoMarkup markup) => markup.Validate();
 }
 
 public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)

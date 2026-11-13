@@ -11,6 +11,7 @@ namespace Stikling.Web.Services;
 /// <param name="Tone">"plant" or "propagation", which sets the colour of a card without a photo.</param>
 /// <param name="PhotoId">The photo to put on the card, or null for the card built around the number.</param>
 /// <param name="Pair">Two photos for the before and after card. When set, <paramref name="PhotoId"/> and <paramref name="Frame"/> are not used.</param>
+/// <param name="Marks">The circles and arrows to draw on the photo, when the card is asked to have them.</param>
 public sealed record ShareCardSpec(
     string Format,
     string Tone,
@@ -21,10 +22,25 @@ public sealed record ShareCardSpec(
     ShareFigure? Figure,
     string? PhotoId,
     PhotoFrame? Frame,
-    ShareCardPair? Pair = null);
+    ShareCardPair? Pair = null,
+    IReadOnlyList<ShareCardMark>? Marks = null);
+
+/// <summary>A circle or an arrow on a photo, as drawn on a card. Shape is "circle" or "arrow"; the points are from 0 to 1 across the photo.</summary>
+public sealed record ShareCardMark(string Shape, double X1, double Y1, double X2, double Y2, string? Label)
+{
+    /// <summary>The marks of a photo that this version can draw. A shape it doesn't know is left out.</summary>
+    public static IReadOnlyList<ShareCardMark>? Of(IEnumerable<PhotoMarkup>? marks)
+    {
+        var list = (marks ?? [])
+            .Where(m => m.Shape is not null)
+            .Select(m => new ShareCardMark(m.Shape == MarkupShape.Arrow ? "arrow" : "circle", m.X1, m.Y1, m.X2, m.Y2, m.Label))
+            .ToList();
+        return list.Count == 0 ? null : list;
+    }
+}
 
 /// <summary>One side of a before and after card. Label is the date, already formatted.</summary>
-public sealed record ShareCardSide(string PhotoId, PhotoFrame? Frame, string Label);
+public sealed record ShareCardSide(string PhotoId, PhotoFrame? Frame, string Label, IReadOnlyList<ShareCardMark>? Marks = null);
 
 /// <summary>The older photo is first and is drawn first, whatever order the person picked them in.</summary>
 public sealed record ShareCardPair(ShareCardSide Before, ShareCardSide After);

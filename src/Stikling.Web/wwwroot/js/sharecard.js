@@ -51,7 +51,8 @@ const retired = []; // replaced bitmaps, closed by the next keepOnly
 // of the photos that made it onto the card and of those that are only small.
 // spec: { format, tone, name, latin, cultivar, line, figure: { value, caption } | null,
 //         photoId: string | null, frame: { x, y, zoom } | null,
-//         pair: { before, after } | null }, each side { photoId, frame, label }.
+//         pair: { before, after } | null, marks: [mark] | null }, each side { photoId, frame, label, marks }.
+// A mark is { shape: "circle" | "arrow", x1, y1, x2, y2, label }, the points from 0 to 1 across the photo.
 // The before side is the older photo. The labels are the dates, formatted by the caller.
 export async function draw(canvas, spec) {
     const token = canvas.stiklingToken = (canvas.stiklingToken ?? 0) + 1;
@@ -73,7 +74,10 @@ export async function draw(canvas, spec) {
     ctx.textBaseline = "alphabetic";
 
     if (bitmap)
-        paintPhotoCard(ctx, size, spec, bandTop => drawCover(ctx, bitmap, spec.frame, 0, 0, size.width, bandTop));
+        paintPhotoCard(ctx, size, spec, bandTop => {
+            const placed = drawCover(ctx, bitmap, spec.frame, 0, 0, size.width, bandTop);
+            paintMarks(ctx, spec.marks, placed, { x: 0, y: 0, w: size.width, h: bandTop });
+        });
     else
         paintTextCard(ctx, size, spec);
     // The picture is made now, so sharing has nothing to wait for while the tap's permission to open
@@ -111,7 +115,8 @@ async function drawPair(canvas, spec, size, token) {
         [[before, first], [after, second]].forEach(([side, photo], i) => {
             const [x, y, w, h] = boxes[i];
             if (photo) {
-                drawCover(ctx, photo.bitmap, side.frame, x, y, w, h);
+                const placed = drawCover(ctx, photo.bitmap, side.frame, x, y, w, h);
+                paintMarks(ctx, side.marks, placed, { x, y, w, h });
             } else {
                 ctx.fillStyle = PAPER;
                 ctx.fillRect(x, y, w, h);
@@ -334,7 +339,8 @@ export function paintPhotoCard(ctx, size, spec, paintPhotos) {
 }
 
 // The photo fills the box the way "framed" photos do on the page: zoomed, then moved so the
-// framed point is in the middle as far as the photo's edges allow
+// framed point is in the middle as far as the photo's edges allow. Returns where the whole
+// photo was drawn, { x, y, w, h }, which can be bigger than the box.
 export function drawCover(ctx, bitmap, frame, x, y, w, h) {
     const aspect = bitmap.width / bitmap.height;
     const zoom = Math.min(4, Math.max(1, frame?.zoom ?? 1));
@@ -350,6 +356,160 @@ export function drawCover(ctx, bitmap, frame, x, y, w, h) {
     ctx.clip();
     ctx.imageSmoothingQuality = "high";
     ctx.drawImage(bitmap, x + dx, y + dy, dw, dh);
+    ctx.restore();
+    return { x: x + dx, y: y + dy, w: dw, h: dh };
+}
+
+// ---- Circles and arrows drawn on a photo ----
+
+const MARK_COLOR = "#f1f4f1";
+const MARK_LINE = 6;
+const MARK_EDGE = 12;
+const MARK_HEAD = 26;
+const MARK_LABEL_SIZE = 28;
+const MARK_LABEL_MAX = 440;
+const MARK_LABEL_GAP = 18;
+
+// Draws the marks of a photo that was placed by drawCover (placed), so each sits on the same spot of the
+// photo after the frame's crop and zoom. Clipped to the photo's box on the card. The lines are light on a dark
+// edge at half strength, and a label is a see-through dark pill, as in the viewer, only larger.
+export function paintMarks(ctx, marks, placed, box) {
+    if (!marks?.length || !placed)
+        return;
+
+    const at = (px, py) => [placed.x + px * placed.w, placed.y + py * placed.h];
+    const shapes = marks.map(mark => {
+        const [x1, y1] = at(mark.x1, mark.y1);
+        const [x2, y2] = at(mark.x2, mark.y2);
+        return { mark, x1, y1, x2, y2, path: markPath(mark.shape, x1, y1, x2, y2) };
+    });
+
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(box.x, box.y, box.w, box.h);
+    ctx.clip();
+
+    // The edges are drawn solid on a layer of their own and put on at half strength, so where a line
+    // and its head meet the edge is not darker
+    const layer = document.createElement("canvas");
+    layer.width = ctx.canvas.width;
+    layer.height = ctx.canvas.height;
+    const edge = layer.getContext("2d");
+    edge.fillStyle = "#000";
+    edge.strokeStyle = "#000";
+    edge.lineWidth = MARK_EDGE;
+    edge.lineCap = "round";
+    edge.lineJoin = "round";
+    for (const { path } of shapes) {
+        edge.stroke(path.line);
+        if (path.head) {
+            edge.fill(path.head);
+            edge.stroke(path.head);
+        }
+    }
+    ctx.save();
+    ctx.globalAlpha *= 0.5;
+    ctx.drawImage(layer, 0, 0);
+    ctx.restore();
+
+    ctx.fillStyle = MARK_COLOR;
+    ctx.strokeStyle = MARK_COLOR;
+    ctx.lineWidth = MARK_LINE;
+    ctx.lineCap = "round";
+    ctx.lineJoin = "round";
+    for (const { path } of shapes) {
+        ctx.stroke(path.line);
+        if (path.head) {
+            ctx.fill(path.head);
+            ctx.save();
+            ctx.lineWidth = 2;
+            ctx.stroke(path.head);
+            ctx.restore();
+        }
+    }
+
+    // A label can't leave the part of the photo that is on the card
+    const inside = {
+        left: Math.max(box.x, placed.x),
+        top: Math.max(box.y, placed.y),
+        right: Math.min(box.x + box.w, placed.x + placed.w),
+        bottom: Math.min(box.y + box.h, placed.y + placed.h),
+    };
+    for (const { mark, x1, y1, x2, y2 } of shapes)
+        if (mark.label)
+            paintMarkLabel(ctx, mark, x1, y1, x2, y2, inside);
+    ctx.restore();
+}
+
+// A circle is its centre (x1, y1) and a point on its edge (x2, y2); an arrow points at (x1, y1) from its tail (x2, y2).
+// Circles are round whatever the photo's shape, since the radius is the distance in drawn pixels.
+function markPath(shape, x1, y1, x2, y2) {
+    const line = new Path2D();
+    if (shape !== "arrow") {
+        line.arc(x1, y1, Math.max(1, Math.hypot(x2 - x1, y2 - y1)), 0, Math.PI * 2);
+        return { line, head: null };
+    }
+
+    const length = Math.hypot(x1 - x2, y1 - y2);
+    if (length < 0.01) {
+        line.moveTo(x1, y1);
+        return { line, head: null };
+    }
+    const ux = (x1 - x2) / length;
+    const uy = (y1 - y2) / length;
+    // A very short arrow gets a smaller head, so the head isn't all there is of it
+    const head = Math.min(MARK_HEAD, length * 0.6);
+    const half = head * 0.45;
+    const bx = x1 - ux * head;
+    const by = y1 - uy * head;
+    line.moveTo(x2, y2);
+    line.lineTo(bx, by);
+    const triangle = new Path2D();
+    triangle.moveTo(x1, y1);
+    triangle.lineTo(bx - uy * half, by + ux * half);
+    triangle.lineTo(bx + uy * half, by - ux * half);
+    triangle.closePath();
+    return { line, head: triangle };
+}
+
+// Under a circle, centred. Beyond an arrow's tail, away from its tip. Moved back inside the photo when it sticks out.
+function paintMarkLabel(ctx, mark, x1, y1, x2, y2, inside) {
+    ctx.save();
+    setFont(ctx, `500 ${MARK_LABEL_SIZE}px ${BODY}`, "0", "normal");
+    ctx.textBaseline = "middle";
+    const padX = 18;
+    const height = Math.round(MARK_LABEL_SIZE * 1.55);
+    let text = mark.label;
+    while (text.length > 1 && ctx.measureText(text).width + 2 * padX > MARK_LABEL_MAX)
+        text = text.slice(0, -1);
+    if (text !== mark.label)
+        text = text.trimEnd() + "\u2026";
+    const width = Math.ceil(ctx.measureText(text).width) + 2 * padX;
+
+    let px;
+    let py;
+    let ux;
+    let uy;
+    if (mark.shape === "arrow") {
+        const length = Math.hypot(x2 - x1, y2 - y1);
+        [ux, uy] = length < 0.01 ? [0, 1] : [(x2 - x1) / length, (y2 - y1) / length];
+        [px, py] = [x2 + ux * MARK_LABEL_GAP, y2 + uy * MARK_LABEL_GAP];
+    } else {
+        [ux, uy] = [0, 1];
+        [px, py] = [x1, y1 + Math.max(1, Math.hypot(x2 - x1, y2 - y1)) + MARK_LABEL_GAP];
+    }
+
+    let left = px + ux * (width / 2) - width / 2;
+    let top = py + uy * (height / 2) - height / 2;
+    left = Math.max(inside.left, Math.min(left, inside.right - width));
+    top = Math.max(inside.top, Math.min(top, inside.bottom - height));
+
+    ctx.fillStyle = "rgb(0 0 0 / 0.6)";
+    ctx.beginPath();
+    ctx.roundRect(left, top, width, height, height / 2);
+    ctx.fill();
+    ctx.fillStyle = MARK_COLOR;
+    ctx.fillText(text, left + padX, top + height / 2 + 1);
     ctx.restore();
 }
 

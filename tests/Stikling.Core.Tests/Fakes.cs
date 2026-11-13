@@ -12,6 +12,7 @@ using Stikling.Core.Names;
 using Stikling.Core.Leaves;
 using Stikling.Core.Shelves;
 using Stikling.Core.Orders;
+using Stikling.Core.Photos;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -1179,6 +1180,38 @@ internal sealed class FakePhotoMarkRepository : IPhotoMarkRepository
     }
 }
 
+
+internal sealed class FakePhotoMarkupRepository : IPhotoMarkupRepository
+{
+    // Each mark is a second newer than the last, so "the one made first" can be told apart
+    private DateTimeOffset clock = new(2026, 1, 1, 12, 0, 0, TimeSpan.Zero);
+
+    public Dictionary<Guid, PhotoMarkup> Marks { get; } = [];
+
+    public Task<IReadOnlyList<PhotoMarkup>> GetAllAsync() =>
+        Task.FromResult<IReadOnlyList<PhotoMarkup>>(Marks.Values.Where(m => !m.IsDeleted).ToList());
+
+    public Task<IReadOnlyList<PhotoMarkup>> GetForPhotoAsync(Guid photoId) =>
+        Task.FromResult<IReadOnlyList<PhotoMarkup>>(Marks.Values.Where(m => !m.IsDeleted && m.PhotoId == photoId).ToList());
+
+    public Task SaveAsync(PhotoMarkup markup)
+    {
+        if (markup.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid mark");
+        if (markup.CreatedAt == default)
+            markup.CreatedAt = clock = clock.AddSeconds(1);
+        markup.UpdatedAt = clock.AddSeconds(1);
+        Marks[markup.Id] = markup;
+        return Task.CompletedTask;
+    }
+
+    public Task DeleteAsync(Guid id)
+    {
+        if (Marks.TryGetValue(id, out var markup))
+            markup.DeletedAt = markup.UpdatedAt = clock = clock.AddSeconds(1);
+        return Task.CompletedTask;
+    }
+}
 
 internal sealed class FakeSupplyRepository() : FakeRepository<Supply>(stampsDates: true), ISupplyRepository
 {

@@ -1,0 +1,251 @@
+@* The circles and arrows drawn over a photo, sitting exactly on the photo as it is drawn inside the box around it
+   (the photo is letterboxed). The size comes from wwwroot/js/markup.js, which says where the photo is. Circles are
+   round whatever the photo's shape, and lines are the same width on screen at any size, so the shapes are worked
+   out in pixels here. Looking, the layer is picture only. Marking, the marks can be picked and show handles. *@
+@implements IAsyncDisposable
+@using System.Globalization
+@inject IJSRuntime Js
+
+<div class="mk-layer @(Interactive ? "interactive" : null)" style="@LayerStyle" @ref="layer">
+    @if (width > 0 && height > 0)
+    {
+        @* Sized by the stylesheet and scaled from the pixel size it was drawn at, so it follows a resize at once, before the shapes are worked out again *@
+        <svg class="mk-svg" width="100%" height="100%" viewBox="0 0 @Px(width) @Px(height)" preserveAspectRatio="none" aria-hidden="true">
+            @foreach (var mark in Marks)
+            {
+                @if (mark.Shape is { } shape)
+                {
+                    var geo = Geo.Of(mark, shape, width, height);
+                    var interactive = Interactive && mark.Id != Guid.Empty;
+                    var picked = IsPicked(mark);
+                    <g @key="mark.Id" class="@(picked ? "mk picked" : "mk")" @attributes="DataOf(mark)"
+                       tabindex="@(interactive ? "0" : null)" role="@(interactive ? "button" : null)"
+                       aria-label="@(interactive ? Name(mark) : null)" aria-pressed="@(interactive ? (picked ? "true" : "false") : null)"
+                       @onkeydown="e => KeyAsync(e, mark)">
+                        @if (interactive && geo.Circle)
+                        {
+                            @* The inside of a circle picks it with a tap. A drag from there still draws *@
+                            <circle class="mk-inside" cx="@Px(geo.X1)" cy="@Px(geo.Y1)" r="@Px(geo.Radius)"></circle>
+                        }
+                        @* The dark edge goes under the light line. As one group at half opacity, it is not darker where line and head overlap *@
+                        <g class="mk-edge">@Drawing(geo)</g>
+                        <g class="mk-line">@Drawing(geo)</g>
+                        @if (interactive)
+                        {
+                            <g class="mk-hit">@Shaft(geo)</g>
+                        }
+                    </g>
+                }
+            }
+            @if (Interactive && Marks.FirstOrDefault(m => m.Id != Guid.Empty && m.Id == PickedId && m.Shape is not null) is { } pickedMark)
+            {
+                @Handle(pickedMark, 1)
+                @Handle(pickedMark, 2)
+            }
+        </svg>
+        @foreach (var mark in Marks)
+        {
+            @if (mark.Shape is not null && mark.Label is { Length: > 0 } label)
+            {
+                var (px, py, ux, uy) = LabelAnchor(mark);
+                <div @key="mark.Id" class="mk-label @(IsPicked(mark) ? "picked" : null)" data-label @attributes="DataOf(mark)"
+                     style="left:@(Px(px / width * 100))%;top:@(Px(py / height * 100))%;--ux:@Px(ux);--uy:@Px(uy)">@label</div>
+            }
+        }
+    }
+</div>
+
+@code {
+    private const double HeadLength = 10;
+    private const double HeadHalfWidth = 4.5;
+    private const double LabelGap = 6;
+
+    /// <summary>The marks to draw. One with an empty id is being drawn right now and can't be picked.</summary>
+    [Parameter, EditorRequired]
+    public IReadOnlyList<PhotoMarkup> Marks { get; set; } = [];
+
+    [Parameter]
+    public Guid? PickedId { get; set; }
+
+    /// <summary>True while marking: marks can be picked, and the picked one shows its handles.</summary>
+    [Parameter]
+    public bool Interactive { get; set; }
+
+    /// <summary>Raised when a mark is picked with the keyboard.</summary>
+    [Parameter]
+    public EventCallback<Guid> OnPick { get; set; }
+
+    /// <summary>A mark worked out in pixels: a circle's radius, or an arrow's shaft and head.</summary>
+    private sealed record Geo(bool Circle, double X1, double Y1, double X2, double Y2, double Radius, double BaseX, double BaseY, string Head)
+    {
+        public static Geo Of(PhotoMarkup mark, MarkupShape shape, double width, double height)
+        {
+            var (x1, y1, x2, y2) = (mark.X1 * width, mark.Y1 * height, mark.X2 * width, mark.Y2 * height);
+            if (shape == MarkupShape.Circle)
+                return new Geo(true, x1, y1, x2, y2, Math.Max(1, Math.Sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1)))), x1, y1, "");
+
+            // An arrow points at (x1, y1) from its tail (x2, y2). The shaft stops where the head starts
+            var (dx, dy) = (x1 - x2, y1 - y2);
+            var length = Math.Sqrt((dx * dx) + (dy * dy));
+            if (length < 0.01)
+                return new Geo(false, x1, y1, x2, y2, 0, x1, y1, "");
+
+            var (ux, uy) = (dx / length, dy / length);
+            // A very short arrow gets a smaller head, so the head isn't all there is of it
+            var head = Math.Min(HeadLength, length * 0.6);
+            var half = HeadHalfWidth * head / HeadLength;
+            var (bx, by) = (x1 - (ux * head), y1 - (uy * head));
+            var triangle = $"M{Px(x1)} {Px(y1)}L{Px(bx - (uy * half))} {Px(by + (ux * half))}L{Px(bx + (uy * half))} {Px(by - (ux * half))}Z";
+            return new Geo(false, x1, y1, x2, y2, 0, bx, by, triangle);
+        }
+    }
+
+    private ElementReference layer;
+    private IJSObjectReference? module;
+    private IJSObjectReference? watcher;
+    private DotNetObjectReference<PhotoMarkupLayer>? self;
+    private double left, top, width, height;
+    private bool disposed;
+
+    private string? LayerStyle => width > 0 && height > 0
+        ? $"left:{Px(left)}px;top:{Px(top)}px;width:{Px(width)}px;height:{Px(height)}px"
+        : null;
+
+    private static string Px(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private bool IsPicked(PhotoMarkup mark) => mark.Id != Guid.Empty && mark.Id == PickedId;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (disposed)
+            return;
+        try
+        {
+            if (firstRender)
+            {
+                self = DotNetObjectReference.Create(this);
+                module = await Js.InvokeAsync<IJSObjectReference>("import", "./js/markup.js");
+                // The viewer can be closed before the module has loaded
+                if (disposed)
+                    return;
+                watcher = await module.InvokeAsync<IJSObjectReference>("watchFit", layer, self);
+                if (disposed)
+                {
+                    await DisposeAsync();
+                    return;
+                }
+            }
+
+            if (module is not null && width > 0)
+                await module.InvokeVoidAsync("layoutLabels", layer);
+        }
+        catch (JSException)
+        {
+            // The marks are drawn without keeping their labels inside the photo
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+            // Closed before the call was done
+        }
+    }
+
+    [JSInvokable]
+    public Task Fit(double newLeft, double newTop, double newWidth, double newHeight) => InvokeAsync(() =>
+    {
+        (left, top, width, height) = (newLeft, newTop, newWidth, newHeight);
+        StateHasChanged();
+    });
+
+    private RenderFragment Shaft(Geo geo) => geo.Circle
+        ? @<circle cx="@Px(geo.X1)" cy="@Px(geo.Y1)" r="@Px(geo.Radius)"></circle>
+        : @<path d="M@(Px(geo.X2)) @(Px(geo.Y2))L@(Px(geo.BaseX)) @(Px(geo.BaseY))"></path>;
+
+    private RenderFragment Drawing(Geo geo) => @<text>
+        @Shaft(geo)
+        @if (geo.Head.Length > 0)
+        {
+            <path class="mk-head" d="@geo.Head"></path>
+        }
+    </text>;
+
+    private RenderFragment Handle(PhotoMarkup mark, int which)
+    {
+        var (x, y) = which == 1 ? (mark.X1 * width, mark.Y1 * height) : (mark.X2 * width, mark.Y2 * height);
+        // The tap area is 44px and the dot 12px
+        return @<g class="mk-handle" data-handle="@which" @attributes="DataOf(mark)">
+            <circle class="mk-handle-area" cx="@Px(x)" cy="@Px(y)" r="22"></circle>
+            <circle class="mk-handle-dot" cx="@Px(x)" cy="@Px(y)" r="5"></circle>
+        </g>;
+    }
+
+    // What the pointer code reads from a mark under the finger
+    private IEnumerable<KeyValuePair<string, object>> DataOf(PhotoMarkup mark)
+    {
+        if (mark.Id == Guid.Empty)
+            return [];
+        return
+        [
+            new("data-mark", mark.Id.ToString()),
+            new("data-x1", mark.X1.ToString("0.####", CultureInfo.InvariantCulture)),
+            new("data-y1", mark.Y1.ToString("0.####", CultureInfo.InvariantCulture)),
+            new("data-x2", mark.X2.ToString("0.####", CultureInfo.InvariantCulture)),
+            new("data-y2", mark.Y2.ToString("0.####", CultureInfo.InvariantCulture)),
+            new("data-picked", IsPicked(mark) ? "true" : "false"),
+        ];
+    }
+
+    // Where a label hangs, and which way it grows from there. Under a circle, centred. Beyond an arrow's tail, away from its tip.
+    private (double X, double Y, double Ux, double Uy) LabelAnchor(PhotoMarkup mark)
+    {
+        var (x1, y1, x2, y2) = (mark.X1 * width, mark.Y1 * height, mark.X2 * width, mark.Y2 * height);
+        if (mark.Shape == MarkupShape.Circle)
+        {
+            var radius = Math.Max(1, Math.Sqrt(((x2 - x1) * (x2 - x1)) + ((y2 - y1) * (y2 - y1))));
+            return (x1, y1 + radius + LabelGap, 0, 1);
+        }
+
+        var (dx, dy) = (x2 - x1, y2 - y1);
+        var length = Math.Sqrt((dx * dx) + (dy * dy));
+        var (ux, uy) = length < 0.01 ? (0.0, 1.0) : (dx / length, dy / length);
+        return (x2 + (ux * LabelGap), y2 + (uy * LabelGap), ux, uy);
+    }
+
+    private static string Name(PhotoMarkup mark)
+    {
+        if (mark.Label is { Length: > 0 } label)
+            return F(mark.Shape == MarkupShape.Circle ? Strings.Shared.MarkupCircleNamed : Strings.Shared.MarkupArrowNamed, label);
+        return mark.Shape == MarkupShape.Circle ? Strings.Shared.MarkupCircle : Strings.Shared.MarkupArrow;
+    }
+
+    private async Task KeyAsync(KeyboardEventArgs e, PhotoMarkup mark)
+    {
+        if (Interactive && mark.Id != Guid.Empty && e.Key is "Enter" or " ")
+            await OnPick.InvokeAsync(mark.Id);
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        try
+        {
+            if (watcher is not null)
+            {
+                await watcher.InvokeVoidAsync("dispose");
+                await watcher.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        catch (ObjectDisposedException)
+        {
+            // Closed before the call was done
+        }
+        self?.Dispose();
+    }
+}

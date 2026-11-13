@@ -1,0 +1,128 @@
+/* Dark in both themes, like the photo viewer, so the colours are written here as they have them, with the dark
+   values of the green accent. */
+.marker {
+    flex: 1;
+    min-height: 0;
+    display: flex;
+    flex-direction: column;
+    outline: none;
+}
+
+.marker-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    /* Rows and columns of a set size, so a tall photo shrinks to fit instead of growing over the controls */
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+    place-items: center;
+    overflow: hidden;
+    cursor: crosshair;
+    /* The page doesn't scroll while a finger draws */
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.marker-stage ::deep .marker-img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    pointer-events: none;
+    -webkit-user-drag: none;
+}
+
+/* The same height as the viewer's row of actions (min-height there), so the photo doesn't move between looking and
+   marking, or when a mark is picked. Centred and no wider than a phone, so on a wide screen the controls stay together
+   under the photo like the viewer's actions do. */
+.marker-bar {
+    box-sizing: border-box;
+    align-self: center;
+    width: 100%;
+    max-width: 32rem;
+    height: 6rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    gap: 0.5rem;
+    padding: 0.6rem 1rem 0.75rem;
+}
+
+.marker-hint {
+    margin: 0;
+    text-align: center;
+    font-size: 0.875rem;
+    color: #b8c2bb;
+}
+
+.marker-hint-held {
+    visibility: hidden;
+}
+
+.marker-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem;
+}
+
+.marker-row .btn,
+.marker-label {
+    min-height: 2.75rem;
+}
+
+.marker-row .btn {
+    display: inline-flex;
+    align-items: center;
+}
+
+.marker-label {
+    flex: 1;
+    min-width: 0;
+    background: #131b15;
+    border-color: #3a4a3f;
+    color: #f1f4f1;
+}
+
+.marker-label::placeholder {
+    color: #b8c2bb;
+}
+
+.marker-label:focus {
+    background: #131b15;
+    border-color: #5fb883;
+    color: #f1f4f1;
+    box-shadow: none;
+}
+
+.marker-shape .btn-check:checked + .btn {
+    background: transparent;
+    border-color: #5fb883;
+    color: #86d1a4;
+}
+
+.marker-row .marker-done {
+    background: #5fb883;
+    border-color: #5fb883;
+    color: #0f1a13;
+}
+
+.marker-row .marker-done:hover,
+.marker-row .marker-done:active {
+    background: #86d1a4;
+    border-color: #86d1a4;
+    color: #0f1a13;
+}
+
+.marker button:focus-visible,
+.marker .btn-check:focus-visible + .btn,
+.marker-label:focus-visible {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .marker-row .btn {
+        transition: border-color 0.15s ease, background-color 0.15s ease, color 0.15s ease;
+    }
+}

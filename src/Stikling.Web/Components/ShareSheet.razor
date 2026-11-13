@@ -6,11 +6,13 @@
    saved to the link on the server through ShareLinkService, never on the device. *@
 @using System.Globalization
 @using System.Text.Json
+@using Stikling.Core.Photos
 @using Stikling.Core.Sync
 @implements IAsyncDisposable
 @inject ShareCardService Cards
 @inject TimelapseService Timelapse
 @inject IPhotoRepository PhotoRepository
+@inject PhotoMarkupService Markups
 @inject SyncRunner Sync
 @inject ShareLinkService Links
 @inject AccountService Account
@@ -234,6 +236,14 @@
             </div>
         }
 
+        @if (CanShowMarks)
+        {
+            <div class="form-check form-switch share-switch">
+                <input class="form-check-input" type="checkbox" role="switch" id="share-with-marks" checked="@withMarks" @onchange="e => withMarks = e.Value is true" disabled="@Making" />
+                <label class="form-check-label" for="share-with-marks">@Strings.Propagations.ShWithMarks</label>
+            </div>
+        }
+
         @if (mode != ShareMode.Link)
         {
             @WordsFields
@@ -386,6 +396,11 @@
     private string? drawnKey;
     private bool wasOpen;
 
+    // The circles and arrows of the photos, read when the sheet opens. They go on a card only when With marks is on,
+    // which is off every time the sheet opens
+    private IReadOnlyDictionary<Guid, IReadOnlyList<PhotoMarkup>> marksByPhoto = new Dictionary<Guid, IReadOnlyList<PhotoMarkup>>();
+    private bool withMarks;
+
     // The time-lapse. Its size and speed are remembered on their own, apart from the card's size.
     private string videoFormat = "story";
     private TimelapseSpeed speed = TimelapseSpeed.Normal;
@@ -537,6 +552,7 @@
         tickNote = null;
         triedFull.Clear();
         format =await Cards.GetFormatAsync();
+        withMarks = false;
         canShare = await Cards.CanShareAsync();
 
         // The cover first, then the newest, so the picture it starts with is the one on the page
@@ -546,6 +562,7 @@
 
         // Oldest first, so the history reads left to right. A very long history keeps its first and last photos.
         allPhotos = all.OrderBy(p => p.TakenAt).ToList();
+        marksByPhoto = await Markups.GetForPhotosAsync(all.Select(p => p.Id));
         // A long history starts with 60 photos spread over it for the time-lapse; the rest are left out
         showAllPhotos = false;
         var starting = TimelapsePlan.Spread(allPhotos.Select(p => new TimelapsePhoto(p.Id, p.TakenAt))).Select(p => p.Id).ToHashSet();
@@ -645,7 +662,20 @@
         };
     }
 
-    private ShareCardSide Side(Photo photo) => new(photo.Id.ToString(), photo.Frame, DayText(photo));
+    private ShareCardSide Side(Photo photo) => new(photo.Id.ToString(), photo.Frame, DayText(photo), MarksFor(photo.Id));
+
+    // The photos that are on the card now, in the modes that have a photo to draw on
+    private IEnumerable<Guid> CardPhotoIds => mode switch
+    {
+        ShareMode.One when photoId is { } id => [id],
+        ShareMode.Pair => new[] { beforeId, afterId }.OfType<Guid>(),
+        _ => [],
+    };
+
+    private bool CanShowMarks => ready && CardPhotoIds.Any(id => marksByPhoto.ContainsKey(id));
+
+    private IReadOnlyList<ShareCardMark>? MarksFor(Guid id) =>
+        withMarks && marksByPhoto.TryGetValue(id, out var list) ? ShareCardMark.Of(list) : null;
 
     private ShareCardSpec SinglePhotoSpec() => new(
         format,
@@ -656,7 +686,8 @@
         Clean(line),
         Text.Figure,
         photoId?.ToString(),
-        photos.FirstOrDefault(p => p.Id == photoId)?.Frame);
+        photos.FirstOrDefault(p => p.Id == photoId)?.Frame,
+        Marks: photoId is { } id && mode == ShareMode.One ? MarksFor(id) : null);
 
     // The card and the video each keep their own size
     private async Task SetFormatAsync(string value)
