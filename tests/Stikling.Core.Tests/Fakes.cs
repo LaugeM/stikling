@@ -6,6 +6,7 @@ using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Wishlist;
 using Stikling.Core.Lights;
+using Stikling.Core.Measurements;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
 using Stikling.Core.Leaves;
@@ -157,6 +158,38 @@ internal sealed class FakeOwnCareKindRepository : FakeRepository<OwnCareKind>, I
     }
 }
 
+internal sealed class FakeMeasurementRepository : FakeRepository<Measurement>, IMeasurementRepository
+{
+    public FakeMeasurementRepository() : base(stampsDates: true)
+    {
+    }
+
+    public Dictionary<Guid, Measurement> Measurements => Records;
+
+    public Task<IReadOnlyList<Measurement>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<Measurement>>(Measurements.Values.ToList());
+
+    protected override void Check(Measurement measurement)
+    {
+        if (measurement.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}
+
+internal sealed class FakeOwnMeasureKindRepository : FakeRepository<OwnMeasureKind>, IOwnMeasureKindRepository
+{
+    public Dictionary<Guid, OwnMeasureKind> Kinds => Records;
+
+    public Task<IReadOnlyList<OwnMeasureKind>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<OwnMeasureKind>>(Kinds.Values.ToList());
+
+    protected override void Check(OwnMeasureKind kind)
+    {
+        if (kind.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}
+
 internal sealed class FakeOwnFieldRepository : FakeRepository<OwnField>, IOwnFieldRepository
 {
     public Dictionary<Guid, OwnField> Fields => Records;
@@ -219,7 +252,7 @@ internal sealed class FakeTimelineRepository : ITimelineRepository
     public Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries
             .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
-                && TimelineEvents.Of(e) != TimelineEvent.LookedOver).ToList());
+                && TimelineEvents.Of(e) is not (TimelineEvent.LookedOver or TimelineEvent.Measured)).ToList());
 
     public Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>
         Task.FromResult<IReadOnlyList<TimelineEntry>>(Entries.Where(NotesComingBack.IsWaiting).ToList());

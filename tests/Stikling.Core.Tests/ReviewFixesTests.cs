@@ -29,7 +29,7 @@ public class ReviewFixesTests
     public async Task Saving_a_note_with_its_unchanged_past_day_does_not_throw()
     {
         var timeline = new FakeTimelineRepository();
-        var service = new TimelineService(timeline, new FakePhotoRepository(), new FixedTime(Now));
+        var service = new TimelineService(timeline, new FakePhotoRepository(), new FakeMeasurementRepository(), new FixedTime(Now));
         var entry = new TimelineEntry
         {
             Kind = TimelineKind.Note, SubjectType = SubjectType.Plant, SubjectId = Guid.NewGuid(), Text = "Repot",

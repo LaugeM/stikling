@@ -74,7 +74,10 @@ public enum TimelineEvent
     NewLeaf,
 
     /// <summary>A pest was found on the plant, as part of a pest case.</summary>
-    Pest
+    Pest,
+
+    /// <summary>Measurements were taken, with no note or photos. A line written by the app, see <see cref="Measurement"/>.</summary>
+    Measured
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

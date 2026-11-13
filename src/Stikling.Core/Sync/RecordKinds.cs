@@ -90,6 +90,8 @@ public static class RecordKinds
     public static readonly RecordKind<Supply> Supplies = new("supplies");
     public static readonly RecordKind<SupplyEntry> SupplyEntries = new("supplyEntries");
     public static readonly RecordKind<ShoppingItem> ShoppingItems = new("shoppingItems");
+    public static readonly RecordKind<Measurement> Measurements = new("measurements");
+    public static readonly RecordKind<OwnMeasureKind> OwnMeasureKinds = new("ownMeasureKinds");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -134,6 +136,8 @@ public static class RecordKinds
         Supplies,
         SupplyEntries,
         ShoppingItems,
+        Measurements,
+        OwnMeasureKinds,
         Settings,
     ];
 }

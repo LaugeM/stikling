@@ -1,0 +1,111 @@
+@* A small line chart of values over time, drawn as SVG with no libraries: Potting Green line, a ring on each
+   point, a hairline baseline and the first and last day under it. The smallest and the largest value are
+   named at the side. Each point is a button with a 44px tap area. It knows nothing about what it draws, so
+   the growth curve uses it today and room readings can later. *@
+@using System.Globalization
+
+@if (points.Count > 0)
+{
+    <div class="line-chart">
+        <div class="line-chart-y" aria-hidden="true">
+            @if (lowest == highest)
+            {
+                <span style="top: 50%">@FormatY(highest)</span>
+            }
+            else
+            {
+                <span style="top: @Percent(Top, Height)">@FormatY(highest)</span>
+                <span style="top: @Percent(Height - Top, Height)">@FormatY(lowest)</span>
+            }
+        </div>
+        <div class="line-chart-plot">
+            <svg viewBox="0 0 @Number(Width) @Number(Height)" role="img" aria-label="@Description" focusable="false">
+                <line class="line-chart-base" x1="0" x2="@Number(Width)" y1="@Number(Height - 0.5)" y2="@Number(Height - 0.5)" />
+                @if (points.Count > 1)
+                {
+                    <polyline class="line-chart-line" points="@string.Join(" ", points.Select(p => $"{Number(XOf(p))},{Number(YOf(p))}"))" />
+                }
+                @foreach (var point in points)
+                {
+                    <circle class="line-chart-dot @(point == points[^1] ? "latest" : null)" cx="@Number(XOf(point))" cy="@Number(YOf(point))" r="3.5" />
+                }
+            </svg>
+            @foreach (var point in points)
+            {
+                var chosen = point;
+                <button type="button" class="line-chart-hit" style="left: @Percent(XOf(point), Width); top: @Percent(YOf(point), Height)"
+                        aria-label="@Label(point)" @onclick="() => OnPointClick.InvokeAsync(chosen)"></button>
+            }
+        </div>
+        <div class="line-chart-x" aria-hidden="true">
+            <span>@FormatX(points[0].X)</span>
+            @if (points[^1].X != points[0].X)
+            {
+                <span>@FormatX(points[^1].X)</span>
+            }
+        </div>
+    </div>
+}
+
+@code {
+    // The drawing is 300 by 100 units and scales with the width. The points keep clear of the edges.
+    private const double Width = 300;
+    private const double Height = 100;
+    private const double SideMargin = 10;
+    private const double Top = 10;
+
+    /// <summary>The points. They are put in order of day, so the line only ever runs left to right.</summary>
+    [Parameter, EditorRequired]
+    public required IReadOnlyList<ChartPoint> Points { get; set; }
+
+    /// <summary>A value as text, with its unit. Used for the smallest and the largest value and for each point's name.</summary>
+    [Parameter, EditorRequired]
+    public required Func<double, string> FormatY { get; set; }
+
+    /// <summary>A day as text, for the first and the last label.</summary>
+    [Parameter, EditorRequired]
+    public required Func<DateOnly, string> FormatX { get; set; }
+
+    /// <summary>What the chart says, for people who can't see it.</summary>
+    [Parameter, EditorRequired]
+    public required string Description { get; set; }
+
+    /// <summary>Raised with the point that was tapped.</summary>
+    [Parameter]
+    public EventCallback<ChartPoint> OnPointClick { get; set; }
+
+    /// <summary>The name of a point's button. Without it, the value and the day.</summary>
+    [Parameter]
+    public Func<ChartPoint, string>? PointLabel { get; set; }
+
+    private IReadOnlyList<ChartPoint> points = [];
+    private double lowest;
+    private double highest;
+    private int firstDay;
+    private int lastDay;
+
+    protected override void OnParametersSet()
+    {
+        points = [.. Points.OrderBy(p => p.X)];
+        if (points.Count == 0)
+            return;
+        lowest = points.Min(p => p.Y);
+        highest = points.Max(p => p.Y);
+        firstDay = points[0].X.DayNumber;
+        lastDay = points[^1].X.DayNumber;
+    }
+
+    private double XOf(ChartPoint point) =>
+        lastDay == firstDay ? Width / 2 : SideMargin + (point.X.DayNumber - firstDay) / (double)(lastDay - firstDay) * (Width - 2 * SideMargin);
+
+    // A flat line runs through the middle
+    private double YOf(ChartPoint point) =>
+        highest == lowest ? Height / 2 : Top + (highest - point.Y) / (highest - lowest) * (Height - 2 * Top);
+
+    private string Label(ChartPoint point) =>
+        PointLabel?.Invoke(point) ?? $"{FormatY(point.Y)}, {FormatX(point.X)}";
+
+    private static string Number(double value) => value.ToString("0.##", CultureInfo.InvariantCulture);
+
+    private static string Percent(double value, double of) => $"{Number(value / of * 100)}%";
+}

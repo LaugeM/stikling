@@ -13,7 +13,7 @@ public class LookedOverTests
     private readonly FakeTimelineRepository timeline = new();
     private readonly TimelineService service;
 
-    public LookedOverTests() => service = new TimelineService(timeline, new FakePhotoRepository(), new FixedTime(Now));
+    public LookedOverTests() => service = new TimelineService(timeline, new FakePhotoRepository(), new FakeMeasurementRepository(), new FixedTime(Now));
 
     private static TimelineEntry Entry(TimelineKind kind, TimelineEvent? @event = null, SubjectType type = SubjectType.Plant,
         DateTimeOffset? at = null, Guid? subject = null) =>

@@ -22,7 +22,7 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
     public async Task<IReadOnlyList<TimelineEntry>> GetPlantChangesAsync() =>
         (await db.GetAllAsync(RecordKinds.Timeline))
             .Where(e => !e.IsDeleted && e.Kind == TimelineKind.Change && e.SubjectType == SubjectType.Plant
-                && TimelineEvents.Of(e) != TimelineEvent.LookedOver)
+                && TimelineEvents.Of(e) is not (TimelineEvent.LookedOver or TimelineEvent.Measured))
             .ToList();
 
     public async Task<IReadOnlyList<TimelineEntry>> GetComingBackAsync() =>

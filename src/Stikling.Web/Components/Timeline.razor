@@ -8,6 +8,7 @@
 @inject ShelfService Shelf
 @inject TimeProvider Time
 @inject PropagationService PropagationService
+@inject MeasurementService MeasureService
 @using System.Globalization
 @using Stikling.Core.Sharing
 @using Stikling.Core.Propagations
@@ -111,7 +112,11 @@ else
                             @if (editId == entry.Id)
                             {
                                 <div class="entry-editor">
-                                    <textarea class="form-control" rows="2" aria-label="@Strings.Propagations.TlCorrectedNote" @bind="editText" @bind:event="oninput"></textarea>
+                                    @if (!MeasuredEntries.IsMeasured(entry))
+                                    {
+                                        <textarea class="form-control" rows="2" aria-label="@Strings.Propagations.TlCorrectedNote" @bind="editText" @bind:event="oninput"></textarea>
+                                    }
+                                    <MeasureFields Draft="editMeasure" Changed="() => { }" Disabled="busy" />
                                     <div class="entry-editor-row">
                                         <label for="@editDateId">@Strings.Propagations.TlHappenedOn</label>
                                         <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
@@ -127,14 +132,19 @@ else
                                     }
                                     <div class="entry-editor-row">
                                         <button type="button" class="btn btn-primary btn-sm" @onclick="() => SaveEditAsync(entry)"
-                                                disabled="@(busy || (entryPhotos.Count == 0 && string.IsNullOrWhiteSpace(editText)) || (entry.Kind == TimelineKind.Note && !editBringBack.IsValid(editDay, Today, entry.ComesBackOn)))">@Strings.Common.Save</button>
+                                                disabled="@(busy || !CanSaveEdit(entry, entryPhotos.Count))">@Strings.Common.Save</button>
                                         <button type="button" class="btn btn-link btn-sm" @onclick="CancelEdit">@Strings.Common.Cancel</button>
                                     </div>
                                 </div>
                             }
-                            else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver)
+                            else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver
+                                && !(MeasuredEntries.IsMeasured(entry) && measurementsByEntry.ContainsKey(entry.Id)))
                             {
                                 <p class="entry-text">@HistoryText.Show(entry, Labels.For, Labels.English, CultureInfo.CurrentUICulture)</p>
+                            }
+                            @if (editId != entry.Id && measurementsByEntry.TryGetValue(entry.Id, out var taken))
+                            {
+                                <p class="entry-measures">@string.Join(" · ", taken.Select(m => MeasureText.Phrase(m)))</p>
                             }
                             @if (editId != entry.Id && entry.Kind == TimelineKind.Note && entry.ComesBackOn is { } comesBack)
                             {
@@ -303,6 +313,10 @@ else
     [Parameter]
     public DateOnly? EarlierUntil { get; set; }
 
+    /// <summary>Raised when the measurements on the history changed, by correcting or deleting an entry, so the page can draw its growth curves again.</summary>
+    [Parameter]
+    public EventCallback OnMeasurementsChanged { get; set; }
+
     /// <summary>Raised when the cover photo should change (null = no cover).</summary>
     [Parameter]
     public EventCallback<Guid?> OnCoverChanged { get; set; }
@@ -340,6 +354,8 @@ else
     private string? editText;
     private DateOnly editDay;
     private BringBackChoice editBringBack = new();
+    private MeasureDraft editMeasure = new();
+    private IReadOnlyDictionary<Guid, IReadOnlyList<Measurement>> measurementsByEntry = new Dictionary<Guid, IReadOnlyList<Measurement>>();
     private string? editError;
     private Guid? versionsId;
     private Guid loadedFor;
@@ -416,6 +432,7 @@ else
         photos = [.. photos, .. references];
         photoIndex = photos.Select((p, i) => (p.Id, i)).ToDictionary(x => x.Id, x => x.i);
         days = WithShelfPhotos(TimelineOrder.ByDay(entries.Concat(earlier), Time), await Shelf.HistoryForAsync(SubjectId));
+        measurementsByEntry = await MeasureService.ForEntriesAsync(entries.Concat(earlier).Select(e => e.Id));
 
         // A photo tapped before the photos were here opens as soon as they are
         if (openWhenLoaded is { } waiting)
@@ -501,7 +518,9 @@ else
             cleared = await PropagationService.DeleteEntryAsync(entry);
         else
             await Entries.DeleteAsync(entry.Id);
+        await TimelineService.RemoveMeasurementsAsync(entry.Id);
         await LoadAsync();
+        await OnMeasurementsChanged.InvokeAsync();
         if (cleared.Count > 0)
             await OnSubjectChanged.InvokeAsync();
     }
@@ -511,6 +530,7 @@ else
         await RemovePhotoAsync(photo.Id);
         await TimelineService.RemoveEmptiedEntriesAsync(SubjectId, photo.Id);
         await LoadAsync();
+        await OnMeasurementsChanged.InvokeAsync();
         viewerIndex = photos.Count == 0 ? null : Math.Min(viewerIndex ?? 0, photos.Count - 1);
     }
 
@@ -524,7 +544,8 @@ else
     private void StartEdit(TimelineEntry entry)
     {
         editId = entry.Id;
-        editText = entry.Text;
+        editText = MeasuredEntries.IsMeasured(entry) ? null : entry.Text;
+        editMeasure = MeasureDraft.For(measurementsByEntry.GetValueOrDefault(entry.Id) ?? []);
         editDay = LocalDay(entry.OccurredAt);
         editBringBack = BringBackChoice.For(entry.ComesBackOn);
         editError = null;
@@ -537,24 +558,52 @@ else
         editError = null;
     }
 
+    // A note or a photo entry needs its text or photos, or measurements to stay as an entry of its own. An entry of measurements keeps at least one.
+    private bool CanSaveEdit(TimelineEntry entry, int photoCount)
+    {
+        if (MeasuredEntries.IsMeasured(entry))
+            return editMeasure.HasInput;
+        var hasContent = photoCount > 0 || !string.IsNullOrWhiteSpace(editText);
+        if (!hasContent)
+            return editMeasure.HasInput;
+        return entry.Kind != TimelineKind.Note || editBringBack.IsValid(editDay, Today, entry.ComesBackOn);
+    }
+
     private async Task SaveEditAsync(TimelineEntry entry)
     {
         busy = true;
         try
         {
-            await TimelineService.CorrectAsync(entry, editText, editDay);
+            var values = editMeasure.Values(out var measureError);
+            if (values is null)
+            {
+                editError = measureError;
+                return;
+            }
+
+            await MeasureService.CheckAsync(entry, values);
+            await TimelineService.CorrectAsync(entry, editText, editDay, keepsMeasurements: values.Count > 0);
+            await MeasureService.SetForEntryAsync(entry, values);
             if (entry.Kind == TimelineKind.Note || entry.ComesBackOn is not null)
                 await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay, Today));
             CancelEdit();
+            await OnMeasurementsChanged.InvokeAsync();
         }
         catch (ArgumentException ex)
         {
             // The rule's own message, without " (Parameter 'day')"
             editError = ex.Message.Split(" (Parameter")[0];
         }
+        catch (InvalidOperationException ex)
+        {
+            editError = ex.Message;
+        }
+        finally
+        {
+            busy = false;
+        }
 
         await LoadAsync();
-        busy = false;
     }
 
     private DateOnly LocalDay(DateTimeOffset moment) => Time.LocalDay(moment);
@@ -614,6 +663,7 @@ else
         TimelineEvent.Identified => Strings.Propagations.TlKindIdentified,
         TimelineEvent.NewLeaf => Strings.Propagations.TlKindNewLeaf,
         TimelineEvent.Pest => Strings.Propagations.TlKindPest,
+        TimelineEvent.Measured => Strings.Measurements.TlKindMeasured,
         _ => KindLabel(entry.Kind)
     };
 
@@ -628,6 +678,7 @@ else
         TimelineEvent.Identified => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.500" cy="10.500" r="6" /><path d="M15 15l5.500 5.500" /><path d="M8 10.500l2 2 3.500-3.500" /></svg>"""),
         TimelineEvent.NewLeaf => new($"""<svg viewBox="0 0 24 24" aria-hidden="true">{Icons.Seedling}</svg>"""),
         TimelineEvent.Pest => new($"""<svg viewBox="0 0 24 24" aria-hidden="true">{Icons.Pest}</svg>"""),
+        TimelineEvent.Measured => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.500h18v7H3Z" /><path d="M7 8.500v3M11 8.500v2.500M15 8.500v3M19 8.500v2.500" /></svg>"""),
         TimelineEvent.Arrived => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4Z" /><path d="M3 7.5h18V11H3Z" /><path d="M12 7.5V20" /><path d="M12 7.5C10 7.5 7.5 7 7.5 5.25 7.5 4 8.500 3.5 9.500 3.5 11 3.5 12 5 12 7.5Z" /><path d="M12 7.5c2 0 4.500-.5 4.500-2.250 0-1.250-1-1.750-2-1.750C13 3.5 12 5 12 7.5Z" /></svg>"""),
         _ => KindIcon(entry.Kind)
     };

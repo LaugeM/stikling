@@ -1,0 +1,82 @@
+@* The growth curves of a plant or a cutting, in the profile column under the details: one for each kind
+   measured at least three times, with the latest value big and a LineChart under it. Tapping a point
+   scrolls to the entry in the history and marks it for a moment. *@
+@inject MeasurementService MeasureService
+@inject PageScripts Scripts
+
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (curves.Count > 0)
+{
+    <section class="growth" aria-labelledby="@headingId">
+        <h2 class="section-label" id="@headingId">@Strings.Measurements.GrowthTitle</h2>
+        @foreach (var curve in curves)
+        {
+            var points = curve.Points.Select(p => new ChartPoint(p.Day, (double)p.Value, p.EntryId)).ToList();
+            <div class="growth-curve">
+                <div class="growth-head">
+                    <span class="growth-name">@curve.Name</span>
+                    <span class="growth-latest">@Show(curve, curve.Latest.Value)</span>
+                </div>
+                <LineChart Points="points" FormatY="y => Show(curve, (decimal)y)" FormatX="DayText"
+                           Description="@Describe(curve)" PointLabel="p => F(Strings.Measurements.GrowthPoint, Show(curve, (decimal)p.Y), DayText(p.X))"
+                           OnPointClick="OpenEntryAsync" />
+            </div>
+        }
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>The day a propagation starts on. The days are then counted from it, like on its photos. Without it, they are dates.</summary>
+    [Parameter]
+    public DateOnly? StartDay { get; set; }
+
+    /// <summary>On a plant potted up from a propagation: the propagation, whose measurements join the curves.</summary>
+    [Parameter]
+    public Guid? EarlierSubjectId { get; set; }
+
+    /// <summary>The day it was potted up. Only the propagation's measurements up to then count.</summary>
+    [Parameter]
+    public DateOnly? EarlierUntil { get; set; }
+
+    private readonly string headingId = $"growth-{Guid.NewGuid():N}";
+    private IReadOnlyList<GrowthCurve> curves = [];
+    private Guid loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != SubjectId)
+        {
+            loadedFor = SubjectId;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync() => curves = await MeasureService.CurvesForAsync(SubjectId, EarlierSubjectId, EarlierUntil);
+
+    private static string Show(GrowthCurve curve, decimal value) => MeasureText.Value(curve.IsLength, value);
+
+    private string DayText(DateOnly day) =>
+        PhotoDayCount.DayLabel(StartDay, day) ?? ProblemText.ShortDay(day);
+
+    private string Describe(GrowthCurve curve) =>
+        F(Strings.Measurements.GrowthDescription, curve.Name, curve.Points.Count,
+            DayText(curve.Points[0].Day), DayText(curve.Latest.Day), Show(curve, curve.Latest.Value));
+
+    private async Task OpenEntryAsync(ChartPoint point)
+    {
+        if (point.Key is not { } entryId)
+            return;
+        try
+        {
+            await Scripts.ShowFoundAsync($"entry-{entryId}");
+        }
+        catch (JSException)
+        {
+            // The entry is not on the page, so there is nothing to scroll to
+        }
+    }
+}

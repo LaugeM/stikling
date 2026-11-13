@@ -722,6 +722,12 @@ else
                     </p>
                 </section>
 
+            </div>
+
+            <GrowthBlock @key="@($"{historyVersion}-{growthVersion}-{earlierId}")" SubjectId="plant.Id"
+                         EarlierSubjectId="earlierId" EarlierUntil="earlierUntil" />
+
+            <div class="profile-details @(detailsOpen ? "open" : null)">
                 <p class="family-hint">
                     @Html(Strings.PlantDetail.CopyHint, Link($"plants/new?copy={plant.Id}", Strings.PlantDetail.CopyHintLink))
                 </p>
@@ -791,7 +797,7 @@ else
             <Timeline @key="historyVersion" @ref="timeline" SubjectType="SubjectType.Plant" SubjectId="plant.Id"
                       CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" PhotoAge="day => PhotoDayCount.PlantAge(plant, day)"
                       EarlierPropagationId="@(earlierUntil is null ? null : fromPropagation?.Id)" EarlierUntil="earlierUntil"
-                      EmptyText="@Strings.PlantDetail.TimelineEmpty" OnBeforeAfter="OpenShareBeforeAfter" />
+                      EmptyText="@Strings.PlantDetail.TimelineEmpty" OnBeforeAfter="OpenShareBeforeAfter" OnMeasurementsChanged="() => growthVersion++" />
         </div>
     </div>
 
@@ -1602,6 +1608,11 @@ else
     private bool scrollToFamily;
     private More more;
     private int historyVersion;
+
+    // Counts up when a correction or a deletion in the history changes the measurements, so the growth curves are drawn again
+    private int growthVersion;
+
+    private Guid? earlierId => earlierUntil is null ? null : fromPropagation?.Id;
 
     // A cover that is a reference photo shows as no cover. The plant itself isn't changed.
     private Guid? ShownCover => Covers.Shown(plant?.CoverPhotoId);

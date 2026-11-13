@@ -181,6 +181,8 @@ public static partial class HistoryText
     {
         if (line.Key == CareKey)
             return RenderCare(line, label, culture);
+        if (line.Key == Measurements.MeasuredEntries.LineKey)
+            return Measurements.MeasuredEntries.Render(line, culture, saved);
         if (!ByKey.TryGetValue(line.Key, out var template) || line.Args.Count != template.Args.Length)
             return null;
 

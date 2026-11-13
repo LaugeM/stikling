@@ -247,7 +247,7 @@ public class TimelineCorrectionTests
     private readonly FakePhotoRepository photos = new();
     private readonly TimelineService service;
 
-    public TimelineCorrectionTests() => service = new TimelineService(timeline, photos, new FixedTime(Now));
+    public TimelineCorrectionTests() => service = new TimelineService(timeline, photos, new FakeMeasurementRepository(), new FixedTime(Now));
 
     private TimelineEntry Note(string? text, params Photo[] withPhotos)
     {
@@ -439,7 +439,7 @@ public class TimelineAddPhotosTests
     private readonly TimelineService service;
     private readonly Guid subject = Guid.NewGuid();
 
-    public TimelineAddPhotosTests() => service = new TimelineService(timeline, photos, new FixedTime(Now));
+    public TimelineAddPhotosTests() => service = new TimelineService(timeline, photos, new FakeMeasurementRepository(), new FixedTime(Now));
 
     private Photo Saved(string takenAt)
     {

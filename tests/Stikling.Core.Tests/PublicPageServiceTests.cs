@@ -25,7 +25,7 @@ public class PublicPageServiceTests
             server,
             new PlantService(plants, timeline, time),
             new PropagationService(propagations, plants, timeline, new FakePropagationCareLogRepository(), new FakeCareLogRepository(), photos, time),
-            new TimelineService(timeline, photos, time));
+            new TimelineService(timeline, photos, new FakeMeasurementRepository(), time));
     }
 
     [Fact]

@@ -66,7 +66,7 @@ public class PublicPageHidingTests
         var photo = new Photo { SubjectType = SubjectType.Plant, SubjectId = Guid.NewGuid() };
         photos.Photos[photo.Id] = photo;
         var updates = new CountingPhotos(photos);
-        var service = new TimelineService(new FakeTimelineRepository(), updates, Time);
+        var service = new TimelineService(new FakeTimelineRepository(), updates, new FakeMeasurementRepository(), Time);
 
         await service.SetPhotoHiddenFromPublicPageAsync(photo, true);
         await service.SetPhotoHiddenFromPublicPageAsync(photo, true);
