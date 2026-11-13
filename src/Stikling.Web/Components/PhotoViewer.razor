@@ -1,5 +1,8 @@
 @* Full-screen photo viewer with previous/next, and "set as cover", framing and delete where the page allows them. Photos copied from a received history can't be deleted. *@
 
+@using Stikling.Core.Photos
+@inject PhotoMarkupService Markups
+
 @if (Current is { } photo)
 {
     <div class="viewer" role="dialog" aria-modal="true" aria-label="@Strings.Shared.PhotoViewerLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
@@ -8,7 +11,11 @@
             <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
         </div>
 
-        @if (framing)
+        @if (marking)
+        {
+            <PhotoMarker @key="photo.Id" Photo="photo" OnDone="list => MarkingDone(photo, list)" />
+        }
+        else if (framing)
         {
             <PhotoFramer @key="photo.Id" Photo="photo" OnSave="frame => SaveFrameAsync(photo, frame)" OnCancel="() => framing = false" />
         }
@@ -16,6 +23,14 @@
         {
             <div class="viewer-stage">
                 <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="@Strings.Shared.PhotoViewerAlt" />
+                @if (MarksOf(photo) is { Count: > 0 } marks)
+                {
+                    @if (!marksHidden)
+                    {
+                        <PhotoMarkupLayer @key="photo.Id" Marks="marks" />
+                    }
+                    <button type="button" class="viewer-hide-marks" aria-pressed="@(marksHidden ? "true" : "false")" @onclick="() => marksHidden = !marksHidden">@(marksHidden ? Strings.Shared.MarkupShow : Strings.Shared.MarkupHide)</button>
+                }
                 @if (PhotoList.Count > 1)
                 {
                     <button type="button" class="viewer-nav prev" @onclick="() => Move(-1)" aria-label="@Strings.Shared.PhotoViewerPrevious"><svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg></button>
@@ -25,7 +40,7 @@
 
             @if (HasActions)
             {
-                <div class="viewer-actions">
+                <div class="viewer-actions @(CanMarkUp ? "markable" : null)">
                     @if (confirmDelete)
                     {
                         <span>@Strings.Shared.PhotoViewerDeleteConfirm</span>
@@ -53,6 +68,11 @@
                         @if (CanCompare(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCompare.InvokeAsync(photo)">@Strings.Shared.PhotoViewerCompare</button>
+                        }
+                        @* The photo isn't changed, so it can be marked up wherever it came from *@
+                        @if (CanMarkUp)
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => marking = true">@Strings.Shared.PhotoViewerMarkUp</button>
                         }
                         @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
                         {
@@ -111,6 +131,10 @@
     [Parameter]
     public EventCallback<Photo> OnCompare { get; set; }
 
+    /// <summary>Whether Mark up shows: drawing circles and arrows on the photo, which are kept as records of their own.</summary>
+    [Parameter]
+    public bool CanMarkUp { get; set; }
+
     /// <summary>Photos that belong to another page, like a cutting's photos on its plant. They can be framed and set as the cover, not moved or deleted from here.</summary>
     [Parameter]
     public IReadOnlySet<Guid>? KeptPhotoIds { get; set; }
@@ -120,20 +144,59 @@
     private ElementReference dialog;
     private bool confirmDelete;
     private bool framing;
+    private bool marking;
+    private bool marksHidden;
     private bool focusPending;
+    private Dictionary<Guid, IReadOnlyList<PhotoMarkup>>? markups;
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
-    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate;
+    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate || CanMarkUp;
 
     private bool CanCompare(Photo photo) =>
         OnCompare.HasDelegate && !photo.IsReference && PhotoList.Count(p => !p.IsReference) >= 2;
 
     private Photo? Current => Index is { } i && i >= 0 && i < PhotoList.Count ? PhotoList[i] : null;
 
-    protected override void OnParametersSet()
+    protected override async Task OnParametersSetAsync()
     {
-        if (Current is not null)
-            focusPending = true;
+        if (Current is null)
+        {
+            // Closed: the marks are read again next time, and hiding them is forgotten
+            markups = null;
+            marksHidden = false;
+            marking = false;
+            return;
+        }
+
+        focusPending = true;
+        if (markups is null || !markups.ContainsKey(Current.Id) && PhotoList.Any(p => !markupsFor.Contains(p.Id)))
+            await LoadMarksAsync();
+    }
+
+    // The photos the marks were read for, since a photo with none isn't in the dictionary
+    private HashSet<Guid> markupsFor = [];
+
+    private async Task LoadMarksAsync()
+    {
+        var ids = PhotoList.Select(p => p.Id).ToList();
+        var found = await Markups.GetForPhotosAsync(ids);
+        markups = found.ToDictionary(x => x.Key, x => x.Value);
+        markupsFor = ids.ToHashSet();
+    }
+
+    private IReadOnlyList<PhotoMarkup>? MarksOf(Photo photo) =>
+        markups is not null && markups.TryGetValue(photo.Id, out var list) ? list : null;
+
+    private void MarkingDone(Photo photo, IReadOnlyList<PhotoMarkup> list)
+    {
+        markups ??= [];
+        if (list.Count == 0)
+            markups.Remove(photo.Id);
+        else
+            markups[photo.Id] = list;
+        marking = false;
+        marksHidden = false;
+        focusPending = true;
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -164,6 +227,8 @@
     {
         confirmDelete = false;
         framing = false;
+        marking = false;
+        marksHidden = false;
         await IndexChanged.InvokeAsync(null);
     }
 
@@ -178,6 +243,8 @@
     {
         switch (e.Key)
         {
+            // Marking has its own keys, and Escape there leaves marking, not the viewer
+            case var _ when marking: break;
             case "Escape" when framing: framing = false; break;
             case "Escape": await CloseAsync(); break;
             case "ArrowLeft" when PhotoList.Count > 1 && !framing: await Move(-1); break;

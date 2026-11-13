@@ -92,6 +92,7 @@ public static class RecordKinds
     public static readonly RecordKind<ShoppingItem> ShoppingItems = new("shoppingItems");
     public static readonly RecordKind<Measurement> Measurements = new("measurements");
     public static readonly RecordKind<OwnMeasureKind> OwnMeasureKinds = new("ownMeasureKinds");
+    public static readonly RecordKind<PhotoMarkup> PhotoMarkups = new("photoMarkups");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -138,6 +139,7 @@ public static class RecordKinds
         ShoppingItems,
         Measurements,
         OwnMeasureKinds,
+        PhotoMarkups,
         Settings,
     ];
 }

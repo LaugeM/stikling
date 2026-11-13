@@ -1,0 +1,129 @@
+/* Dark in both themes, like the photo viewer, so the colours are written here as they have them. Lines are
+   the same width on screen at any photo size, because the shapes are drawn in pixels. */
+.mk-layer {
+    position: absolute;
+    pointer-events: none;
+}
+
+.mk-svg {
+    position: absolute;
+    inset: 0;
+    display: block;
+    overflow: visible;
+}
+
+/* Under the light line, as one group at half opacity so it isn't darker where line and head meet */
+.mk-edge {
+    opacity: 0.5;
+}
+
+.mk-edge circle,
+.mk-edge path {
+    vector-effect: non-scaling-stroke;
+    fill: none;
+    stroke: #000;
+    stroke-width: 5.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.mk-line circle,
+.mk-line path {
+    vector-effect: non-scaling-stroke;
+    fill: none;
+    stroke: #f1f4f1;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.mk-edge .mk-head {
+    fill: #000;
+}
+
+.mk-line .mk-head {
+    fill: #f1f4f1;
+    stroke-width: 1;
+}
+
+/* The line to grab a mark by, wider than it is drawn. A circle is grabbed by its edge, so the inside can still draw */
+.mk-hit circle,
+.mk-hit path {
+    vector-effect: non-scaling-stroke;
+    fill: none;
+    stroke: transparent;
+    stroke-width: 24;
+}
+
+.mk-inside {
+    fill: transparent;
+    stroke: none;
+}
+
+.interactive .mk-inside {
+    pointer-events: all;
+}
+
+.interactive .mk-hit {
+    pointer-events: stroke;
+}
+
+.interactive .mk-handle {
+    pointer-events: all;
+    cursor: grab;
+}
+
+.mk-handle-area {
+    fill: transparent;
+}
+
+.mk-handle-dot {
+    vector-effect: non-scaling-stroke;
+    fill: #f1f4f1;
+    stroke: #5fb883;
+    stroke-width: 2;
+}
+
+.interactive .mk {
+    cursor: pointer;
+}
+
+.interactive .mk.picked {
+    cursor: move;
+}
+
+.mk:focus {
+    outline: none;
+}
+
+.mk:focus-visible {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+/* Hangs on a point (left, top) and grows away from it the way --ux and --uy say: under a circle, beyond an arrow's
+   tail. --sx and --sy are what markup.js adds to keep it inside the photo. */
+.mk-label {
+    position: absolute;
+    max-width: 11rem;
+    padding: 0.15rem 0.6rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.6);
+    color: #f1f4f1;
+    font-size: 0.8rem;
+    line-height: 1.4;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    transform: translate(calc((var(--ux) - 1) * 50% + var(--sx, 0px)), calc((var(--uy) - 1) * 50% + var(--sy, 0px)));
+}
+
+.interactive .mk-label {
+    pointer-events: auto;
+    cursor: pointer;
+}
+
+.interactive .mk-label.picked {
+    cursor: move;
+    box-shadow: 0 0 0 1px #5fb883;
+}

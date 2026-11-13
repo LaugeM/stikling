@@ -1578,4 +1578,52 @@ Maybe</value>
     <value>at least {0}</value>
     <comment>{0} is a length of time, like "8 months".</comment>
   </data>
+  <data name="PhotoViewerMarkUp" xml:space="preserve">
+    <value>Mark up</value>
+    <comment>Button in the photo viewer that opens drawing circles and arrows on the photo.</comment>
+  </data>
+  <data name="MarkupLabel" xml:space="preserve">
+    <value>Mark up the photo</value>
+    <comment>Name of the full-screen view where circles and arrows are drawn on a photo, for screen readers.</comment>
+  </data>
+  <data name="MarkupHide" xml:space="preserve">
+    <value>Hide marks</value>
+    <comment>Button in the photo viewer that hides the circles and arrows drawn on the photo.</comment>
+  </data>
+  <data name="MarkupShow" xml:space="preserve">
+    <value>Show marks</value>
+    <comment>Button in the photo viewer that shows the circles and arrows again after they were hidden.</comment>
+  </data>
+  <data name="MarkupShapeGroup" xml:space="preserve">
+    <value>Shape</value>
+    <comment>Name of the Circle and Arrow choice, for screen readers.</comment>
+  </data>
+  <data name="MarkupCircle" xml:space="preserve">
+    <value>Circle</value>
+    <comment>Choice when marking up a photo, and the name of a circle drawn on it, for screen readers.</comment>
+  </data>
+  <data name="MarkupArrow" xml:space="preserve">
+    <value>Arrow</value>
+    <comment>Choice when marking up a photo, and the name of an arrow drawn on it, for screen readers.</comment>
+  </data>
+  <data name="MarkupCircleNamed" xml:space="preserve">
+    <value>Circle, {0}</value>
+    <comment>Name of a circle drawn on a photo that has a label, for screen readers. {0} is the label.</comment>
+  </data>
+  <data name="MarkupArrowNamed" xml:space="preserve">
+    <value>Arrow, {0}</value>
+    <comment>Name of an arrow drawn on a photo that has a label, for screen readers. {0} is the label.</comment>
+  </data>
+  <data name="MarkupHint" xml:space="preserve">
+    <value>Drag on the photo, or tap it</value>
+    <comment>Hint under the photo while marking it up.</comment>
+  </data>
+  <data name="MarkupLabelPlaceholder" xml:space="preserve">
+    <value>Label, like new node</value>
+    <comment>Placeholder in the field for the short text on a circle or arrow.</comment>
+  </data>
+  <data name="MarkupLabelName" xml:space="preserve">
+    <value>Label for the mark</value>
+    <comment>Name of the field for the short text on a circle or arrow, for screen readers.</comment>
+  </data>
 </root>

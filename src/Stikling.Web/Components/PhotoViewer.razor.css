@@ -27,6 +27,12 @@
     flex-wrap: wrap;
 }
 
+/* Marking up replaces this row with one of the same height (6rem in PhotoMarker.razor.css), so the photo stays where it is */
+.viewer-actions.markable {
+    box-sizing: border-box;
+    min-height: 6rem;
+}
+
 .viewer-count {
     font-size: 0.9rem;
     color: #b8c2bb;
@@ -104,4 +110,46 @@
     width: 1.1rem;
     height: 1.1rem;
     fill: currentColor;
+}
+
+/* Over the nav buttons' corner of the photo: the marks sit under the arrows, which stay tappable */
+.viewer-nav {
+    z-index: 2;
+}
+
+.viewer-hide-marks {
+    position: absolute;
+    right: 0.5rem;
+    bottom: 0.5rem;
+    z-index: 2;
+    height: 2rem;
+    padding: 0 0.9rem;
+    border: 0;
+    border-radius: 999px;
+    background: rgb(0 0 0 / 0.55);
+    color: #f1f4f1;
+    font-size: 0.875rem;
+}
+
+/* The tap area is 44px */
+.viewer-hide-marks::after {
+    content: "";
+    position: absolute;
+    inset: -0.375rem;
+}
+
+.viewer-hide-marks[aria-pressed="true"] {
+    border: 1px solid #5fb883;
+}
+
+.viewer-hide-marks:focus-visible,
+.viewer-actions .btn:focus-visible {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .viewer-hide-marks {
+        transition: background-color 0.15s ease, color 0.15s ease;
+    }
 }
