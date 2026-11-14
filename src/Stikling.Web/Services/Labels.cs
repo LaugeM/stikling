@@ -337,6 +337,14 @@ public static class Labels
         return english == current ? [english] : [english, current];
     }
 
+    /// <summary>The same for "Sold", for finding the day an older plant was sold.</summary>
+    public static string[] SoldInSavedLines()
+    {
+        var english = Strings.Labels.ResourceManager.GetString(nameof(Strings.Labels.StatusSold), CultureInfo.InvariantCulture)!;
+        var current = For(PlantStatus.Sold);
+        return english == current ? [english] : [english, current];
+    }
+
     /// <summary>Any of the app's enums, for code that works with several (e.g. history text).</summary>
     public static string For(Enum value) => value switch
     {

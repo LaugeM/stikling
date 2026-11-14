@@ -139,7 +139,8 @@ else
             Time.LocalDay,
             order => sellers.For(order.SellerId, order.SellerName)?.Name,
             supplyId => stock.Find(supplyId)?.Name,
-            potId => pots.TryGetValue(potId, out var pot) ? pot.DisplayName : null);
+            potId => pots.TryGetValue(potId, out var pot) ? pot.DisplayName : null,
+            Labels.SoldInSavedLines());
         years = all;
         var wanted = picked ?? Time.Today().Year;
         current = all.FirstOrDefault(y => y.Year == wanted) ?? all.FirstOrDefault();

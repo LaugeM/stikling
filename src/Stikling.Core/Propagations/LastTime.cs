@@ -31,7 +31,7 @@ public static class LastTime
         && string.Equals(a.Container?.Trim() ?? "", b.Container?.Trim() ?? "", StringComparison.Ordinal)
         && a.RootingAids.Order().SequenceEqual(b.RootingAids.Order())
         && a.DriedForHours == b.DriedForHours
-        && a.WaterChangeDays == b.WaterChangeDays;
+        && (!WaterChangeLog.Takes(a.Medium) || a.WaterChangeDays == b.WaterChangeDays);
 
     /// <summary>Copies the setup of <paramref name="from"/> onto <paramref name="to"/>. Nothing else changes.</summary>
     public static void Apply(Propagation from, Propagation to)

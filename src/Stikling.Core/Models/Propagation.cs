@@ -443,7 +443,8 @@ public sealed class Propagation : Entity
             errors.Add(Strings.Propagations.ErrDormantFuture);
         if (SpareCount < 0)
             errors.Add(Strings.Propagations.ErrSwapNegative);
-        if (WaterChangeDays is < 1 or > MaxWaterChangeDays)
+        // Only where the number counts and the form shows it. In another medium it is left as it is.
+        if (WaterChangeDays is < 1 or > MaxWaterChangeDays && Propagations.WaterChangeLog.Takes(Medium))
             errors.Add(F(Strings.Propagations.ErrWaterChangeDays, MaxWaterChangeDays));
         return errors;
     }

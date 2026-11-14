@@ -183,7 +183,7 @@ public static class PlantLineage
             offspring.Count(p => p.Status == PlantStatus.GivenAway),
             offspring.Count(p => p.Status == PlantStatus.Sold),
             further,
-            plant.PricePaid,
+            plant.PricePaid > 0 ? plant.PricePaid : null,
             broughtIn > 0 ? broughtIn : null);
     }
 }

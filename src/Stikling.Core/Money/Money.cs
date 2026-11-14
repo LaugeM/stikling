@@ -66,8 +66,11 @@ public static class Money
         Func<DateTimeOffset, DateOnly> dayOf,
         Func<Order, string?>? orderName = null,
         Func<Guid, string?>? supplyName = null,
-        Func<Guid, string?>? potName = null)
+        Func<Guid, string?>? potName = null,
+        string[]? soldLabels = null)
     {
+        // The text PlantChanges.Describe writes when a status changes, in the language the line was saved in
+        var soldLines = (soldLabels ?? ["Sold"]).Select(label => $"Status: {label}").ToArray();
         var lines = new List<MoneyLine>();
         var livePlants = plants.Where(p => !p.IsDeleted).ToList();
 
@@ -103,7 +106,7 @@ public static class Money
         var liveEntries = entries.Where(e => !e.IsDeleted).ToList();
         var soldOn = liveEntries
             .Where(e => e.SubjectType == SubjectType.Plant && e.Text is not null
-                && e.Text.Split('\n').Any(line => line.StartsWith("Status: Sold", StringComparison.Ordinal)))
+                && e.Text.Split('\n').Any(line => soldLines.Any(s => line.StartsWith(s, StringComparison.Ordinal))))
             .GroupBy(e => e.SubjectId)
             .ToDictionary(g => g.Key, g => g.Max(e => e.OccurredAt));
         foreach (var plant in livePlants.Where(p => p.Status == PlantStatus.Sold && p.SoldPrice > 0))
