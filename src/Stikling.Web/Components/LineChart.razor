@@ -1,7 +1,7 @@
 @* A small line chart of values over time, drawn as SVG with no libraries: Potting Green line, a ring on each
    point, a hairline baseline and the first and last day under it. The smallest and the largest value are
    named at the side. Each point is a button with a 44px tap area. It knows nothing about what it draws, so
-   the growth curve uses it today and room readings can later. *@
+   the growth curve and the readings of a room or spot use it. *@
 @using System.Globalization
 
 @if (points.Count > 0)

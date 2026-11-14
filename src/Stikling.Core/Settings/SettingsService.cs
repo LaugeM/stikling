@@ -33,6 +33,13 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetTemperaturesAsync(TemperatureUnit unit)
+    {
+        var current = await GetAsync();
+        current.Temperatures = unit;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetDatesAsync(DateStyle style)
     {
         var current = await GetAsync();

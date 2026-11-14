@@ -141,6 +141,13 @@ public sealed class UserSettings : Entity
     public LengthUnit? Lengths { get; set; }
 
     /// <summary>
+    /// The unit temperatures are shown and typed in. Readings stay stored in °C. Null means Celsius.
+    /// Older settings without it read as null.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<TemperatureUnit>))]
+    public TemperatureUnit? Temperatures { get; set; }
+
+    /// <summary>
     /// The order dates are written in. Null means <see cref="DateStyle.DayFirst"/>, the language's own
     /// pattern. Older settings without it read as null.
     /// </summary>

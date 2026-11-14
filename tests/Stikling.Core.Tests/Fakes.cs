@@ -13,6 +13,7 @@ using Stikling.Core.Leaves;
 using Stikling.Core.Shelves;
 using Stikling.Core.Orders;
 using Stikling.Core.Photos;
+using Stikling.Core.Readings;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -1243,5 +1244,19 @@ internal sealed class FakeShoppingItemRepository() : FakeRepository<ShoppingItem
     {
         if (item.Validate().Count > 0)
             throw new InvalidOperationException("Invalid shopping item");
+    }
+}
+
+internal sealed class FakePlaceReadingRepository() : FakeRepository<PlaceReading>(stampsDates: true), IPlaceReadingRepository
+{
+    public Dictionary<Guid, PlaceReading> Readings => Records;
+
+    /// <summary>The day after which a reading is in the future.</summary>
+    public DateOnly Today { get; set; } = new(2026, 11, 13);
+
+    protected override void Check(PlaceReading reading)
+    {
+        if (reading.Validate(Today).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
     }
 }

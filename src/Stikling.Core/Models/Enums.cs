@@ -218,6 +218,14 @@ public enum LengthUnit
     Inches
 }
 
+/// <summary>The unit temperatures are shown and typed in. Readings are always stored in °C.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<TemperatureUnit>))]
+public enum TemperatureUnit
+{
+    Celsius,
+    Fahrenheit
+}
+
 /// <summary>The order dates are written in. DayFirst is the language's own pattern.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<DateStyle>))]
 public enum DateStyle

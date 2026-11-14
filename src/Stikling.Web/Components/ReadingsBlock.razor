@@ -1,0 +1,166 @@
+@* The light, temperature and humidity of a room or spot, on its page: the latest of each as a tile, one curve
+   with a switch between the measures that have one, and links to add a reading and to see them all. A spot
+   without a reading of its own shows the room's, marked. *@
+@inject PlaceReadingService Readings
+
+<ReloadOnSync Reload="LoadAsync" />
+
+<section class="readings" aria-labelledby="@headingId">
+    <h2 class="section-label" id="@headingId">@Strings.Shared.ReadingsTitle</h2>
+
+    @if (loaded && !conditions.Any)
+    {
+        <p class="settings-hint mt-0">@F(Strings.Shared.ReadingsHint, PlaceName)</p>
+        <button type="button" class="btn btn-link btn-sm link-action readings-add" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+    }
+    else if (loaded)
+    {
+        <div class="reading-tiles">
+            @Tile(ReadingMeasure.Light, conditions.Light)
+            @Tile(ReadingMeasure.Temperature, conditions.Temperature)
+            @Tile(ReadingMeasure.Humidity, conditions.Humidity)
+        </div>
+
+        @if (ShownCurve is { } curve)
+        {
+            var points = curve.Points.Select(p => new ChartPoint(p.Day, (double)p.Value, p.ReadingId)).ToList();
+            <div class="reading-curve">
+                @if (curves.Count > 1)
+                {
+                    <div class="btn-group segmented w-100" role="radiogroup" aria-label="@Strings.Shared.ReadingChartSwitch">
+                        @foreach (var option in curves)
+                        {
+                            var measure = option.Measure;
+                            <input type="radio" class="btn-check" name="@switchName" id="@(switchName)-@measure"
+                                   checked="@(measure == curve.Measure)" @onchange="() => chosen = measure" />
+                            <label class="btn btn-outline-primary" for="@(switchName)-@measure">@ReadingText.MeasureName(measure)</label>
+                        }
+                    </div>
+                }
+                <LineChart Points="points" FormatY="y => AxisValue(curve.Measure, (decimal)y)" FormatX="ProblemText.ShortDay"
+                           Description="@Describe(curve)"
+                           PointLabel="p => F(Strings.Shared.ReadingChartPoint, ReadingText.Value(curve.Measure, (decimal)p.Y), ProblemText.ShortDay(p.X))"
+                           OnPointClick="OpenReadingAsync" />
+            </div>
+        }
+
+        <div class="readings-links">
+            <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+            @if (ownCount > 0)
+            {
+                <a class="btn btn-link btn-sm link-action" href="rooms/@PlaceId/readings">@Strings.Shared.ReadingAll</a>
+            }
+        </div>
+    }
+</section>
+
+<ReadingSheet @bind-Open="sheetOpen" PlaceId="PlaceId" PlaceName="@PlaceName" Reading="editing" OnSaved="SavedAsync" />
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid PlaceId { get; set; }
+
+    [Parameter]
+    public string PlaceName { get; set; } = "";
+
+    private readonly string headingId = $"readings-{Guid.NewGuid():N}";
+    private readonly string switchName = $"readings-switch-{Guid.NewGuid():N}";
+    private PlaceConditions conditions = new(null, null, null);
+    private IReadOnlyList<ReadingCurve> curves = [];
+    private int ownCount;
+    private ReadingMeasure? chosen;
+    private bool loaded;
+    private bool sheetOpen;
+    private PlaceReading? editing;
+    private Guid loadedFor;
+
+    // The measure picked stays picked while it still has a curve, else the first one
+    private ReadingCurve? ShownCurve =>
+        curves.FirstOrDefault(c => c.Measure == chosen) ?? curves.FirstOrDefault();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != PlaceId)
+        {
+            loadedFor = PlaceId;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        conditions = await Readings.ConditionsForAsync(PlaceId);
+        curves = await Readings.CurvesAsync(PlaceId);
+        ownCount = (await Readings.GetForPlaceAsync(PlaceId)).Count;
+        loaded = true;
+    }
+
+    private RenderFragment Tile(ReadingMeasure measure, ConditionValue? value) => @<div class="reading-tile">
+        <span class="reading-name">@ReadingText.MeasureName(measure)</span>
+        @if (value is null)
+        {
+            <span class="reading-none">@Strings.Shared.ReadingNone</span>
+        }
+        else
+        {
+            var reading = value.Reading;
+            <span class="reading-value">@Shown(measure, reading)</span>
+            <span class="reading-meta">@When(measure, reading)</span>
+            @if (measure == ReadingMeasure.Light && reading.Lux is { } lux)
+            {
+                <span class="reading-meta">@ReadingText.Guess(lux)</span>
+            }
+            @if (value.FromRoom)
+            {
+                <span class="reading-meta">@Strings.Shared.ReadingFromRoom</span>
+            }
+        }
+    </div>;
+
+    private static string Shown(ReadingMeasure measure, PlaceReading reading) => measure switch
+    {
+        ReadingMeasure.Light => Climate.Light(reading.Lux ?? 0),
+        ReadingMeasure.Temperature => Climate.Temperature(reading.TemperatureC ?? 0),
+        _ => Climate.Humidity(reading.HumidityPercent ?? 0)
+    };
+
+    // Beside the chart there is only room for a short label, so light is the number alone (the switch and the tile name the unit)
+    private static string AxisValue(ReadingMeasure measure, decimal value) => measure switch
+    {
+        ReadingMeasure.Light => Math.Round(Climate.LightToInput((int)value), 0, MidpointRounding.AwayFromZero).ToString("N0", System.Globalization.CultureInfo.CurrentCulture),
+        ReadingMeasure.Temperature => Climate.TemperatureShort(value),
+        _ => Climate.Humidity((int)value)
+    };
+
+    // The day, and on the light tile the time of day when there is one
+    private static string When(ReadingMeasure measure, PlaceReading reading) =>
+        measure == ReadingMeasure.Light && reading.Time is { } time
+            ? $"{ProblemText.ShortDay(reading.Day)} · {TextCulture.TimeOf(time)}"
+            : ProblemText.ShortDay(reading.Day);
+
+    private string Describe(ReadingCurve curve) =>
+        F(Strings.Shared.ReadingChartDescription, ReadingText.MeasureName(curve.Measure), PlaceName, curve.Points.Count,
+            ProblemText.ShortDay(curve.Points[0].Day), ProblemText.ShortDay(curve.Points[^1].Day),
+            ReadingText.Value(curve.Measure, curve.Points[^1].Value));
+
+    private void OpenAdd()
+    {
+        editing = null;
+        sheetOpen = true;
+    }
+
+    private async Task OpenReadingAsync(ChartPoint point)
+    {
+        if (point.Key is not { } id || await Readings.GetAsync(id) is not { } reading)
+            return;
+
+        editing = reading;
+        sheetOpen = true;
+    }
+
+    private async Task SavedAsync()
+    {
+        sheetOpen = false;
+        await LoadAsync();
+    }
+}

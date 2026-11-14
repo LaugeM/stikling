@@ -1,0 +1,118 @@
+@page "/rooms/{Id:guid}/readings"
+@inject RoomService RoomService
+@inject PlaceReadingService Readings
+
+<PageTitle>@F(Strings.Shared.ReadingsPageTitle, place?.Name ?? Strings.Shared.RoomsTitle)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (place is { } there)
+{
+    <a class="back-link" href="rooms/@there.Id">@there.Name</a>
+}
+else
+{
+    <a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+}
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (place is not { } found)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Shared.SpotHistoryGone</p>
+    </div>
+}
+else
+{
+    <h1>@F(Strings.Shared.ReadingsPageTitle, found.Name)</h1>
+
+    @if (readings.Count == 0)
+    {
+        <div class="empty-state mt-3">
+            <p>@F(Strings.Shared.ReadingsEmpty, found.Name)</p>
+            <p class="text-body-secondary">@F(Strings.Shared.ReadingsHint, found.Name)</p>
+            <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+        </div>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary mt-2" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+        <ul class="reading-list">
+            @foreach (var reading in readings)
+            {
+                var item = reading;
+                <li>
+                    <button type="button" class="reading-row" @onclick="() => OpenCorrect(item)">
+                        <span class="reading-when">@When(item)</span>
+                        <span class="reading-values">@ReadingText.Values(item)</span>
+                        @if (Detail(item) is { Length: > 0 } detail)
+                        {
+                            <span class="reading-detail">@detail</span>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(item.Notes))
+                        {
+                            <span class="reading-detail">@item.Notes</span>
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+
+    <ReadingSheet @bind-Open="sheetOpen" PlaceId="found.Id" PlaceName="@found.Name" Reading="editing" OnSaved="SavedAsync" />
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool loaded;
+    private Place? place;
+    private IReadOnlyList<PlaceReading> readings = [];
+    private bool sheetOpen;
+    private PlaceReading? editing;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        // A merged place gives the place it went into
+        place = (await RoomService.GetPageAsync(Id))?.Place;
+        readings = place is { } found ? await Readings.GetForPlaceAsync(found.Id) : [];
+        loaded = true;
+    }
+
+    private static string When(PlaceReading reading) =>
+        reading.Time is { } time ? $"{Labels.Date(reading.Day)} · {TextCulture.TimeOf(time)}" : Labels.Date(reading.Day);
+
+    // "About low · South window"
+    private static string Detail(PlaceReading reading)
+    {
+        var parts = new List<string>();
+        if (reading.Lux is { } lux)
+            parts.Add(ReadingText.Guess(lux));
+        if (!string.IsNullOrWhiteSpace(reading.Window))
+            parts.Add(reading.Window.Trim());
+        return string.Join(" · ", parts);
+    }
+
+    private void OpenAdd()
+    {
+        editing = null;
+        sheetOpen = true;
+    }
+
+    private void OpenCorrect(PlaceReading reading)
+    {
+        editing = reading;
+        sheetOpen = true;
+    }
+
+    private async Task SavedAsync()
+    {
+        sheetOpen = false;
+        await LoadAsync();
+    }
+}

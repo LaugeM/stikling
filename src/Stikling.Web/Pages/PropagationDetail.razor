@@ -23,6 +23,7 @@
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject SettingsService SettingsService
+@inject PlaceReadingService ReadingService
 @inject IdentificationService Identification
 @inject SubjectPhotos SubjectPhotos
 @using Stikling.Core.Identification
@@ -435,6 +436,7 @@ else
                             {
                                 @Strings.Propagations.DetNotSet
                             }
+                            <StandingLine Conditions="standing" PlaceId="standingPlace" Query="@($"propagation={propagation.Id}")" />
                         </dd>
 
                         @if (propagation.DormantSince is { } dormantSince)
@@ -1095,6 +1097,8 @@ else
     private IReadOnlyList<CodeClash> numberClashes = [];
     private IReadOnlyList<Room> rooms = [];
     private Places places = Places.None;
+    private PlaceConditions? standing;
+    private Guid? standingPlace;
     private SellerList sellers = SellerList.None;
     private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
@@ -1385,6 +1389,8 @@ else
                           .ToList();
         numberClashes = propagation is null ? [] : CollectionNumbers.Clashes(propagation.CollectionNumber, propagation.Id, plants, propagations);
         places = await RoomService.GetPlacesAsync();
+        standingPlace = propagation is null ? null : places.Find(propagation.PlaceId)?.Id;
+        standing = standingPlace is { } standsAt ? await ReadingService.ConditionsForAsync(standsAt) : null;
         sellers = await SellerService.GetSellersAsync();
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);

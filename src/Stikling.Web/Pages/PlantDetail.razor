@@ -31,6 +31,7 @@
 @inject GrowLightService LightService
 @inject AwayService AwayService
 @inject SettingsService SettingsService
+@inject PlaceReadingService ReadingService
 @inject GooglePhotosService Google
 @inject AccountService Account
 @inject CameraService Camera
@@ -440,12 +441,21 @@ else
                                 {
                                     <div class="detail-sub">@(fit == LightFit.Darker ? Strings.PlantDetail.LikesDarker : Strings.PlantDetail.LikesBrighter)</div>
                                 }
+                                <StandingLine Conditions="standing" PlaceId="standingPlace" Query="@($"plant={plant.Id}")" />
                             </dd>
                         }
                         else if (careFor is not null && CareSuggestion.Fills(plant, careFor) is { Count: > 0 } offered)
                         {
                             <dt>@Strings.PlantDetail.Likes</dt>
-                            <dd><CareOffer Care="careFor" Fills="offered" Book="careBook" Inline="true" OnUse="UseCareAsync" /></dd>
+                            <dd>
+                                <CareOffer Care="careFor" Fills="offered" Book="careBook" Inline="true" OnUse="UseCareAsync" />
+                                <StandingLine Conditions="standing" PlaceId="standingPlace" Query="@($"plant={plant.Id}")" />
+                            </dd>
+                        }
+                        else if (standing is { Any: true })
+                        {
+                            <dt>@Strings.PlantDetail.Likes</dt>
+                            <dd><StandingLine Conditions="standing" PlaceId="standingPlace" Query="@($"plant={plant.Id}")" /></dd>
                         }
 
                         @if (GuideBook.ForPlant(origin?.Genus ?? plant.Genus, origin?.Family) is { } groupGuide)
@@ -1696,6 +1706,8 @@ else
     private string? checkNotes;
     private string? actionNote;
     private Places places = Places.None;
+    private PlaceConditions? standing;
+    private Guid? standingPlace;
     private SellerList sellers = SellerList.None;
     private IReadOnlyList<Pot> pots = [];
 
@@ -1979,6 +1991,8 @@ else
             origin = await FindOriginAsync();
             showAllAreas = false;
             places = await RoomService.GetPlacesAsync();
+            standingPlace = places.Find(plant.PlaceId)?.Id;
+            standing = standingPlace is { } standsAt ? await ReadingService.ConditionsForAsync(standsAt) : null;
             sellers = await SellerService.GetSellersAsync();
             ownFields = await OwnFieldBook.GetAllAsync();
             var allCases = await PestCaseRepository.GetAllAsync();

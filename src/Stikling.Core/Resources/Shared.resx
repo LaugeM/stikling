@@ -504,4 +504,28 @@
     <value>in</value>
     <comment>The unit inches, written after a number like 5.12 in.</comment>
   </data>
+  <data name="ReadingNeedsPlace" xml:space="preserve">
+    <value>Pick the room or spot the reading is from.</value>
+    <comment>Error when saving a light or climate reading without a place.</comment>
+  </data>
+  <data name="ReadingNeedsValue" xml:space="preserve">
+    <value>Write at least one of light, temperature and humidity.</value>
+    <comment>Error when saving a reading with no value.</comment>
+  </data>
+  <data name="ReadingFuture" xml:space="preserve">
+    <value>A reading can't be from a day that hasn't come yet.</value>
+    <comment>Error when saving a reading dated after today.</comment>
+  </data>
+  <data name="ReadingLuxRange" xml:space="preserve">
+    <value>Light has to be between 0 and 200,000 lux.</value>
+    <comment>Error when the light value is out of range.</comment>
+  </data>
+  <data name="ReadingTemperatureRange" xml:space="preserve">
+    <value>Temperature has to be between -50 and 60 °C.</value>
+    <comment>Error when the temperature is out of range.</comment>
+  </data>
+  <data name="ReadingHumidityRange" xml:space="preserve">
+    <value>Humidity has to be between 0 and 100%.</value>
+    <comment>Error when the humidity is out of range.</comment>
+  </data>
 </root>

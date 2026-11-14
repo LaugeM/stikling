@@ -8,6 +8,7 @@ using Stikling.Core.Lights;
 using Stikling.Core.Measurements;
 using Stikling.Core.Orders;
 using Stikling.Core.Photos;
+using Stikling.Core.Readings;
 using Stikling.Core.Models;
 using Stikling.Core.Sync;
 using Stikling.Core.Pests;
@@ -283,4 +284,10 @@ public sealed class IndexedDbOwnMeasureKindRepository(IndexedDb db, TimeProvider
     async Task<IReadOnlyList<OwnMeasureKind>> IOwnMeasureKindRepository.GetStoredAsync() => await GetStoredAsync();
 
     protected override IReadOnlyList<string> Validate(OwnMeasureKind kind) => kind.Validate();
+}
+
+public sealed class IndexedDbPlaceReadingRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<PlaceReading>(db, time, RecordKinds.PlaceReadings), IPlaceReadingRepository
+{
+    protected override IReadOnlyList<string> Validate(PlaceReading reading) => reading.Validate(Today);
 }

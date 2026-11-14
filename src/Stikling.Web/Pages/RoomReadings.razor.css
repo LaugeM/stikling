@@ -1,0 +1,36 @@
+.reading-list {
+    list-style: none;
+    margin: 1rem 0 0;
+    padding: 0;
+}
+
+.reading-list li {
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.reading-list li:last-child {
+    border-bottom: 0;
+}
+
+/* A whole row is the button that opens the reading, with at least a 44px tap area */
+.reading-row {
+    display: flex;
+    flex-direction: column;
+    gap: 0.1rem;
+    width: 100%;
+    min-height: 44px;
+    padding: 0.6rem 0;
+    border: 0;
+    background: none;
+    text-align: left;
+    color: inherit;
+}
+
+.reading-when {
+    font-weight: 600;
+}
+
+.reading-detail {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
