@@ -10,9 +10,17 @@ namespace Stikling.Web.Services;
 /// <summary>Text for light, temperature and humidity readings.</summary>
 public static class ReadingText
 {
-    /// <summary>"About bright indirect": a rough guess at the light level from the lux.</summary>
-    public static string Guess(int lux) =>
-        F(Strings.Shared.ReadingGuess, Labels.For(LightGuess.For(lux)).ToLower(CultureInfo.CurrentCulture));
+    /// <summary>
+    /// "Looks like bright indirect light": a rough guess at the light level from the lux. It has its own
+    /// texts and not the plant's light labels, which say what a plant takes and not what a window gives.
+    /// </summary>
+    public static string Guess(int lux) => LightGuess.For(lux) switch
+    {
+        LightLevel.Low => Strings.Shared.ReadingGuessLow,
+        LightLevel.Medium => Strings.Shared.ReadingGuessMedium,
+        LightLevel.BrightIndirect => Strings.Shared.ReadingGuessBrightIndirect,
+        _ => Strings.Shared.ReadingGuessDirectSun
+    };
 
     public static string MeasureName(ReadingMeasure measure) => measure switch
     {

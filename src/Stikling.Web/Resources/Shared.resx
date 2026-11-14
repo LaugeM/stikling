@@ -1754,9 +1754,21 @@ Maybe</value>
     <value>The room's</value>
     <comment>Small mark on a tile for a spot that shows its room's reading.</comment>
   </data>
-  <data name="ReadingGuess" xml:space="preserve">
-    <value>About {0}</value>
-    <comment>Rough light level guessed from lux. {0} is the level in lower case, like bright indirect.</comment>
+  <data name="ReadingGuessLow" xml:space="preserve">
+    <value>Looks like low light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessMedium" xml:space="preserve">
+    <value>Looks like medium light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessBrightIndirect" xml:space="preserve">
+    <value>Looks like bright indirect light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessDirectSun" xml:space="preserve">
+    <value>Looks like direct sun</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
   </data>
   <data name="ReadingDate" xml:space="preserve">
     <value>Date</value>

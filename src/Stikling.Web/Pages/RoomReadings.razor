@@ -87,7 +87,7 @@ else
     private static string When(PlaceReading reading) =>
         reading.Time is { } time ? $"{Labels.Date(reading.Day)} · {TextCulture.TimeOf(time)}" : Labels.Date(reading.Day);
 
-    // "About low · South window"
+    // "Looks like low light · South window"
     private static string Detail(PlaceReading reading)
     {
         var parts = new List<string>();
