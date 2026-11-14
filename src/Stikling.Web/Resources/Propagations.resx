@@ -1955,4 +1955,16 @@
     <value>Open pest case</value>
     <comment>Link under a timeline entry that points to a pest case.</comment>
   </data>
+  <data name="DetSold" xml:space="preserve">
+    <value>They were sold</value>
+    <comment>Tick on the Gave some away sheet. Shows a price field when on.</comment>
+  </data>
+  <data name="DetSoldPrice" xml:space="preserve">
+    <value>Price for all of them</value>
+    <comment>Label of the number field for what the units were sold for in total.</comment>
+  </data>
+  <data name="DetSoldPriceHint" xml:space="preserve">
+    <value>A number, so it can be added up under Money.</value>
+    <comment>Hint under the price on the Gave some away sheet. Money is the name of the page that adds up prices.</comment>
+  </data>
 </root>

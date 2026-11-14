@@ -14,6 +14,14 @@ public sealed class GiveAwayForm : CountForm
 
     public string? To { get; set; }
 
+    /// <summary>The "They were sold" tick. The price is only used while it is on.</summary>
+    public bool Sold { get; set; }
+
+    /// <summary>What all of them were sold for, as a number. Optional even when sold.</summary>
+    public decimal? Price { get; set; }
+
+    public bool PriceIsValid => !Sold || Price is null or >= 0;
+
     private protected override Task RecordAsync(Propagation propagation) =>
-        Deps.PropagationService.GiveAwayAsync(propagation, Count, To, Date);
+        Deps.PropagationService.GiveAwayAsync(propagation, Count, To, Date, Sold ? Price : null);
 }

@@ -128,6 +128,8 @@ public static partial class HistoryText
         Add("FinishedGiven", Num());
         Add("FinishedFailed", Num());
         Add("FinishedNothing");
+        Add("SoldToWho", Num(), Txt(), Num());
+        Add("SoldCuttings", Num(), Num());
         Add("GaveToWho", Num(), Txt());
         Add("GaveAway", Num());
         Add("SplitOff", Num());

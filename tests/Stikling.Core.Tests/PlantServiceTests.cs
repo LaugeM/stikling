@@ -458,6 +458,29 @@ public class PlantServiceTests
     }
 
     [Fact]
+    public async Task The_sold_price_is_kept_while_sold_and_cleared_when_it_comes_back_or_is_given_away()
+    {
+        var plant = new Plant { Nickname = "Basil" };
+        plants.Plants[plant.Id] = plant;
+        var before = plant.Copy();
+        plant.Status = PlantStatus.Sold;
+        plant.SoldPrice = 150;
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Equal(150, plants.Plants[plant.Id].SoldPrice);
+
+        before = plant.Copy();
+        plant.Status = PlantStatus.Active;
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Null(plants.Plants[plant.Id].SoldPrice);
+
+        plant.SoldPrice = 20;
+        before = plant.Copy();
+        plant.Status = PlantStatus.GivenAway;
+        await service.UpdateAsync(before, plant, Label);
+        Assert.Null(plants.Plants[plant.Id].SoldPrice);
+    }
+
+    [Fact]
     public async Task Swapping_a_plant_away_says_what_came_back_in_the_history()
     {
         var plant = new Plant { Nickname = "Basil" };

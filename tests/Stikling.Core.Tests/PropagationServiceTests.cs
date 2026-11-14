@@ -662,4 +662,36 @@ public class PropagationServiceTests
         Assert.Equal(0, corms.PottedUpCount);
         Assert.DoesNotContain(plants.Plants.Values, p => p.FromPropagationId == corms.Id);
     }
+
+    [Fact]
+    public async Task Selling_cuttings_writes_the_sale_line_and_keeps_the_price_and_count_on_the_entry()
+    {
+        var corms = await StartCormsAsync(5);
+
+        await service.GiveAwayAsync(corms, 2, " Anna ", soldFor: 45.5m);
+        await service.GiveAwayAsync(corms, 1, null, soldFor: 10);
+
+        Assert.Equal(3, corms.GivenAwayCount);
+        var entries = HistoryOf(corms.Id).Where(e => e.Event == TimelineEvent.GaveAway).ToList();
+        var toAnna = entries.Single(e => e.Count == 2);
+        Assert.Equal("Sold 2 to Anna for 45.5", toAnna.Text);
+        Assert.Equal(45.5m, toAnna.Price);
+        var loose = entries.Single(e => e.Count == 1);
+        Assert.Equal("Sold 1 for 10", loose.Text);
+        Assert.Equal("SoldCuttings", loose.Lines![0].Key);
+    }
+
+    [Fact]
+    public async Task Giving_away_without_a_price_keeps_the_count_but_no_price_and_a_negative_price_is_refused()
+    {
+        var corms = await StartCormsAsync(3);
+
+        await service.GiveAwayAsync(corms, 1, "Anna");
+        await Assert.ThrowsAsync<InvalidOperationException>(() => service.GiveAwayAsync(corms, 1, "Anna", soldFor: -1));
+
+        var entry = HistoryOf(corms.Id).Single(e => e.Event == TimelineEvent.GaveAway);
+        Assert.Null(entry.Price);
+        Assert.Equal(1, entry.Count);
+        Assert.Equal(1, corms.GivenAwayCount);
+    }
 }

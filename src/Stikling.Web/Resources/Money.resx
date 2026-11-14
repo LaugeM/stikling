@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Money · Stikling</value>
+    <comment>Title of the Money page in the browser tab.</comment>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Money</value>
+    <comment>Heading of the page that adds up what was spent on plants and supplies, and what was brought in.</comment>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>Only what has a price is counted.</value>
+    <comment>Line under the totals. Prices are plain numbers with no currency.</comment>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>Nothing has a price yet. Prices typed on plants, orders and supplies are added up here.</value>
+    <comment>Shown when no plant, order or supply has a price.</comment>
+  </data>
+  <data name="Spent" xml:space="preserve">
+    <value>Spent</value>
+    <comment>Total of everything bought in a year.</comment>
+  </data>
+  <data name="BroughtIn" xml:space="preserve">
+    <value>Brought in</value>
+    <comment>Total of plants and cuttings that were sold in a year.</comment>
+  </data>
+  <data name="PartPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Part of what was spent: plants and cuttings bought.</comment>
+  </data>
+  <data name="PartShipping" xml:space="preserve">
+    <value>Shipping</value>
+    <comment>Part of what was spent: shipping on orders.</comment>
+  </data>
+  <data name="PartSupplies" xml:space="preserve">
+    <value>Supplies</value>
+    <comment>Part of what was spent: pots, soil, feeds and other supplies bought for the stock.</comment>
+  </data>
+  <data name="PartOther" xml:space="preserve">
+    <value>Other things bought</value>
+    <comment>Part of what was spent: pots and loose lines ticked off the shopping list.</comment>
+  </data>
+  <data name="OrderFallback" xml:space="preserve">
+    <value>Order</value>
+    <comment>Name of an order line with no seller.</comment>
+  </data>
+  <data name="SuppliesRow" xml:space="preserve">
+    <value>Money</value>
+    <comment>Row on the Supplies page that opens the Money page.</comment>
+  </data>
+  <data name="SuppliesRowDetail" xml:space="preserve">
+    <value>What the hobby costs, per year</value>
+    <comment>Line under Money on the Supplies page.</comment>
+  </data>
+  <data name="OrdersLink" xml:space="preserve">
+    <value>See what you have spent</value>
+    <comment>Link on the Orders page to the Money page.</comment>
+  </data>
+</root>

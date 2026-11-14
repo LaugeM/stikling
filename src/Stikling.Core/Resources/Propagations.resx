@@ -88,6 +88,10 @@
     <value>The date can't be in the future.</value>
     <comment>Error shown when a date is after today.</comment>
   </data>
+  <data name="ErrSoldPriceNegative" xml:space="preserve">
+    <value>The price can't be negative.</value>
+    <comment>Error shown when the price the cuttings were sold for is below zero.</comment>
+  </data>
   <data name="ErrDateBeforeStart" xml:space="preserve">
     <value>The date can't be before the propagation started.</value>
     <comment>Error shown when a date is before the propagation was started.</comment>

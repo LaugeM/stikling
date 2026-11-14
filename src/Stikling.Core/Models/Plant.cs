@@ -166,6 +166,12 @@ public sealed class Plant : Entity
     /// <summary>What it was sold or swapped for, in the person's own words ("150 kr", "a Hoya carnosa"). Kept while the status is GivenAway or Sold.</summary>
     public string? LeftFor { get; set; }
 
+    /// <summary>
+    /// What it was sold for, as a number with no currency, so it can be added up under Money. Sits beside the
+    /// free text <see cref="LeftFor"/>, which is never read as a number. Kept while the status is Sold.
+    /// </summary>
+    public decimal? SoldPrice { get; set; }
+
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
     /// <summary>The pot the roots are in.</summary>
@@ -577,6 +583,8 @@ public sealed class Plant : Entity
             errors.Add(Strings.Plants.ErrReservoirFill);
         if (PricePaid < 0)
             errors.Add(Strings.Plants.ErrPriceNegative);
+        if (SoldPrice < 0)
+            errors.Add(Strings.Plants.ErrSoldPriceNegative);
         if (AcquiredOn is { } acquired && acquired.Start > today)
             errors.Add(Strings.Plants.ErrAcquiredFuture);
         if (InnerPotId is not null && InnerPotId == OuterPotId)
