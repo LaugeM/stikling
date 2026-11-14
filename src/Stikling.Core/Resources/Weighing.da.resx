@@ -22,7 +22,7 @@
     <value>En vægt skal være over 0 og højst 100 kg.</value>
   </data>
   <data name="ErrDryBelowWatered" xml:space="preserve">
-    <value>Vægten når den er tør skal være lavere end vægten lige efter vanding.</value>
+    <value>Vægten når jorden er tør, skal være lavere end vægten lige efter vanding.</value>
   </data>
   <data name="ErrOnlyHarvestHasAmount" xml:space="preserve">
     <value>Kun en høst kan have en mængde.</value>
@@ -31,7 +31,7 @@
     <value>Skriv hvor meget der blev høstet.</value>
   </data>
   <data name="ErrHarvestAmount" xml:space="preserve">
-    <value>Mængden der er høstet skal være over 0.</value>
+    <value>Den høstede mængde skal være over 0.</value>
   </data>
   <data name="ErrHarvestNeedsUnit" xml:space="preserve">
     <value>Vælg gram eller stk. til mængden.</value>
@@ -97,12 +97,12 @@
     <value>I år: {0} fra 1 høst</value>
   </data>
   <data name="HarvestYearTotal_Other" xml:space="preserve">
-    <value>I år: {0} fordelt på {1} høster</value>
+    <value>I år: {0} fordelt på {1} gange</value>
   </data>
   <data name="HarvestYearCount_One" xml:space="preserve">
-    <value>I år: 1 høst</value>
+    <value>I år: 1 gang</value>
   </data>
   <data name="HarvestYearCount_Other" xml:space="preserve">
-    <value>I år: {0} høster</value>
+    <value>I år: {0} gange</value>
   </data>
 </root>
