@@ -223,6 +223,27 @@ public sealed class PlantForm
         }
     }
 
+    /// <summary>Sets the weight of the pot when dry. The day it was weighed is today from then on, and none when both weights are empty.</summary>
+    public void SetDryWeight(int? grams)
+    {
+        if (Plant.DryWeightGrams == grams)
+            return;
+        Plant.DryWeightGrams = grams;
+        WeightsChanged();
+    }
+
+    /// <summary>Sets the weight of the pot just after watering, the same way as <see cref="SetDryWeight"/>.</summary>
+    public void SetWateredWeight(int? grams)
+    {
+        if (Plant.WateredWeightGrams == grams)
+            return;
+        Plant.WateredWeightGrams = grams;
+        WeightsChanged();
+    }
+
+    private void WeightsChanged() =>
+        Plant.WeighedOn = Plant.DryWeightGrams is null && Plant.WateredWeightGrams is null ? null : Today;
+
     /// <summary>The setting for how long a plant is kept apart.</summary>
     public int QuarantineLength => Settings.QuarantineDays ?? Plant.DefaultQuarantineDays;
 

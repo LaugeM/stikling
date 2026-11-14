@@ -1,0 +1,139 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="UnitGram" xml:space="preserve">
+    <value>g</value>
+    <comment>The unit grams, written after a number like 840 g.</comment>
+  </data>
+  <data name="UnitOunce" xml:space="preserve">
+    <value>oz</value>
+    <comment>The unit ounces, written after a number like 29.6 oz.</comment>
+  </data>
+  <data name="ErrWeightRange" xml:space="preserve">
+    <value>A weight has to be above 0 and at most 100 kg.</value>
+    <comment>Error when saving a plant with a pot weight that is 0 or very large.</comment>
+  </data>
+  <data name="ErrDryBelowWatered" xml:space="preserve">
+    <value>The weight when dry has to be less than the weight just watered.</value>
+    <comment>Error when saving a plant whose dry pot weighs as much as or more than the watered pot.</comment>
+  </data>
+  <data name="ErrOnlyHarvestHasAmount" xml:space="preserve">
+    <value>Only a harvest can have an amount.</value>
+    <comment>Error when an amount is put on care that isn't a harvest.</comment>
+  </data>
+  <data name="ErrHarvestNeedsAmount" xml:space="preserve">
+    <value>Write how much was harvested.</value>
+    <comment>Error when a harvest has a unit but no amount.</comment>
+  </data>
+  <data name="ErrHarvestAmount" xml:space="preserve">
+    <value>The amount harvested has to be above 0.</value>
+    <comment>Error when a harvest amount is 0 or below.</comment>
+  </data>
+  <data name="ErrHarvestNeedsUnit" xml:space="preserve">
+    <value>Pick grams or pieces for the amount.</value>
+    <comment>Error when a harvest has an amount but no unit.</comment>
+  </data>
+  <data name="WaterTypeTap" xml:space="preserve">
+    <value>Tap water</value>
+    <comment>A kind of water a plant gets, in a list.</comment>
+  </data>
+  <data name="WaterTypeDemineralised" xml:space="preserve">
+    <value>Demineralised water</value>
+    <comment>A kind of water a plant gets, in a list.</comment>
+  </data>
+  <data name="WaterTypeRain" xml:space="preserve">
+    <value>Rain water</value>
+    <comment>A kind of water a plant gets, in a list.</comment>
+  </data>
+  <data name="WaterGetsTap" xml:space="preserve">
+    <value>Gets tap water</value>
+    <comment>On a plant's page, saying what water it gets.</comment>
+  </data>
+  <data name="WaterGetsDemineralised" xml:space="preserve">
+    <value>Gets demineralised water</value>
+    <comment>On a plant's page, saying what water it gets.</comment>
+  </data>
+  <data name="WaterGetsRain" xml:space="preserve">
+    <value>Gets rain water</value>
+    <comment>On a plant's page, saying what water it gets.</comment>
+  </data>
+  <data name="SitterUseDemineralised" xml:space="preserve">
+    <value>Use demineralised water</value>
+    <comment>On the plant-sitter sheet, on the plant's card.</comment>
+  </data>
+  <data name="SitterUseRain" xml:space="preserve">
+    <value>Use rain water</value>
+    <comment>On the plant-sitter sheet, on the plant's card.</comment>
+  </data>
+  <data name="WeightBoth" xml:space="preserve">
+    <value>Dry {0} · just watered {1}</value>
+    <comment>On a plant's page. {0} and {1} are weights like 840 g.</comment>
+  </data>
+  <data name="WeightDry" xml:space="preserve">
+    <value>Dry {0}</value>
+    <comment>On a plant's page when only the dry weight is set. {0} is a weight like 840 g.</comment>
+  </data>
+  <data name="WeightWatered" xml:space="preserve">
+    <value>Just watered {0}</value>
+    <comment>On a plant's page when only the watered weight is set. {0} is a weight like 1,320 g.</comment>
+  </data>
+  <data name="WeightDryAt" xml:space="preserve">
+    <value>Dry at {0}</value>
+    <comment>On the Water plants screen under a plant's name. {0} is a weight like 840 g.</comment>
+  </data>
+  <data name="SitterWeightBoth" xml:space="preserve">
+    <value>To check by lifting: about {0} when dry, {1} just watered.</value>
+    <comment>On the plant-sitter sheet. {0} and {1} are weights like 840 g.</comment>
+  </data>
+  <data name="SitterWeightDry" xml:space="preserve">
+    <value>To check by lifting: about {0} when dry.</value>
+    <comment>On the plant-sitter sheet when only the dry weight is set. {0} is a weight.</comment>
+  </data>
+  <data name="SitterWeightWatered" xml:space="preserve">
+    <value>To check by lifting: about {0} just watered.</value>
+    <comment>On the plant-sitter sheet when only the watered weight is set. {0} is a weight.</comment>
+  </data>
+  <data name="HarvestPieces_One" xml:space="preserve">
+    <value>{0} piece</value>
+    <comment>An amount harvested counted in pieces, like 1 piece. {0} is the number.</comment>
+  </data>
+  <data name="HarvestPieces_Other" xml:space="preserve">
+    <value>{0} pieces</value>
+    <comment>An amount harvested counted in pieces, like 6 pieces. {0} is the number.</comment>
+  </data>
+  <data name="HarvestedAmount" xml:space="preserve">
+    <value>{0} {1}</value>
+    <comment>A harvest in a plant's care list. {0} is Harvested and {1} is the amount, like 40 g or 6 pieces.</comment>
+  </data>
+  <data name="HarvestAnd" xml:space="preserve">
+    <value>{0} and {1}</value>
+    <comment>Joins an amount in grams and an amount in pieces, like 140 g and 12 pieces.</comment>
+  </data>
+  <data name="HarvestYearTotal_One" xml:space="preserve">
+    <value>This year: {0} from 1 harvest</value>
+    <comment>Under Harvested on a plant's page, for one harvest. {0} is the amounts, like 140 g and 12 pieces.</comment>
+  </data>
+  <data name="HarvestYearTotal_Other" xml:space="preserve">
+    <value>This year: {0} over {1} harvests</value>
+    <comment>Under Harvested on a plant's page. {0} is the amounts, like 140 g and 12 pieces. {1} is how many harvests.</comment>
+  </data>
+  <data name="HarvestYearCount_One" xml:space="preserve">
+    <value>This year: 1 harvest</value>
+    <comment>Under Harvested on a plant's page when no harvest this year had an amount.</comment>
+  </data>
+  <data name="HarvestYearCount_Other" xml:space="preserve">
+    <value>This year: {0} harvests</value>
+    <comment>Under Harvested on a plant's page when no harvest this year had an amount. {0} is how many.</comment>
+  </data>
+</root>

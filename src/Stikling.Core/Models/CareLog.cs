@@ -80,6 +80,13 @@ public sealed class CareLog : Entity
     /// </summary>
     public int? ReservoirLevel { get; set; }
 
+    /// <summary>How much was harvested, in <see cref="HarvestUnit"/>. Grams are always stored as grams. Only on <see cref="CareKind.Harvested"/>.</summary>
+    public decimal? HarvestAmount { get; set; }
+
+    /// <summary>What <see cref="HarvestAmount"/> is counted in. Set whenever there is an amount.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<HarvestUnit>))]
+    public HarvestUnit? HarvestUnit { get; set; }
+
     public string? Notes { get; set; }
 
     /// <summary>
@@ -135,6 +142,18 @@ public sealed class CareLog : Entity
         else if (Moisture is not null)
         {
             errors.Add(Strings.Care.LogOnlyReadingHasNumber);
+        }
+
+        if (HarvestAmount is not null || HarvestUnit is not null)
+        {
+            if (Kind != CareKind.Harvested || OwnKindId is not null)
+                errors.Add(Strings.Weighing.ErrOnlyHarvestHasAmount);
+            else if (HarvestAmount is null)
+                errors.Add(Strings.Weighing.ErrHarvestNeedsAmount);
+            else if (HarvestAmount <= 0)
+                errors.Add(Strings.Weighing.ErrHarvestAmount);
+            else if (HarvestUnit is null)
+                errors.Add(Strings.Weighing.ErrHarvestNeedsUnit);
         }
 
         if (Products.Count > 0 && !CareKinds.TakesProducts(Kind))

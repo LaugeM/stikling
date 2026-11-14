@@ -206,7 +206,9 @@ public static class SitterSheetBuilder
                 Plant p => CollectionNumbers.Normalize(p.CollectionNumber),
                 Propagation p => CollectionNumbers.Normalize(p.CollectionNumber),
                 _ => null
-            });
+            },
+            sheet.HideHowWatered || item.Entity is not Plant waterPlant ? null : PotWeight.SitterLine(waterPlant.WaterType),
+            item.Entity is Plant weighedPlant ? PotWeight.SitterWeight(weighedPlant) : null);
     }
 
     private static (int UsualDays, DateOnly CheckOn)? PaceOf(WateringGuess? guess) =>
