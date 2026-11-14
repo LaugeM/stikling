@@ -493,6 +493,7 @@ public sealed class PropagationService(
             CormSizeMm = source.CormSizeMm,
             RootingAids = [.. source.RootingAids],
             DriedForHours = source.DriedForHours,
+            WaterChangeDays = source.WaterChangeDays,
             FirstRootOn = source.FirstRootOn,
             FirstLeafOn = source.FirstLeafOn,
             RootedOn = source.RootedOn,

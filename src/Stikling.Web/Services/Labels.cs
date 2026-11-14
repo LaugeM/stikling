@@ -181,6 +181,7 @@ public static class Labels
         ComparedThing.RootingAids => Strings.Propagations.ThingRootingAids,
         ComparedThing.Drying => Strings.Propagations.ThingDrying,
         ComparedThing.Place => Strings.Propagations.ThingPlace,
+        ComparedThing.WaterChanges => Strings.Propagations.ThingWaterChanges,
         _ => thing.ToString()
     };
 

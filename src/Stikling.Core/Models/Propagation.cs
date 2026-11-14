@@ -108,6 +108,14 @@ public sealed class Propagation : Entity
     /// <summary>How many hours the cut end dried before it went in. Null when it went straight in.</summary>
     public int? DriedForHours { get; set; }
 
+    /// <summary>
+    /// Remind to change the water every this many days, 1 to 60. Null for no reminder. Only counts in
+    /// a medium that takes a water change, and is left as it is when the medium is something else.
+    /// </summary>
+    public int? WaterChangeDays { get; set; }
+
+    public const int MaxWaterChangeDays = 60;
+
     /// <summary>How many units the batch started with.</summary>
     public int InitialCount { get; set; } = 1;
 
@@ -435,6 +443,8 @@ public sealed class Propagation : Entity
             errors.Add(Strings.Propagations.ErrDormantFuture);
         if (SpareCount < 0)
             errors.Add(Strings.Propagations.ErrSwapNegative);
+        if (WaterChangeDays is < 1 or > MaxWaterChangeDays)
+            errors.Add(F(Strings.Propagations.ErrWaterChangeDays, MaxWaterChangeDays));
         return errors;
     }
 }

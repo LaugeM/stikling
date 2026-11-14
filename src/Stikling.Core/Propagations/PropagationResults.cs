@@ -43,6 +43,9 @@ public sealed record RootingAidResult(
 /// <summary>The batches that dried their cut end for about as long, as a name and the same numbers as the rooting aids.</summary>
 public sealed record DryingResult(string Name, PropagationResult<string> Result);
 
+/// <summary>The batches whose water was changed about this often, with the same numbers as the rooting aids.</summary>
+public sealed record WaterChangeGroup(string Name, PropagationResult<string> Result, IReadOnlyList<Propagation> Batches);
+
 /// <summary>
 /// Success rate and days to root per medium and per type, worked out from the counts and the
 /// rooted date every propagation already keeps. Deleted propagations are left out.
@@ -95,6 +98,35 @@ public static class PropagationResults
             .Where(g => g.Batches.Count > 0)
             .Select(g => new DryingResult(g.Item1, Result(g.Item1, g.Batches)))
             .ToList();
+    }
+
+    /// <summary>
+    /// Batches in water that had the water changed, grouped by the days between changes: every 1 to 3
+    /// days, every 4 to 7, and further apart. Only batches with a change logged are counted, since
+    /// one without may have had its water changed without anyone writing it down. Only the groups
+    /// that have batches, and nothing at all while fewer than two groups have.
+    /// </summary>
+    public static IReadOnlyList<WaterChangeGroup> ByWaterChanges(
+        IEnumerable<Propagation> propagations, IEnumerable<PropagationCareLog> careLogs)
+    {
+        var days = WaterChangeLog.DaysByBatch(careLogs);
+        var gaps = Counted(propagations)
+            .Where(p => WaterChangeLog.Takes(p.Medium))
+            .Select(p => (Batch: p, Gap: WaterChangeLog.DaysBetween(p, p.RootedOn ?? p.FinishedOn, days.GetValueOrDefault(p.Id))))
+            .Where(b => b.Gap is not null)
+            .ToList();
+
+        var groups = new (string Name, Func<double, bool> Fits)[]
+            {
+                (Strings.Propagations.WaterEveryFewDays, gap => gap < 3.5),
+                (Strings.Propagations.WaterEveryWeek, gap => gap is >= 3.5 and < 7.5),
+                (Strings.Propagations.WaterMoreThanWeek, gap => gap >= 7.5)
+            }
+            .Select(g => (g.Name, Batches: gaps.Where(b => g.Fits(b.Gap!.Value)).Select(b => b.Batch).ToList()))
+            .Where(g => g.Batches.Count > 0)
+            .Select(g => new WaterChangeGroup(g.Name, Result(g.Name, g.Batches), g.Batches))
+            .ToList();
+        return groups.Count < 2 ? [] : groups;
     }
 
     /// <summary>Everything together, or null when there are no propagations.</summary>

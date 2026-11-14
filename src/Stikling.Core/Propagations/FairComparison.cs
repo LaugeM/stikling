@@ -13,7 +13,10 @@ public enum ComparedThing
     StartMonth,
     RootingAids,
     Drying,
-    Place
+    Place,
+
+    /// <summary>How often the water was changed. Only the results page compares on it.</summary>
+    WaterChanges
 }
 
 /// <summary>
@@ -82,6 +85,10 @@ public static class FairComparison
     public static IReadOnlyList<ComparedThing> AcrossDrying(IEnumerable<Propagation> propagations, Places places) =>
         Between(Live(propagations).GroupBy(DryingKey).Select(g => g.ToList()).ToList(), ComparedThing.Drying, places);
 
+    /// <summary>What the groups of batches by how often the water was changed mostly differ in, besides that.</summary>
+    public static IReadOnlyList<ComparedThing> AcrossWaterChanges(IReadOnlyList<List<Propagation>> groups, Places places) =>
+        Between(groups, ComparedThing.WaterChanges, places);
+
     /// <summary>
     /// The things where what is most common in one group is not what is most common in another. A whole
     /// collection is never alike down to the last batch, so a single batch out of line doesn't count.
@@ -93,7 +100,8 @@ public static class FairComparison
             return [];
 
         var differing = new List<ComparedThing>();
-        foreach (var thing in Enum.GetValues<ComparedThing>().Where(t => t != about))
+        // How often the water was changed isn't a field of the batch, so it is only ever what a comparison is about
+        foreach (var thing in Enum.GetValues<ComparedThing>().Where(t => t != about && t != ComparedThing.WaterChanges))
         {
             var differs = thing == ComparedThing.StartMonth
                 ? MostCommonDiffer(filled, p => p.StartedOn.Month.ToString(), (a, b) => MonthsApart(int.Parse(a), int.Parse(b)) <= 1)

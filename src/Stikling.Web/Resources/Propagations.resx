@@ -1955,4 +1955,96 @@
     <value>Open pest case</value>
     <comment>Link under a timeline entry that points to a pest case.</comment>
   </data>
+  <data name="StatsWaterHeading" xml:space="preserve">
+    <value>How often the water was changed</value>
+    <comment>Heading on the results page.</comment>
+  </data>
+  <data name="StatsWaterHow" xml:space="preserve">
+    <value>Only batches with water changes logged are counted.</value>
+    <comment>On the results page, under the water changes heading.</comment>
+  </data>
+  <data name="StatsFairWater" xml:space="preserve">
+    <value>The batches changed at different intervals mostly also differ in {0}, so a difference here can't be put down to how often the water was changed alone.</value>
+    <comment>On the results page, under water changes. {0} is the list of things that differ.</comment>
+  </data>
+  <data name="ThingWaterChanges" xml:space="preserve">
+    <value>how often the water was changed</value>
+    <comment>Name of a thing batches can differ in, in the line about a fair comparison.</comment>
+  </data>
+  <data name="EditWaterChange" xml:space="preserve">
+    <value>Change the water every … days</value>
+    <comment>Label of the number field on the propagation form, for a propagation in water.</comment>
+  </data>
+  <data name="EditWaterChangeHint" xml:space="preserve">
+    <value>Leave empty for no reminder.</value>
+    <comment>Under the water change field on the propagation form.</comment>
+  </data>
+  <data name="EditWaterChangeSummary_One" xml:space="preserve">
+    <value>Change water every day</value>
+    <comment>Summary of the setup section on the propagation form.</comment>
+  </data>
+  <data name="EditWaterChangeSummary_Other" xml:space="preserve">
+    <value>Change water every {0} days</value>
+    <comment>Summary of the setup section on the propagation form.</comment>
+  </data>
+  <data name="DetWaterChangeReminder" xml:space="preserve">
+    <value>Water change reminder</value>
+    <comment>Label on a propagation's page, in the details.</comment>
+  </data>
+  <data name="DetWaterChangeEvery_One" xml:space="preserve">
+    <value>Every day</value>
+    <comment>Value of the water change reminder on a propagation's page.</comment>
+  </data>
+  <data name="DetWaterChangeEvery_Other" xml:space="preserve">
+    <value>Every {0} days</value>
+    <comment>Value of the water change reminder on a propagation's page.</comment>
+  </data>
+  <data name="DetRemindWaterChange" xml:space="preserve">
+    <value>Remind me to change the water</value>
+    <comment>Link on the page of a propagation in water that has no water change reminder. Opens the edit page.</comment>
+  </data>
+  <data name="ReadyByLink" xml:space="preserve">
+    <value>Ready by a date?</value>
+    <comment>Link that opens the sheet which says when to start a cutting.</comment>
+  </data>
+  <data name="ReadyByTitle" xml:space="preserve">
+    <value>Ready by a date?</value>
+    <comment>Title of the sheet which says when to start a cutting.</comment>
+  </data>
+  <data name="ReadyByHint" xml:space="preserve">
+    <value>Pick when you want it rooted and see when to start, going by your own batches.</value>
+    <comment>Under the title of the Ready by sheet.</comment>
+  </data>
+  <data name="ReadyByDate" xml:space="preserve">
+    <value>Rooted by</value>
+    <comment>Label of the date field in the Ready by sheet.</comment>
+  </data>
+  <data name="ReadyByStart_One" xml:space="preserve">
+    <value>Start by {1}. Your {2} rooted batches of type {3} in {4} took {0} day to root on average.</value>
+    <comment>Ready by sheet. {0} is the average days (1), {1} the date to start, {2} the number of batches, {3} the type, {4} the medium.</comment>
+  </data>
+  <data name="ReadyByStart_Other" xml:space="preserve">
+    <value>Start by {1}. Your {2} rooted batches of type {3} in {4} took {0} days to root on average.</value>
+    <comment>Ready by sheet. {0} is the average days, {1} the date to start, {2} the number of batches, {3} the type, {4} the medium.</comment>
+  </data>
+  <data name="ReadyBySafe_One" xml:space="preserve">
+    <value>To be safe, start by {1}. The slowest took {0} day.</value>
+    <comment>Ready by sheet. {0} is the days the slowest batch took (1), {1} the date.</comment>
+  </data>
+  <data name="ReadyBySafe_Other" xml:space="preserve">
+    <value>To be safe, start by {1}. The slowest took {0} days.</value>
+    <comment>Ready by sheet. {0} is the days the slowest batch took, {1} the date.</comment>
+  </data>
+  <data name="ReadyByPast_One" xml:space="preserve">
+    <value>That was {0} day ago. Started today, it would usually be rooted around {1}.</value>
+    <comment>Ready by sheet, when the day to start has passed. {0} is how many days ago (1), {1} the date it would be rooted.</comment>
+  </data>
+  <data name="ReadyByPast_Other" xml:space="preserve">
+    <value>That was {0} days ago. Started today, it would usually be rooted around {1}.</value>
+    <comment>Ready by sheet, when the day to start has passed. {0} is how many days ago, {1} the date it would be rooted.</comment>
+  </data>
+  <data name="ReadyByTooFew" xml:space="preserve">
+    <value>This needs {1} rooted batches of this type in this medium to go by. You have {0}.</value>
+    <comment>Ready by sheet. {0} is how many there are, {1} how many are needed.</comment>
+  </data>
 </root>

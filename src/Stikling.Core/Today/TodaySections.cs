@@ -6,6 +6,7 @@ using Stikling.Core.Orders;
 using Stikling.Core.Pests;
 using Stikling.Core.Plants;
 using Stikling.Core.Problems;
+using Stikling.Core.Propagations;
 
 namespace Stikling.Core.Today;
 
@@ -50,6 +51,10 @@ public sealed record TodaySections
     public IReadOnlyList<PropagationCheck> Checks { get; init; } = [];
     public IReadOnlyList<PropagationCheck> ChecksNow { get; init; } = [];
     public NextRoundCount? NextRoundChecks { get; init; }
+
+    /// <summary>Propagations whose water is due to be changed. Ticking one logs the change, and it drops off.</summary>
+    public IReadOnlyList<WaterChangeDue> WaterChanges { get; init; } = [];
+
     public IReadOnlyList<PhotoDue> PhotosDue { get; init; } = [];
     public bool PhotoRoundShows { get; init; }
 
@@ -143,6 +148,8 @@ public sealed record TodaySections
             .Where(c => !putOffs.IsPutOff(PutOffs.Check(c.Propagation.Id), day) && flagged.All(i => i.Subject.Id != c.Propagation.Id))
             .ToList();
 
+        var waterChanges = WaterChangeReminders.Due(propagations, data.PropagationCareLogs, day);
+
         // A case that is ready to resolve is asked about under Ready to resolve instead of a weekly check
         var dueChecks = dueTreatments
             .Where(v => v.IsCheck && !(v.ReadyToResolve && !putOffs.IsPutOff(PutOffs.Resolve(v.Case.Id), day))).ToList();
@@ -181,7 +188,7 @@ public sealed record TodaySections
             : dueTreatmentList.Count + dueChecks.Count + readyNow.Count + planDoneNow.Count + flagged.Count + lookAgain.Count
               + quarantineNow.Count + transitionNow.Count + restAsk.Count
               + (holding ? backRows.Count : checksNow.Count + wateringDue.Count(d => d.DueNow))
-              + (holding ? 0 : careNow.Sum(g => g.Items.Count))
+              + (holding ? 0 : careNow.Sum(g => g.Items.Count) + waterChanges.Count)
               + (roundSuggestion is not null ? 1 : 0)
               + (photoShows ? 1 : 0);
 
@@ -216,6 +223,7 @@ public sealed record TodaySections
             Checks = checks,
             ChecksNow = checksNow,
             NextRoundChecks = checksNextRound,
+            WaterChanges = waterChanges,
             PhotosDue = photoRound,
             PhotoRoundShows = photoShows,
             DueCount = dueCount

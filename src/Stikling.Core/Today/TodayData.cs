@@ -16,6 +16,7 @@ public sealed record TodayData
     public PutOffs PutOffs { get; init; } = PutOffs.Empty();
     public IReadOnlyDictionary<Guid, TimelineEntry> Latest { get; init; } = new Dictionary<Guid, TimelineEntry>();
     public IReadOnlyDictionary<Guid, DateOnly> PropagationCareDays { get; init; } = new Dictionary<Guid, DateOnly>();
+    public IReadOnlyList<PropagationCareLog> PropagationCareLogs { get; init; } = [];
     public IReadOnlyList<Problem> Problems { get; init; } = [];
     public IReadOnlyList<ProblemUpdate> ProblemUpdates { get; init; } = [];
     public Places Places { get; init; } = Places.None;

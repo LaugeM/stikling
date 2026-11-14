@@ -1488,6 +1488,14 @@ img.framed {
     white-space: nowrap;
 }
 
+/* What went in the water, under a care entry on a propagation */
+.care-products {
+    margin-top: -0.35rem;
+    padding-bottom: 0.55rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
 /* The latest moisture reading, on a plant card */
 .moisture-badge {
     padding: 0.05rem 0.4rem;

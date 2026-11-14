@@ -1866,4 +1866,24 @@
     <value>Round {0}</value>
     <comment>Which round a treatment plan that starts over is on, on a pest case in Today, like Round 2.</comment>
   </data>
+  <data name="TodayChangeWater" xml:space="preserve">
+    <value>Change the water</value>
+    <comment>Heading on Today, over the propagations whose water is due to be changed.</comment>
+  </data>
+  <data name="TodayWaterChanged" xml:space="preserve">
+    <value>Changed</value>
+    <comment>Button on Today that logs a water change on a propagation.</comment>
+  </data>
+  <data name="TodayWaterChangedAgo" xml:space="preserve">
+    <value>Changed {0}</value>
+    <comment>Line under a propagation on Today. {0} is when, like "5 days ago".</comment>
+  </data>
+  <data name="TodayWaterNotChanged" xml:space="preserve">
+    <value>Not changed yet, started {0}</value>
+    <comment>Line under a propagation on Today. {0} is when, like "6 days ago".</comment>
+  </data>
+  <data name="TodayWaterChangeFailed" xml:space="preserve">
+    <value>Couldn't log the water change: {0}</value>
+    <comment>Error on Today. {0} is what went wrong.</comment>
+  </data>
 </root>

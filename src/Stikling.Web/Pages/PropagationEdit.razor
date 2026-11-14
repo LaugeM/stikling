@@ -146,6 +146,12 @@ else
                             $"<a href=\"{(propagation.ParentPlantId is { } parent ? $"plants/new?parent={parent}" : "plants/new")}\">{System.Net.WebUtility.HtmlEncode(Strings.Propagations.EditAddAsPlant)}</a>"))
                     </div>
                 }
+                @if (IsNew)
+                {
+                    <div class="col-12">
+                        <button type="button" class="btn btn-link btn-sm link-action p-0" @onclick="() => readyByOpen = true">@Strings.Propagations.ReadyByLink</button>
+                    </div>
+                }
             </div>
             <div class="mb-1">
                 <label class="form-label" for="started">@Strings.Propagations.EditStartedOn</label>
@@ -255,6 +261,15 @@ else
                         <div id="medium-help" class="form-text">@mediumHelp</div>
                     }
                 </div>
+                @if (WaterChangeLog.Takes(propagation.Medium))
+                {
+                    <div class="mb-3">
+                        <label class="form-label" for="water-change-days">@Strings.Propagations.EditWaterChange</label>
+                        <InputNumber id="water-change-days" class="form-control" @bind-Value="propagation.WaterChangeDays"
+                                     min="1" max="@Propagation.MaxWaterChangeDays" inputmode="numeric" aria-describedby="water-change-help" />
+                        <div id="water-change-help" class="form-text">@Strings.Propagations.EditWaterChangeHint</div>
+                    </div>
+                }
                 @if (propagation.Medium == GrowingMedium.Soil)
                 {
                     <div class="mb-3">
@@ -451,6 +466,11 @@ else
     </EditForm>
 
     <ParentNotMine @bind-Open="addParentOpen" Added="ParentAdded" />
+
+    @if (IsNew)
+    {
+        <ReadyBySheet @bind-Open="readyByOpen" All="form!.Propagations" StartType="propagation.Type" StartMedium="propagation.Medium" />
+    }
 }
 
 @code {
@@ -473,7 +493,7 @@ else
         await Scripts.ShowAlertAsync("form-errors");
     }
 
-    /// <summary>The one field to open and focus, "first-root" or "first-leaf", from a date on the propagation's page.</summary>
+    /// <summary>The one field to open and focus, "first-root", "first-leaf" or "water-change-days", from a date on the propagation's page.</summary>
     [SupplyParameterFromQuery(Name = "field")]
     public string? Field { get; set; }
 
@@ -616,6 +636,8 @@ else
         propagation.Medium == GrowingMedium.Soil && propagation.SoilMixId is { } mix ? form!.Mixes.FirstOrDefault(m => m.Id == mix)?.Name : null,
         propagation.RootingAids.Count > 0 ? string.Join(", ", propagation.RootingAids.Select(Labels.For)) : null,
         propagation.DriedForHours is { } dried ? F(Strings.Propagations.EditDried, Drying.Shown(dried)) : null,
+        WaterChangeLog.Takes(propagation.Medium) && propagation.WaterChangeDays is { } every
+            ? Plural.Of(every, Strings.Propagations.EditWaterChangeSummary_One, Strings.Propagations.EditWaterChangeSummary_Other) : null,
         propagation.Experiment);
 
     private string? AboutSummary => string.IsNullOrWhiteSpace(propagation?.Notes) ? null : Labels.Short(propagation.Notes);
@@ -637,12 +659,13 @@ else
 
     private static bool HasSetup(Propagation p) =>
         !string.IsNullOrWhiteSpace(p.Container) || p.SoilMixId is not null || p.RootingAids.Count > 0
-        || p.DriedForHours is not null || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
+        || p.DriedForHours is not null || p.WaterChangeDays is not null || !string.IsNullOrWhiteSpace(p.Experiment) || p.CormSizeMm is not null;
 
     private static bool HasProgress(Propagation p) =>
         p.Stage != PropagationStage.Started || p.RootedOn is not null || p.FirstRootOn is not null
         || p.FirstLeafOn is not null || p.SeedsGerminated is not null || p.FirstGerminatedOn is not null;
 
+    private bool readyByOpen;
     private bool openArrival;
     private bool addParentOpen;
 
@@ -690,6 +713,11 @@ else
         if (!isNew && Field is "first-root" or "first-leaf")
         {
             openProgress = true;
+            focusFieldId = Field;
+        }
+        else if (!isNew && Field is "water-change-days")
+        {
+            openSetup = true;
             focusFieldId = Field;
         }
         openSitter = !isNew && !string.IsNullOrWhiteSpace(propagation.SitterNote);
@@ -799,7 +827,9 @@ else
         F(Strings.Propagations.EditLastTypeIn, Lower(Labels.For(p.Type)), Lower(Labels.For(p.Medium))),
         Clean(p.Container),
         p.RootingAids.Count > 0 ? string.Join(", ", p.RootingAids.Order().Select(a => Lower(Labels.For(a)))) : null,
-        p.DriedForHours is { } hours ? F(Strings.Propagations.EditDried, Drying.Shown(hours)) : null
+        p.DriedForHours is { } hours ? F(Strings.Propagations.EditDried, Drying.Shown(hours)) : null,
+        WaterChangeLog.Takes(p.Medium) && p.WaterChangeDays is { } every
+            ? Plural.Of(every, Strings.Propagations.EditWaterChangeSummary_One, Strings.Propagations.EditWaterChangeSummary_Other) : null
     }.OfType<string>());
 
     // Mid-sentence, but not LECA or PON

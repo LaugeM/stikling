@@ -1,5 +1,6 @@
 @page "/propagations/results"
 @inject IPropagationRepository Repository
+@inject IPropagationCareLogRepository CareLogs
 @inject RoomService RoomService
 @inject ITimelineRepository Timeline
 @inject TimeProvider Time
@@ -117,6 +118,30 @@ else
             </ul>
         </section>
     }
+
+    @if (byWater.Count > 0)
+    {
+        <section class="results-section">
+            <h2>@Strings.Propagations.StatsWaterHeading</h2>
+            <p class="aid-note">@Strings.Propagations.StatsWaterHow</p>
+            @if (acrossWater.Count > 0)
+            {
+                <p class="aid-note">@F(Strings.Propagations.StatsFairWater, Labels.List(acrossWater))</p>
+            }
+            <ul class="results-list">
+                @foreach (var group in byWater)
+                {
+                    <li>@Row(group.Name, group.Result, false)</li>
+                }
+            </ul>
+        </section>
+    }
+
+    <p class="aid-note">
+        <button type="button" class="btn btn-link btn-sm link-action p-0" @onclick="() => readyByOpen = true">@Strings.Propagations.ReadyByLink</button>
+    </p>
+
+    <ReadyBySheet @bind-Open="readyByOpen" All="all!" StartType="byType[0].Key" StartMedium="byMedium[0].Key" />
 }
 
 @code {
@@ -126,6 +151,9 @@ else
     private IReadOnlyList<PropagationResult<PropagationType>> byType = [];
     private IReadOnlyList<RootingAidResult> byAid = [];
     private IReadOnlyList<DryingResult> byDrying = [];
+    private IReadOnlyList<WaterChangeGroup> byWater = [];
+    private IReadOnlyList<ComparedThing> acrossWater = [];
+    private bool readyByOpen;
     private IReadOnlyDictionary<GrowingMedium, FailureSummary> lostByMedium = new Dictionary<GrowingMedium, FailureSummary>();
     private FailureSummary? overallLost;
     private IReadOnlyList<ComparedThing> acrossMediums = [];
@@ -146,6 +174,8 @@ else
         acrossMediums = FairComparison.AcrossMediums(all, places);
         acrossAids = FairComparison.AcrossRootingAids(all, places);
         acrossDrying = FairComparison.AcrossDrying(all, places);
+        byWater = PropagationResults.ByWaterChanges(all, await CareLogs.GetAllAsync());
+        acrossWater = byWater.Count == 0 ? [] : FairComparison.AcrossWaterChanges([.. byWater.Select(g => g.Batches.ToList())], places);
 
         var entries = new Dictionary<Guid, IReadOnlyList<TimelineEntry>>();
         foreach (var p in all.Where(p => !p.IsDeleted && p.FailedCount > 0))
