@@ -939,4 +939,24 @@
     <value>New case</value>
     <comment>Link in the Found pests sheet that opens the form for a new pest case.</comment>
   </data>
+  <data name="SoldPrice" xml:space="preserve">
+    <value>Price</value>
+    <comment>Label of the number field for what a plant was sold for, next to the free text Sold for.</comment>
+  </data>
+  <data name="SoldPriceHint" xml:space="preserve">
+    <value>A number, so it can be added up under Money.</value>
+    <comment>Hint under the sold price field. Money is the name of the page that adds up prices.</comment>
+  </data>
+  <data name="GivenCostAndBroughtIn" xml:space="preserve">
+    <value>Cost {0} · brought in {1}</value>
+    <comment>Part of what a plant has given, on its own page only. {0} is what the plant cost, {1} what its cuttings and offspring brought in, both plain numbers.</comment>
+  </data>
+  <data name="GivenCost" xml:space="preserve">
+    <value>Cost {0}</value>
+    <comment>Part of what a plant has given. {0} is what the plant cost, a plain number.</comment>
+  </data>
+  <data name="GivenBroughtIn" xml:space="preserve">
+    <value>Brought in {0}</value>
+    <comment>Part of what a plant has given. {0} is what its cuttings and offspring were sold for, a plain number.</comment>
+  </data>
 </root>

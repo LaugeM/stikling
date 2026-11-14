@@ -183,6 +183,12 @@ public sealed class TimelineEntry : Entity
     /// <summary>How many units the entry is about. Only on a failed entry, and null on older ones.</summary>
     public int? Count { get; set; }
 
+    /// <summary>
+    /// What the units were sold for in total, as a number with no currency. Only on a <see cref="TimelineEvent.GaveAway"/>
+    /// entry, and null when they were given away and on older entries.
+    /// </summary>
+    public decimal? Price { get; set; }
+
     public List<Guid> PhotoIds { get; set; } = [];
 
     /// <summary>

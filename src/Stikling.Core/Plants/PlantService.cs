@@ -159,6 +159,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         var gone = after.Status is PlantStatus.GivenAway or PlantStatus.Sold;
         after.LeftTo = gone && !string.IsNullOrWhiteSpace(after.LeftTo) ? after.LeftTo.Trim() : null;
         after.LeftFor = gone && !string.IsNullOrWhiteSpace(after.LeftFor) ? after.LeftFor.Trim() : null;
+        if (after.SoldPrice < 0)
+            throw new InvalidOperationException(Strings.Plants.ErrSoldPriceNegative);
+        after.SoldPrice = after.Status == PlantStatus.Sold ? after.SoldPrice : null;
         await plants.SaveAsync(after);
 
         await PartlySavedException.AfterSaveAsync(async () =>

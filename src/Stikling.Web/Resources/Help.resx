@@ -481,7 +481,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="HappensWhenPlantDiesOrA1" xml:space="preserve">
-    <value>Open the plant, tap the three dots next to &lt;em&gt;Photo&lt;/em&gt; and &lt;em&gt;Note&lt;/em&gt; and pick &lt;em&gt;It died&lt;/em&gt; or &lt;em&gt;Gave it away or sold it&lt;/em&gt;. For several at once, use &lt;em&gt;Select&lt;/em&gt; on the plant list. It leaves the list but keeps its history, and you can still find it under &lt;em&gt;Gone&lt;/em&gt;. When you mark a plant as died, you can add a note on what happened. It shows on the plant and in the &lt;em&gt;Gone&lt;/em&gt; list, so you can look it over before buying the same plant again. Under &lt;em&gt;Gone&lt;/em&gt;, pick &lt;em&gt;Died&lt;/em&gt; to see only the plants that died and why. When you add a plant with the same name as one that died, the form reminds you of it and what went wrong. For a plant you gave away or sold, you can note who got it and what it was sold or swapped for, for example a price or the plant you got back. An offspring that was given away or sold shows who got it in the family list. If it comes back, or you picked it by mistake, the same place has &lt;em&gt;Back in the collection&lt;/em&gt;. Deleting a plant removes it along with its history, so saying what happened is usually the better choice.</value>
+    <value>Open the plant, tap the three dots next to &lt;em&gt;Photo&lt;/em&gt; and &lt;em&gt;Note&lt;/em&gt; and pick &lt;em&gt;It died&lt;/em&gt; or &lt;em&gt;Gave it away or sold it&lt;/em&gt;. For several at once, use &lt;em&gt;Select&lt;/em&gt; on the plant list. It leaves the list but keeps its history, and you can still find it under &lt;em&gt;Gone&lt;/em&gt;. When you mark a plant as died, you can add a note on what happened. It shows on the plant and in the &lt;em&gt;Gone&lt;/em&gt; list, so you can look it over before buying the same plant again. Under &lt;em&gt;Gone&lt;/em&gt;, pick &lt;em&gt;Died&lt;/em&gt; to see only the plants that died and why. When you add a plant with the same name as one that died, the form reminds you of it and what went wrong. For a plant you gave away or sold, you can note who got it and what it was sold or swapped for, for example a price or the plant you got back. When it was sold, you can also type the price as a number, so it is added up under &lt;em&gt;Money&lt;/em&gt;. An offspring that was given away or sold shows who got it in the family list. If it comes back, or you picked it by mistake, the same place has &lt;em&gt;Back in the collection&lt;/em&gt;. Deleting a plant removes it along with its history, so saying what happened is usually the better choice.</value>
     <comment>Answer to "What happens when a plant dies or I give it away?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="DeletePlantByMistakeQ" xml:space="preserve">
@@ -769,7 +769,7 @@
     <comment>Question in the "Propagations" part of the Help page.</comment>
   </data>
   <data name="GiveAwayCuttingBeforeHasA1" xml:space="preserve">
-    <value>Yes. Open its stage and tap &lt;em&gt;Gave some away&lt;/em&gt;. It counts as given away rather than potted up or failed, stays in its history, and doesn't change its success rate. You can send whoever got it a link to its story right after.</value>
+    <value>Yes. Open its stage and tap &lt;em&gt;Gave some away&lt;/em&gt;. It counts as given away rather than potted up or failed, stays in its history, and doesn't change its success rate. If you sold them, tick &lt;em&gt;They were sold&lt;/em&gt; and type what you got for all of them, and it is added up under &lt;em&gt;Money&lt;/em&gt;. You can send whoever got it a link to its story right after.</value>
     <comment>Answer to "Can I give away a cutting before it has rooted?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="FamilyTreeWorkQ" xml:space="preserve">
@@ -777,7 +777,7 @@
     <comment>Question in the "Propagations" part of the Help page.</comment>
   </data>
   <data name="FamilyTreeWorkA1" xml:space="preserve">
-    <value>Under a plant's name you see what it came from and how many propagations and plants have come from it. &lt;em&gt;Family tree&lt;/em&gt; there, or in the Family section further down, opens a page with the plant in the middle, up to three generations it came from above it, its siblings beside it, and what has grown from it below, with the cuttings still on their way. Tap any plant there to move the tree to it, so a big family never turns into one huge chart. It follows the links across generations, so a cutting of a cutting still leads back to the first plant. A plant or cutting that comes from another also says which generation it is, like &lt;em&gt;3rd generation from the kitchen Monstera&lt;/em&gt;: how many steps it is from the oldest plant you have in its line, worked out from the parents, so there is nothing to fill in. Under the name, the plant also adds up what it has given: how many cuttings were taken and how many rooted, how many plants were given away or sold, and how many plants have come from those in turn.</value>
+    <value>Under a plant's name you see what it came from and how many propagations and plants have come from it. &lt;em&gt;Family tree&lt;/em&gt; there, or in the Family section further down, opens a page with the plant in the middle, up to three generations it came from above it, its siblings beside it, and what has grown from it below, with the cuttings still on their way. Tap any plant there to move the tree to it, so a big family never turns into one huge chart. It follows the links across generations, so a cutting of a cutting still leads back to the first plant. A plant or cutting that comes from another also says which generation it is, like &lt;em&gt;3rd generation from the kitchen Monstera&lt;/em&gt;: how many steps it is from the oldest plant you have in its line, worked out from the parents, so there is nothing to fill in. Under the name, the plant also adds up what it has given: how many cuttings were taken and how many rooted, how many plants were given away or sold, and how many plants have come from those in turn. If prices are typed, it also says what the plant cost and what its sold cuttings and offspring brought in. That is only on its own page, never on a printed story or a shared page.</value>
     <comment>Answer to "How does the family tree work?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="LineAboutRecentChangesUnderQ" xml:space="preserve">
@@ -1956,5 +1956,13 @@
   <data name="OnResultsPageA4" xml:space="preserve">
     <value>Batches in water that had the water changed are also grouped by how often, every 1 to 3 days, every 4 to 7 or further apart. Only batches with water changes logged are counted, and it shows once two of the groups have a batch.</value>
     <comment>Answer to "What is on the results page?" on the Help page.</comment>
+  </data>
+  <data name="SeeWhatSpentQ" xml:space="preserve">
+    <value>Can I see what I have spent?</value>
+    <comment>Question in the "Plants" part of the Help page, after the answers on orders.</comment>
+  </data>
+  <data name="SeeWhatSpentA1" xml:space="preserve">
+    <value>Yes. Under &lt;em&gt;Supplies&lt;/em&gt;, open &lt;em&gt;Money&lt;/em&gt;, or tap the link on the Orders page. It adds up the prices you typed, year by year: plants (what you paid, and items on an order that have not become plants yet), shipping, supplies you marked as bought and other things ticked off the shopping list. If you sold plants or cuttings and typed the price, what they brought in is shown beside it. Each line opens the plant, order or supply it is from. Prices are plain numbers with no currency, and only what has a price is counted. A plant you got from an order counts once, with its own price, and an item that did not come is left out. Money is never put on a shared page or a printed story.</value>
+    <comment>Answer to "Can I see what I have spent?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
 </root>

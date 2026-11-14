@@ -440,6 +440,14 @@
     <value>Finished: nothing yet</value>
     <comment>A propagation ended with no units potted up, given away or failed.</comment>
   </data>
+  <data name="SoldToWho" xml:space="preserve">
+    <value>Sold {0} to {1} for {2}</value>
+    <comment>Units of a propagation were sold to someone. {0} is how many, {1} who bought them, {2} what they were sold for in total.</comment>
+  </data>
+  <data name="SoldCuttings" xml:space="preserve">
+    <value>Sold {0} for {1}</value>
+    <comment>Units of a propagation were sold. {0} is how many, {1} what they were sold for in total.</comment>
+  </data>
   <data name="GaveToWho" xml:space="preserve">
     <value>Gave {0} to {1}</value>
     <comment>Units of a propagation were given to someone. {0} is how many, {1} who got them.</comment>

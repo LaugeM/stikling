@@ -169,6 +169,8 @@ public class HistoryTextTests
         (L("FinishedGiven", 1), "Finished: 1 given away"),
         (L("FinishedFailed", 1), "Finished: 1 failed"),
         (L("FinishedNothing"), "Finished: nothing yet"),
+        (L("SoldToWho", 2, "Anna", 45.5m), "Sold 2 to Anna for 45.5"),
+        (L("SoldCuttings", 3, 10m), "Sold 3 for 10"),
         (L("GaveToWho", 2, "Anna"), "Gave 2 to Anna"),
         (L("GaveAway", 2), "Gave 2 away"),
         (L("SplitOff", 1), "Split 1 off into its own propagation"),
