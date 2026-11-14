@@ -1498,7 +1498,7 @@ else
             : F(Strings.Care.TodayLastSeen, Labels.DaysAgo(check.DaysSince));
 
     private string WaterChangeLine(WaterChangeDue due) => due.LastChanged is null
-        ? F(Strings.Care.TodayWaterNotChanged, Labels.DaysAgo(due.DaysSince))
+        ? Strings.Care.TodayWaterNotChanged
         : F(Strings.Care.TodayWaterChangedAgo, Labels.DaysAgo(due.DaysSince));
 
     private bool waterBusy;
