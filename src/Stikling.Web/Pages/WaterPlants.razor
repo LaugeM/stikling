@@ -630,6 +630,10 @@ else
             <SubjectThumb Subject="row.Plant" />
             <div class="pass-body" role="group" aria-labelledby="@nameId">
                 <a id="@nameId" class="pass-name" href="@($"plants/{plantId}")">@row.Plant.DisplayName</a>
+                @if (!done && string.Join(" · ", new[] { PotWeight.Note(row.Plant.WaterType), PotWeight.DryAt(row.Plant) }.Where(n => n is not null)) is { Length: > 0 } waterNote)
+                {
+                    <span class="pass-meta">@waterNote</span>
+                }
                 @if (done)
                 {
                     <div class="pass-doneline">

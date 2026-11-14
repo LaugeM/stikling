@@ -536,6 +536,24 @@ else
                             <dd>@F(plant.WateringFeedEvery switch { 2 => Strings.PlantDetail.FeedEverySecond, 3 => Strings.PlantDetail.FeedEveryThird, _ => Strings.PlantDetail.FeedEveryWatering }, wateringFeed.Name)</dd>
                         }
 
+                        @if (PotWeight.Gets(plant.WaterType) is { } getsWater)
+                        {
+                            <dt>@Strings.Weighing.DetailWater</dt>
+                            <dd>@getsWater</dd>
+                        }
+
+                        @if (PotWeight.Line(plant) is { } weights)
+                        {
+                            <dt>@Strings.Weighing.DetailWeight</dt>
+                            <dd>
+                                @weights
+                                @if (PotWeight.WeighedBeforeRepot(plant, care))
+                                {
+                                    <div class="detail-sub">@Strings.Weighing.WeighedBeforeRepot</div>
+                                }
+                            </dd>
+                        }
+
                         @if (plant.QuarantinedSince is { } quarantinedSince)
                         {
                             <dt>@Strings.Plants.ListQuarantine</dt>
@@ -871,6 +889,17 @@ else
                     {
                         <dt>@(kind == CareKind.ToppedUp && WaterForm == WateringForm.Reservoir ? WateringText.DoneLabel(WaterForm) : Labels.For(kind))</dt>
                         <dd>@(last is null ? Strings.PlantDetail.Never : $"{Labels.DaysAgo(last.DaysAgo)} · {Labels.Date(last.On)}")</dd>
+                    }
+                    @if (harvested is { } lastHarvest)
+                    {
+                        <dt>@Labels.For(CareKind.Harvested)</dt>
+                        <dd>
+                            @($"{Labels.DaysAgo(lastHarvest.DaysAgo)} · {Labels.Date(lastHarvest.On)}")
+                            @if (harvestYear is { Count: > 0 } year)
+                            {
+                                <div class="detail-sub">@year.Text()</div>
+                            }
+                        </dd>
                     }
                 </dl>
             }
@@ -1694,6 +1723,8 @@ else
     private DateOnly? earlierUntil;
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
+    private LastCare? harvested;
+    private HarvestYear? harvestYear;
     private LastCare? lastWater;
     private IReadOnlyDictionary<Guid, OwnCareKind> ownKindLookup = new Dictionary<Guid, OwnCareKind>();
     private MoistureReading? moisture;
@@ -2278,6 +2309,8 @@ else
             .Where(h => h.kind != otherKind || h.Item2 is not null)
             .Where(h => h.kind != CareKind.Flushed || WaterForm == WateringForm.Reservoir || h.Item2 is not null)
             .ToList();
+        harvested = CareSummary.Latest(all, plant.Id, CareKind.Harvested, Today);
+        harvestYear = Harvests.ThisYear(all, plant.Id, Today);
         await LoadComesBackAsync(all);
         lastWater = CareSummary.LastWater(all, plant.Id, Today);
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);

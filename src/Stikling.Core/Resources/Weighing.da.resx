@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="UnitGram" xml:space="preserve">
+    <value>g</value>
+  </data>
+  <data name="UnitOunce" xml:space="preserve">
+    <value>oz</value>
+  </data>
+  <data name="ErrWeightRange" xml:space="preserve">
+    <value>En vægt skal være over 0 og højst 100 kg.</value>
+  </data>
+  <data name="ErrDryBelowWatered" xml:space="preserve">
+    <value>Vægten når den er tør skal være lavere end vægten lige efter vanding.</value>
+  </data>
+  <data name="ErrOnlyHarvestHasAmount" xml:space="preserve">
+    <value>Kun en høst kan have en mængde.</value>
+  </data>
+  <data name="ErrHarvestNeedsAmount" xml:space="preserve">
+    <value>Skriv hvor meget der blev høstet.</value>
+  </data>
+  <data name="ErrHarvestAmount" xml:space="preserve">
+    <value>Mængden der er høstet skal være over 0.</value>
+  </data>
+  <data name="ErrHarvestNeedsUnit" xml:space="preserve">
+    <value>Vælg gram eller stk. til mængden.</value>
+  </data>
+  <data name="WaterTypeTap" xml:space="preserve">
+    <value>Postevand</value>
+  </data>
+  <data name="WaterTypeDemineralised" xml:space="preserve">
+    <value>Demineraliseret vand</value>
+  </data>
+  <data name="WaterTypeRain" xml:space="preserve">
+    <value>Regnvand</value>
+  </data>
+  <data name="WaterGetsTap" xml:space="preserve">
+    <value>Får postevand</value>
+  </data>
+  <data name="WaterGetsDemineralised" xml:space="preserve">
+    <value>Får demineraliseret vand</value>
+  </data>
+  <data name="WaterGetsRain" xml:space="preserve">
+    <value>Får regnvand</value>
+  </data>
+  <data name="SitterUseDemineralised" xml:space="preserve">
+    <value>Brug demineraliseret vand</value>
+  </data>
+  <data name="SitterUseRain" xml:space="preserve">
+    <value>Brug regnvand</value>
+  </data>
+  <data name="WeightBoth" xml:space="preserve">
+    <value>Tør {0} · lige vandet {1}</value>
+  </data>
+  <data name="WeightDry" xml:space="preserve">
+    <value>Tør {0}</value>
+  </data>
+  <data name="WeightWatered" xml:space="preserve">
+    <value>Lige vandet {0}</value>
+  </data>
+  <data name="WeightDryAt" xml:space="preserve">
+    <value>Tør ved {0}</value>
+  </data>
+  <data name="SitterWeightBoth" xml:space="preserve">
+    <value>Du kan tjekke ved at løfte den: ca. {0} når den er tør, {1} lige efter vanding.</value>
+  </data>
+  <data name="SitterWeightDry" xml:space="preserve">
+    <value>Du kan tjekke ved at løfte den: ca. {0} når den er tør.</value>
+  </data>
+  <data name="SitterWeightWatered" xml:space="preserve">
+    <value>Du kan tjekke ved at løfte den: ca. {0} lige efter vanding.</value>
+  </data>
+  <data name="HarvestPieces_One" xml:space="preserve">
+    <value>{0} stk.</value>
+  </data>
+  <data name="HarvestPieces_Other" xml:space="preserve">
+    <value>{0} stk.</value>
+  </data>
+  <data name="HarvestedAmount" xml:space="preserve">
+    <value>{0} {1}</value>
+  </data>
+  <data name="HarvestAnd" xml:space="preserve">
+    <value>{0} og {1}</value>
+  </data>
+  <data name="HarvestYearTotal_One" xml:space="preserve">
+    <value>I år: {0} fra 1 høst</value>
+  </data>
+  <data name="HarvestYearTotal_Other" xml:space="preserve">
+    <value>I år: {0} fordelt på {1} høster</value>
+  </data>
+  <data name="HarvestYearCount_One" xml:space="preserve">
+    <value>I år: 1 høst</value>
+  </data>
+  <data name="HarvestYearCount_Other" xml:space="preserve">
+    <value>I år: {0} høster</value>
+  </data>
+</root>

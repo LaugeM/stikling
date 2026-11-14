@@ -20,6 +20,37 @@
                @onchange="DateChanged" />
     </div>
 
+    @if (Entry is { Kind: CareKind.Harvested, OwnKindId: null })
+    {
+        <div class="mt-2">
+            <div class="row g-2 align-items-end">
+                <div class="col-6">
+                    <label class="form-label" for="care-edit-harvest">@Strings.Weighing.HarvestAmount</label>
+                    @if (harvestUnit == HarvestUnit.Grams)
+                    {
+                        <WeightInput id="care-edit-harvest" class="form-control form-control-sm" min="0"
+                                     placeholder="@Strings.Weighing.HarvestOptional" @bind-Value="harvestAmount" />
+                    }
+                    else
+                    {
+                        <input type="number" id="care-edit-harvest" class="form-control form-control-sm" min="0" step="any" inputmode="decimal"
+                               placeholder="@Strings.Weighing.HarvestOptional" @bind="harvestAmount" />
+                    }
+                </div>
+                <div class="col-6">
+                    <div class="chip-row" role="group" aria-label="@Strings.Weighing.HarvestUnit">
+                        <button type="button" class="chip @(harvestUnit == HarvestUnit.Grams ? "picked" : null)"
+                                aria-pressed="@(harvestUnit == HarvestUnit.Grams ? "true" : "false")"
+                                @onclick="() => PickHarvestUnit(HarvestUnit.Grams)">@Weights.UnitName</button>
+                        <button type="button" class="chip @(harvestUnit == HarvestUnit.Pieces ? "picked" : null)"
+                                aria-pressed="@(harvestUnit == HarvestUnit.Pieces ? "true" : "false")"
+                                @onclick="() => PickHarvestUnit(HarvestUnit.Pieces)">@Strings.Weighing.HarvestPiecesUnit</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+
     @if (Entry.Kind == CareKind.MoistureReading)
     {
         <div class="mt-2">
@@ -114,6 +145,8 @@
 
     private DateOnly occurredOn;
     private int? moisture;
+    private decimal? harvestAmount;
+    private HarvestUnit harvestUnit = HarvestUnit.Grams;
     private int? reservoirLevel;
     private decimal? water;
     private decimal? ec;
@@ -142,11 +175,22 @@
     {
         occurredOn = Entry.OccurredOn;
         moisture = Entry.Moisture;
+        harvestAmount = Entry.HarvestAmount;
+        harvestUnit = Entry.HarvestUnit ?? HarvestUnit.Grams;
         reservoirLevel = Entry.ReservoirLevel;
         water = Entry.WaterLitres;
         ec = Entry.Ec;
         ph = Entry.Ph;
         notes = Entry.Notes;
+    }
+
+    // The amount is in the other unit, so it is cleared rather than kept as a number that now means something else
+    private void PickHarvestUnit(HarvestUnit unit)
+    {
+        if (harvestUnit == unit)
+            return;
+        harvestUnit = unit;
+        harvestAmount = null;
     }
 
     private void DateChanged(ChangeEventArgs e)
@@ -170,6 +214,8 @@
                 WaterLitres = water > 0 ? water : null,
                 Ec = ec,
                 Ph = ph,
+                HarvestAmount = harvestAmount,
+                HarvestUnit = harvestAmount is null ? null : harvestUnit,
                 Notes = notes
             }, Today);
             await OnDone.InvokeAsync();

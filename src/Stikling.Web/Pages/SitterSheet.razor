@@ -423,9 +423,17 @@
             {
                 <p>@how</p>
             }
+            @if (subject.Water is { } water)
+            {
+                <p>@water</p>
+            }
             @if (subject.Meter is { } meter)
             {
                 <p>@meter</p>
+            }
+            @if (subject.Weight is { } weight)
+            {
+                <p>@weight</p>
             }
             @if (subject.Pace is { } pace)
             {
@@ -560,12 +568,12 @@
     </div>;
 
     private static string? ChartHow(SitterSubject subject) =>
-        string.Join(" ", new[] { subject.How is { } how ? how + "." : null, subject.Meter }.Where(s => s is not null));
+        string.Join(" ", new[] { subject.How is { } how ? how + "." : null, subject.Water is { } water ? water + "." : null, subject.Meter }.Where(s => s is not null));
 
     // The line under a name on a visit: the spot, then how to water if it isn't the usual way
     private static string? RowLine(SitterSubject subject)
     {
-        var line = string.Join(" · ", new[] { subject.Spot, subject.How }.Where(s => !string.IsNullOrWhiteSpace(s)));
+        var line = string.Join(" · ", new[] { subject.Spot, subject.How, subject.Water }.Where(s => !string.IsNullOrWhiteSpace(s)));
         return line.Length == 0 ? null : line;
     }
 }

@@ -279,6 +279,23 @@ public enum WaterMethod
     Soak
 }
 
+/// <summary>What water a plant gets. A plant with none said is watered with whatever comes from the tap.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<WaterType>))]
+public enum WaterType
+{
+    Tap,
+    Demineralised,
+    Rain
+}
+
+/// <summary>What a harvest is counted in.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<HarvestUnit>))]
+public enum HarvestUnit
+{
+    Grams,
+    Pieces
+}
+
 /// <summary>The steps of a move to semi-hydro that are ticked off. Never stored.</summary>
 public enum TransitionStep
 {

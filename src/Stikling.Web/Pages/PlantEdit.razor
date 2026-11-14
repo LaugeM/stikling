@@ -455,6 +455,35 @@ else
                 }
 
                 <div class="mb-3">
+                    <label class="form-label" for="water-type">@Strings.Weighing.WaterLabel</label>
+                    <select id="water-type" class="form-select" aria-describedby="water-type-help"
+                            @onchange="e => plant.WaterType = Enum.TryParse<WaterType>(e.Value?.ToString(), out var type) ? type : null">
+                        <option value="" selected="@(plant.WaterType is null)">@Strings.Plants.ListNotSaid</option>
+                        @foreach (var type in Enum.GetValues<WaterType>())
+                        {
+                            <option value="@type" selected="@(plant.WaterType == type)">@PotWeight.Name(type)</option>
+                        }
+                    </select>
+                    <div id="water-type-help" class="form-text">@Strings.Weighing.WaterHelp</div>
+                </div>
+
+                <div class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <label class="form-label" for="weight-dry">@F(Strings.Weighing.WeightDry, Weights.UnitName)</label>
+                            <WeightInput id="weight-dry" class="form-control" min="0" aria-describedby="weight-help"
+                                         Value="plant.DryWeightGrams" ValueChanged="SetDryWeight" />
+                        </div>
+                        <div class="col-6">
+                            <label class="form-label" for="weight-watered">@F(Strings.Weighing.WeightWatered, Weights.UnitName)</label>
+                            <WeightInput id="weight-watered" class="form-control" min="0" aria-describedby="weight-help"
+                                         Value="plant.WateredWeightGrams" ValueChanged="SetWateredWeight" />
+                        </div>
+                    </div>
+                    <div id="weight-help" class="form-text">@Strings.Weighing.WeightHelp</div>
+                </div>
+
+                <div class="mb-3">
                     @if (form.Feeds.Count == 0)
                     {
                         <div class="form-label">@Strings.PlantDetail.WateringFeed</div>
@@ -603,6 +632,10 @@ else
         var list = parts.ToList();
         return list.Count <= 1 ? string.Concat(list) : F(Strings.PlantDetail.ListAnd, string.Join(", ", list.SkipLast(1)), list[^1]);
     }
+
+    private void SetDryWeight(decimal? grams) => form!.SetDryWeight(grams is { } g ? (int)Math.Round(g, MidpointRounding.AwayFromZero) : null);
+
+    private void SetWateredWeight(decimal? grams) => form!.SetWateredWeight(grams is { } g ? (int)Math.Round(g, MidpointRounding.AwayFromZero) : null);
 
     private static readonly WaterMethod?[] WaterByChoices = [null, .. Enum.GetValues<WaterMethod>().Cast<WaterMethod?>()];
 
@@ -914,7 +947,8 @@ else
         openFields = !isNew && plant.OwnFields.Any(v => form.OwnFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
         openSwap = !isNew && plant.Spare is not null;
         openSitter = !isNew && !string.IsNullOrWhiteSpace(plant.SitterNote);
-        openWatering = !isNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null);
+        openWatering = !isNew && (!plant.WateringReminder || plant.WaterAt is not null || plant.WaterBy is not null || plant.WateringFeedId is not null
+            || plant.WaterType is not null || plant.DryWeightGrams is not null || plant.WateredWeightGrams is not null);
     }
 
     private async Task AddPhotosAsync(ElementReference input, bool fromCamera)

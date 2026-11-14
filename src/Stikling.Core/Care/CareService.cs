@@ -89,7 +89,9 @@ public sealed class CareService(
         decimal? ec = null,
         decimal? ph = null,
         Guid? ownKindId = null,
-        string? ownKindName = null)
+        string? ownKindName = null,
+        decimal? harvestAmount = null,
+        HarvestUnit? harvestUnit = null)
     {
         var used = Tidy(products);
         var entries = plantIds
@@ -109,6 +111,8 @@ public sealed class CareService(
                 Ph = ph,
                 OwnKindId = ownKindId,
                 OwnKindName = ownKindId is null ? null : Clean(ownKindName),
+                HarvestAmount = harvestAmount,
+                HarvestUnit = harvestAmount is null ? null : harvestUnit,
                 Notes = Clean(notes)
             })
             .ToList();
@@ -222,6 +226,8 @@ public sealed class CareService(
         changed.WaterLitres = entry.WaterLitres;
         changed.Ec = entry.Ec;
         changed.Ph = entry.Ph;
+        changed.HarvestAmount = entry.HarvestAmount;
+        changed.HarvestUnit = entry.HarvestAmount is null ? null : entry.HarvestUnit;
         changed.Notes = Clean(entry.Notes);
 
         if (changed.Validate(today).FirstOrDefault() is { } error)
@@ -325,8 +331,18 @@ public sealed class CareService(
     public static string Describe(CareLog entry, Func<Enum, string> label,
         IReadOnlyDictionary<Guid, OwnCareKind>? ownKinds = null) =>
         HistoryText.Render(
-            HistoryText.CareLine(entry, CareLabels.OwnName(entry, ownKinds), entry.Products.Count == 0 ? null : string.Join(" + ", entry.Products)),
+            HistoryText.CareLine(entry, CareLabels.OwnName(entry, ownKinds) ?? HarvestName(entry, label), entry.Products.Count == 0 ? null : string.Join(" + ", entry.Products)),
             label, CultureInfo.CurrentUICulture);
+
+    // "Harvested 40 g" as the name of the kind, so the line reads as it does for the other kinds
+    private static string? HarvestName(CareLog entry, Func<Enum, string> label) =>
+        Harvests.AmountOf(entry) is { } amount
+            ? Format.F(Strings.Weighing.HarvestedAmount, label(CareKind.Harvested), amount)
+            : null;
+
+    /// <summary>The unit the plant's last harvest was counted in, for the care form to start on. Grams when it has none.</summary>
+    public async Task<HarvestUnit> LastHarvestUnitAsync(Guid plantId) =>
+        Harvests.LastUnit(await logs.GetAllAsync(), plantId);
 
     private async Task RecordAsync(CareLog entry, Func<Enum, string> label)
     {
