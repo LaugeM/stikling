@@ -58,6 +58,7 @@ public sealed class BackupData
     public List<Measurement> Measurements { get; set; } = [];
     public List<OwnMeasureKind> OwnMeasureKinds { get; set; } = [];
     public List<PhotoMarkup> PhotoMarkups { get; set; } = [];
+    public List<PlaceReading> PlaceReadings { get; set; } = [];
 
     /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
     // Before Lists, which uses it: static fields are set in the order they are written
@@ -108,6 +109,7 @@ public sealed class BackupData
         List(RecordKinds.Measurements, d => d.Measurements, (d, l) => d.Measurements = l),
         List(RecordKinds.OwnMeasureKinds, d => d.OwnMeasureKinds, (d, l) => d.OwnMeasureKinds = l),
         List(RecordKinds.PhotoMarkups, d => d.PhotoMarkups, (d, l) => d.PhotoMarkups = l),
+        List(RecordKinds.PlaceReadings, d => d.PlaceReadings, (d, l) => d.PlaceReadings = l),
     ];
 
     private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
@@ -156,7 +158,8 @@ public sealed class BackupData
         ShoppingItems.Count(i => !i.IsDeleted),
         Measurements.Count(m => !m.IsDeleted),
         OwnMeasureKinds.Count(k => !k.IsDeleted),
-        PhotoMarkups.Count(m => !m.IsDeleted));
+        PhotoMarkups.Count(m => !m.IsDeleted),
+        PlaceReadings.Count(r => !r.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -198,4 +201,5 @@ public sealed record BackupCounts(
     int ShoppingItems,
     int Measurements,
     int OwnMeasureKinds,
-    int PhotoMarkups);
+    int PhotoMarkups,
+    int PlaceReadings);

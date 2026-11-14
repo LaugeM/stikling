@@ -1,0 +1,19 @@
+@* "Where it stands: 1,200 lux, 19.5°, 60% · 3 Nov", under a plant or cutting's place or what it likes. It is a link to the
+   room or spot page. Nothing is shown without a reading, and nothing is compared with what the plant likes. *@
+@if (Conditions is { Any: true } && PlaceId is { } place)
+{
+    <div class="detail-sub"><a href="rooms/@place?@Query">@ReadingText.Stands(Conditions)</a></div>
+}
+
+@code {
+    [Parameter]
+    public PlaceConditions? Conditions { get; set; }
+
+    /// <summary>The room or spot the readings are from, with a merged place already followed.</summary>
+    [Parameter]
+    public Guid? PlaceId { get; set; }
+
+    /// <summary>What the page was opened from, like "plant=..." so the back link there leads back.</summary>
+    [Parameter]
+    public string Query { get; set; } = "";
+}

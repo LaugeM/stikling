@@ -5,17 +5,18 @@ using Stikling.Core.Text;
 namespace Stikling.Web.Services;
 
 /// <summary>
-/// Keeps how lengths, dates and the clock are shown in step with the person's settings. Core reads the
+/// Keeps how lengths, temperatures, dates and the clock are shown in step with the person's settings. Core reads the
 /// choice from <see cref="Lengths"/> and <see cref="TextCulture"/>, which only this app sets, so the
 /// server keeps the defaults. Settings with nothing chosen mean centimetres, the language's own date
 /// pattern and the 24-hour clock.
 /// </summary>
 public sealed class DisplayPreferences(SettingsService settings)
 {
-    /// <summary>Sets the three choices from the settings, or the defaults when there are none.</summary>
+    /// <summary>Sets the choices from the settings, or the defaults when there are none.</summary>
     public static void Apply(UserSettings? saved)
     {
         Lengths.Unit = saved?.Lengths ?? LengthUnit.Centimetres;
+        Climate.TemperatureUnit = saved?.Temperatures ?? TemperatureUnit.Celsius;
         TextCulture.Style = saved?.Dates ?? DateStyle.DayFirst;
         TextCulture.Clock = saved?.Clock ?? ClockStyle.TwentyFourHour;
     }

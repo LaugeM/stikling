@@ -587,4 +587,18 @@
   <data name="PlantNetKeyHint" xml:space="preserve">
     <value>Lets you identify plants without an account. Get a free key at my.plantnet.org. It stays on this device and isn't synced or put in backups.</value>
   </data>
+  <data name="Temperature" xml:space="preserve">
+    <value>Temperature</value>
+    <comment>Label of the choice between Celsius and Fahrenheit.</comment>
+  </data>
+  <data name="TemperatureCelsius" xml:space="preserve">
+    <value>Celsius (°C)</value>
+  </data>
+  <data name="TemperatureFahrenheit" xml:space="preserve">
+    <value>Fahrenheit (°F)</value>
+  </data>
+  <data name="TemperatureHint" xml:space="preserve">
+    <value>Light is shown in foot-candles when lengths are in inches, and in lux otherwise.</value>
+    <comment>Hint under the temperature choice.</comment>
+  </data>
 </root>

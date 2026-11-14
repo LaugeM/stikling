@@ -1714,4 +1714,112 @@ Maybe</value>
     <value>About {0}</value>
     <comment>Quiet link on the Plants page, when it is narrowed to a room or spot, to the page of that room or spot. {0} is its name.</comment>
   </data>
+  <data name="ReadingsTitle" xml:space="preserve">
+    <value>Light and climate</value>
+    <comment>Heading of the readings block on a room or spot page.</comment>
+  </data>
+  <data name="ReadingsHint" xml:space="preserve">
+    <value>Readings from a light meter or a hygrometer, typed in here, show what the plants in {0} live in.</value>
+    <comment>Hint before any reading. {0} is the room or spot name.</comment>
+  </data>
+  <data name="ReadingAdd" xml:space="preserve">
+    <value>Add a reading</value>
+    <comment>Button and sheet title for a new light, temperature or humidity reading.</comment>
+  </data>
+  <data name="ReadingCorrect" xml:space="preserve">
+    <value>Correct a reading</value>
+    <comment>Sheet title for changing a reading.</comment>
+  </data>
+  <data name="ReadingAll" xml:space="preserve">
+    <value>All readings</value>
+    <comment>Link to the list of readings of a room or spot.</comment>
+  </data>
+  <data name="ReadingLight" xml:space="preserve">
+    <value>Light</value>
+    <comment>Name of the light reading.</comment>
+  </data>
+  <data name="ReadingTemperature" xml:space="preserve">
+    <value>Temperature</value>
+    <comment>Name of the temperature reading.</comment>
+  </data>
+  <data name="ReadingHumidity" xml:space="preserve">
+    <value>Humidity</value>
+    <comment>Name of the humidity reading.</comment>
+  </data>
+  <data name="ReadingNone" xml:space="preserve">
+    <value>No reading</value>
+    <comment>Shown on a tile with no reading of that kind.</comment>
+  </data>
+  <data name="ReadingFromRoom" xml:space="preserve">
+    <value>The room's</value>
+    <comment>Small mark on a tile for a spot that shows its room's reading.</comment>
+  </data>
+  <data name="ReadingGuessLow" xml:space="preserve">
+    <value>Looks like low light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessMedium" xml:space="preserve">
+    <value>Looks like medium light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessBrightIndirect" xml:space="preserve">
+    <value>Looks like bright indirect light</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingGuessDirectSun" xml:space="preserve">
+    <value>Looks like direct sun</value>
+    <comment>Rough light level guessed from a lux reading, shown under the reading.</comment>
+  </data>
+  <data name="ReadingDate" xml:space="preserve">
+    <value>Date</value>
+    <comment>Label of the date of a reading.</comment>
+  </data>
+  <data name="ReadingTime" xml:space="preserve">
+    <value>Time</value>
+    <comment>Label of the time of day of a reading.</comment>
+  </data>
+  <data name="ReadingTimeHint" xml:space="preserve">
+    <value>Light changes a lot over a day, so the time helps you compare</value>
+    <comment>Hint under the time field.</comment>
+  </data>
+  <data name="ReadingWindow" xml:space="preserve">
+    <value>Which window</value>
+    <comment>Label of the window field.</comment>
+  </data>
+  <data name="ReadingWindowPlaceholder" xml:space="preserve">
+    <value>South window</value>
+    <comment>Placeholder of the window field.</comment>
+  </data>
+  <data name="ReadingNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label of the note field of a reading.</comment>
+  </data>
+  <data name="ReadingRemoveConfirm" xml:space="preserve">
+    <value>Remove this reading?</value>
+    <comment>Asked before a reading is removed.</comment>
+  </data>
+  <data name="ReadingChartSwitch" xml:space="preserve">
+    <value>Show on the curve</value>
+    <comment>Label of the buttons that choose which reading the curve shows.</comment>
+  </data>
+  <data name="ReadingChartDescription" xml:space="preserve">
+    <value>{0} in {1}: {2} readings from {3} to {4}, latest {5}</value>
+    <comment>Description of the curve for screen readers.</comment>
+  </data>
+  <data name="ReadingChartPoint" xml:space="preserve">
+    <value>{0} on {1}</value>
+    <comment>Label of one point on the curve.</comment>
+  </data>
+  <data name="ReadingsPageTitle" xml:space="preserve">
+    <value>Readings in {0}</value>
+    <comment>Page title and heading of the list of readings.</comment>
+  </data>
+  <data name="ReadingsEmpty" xml:space="preserve">
+    <value>No readings in {0} yet</value>
+    <comment>Empty state of the list of readings.</comment>
+  </data>
+  <data name="ReadingStands" xml:space="preserve">
+    <value>Where it stands: {0} · {1}</value>
+    <comment>Line on a plant or cutting. {0} are the latest readings, {1} the day.</comment>
+  </data>
 </root>

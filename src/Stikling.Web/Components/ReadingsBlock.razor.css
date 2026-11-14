@@ -1,0 +1,87 @@
+.readings {
+    margin-top: 1.75rem;
+    container-type: inline-size;
+}
+
+.readings-add {
+    display: block;
+    margin-top: 0.25rem;
+}
+
+.reading-tiles {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.5rem;
+}
+
+.reading-tile {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+    min-width: 0;
+    padding: 0.7rem 0.6rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.reading-name {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+    color: var(--pa-muted);
+}
+
+/* The latest value, big like the growth curve's */
+.reading-value {
+    font-family: var(--pa-font-display);
+    font-size: 1.4rem;
+    font-weight: 700;
+    line-height: 1.1;
+    letter-spacing: -0.02em;
+    font-variant-numeric: tabular-nums;
+    color: var(--pa-green-dark);
+    overflow-wrap: anywhere;
+}
+
+.reading-meta,
+.reading-none {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.reading-curve {
+    margin-top: 1rem;
+}
+
+.reading-curve .segmented {
+    margin-bottom: 0.75rem;
+}
+
+.readings-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.25rem 1.25rem;
+    margin-top: 0.75rem;
+}
+
+/* In a column too narrow for three tiles side by side, like the profile column on a wide screen, each
+   measure is a row: its name and value on one line, the day and the rest under them. */
+@container (max-width: 22rem) {
+    .reading-tiles {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .reading-tile {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: baseline;
+        gap: 0.2rem 0.75rem;
+        padding: 0.6rem 0.75rem;
+    }
+
+    .reading-name {
+        flex: 1;
+    }
+}

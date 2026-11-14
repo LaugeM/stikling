@@ -100,6 +100,12 @@
                 <option value="@LengthUnit.Centimetres" selected="@(Lengths.Unit == LengthUnit.Centimetres)">@Strings.Settings.LengthsCentimetres</option>
                 <option value="@LengthUnit.Inches" selected="@(Lengths.Unit == LengthUnit.Inches)">@Strings.Settings.LengthsInches</option>
             </select>
+            <label class="theme-label mt-4" for="temperatures">@Strings.Settings.Temperature</label>
+            <select id="temperatures" class="form-select w-auto" @onchange="SetTemperaturesAsync">
+                <option value="@TemperatureUnit.Celsius" selected="@(Climate.TemperatureUnit == TemperatureUnit.Celsius)">@Strings.Settings.TemperatureCelsius</option>
+                <option value="@TemperatureUnit.Fahrenheit" selected="@(Climate.TemperatureUnit == TemperatureUnit.Fahrenheit)">@Strings.Settings.TemperatureFahrenheit</option>
+            </select>
+            <p class="settings-hint">@Strings.Settings.TemperatureHint</p>
             <label class="theme-label mt-4" for="dates">@Strings.Settings.Dates</label>
             <select id="dates" class="form-select w-auto" @onchange="SetDatesAsync">
                 @foreach (var style in Enum.GetValues<DateStyle>())
@@ -904,6 +910,15 @@
         if (Enum.TryParse<LengthUnit>(e.Value?.ToString(), out var unit))
         {
             await SettingsService.SetLengthsAsync(unit);
+            await Display.ApplySavedAsync();
+        }
+    }
+
+    private async Task SetTemperaturesAsync(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<TemperatureUnit>(e.Value?.ToString(), out var unit))
+        {
+            await SettingsService.SetTemperaturesAsync(unit);
             await Display.ApplySavedAsync();
         }
     }

@@ -1,0 +1,237 @@
+@* A Sheet to write down a light, temperature or humidity reading for a room or spot, or to correct or remove
+   one. The numbers are shown and typed in the units chosen in Settings and stored in lux, °C and percent.
+   At least one of the three has to be typed. *@
+@using System.Globalization
+@inject PlaceReadingService Readings
+@inject ILogger<ReadingSheet> Logger
+@inject TimeProvider Time
+
+<Sheet Title="@(Reading is null ? Strings.Shared.ReadingAdd : Strings.Shared.ReadingCorrect)" Open="Open" OpenChanged="OpenChanged">
+    <div class="reading-sheet">
+        <p class="reading-place">@PlaceName</p>
+
+        @if (error is not null)
+        {
+            <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
+        }
+
+        <div class="mb-3">
+            <label class="form-label" for="@dateId">@Strings.Shared.ReadingDate</label>
+            <input id="@dateId" type="date" class="form-control" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
+            @if (day > Today)
+            {
+                <div class="form-text text-danger" role="alert">@Strings.Shared.LeafDayInFuture</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@timeId">@Strings.Shared.ReadingTime</label>
+            <input id="@timeId" type="time" class="form-control" value="@timeText" @onchange="e => timeText = e.Value?.ToString()" aria-describedby="@(timeId)-hint" />
+            <div class="form-text" id="@(timeId)-hint">@Strings.Shared.ReadingTimeHint</div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@luxId">@Strings.Shared.ReadingLight</label>
+            <div class="input-group">
+                <input id="@luxId" type="number" step="any" min="0" inputmode="decimal" class="form-control"
+                       @bind="luxText" @bind:event="oninput" />
+                <span class="input-group-text">@Climate.LightUnitName</span>
+            </div>
+            @if (Lux is { } typedLux)
+            {
+                <div class="form-text" role="status">@ReadingText.Guess(typedLux)</div>
+            }
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@tempId">@Strings.Shared.ReadingTemperature</label>
+            <div class="input-group">
+                <input id="@tempId" type="number" step="0.1" inputmode="decimal" class="form-control"
+                       @bind="temperatureText" @bind:event="oninput" />
+                <span class="input-group-text">@Climate.TemperatureUnitName</span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@humidityId">@Strings.Shared.ReadingHumidity</label>
+            <div class="input-group">
+                <input id="@humidityId" type="number" step="1" min="0" max="100" inputmode="numeric" class="form-control"
+                       @bind="humidityText" @bind:event="oninput" />
+                <span class="input-group-text">%</span>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@windowId">@Strings.Shared.ReadingWindow</label>
+            <input id="@windowId" type="text" class="form-control" list="@(windowId)-list" maxlength="60"
+                   placeholder="@Strings.Shared.ReadingWindowPlaceholder" @bind="window" @bind:event="oninput" />
+            <datalist id="@(windowId)-list">
+                @foreach (var used in windows)
+                {
+                    <option value="@used"></option>
+                }
+            </datalist>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="@noteId">@Strings.Shared.ReadingNote</label>
+            <textarea id="@noteId" class="form-control" rows="2" @bind="note" @bind:event="oninput"></textarea>
+        </div>
+
+        @if (confirmRemove)
+        {
+            <div class="problem-confirm mb-3">
+                <span>@Strings.Shared.ReadingRemoveConfirm</span>
+                <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="RemoveAsync">@Strings.Common.Remove</button>
+                <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmRemove = false">@Strings.Common.Cancel</button>
+            </div>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@(busy || !HasValue || day > Today || day == default)" @onclick="SaveAsync">@Strings.Common.Save</button>
+            @if (Reading is not null && !confirmRemove)
+            {
+                <button type="button" class="btn btn-link text-danger ms-auto" disabled="@busy" @onclick="() => confirmRemove = true">@Strings.Common.Remove</button>
+            }
+        </div>
+    </div>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>The room or spot a new reading is for.</summary>
+    [Parameter, EditorRequired]
+    public Guid PlaceId { get; set; }
+
+    [Parameter]
+    public string PlaceName { get; set; } = "";
+
+    /// <summary>The reading being corrected. Without it a new one is written down.</summary>
+    [Parameter]
+    public PlaceReading? Reading { get; set; }
+
+    /// <summary>Raised after a reading was saved or removed, so the page can close the Sheet and show it.</summary>
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    private readonly string dateId = $"reading-date-{Guid.NewGuid():N}";
+    private readonly string timeId = $"reading-time-{Guid.NewGuid():N}";
+    private readonly string luxId = $"reading-lux-{Guid.NewGuid():N}";
+    private readonly string tempId = $"reading-temp-{Guid.NewGuid():N}";
+    private readonly string humidityId = $"reading-humidity-{Guid.NewGuid():N}";
+    private readonly string windowId = $"reading-window-{Guid.NewGuid():N}";
+    private readonly string noteId = $"reading-note-{Guid.NewGuid():N}";
+
+    private DateOnly day;
+    private string? timeText;
+    private string? luxText;
+    private string? temperatureText;
+    private string? humidityText;
+    private string? window;
+    private string? note;
+    private IReadOnlyList<string> windows = [];
+    private string? error;
+    private bool busy;
+    private bool confirmRemove;
+    private bool wasOpen;
+
+    private DateOnly Today => Time.Today();
+
+    // The numbers as typed, in the units shown. Null for a box that is empty or isn't a number.
+    // A number too large for the field is cut off well past the limit, so the range message shows instead of an overflow.
+    private int? Lux => Number(luxText) is { } typed && typed >= 0 ? Climate.LightFromInput(Math.Min(typed, 1_000_000m)) : null;
+    private decimal? Temperature => Number(temperatureText) is { } typed ? Climate.TemperatureFromInput(typed) : null;
+    private int? Humidity => Number(humidityText) is { } typed ? (int)Math.Round(Math.Clamp(typed, -1000m, 1000m), MidpointRounding.AwayFromZero) : null;
+    private bool HasValue => Lux is not null || Temperature is not null || Humidity is not null;
+
+    private static decimal? Number(string? text) =>
+        decimal.TryParse(text?.Trim(), NumberStyles.Float, CultureInfo.InvariantCulture, out var value) ? value : null;
+
+    private static string? Show(decimal? value) => value?.ToString("0.####", CultureInfo.InvariantCulture);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        // Each time the sheet opens it starts from the reading, or from today for a new one
+        if (Open && !wasOpen)
+        {
+            error = null;
+            confirmRemove = false;
+            busy = false;
+            if (Reading is { } reading)
+            {
+                day = reading.Day;
+                timeText = reading.Time?.ToString("HH:mm", CultureInfo.InvariantCulture);
+                luxText = reading.Lux is { } lux ? Show(Climate.LightToInput(lux)) : null;
+                temperatureText = reading.TemperatureC is { } c ? Show(Climate.TemperatureToInput(c)) : null;
+                humidityText = reading.HumidityPercent?.ToString(CultureInfo.InvariantCulture);
+                window = reading.Window;
+                note = reading.Notes;
+            }
+            else
+            {
+                day = Today;
+                timeText = Time.GetLocalNow().ToString("HH:mm", CultureInfo.InvariantCulture);
+                luxText = temperatureText = humidityText = window = note = null;
+            }
+            windows = await Readings.WindowsUsedAsync(PlaceId);
+        }
+        wasOpen = Open;
+    }
+
+    private TimeOnly? Clock =>
+        TimeOnly.TryParse(timeText, CultureInfo.InvariantCulture, out var time) ? time : null;
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            var reading = Reading?.Copy() ?? new PlaceReading { PlaceId = PlaceId };
+            reading.Day = day;
+            reading.Time = Clock;
+            reading.Lux = Lux;
+            reading.TemperatureC = Temperature;
+            reading.HumidityPercent = Humidity;
+            reading.Window = window;
+            reading.Notes = note;
+            await Readings.SaveAsync(reading);
+            await OnSaved.InvokeAsync();
+        }
+        catch (InvalidOperationException ex)
+        {
+            // The rule's own message
+            error = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a reading failed");
+            error = F(Strings.Pests.CouldntSave, ex.Message);
+        }
+        busy = false;
+    }
+
+    private async Task RemoveAsync()
+    {
+        if (Reading is not { } reading)
+            return;
+
+        busy = true;
+        try
+        {
+            await Readings.DeleteAsync(reading.Id);
+            await OnSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing a reading failed");
+            error = F(Strings.Pests.CouldntDelete, ex.Message);
+        }
+        busy = false;
+    }
+}
