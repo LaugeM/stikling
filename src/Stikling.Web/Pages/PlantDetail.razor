@@ -318,7 +318,7 @@ else
                 <p class="profile-facts">@wateringSeasonsLine</p>
             }
 
-            @if (!given.IsEmpty)
+            @if (!given.IsEmpty || given.HasMoney)
             {
                 <p class="profile-facts">@string.Join(" · ", GivenParts)</p>
             }
@@ -534,6 +534,24 @@ else
                         {
                             <dt>@Strings.PlantDetail.WateringFeed</dt>
                             <dd>@F(plant.WateringFeedEvery switch { 2 => Strings.PlantDetail.FeedEverySecond, 3 => Strings.PlantDetail.FeedEveryThird, _ => Strings.PlantDetail.FeedEveryWatering }, wateringFeed.Name)</dd>
+                        }
+
+                        @if (PotWeight.Gets(plant.WaterType) is { } getsWater)
+                        {
+                            <dt>@Strings.Weighing.DetailWater</dt>
+                            <dd>@getsWater</dd>
+                        }
+
+                        @if (PotWeight.Line(plant) is { } weights)
+                        {
+                            <dt>@Strings.Weighing.DetailWeight</dt>
+                            <dd>
+                                @weights
+                                @if (PotWeight.WeighedBeforeRepot(plant, care))
+                                {
+                                    <div class="detail-sub">@Strings.Weighing.WeighedBeforeRepot</div>
+                                }
+                            </dd>
                         }
 
                         @if (plant.QuarantinedSince is { } quarantinedSince)
@@ -871,6 +889,17 @@ else
                     {
                         <dt>@(kind == CareKind.ToppedUp && WaterForm == WateringForm.Reservoir ? WateringText.DoneLabel(WaterForm) : Labels.For(kind))</dt>
                         <dd>@(last is null ? Strings.PlantDetail.Never : $"{Labels.DaysAgo(last.DaysAgo)} · {Labels.Date(last.On)}")</dd>
+                    }
+                    @if (harvested is { } lastHarvest)
+                    {
+                        <dt>@Labels.For(CareKind.Harvested)</dt>
+                        <dd>
+                            @($"{Labels.DaysAgo(lastHarvest.DaysAgo)} · {Labels.Date(lastHarvest.On)}")
+                            @if (harvestYear is { Count: > 0 } year)
+                            {
+                                <div class="detail-sub">@year.Text()</div>
+                            }
+                        </dd>
                     }
                 </dl>
             }
@@ -1533,6 +1562,14 @@ else
                         <label class="form-label" for="left-for">@(sold ? Strings.PlantDetail.SoldFor : Strings.PlantDetail.SwappedFor) <span class="text-body-secondary">@Strings.PlantDetail.Optional</span></label>
                         <input id="left-for" class="form-control" @bind="leftFor" placeholder="@(sold ? Strings.PlantDetail.SoldPlaceholder : Strings.PlantDetail.SwappedPlaceholder)" />
                     </div>
+                    @if (sold)
+                    {
+                        <div class="mb-3">
+                            <label class="form-label" for="sold-price">@Strings.PlantDetail.SoldPrice <span class="text-body-secondary">@Strings.PlantDetail.Optional</span></label>
+                            <InputNumber id="sold-price" class="form-control" @bind-Value="soldPrice" min="0" step="any" inputmode="decimal" aria-describedby="sold-price-help" />
+                            <div class="form-text" id="sold-price-help">@Strings.PlantDetail.SoldPriceHint</div>
+                        </div>
+                    }
                     @if (Labels.PotsTakenChoices([plant]) is { Count: > 0 } choices)
                     {
                         <div class="mb-3">
@@ -1678,6 +1715,7 @@ else
     private string? causeOfDeath;
     private string? leftTo;
     private string? leftFor;
+    private decimal? soldPrice;
     private PotsTaken potsTaken;
 
     private IReadOnlyList<CodeClash> numberClashes = [];
@@ -1694,6 +1732,8 @@ else
     private DateOnly? earlierUntil;
     private IReadOnlyList<CareLog> care = [];
     private IReadOnlyList<(CareKind Kind, LastCare? Last)> headline = [];
+    private LastCare? harvested;
+    private HarvestYear? harvestYear;
     private LastCare? lastWater;
     private IReadOnlyDictionary<Guid, OwnCareKind> ownKindLookup = new Dictionary<Guid, OwnCareKind>();
     private MoistureReading? moisture;
@@ -1891,7 +1931,7 @@ else
         }));
 
     // "6 cuttings and 2 leaves taken, 5 rooted · 2 given away and 1 sold"
-    private IEnumerable<string> GivenParts => PlantGivenText.Parts(given);
+    private IEnumerable<string> GivenParts => PlantGivenText.Parts(given, withMoney: true);
 
     // What common plants usually like, and so what to offer. Empty if it couldn't be read.
     private PlantCareBook careBook = PlantCareBook.Empty;
@@ -1979,7 +2019,10 @@ else
             offspring = PlantLineage.Offspring(plant, all);
 
             var allPropagations = await PropagationRepository.GetAllAsync();
-            given = PlantLineage.Given(plant, all, allPropagations);
+            var givenEntries = new List<TimelineEntry>();
+            foreach (var own in allPropagations.Where(p => !p.IsDeleted && p.ParentPlantId == plant.Id))
+                givenEntries.AddRange(await TimelineRepository.GetForAsync(own.Id));
+            given = PlantLineage.Given(plant, all, allPropagations, givenEntries);
             numberClashes = CollectionNumbers.Clashes(plant.CollectionNumber, plant.Id, all, allPropagations);
             propagations = new PropagationFilter(Progress: ProgressFilter.All)
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
@@ -2278,6 +2321,8 @@ else
             .Where(h => h.kind != otherKind || h.Item2 is not null)
             .Where(h => h.kind != CareKind.Flushed || WaterForm == WateringForm.Reservoir || h.Item2 is not null)
             .ToList();
+        harvested = CareSummary.Latest(all, plant.Id, CareKind.Harvested, Today);
+        harvestYear = Harvests.ThisYear(all, plant.Id, Today);
         await LoadComesBackAsync(all);
         lastWater = CareSummary.LastWater(all, plant.Id, Today);
         moisture = CareSummary.LatestMoisture(all, plant.Id, Today);
@@ -2552,6 +2597,7 @@ else
         causeOfDeath = plant!.CauseOfDeath;
         leftTo = plant.LeftTo;
         leftFor = plant.LeftFor;
+        soldPrice = plant.SoldPrice;
         potsTaken = plant.PotsTaken;
         more = More.Status;
     }
@@ -2746,6 +2792,7 @@ else
         plant.CauseOfDeath = causeOfDeath;
         plant.LeftTo = leftTo;
         plant.LeftFor = leftFor;
+        plant.SoldPrice = soldPrice;
         plant.PotsTaken = potsTaken;
         await PlantService.UpdateAsync(before, plant, Labels.For);
         await PlantService.CarryStatusToPottedWithAsync(plant, before.Status, Labels.For);

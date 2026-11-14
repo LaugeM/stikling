@@ -24,13 +24,14 @@ public static class LastTime
     private static Propagation? Newest(IEnumerable<Propagation> propagations) =>
         propagations.OrderByDescending(p => p.StartedOn).ThenByDescending(p => p.CreatedAt).FirstOrDefault();
 
-    /// <summary>True when the two have the same setup: type, medium, container, rooting aids and drying.</summary>
+    /// <summary>True when the two have the same setup: type, medium, container, rooting aids, drying and water change.</summary>
     public static bool SameSetup(Propagation a, Propagation b) =>
         a.Type == b.Type
         && a.Medium == b.Medium
         && string.Equals(a.Container?.Trim() ?? "", b.Container?.Trim() ?? "", StringComparison.Ordinal)
         && a.RootingAids.Order().SequenceEqual(b.RootingAids.Order())
-        && a.DriedForHours == b.DriedForHours;
+        && a.DriedForHours == b.DriedForHours
+        && (!WaterChangeLog.Takes(a.Medium) || a.WaterChangeDays == b.WaterChangeDays);
 
     /// <summary>Copies the setup of <paramref name="from"/> onto <paramref name="to"/>. Nothing else changes.</summary>
     public static void Apply(Propagation from, Propagation to)
@@ -41,6 +42,7 @@ public static class LastTime
         to.ContainerPotId = from.ContainerPotId;
         to.RootingAids = [.. from.RootingAids];
         to.DriedForHours = from.DriedForHours;
+        to.WaterChangeDays = from.WaterChangeDays;
         to.ClearMixUnlessSoil();
     }
 }

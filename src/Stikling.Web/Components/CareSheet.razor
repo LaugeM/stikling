@@ -15,7 +15,7 @@
     <div class="row g-2">
         <div class="col-7">
             <label class="form-label" for="care-kind">@Strings.Care.SheetWhatYouDid</label>
-            <select id="care-kind" class="form-select form-select-sm" @bind="choice" @bind:after="ChoiceChanged">
+            <select id="care-kind" class="form-select form-select-sm" @bind="choice" @bind:after="ChoiceChangedAsync">
                 @foreach (var value in Enum.GetValues<CareKind>())
                 {
                     <option value="@value">@KindLabel(value)</option>
@@ -66,6 +66,37 @@
                             aria-pressed="@(reservoirLevel == level ? "true" : "false")"
                             @onclick="() => reservoirLevel = level">@ReservoirLevels.Text(level)</button>
                 }
+            </div>
+        </div>
+    }
+
+    @if (OffersHarvest)
+    {
+        <div class="mt-2">
+            <div class="row g-2 align-items-end">
+                <div class="col-6">
+                    <label class="form-label" for="care-harvest">@Strings.Weighing.HarvestAmount</label>
+                    @if (harvestUnit == HarvestUnit.Grams)
+                    {
+                        <WeightInput id="care-harvest" class="form-control form-control-sm" min="0"
+                                     placeholder="@Strings.Weighing.HarvestOptional" @bind-Value="harvestAmount" />
+                    }
+                    else
+                    {
+                        <input type="number" id="care-harvest" class="form-control form-control-sm" min="0" step="any" inputmode="decimal"
+                               placeholder="@Strings.Weighing.HarvestOptional" @bind="harvestAmount" />
+                    }
+                </div>
+                <div class="col-6">
+                    <div class="chip-row" role="group" aria-label="@Strings.Weighing.HarvestUnit">
+                        <button type="button" class="chip @(harvestUnit == HarvestUnit.Grams ? "picked" : null)"
+                                aria-pressed="@(harvestUnit == HarvestUnit.Grams ? "true" : "false")"
+                                @onclick="() => PickHarvestUnit(HarvestUnit.Grams)">@Weights.UnitName</button>
+                        <button type="button" class="chip @(harvestUnit == HarvestUnit.Pieces ? "picked" : null)"
+                                aria-pressed="@(harvestUnit == HarvestUnit.Pieces ? "true" : "false")"
+                                @onclick="() => PickHarvestUnit(HarvestUnit.Pieces)">@Strings.Weighing.HarvestPiecesUnit</button>
+                    </div>
+                </div>
             </div>
         </div>
     }
@@ -210,6 +241,10 @@
     private bool newOnHistory;
     private DateOnly occurredOn;
     private int? moisture;
+    // A harvest's amount in grams or pieces, and what it is counted in. The unit starts as the one the plant's last harvest used.
+    private decimal? harvestAmount;
+    private HarvestUnit harvestUnit = HarvestUnit.Grams;
+    private Guid? harvestUnitFor;
     private int? reservoirLevel;
     private IReadOnlyList<Product> products = [];
     private IReadOnlyList<Feed> feeds = [];
@@ -230,6 +265,9 @@
 
     // Noting how full a reservoir is only makes sense for one plant that has one
     private bool OffersReservoir => PlantIds.Count == 1 && Form == WateringForm.Reservoir;
+
+    // An amount is for one plant's harvest, not for the same harvest logged on several plants
+    private bool OffersHarvest => PlantIds.Count == 1 && kind == CareKind.Harvested && own is null && choice != ReservoirChoice;
 
     private bool IsReservoir => choice == ReservoirChoice && OffersReservoir;
 
@@ -263,6 +301,24 @@
         feeds = (await FeedRepository.GetAllAsync())
             .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
+    }
+
+    private async Task ChoiceChangedAsync()
+    {
+        ChoiceChanged();
+        if (OffersHarvest && harvestUnitFor != PlantIds[0])
+        {
+            harvestUnitFor = PlantIds[0];
+            harvestUnit = await CareService.LastHarvestUnitAsync(PlantIds[0]);
+        }
+    }
+
+    private void PickHarvestUnit(HarvestUnit unit)
+    {
+        if (harvestUnit == unit)
+            return;
+        harvestUnit = unit;
+        harvestAmount = null;
     }
 
     private void ChoiceChanged()
@@ -332,6 +388,8 @@
     {
         if (kind != CareKind.MoistureReading)
             moisture = null;
+        if (!OffersHarvest)
+            harvestAmount = null;
         if (!IsReservoir)
             reservoirLevel = null;
         if (!CareKinds.TakesProducts(kind))
@@ -396,9 +454,11 @@
                 await CareService.LogReservoirAsync(PlantIds[0], level, label, occurredOn, notes);
             else
                 await CareService.LogManyAsync(PlantIds, kind, occurredOn, notes, label, moisture, doses,
-                    feed, water > 0 ? water : null, ec, ph, own?.Id, own?.Name);
+                    feed, water > 0 ? water : null, ec, ph, own?.Id, own?.Name,
+                    OffersHarvest && harvestAmount is not null ? harvestAmount : null, OffersHarvest ? harvestUnit : null);
             notes = null;
             moisture = null;
+            harvestAmount = null;
             reservoirLevel = null;
             doses.Clear();
             feed = null;

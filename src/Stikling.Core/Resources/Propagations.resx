@@ -88,6 +88,10 @@
     <value>The date can't be in the future.</value>
     <comment>Error shown when a date is after today.</comment>
   </data>
+  <data name="ErrSoldPriceNegative" xml:space="preserve">
+    <value>The price can't be negative.</value>
+    <comment>Error shown when the price the cuttings were sold for is below zero.</comment>
+  </data>
   <data name="ErrDateBeforeStart" xml:space="preserve">
     <value>The date can't be before the propagation started.</value>
     <comment>Error shown when a date is before the propagation was started.</comment>
@@ -675,5 +679,33 @@
   <data name="ErrCormSize_Inches" xml:space="preserve">
     <value>The corm size must be more than 0 and at most 7.8 inches.</value>
     <comment>Used instead of ErrCormSize when lengths are shown in inches.</comment>
+  </data>
+  <data name="ErrWaterChangeDays" xml:space="preserve">
+    <value>Change the water every 1 to {0} days, or leave it empty for no reminder.</value>
+    <comment>Error on the form for a propagation. {0} is the most days.</comment>
+  </data>
+  <data name="ErrOnlyWateringHasFeed" xml:space="preserve">
+    <value>Only a watering or a water change can have a feed.</value>
+    <comment>Error on a propagation care entry.</comment>
+  </data>
+  <data name="CareWateredWith" xml:space="preserve">
+    <value>Watered with {0}</value>
+    <comment>A care entry on a propagation. {0} is the name of the feed.</comment>
+  </data>
+  <data name="CareChangedWaterWith" xml:space="preserve">
+    <value>Changed the water, with {0}</value>
+    <comment>A care entry on a propagation. {0} is the name of the feed.</comment>
+  </data>
+  <data name="WaterEveryFewDays" xml:space="preserve">
+    <value>Every 1 to 3 days</value>
+    <comment>Group on the results page, by days between water changes.</comment>
+  </data>
+  <data name="WaterEveryWeek" xml:space="preserve">
+    <value>Every 4 to 7 days</value>
+    <comment>Group on the results page, by days between water changes.</comment>
+  </data>
+  <data name="WaterMoreThanWeek" xml:space="preserve">
+    <value>More than a week apart</value>
+    <comment>Group on the results page, by days between water changes.</comment>
   </data>
 </root>

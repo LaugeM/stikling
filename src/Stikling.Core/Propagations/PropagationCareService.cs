@@ -16,7 +16,8 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
 
     /// <summary>Saves one care entry. Throws for a finished propagation, a day outside its life or a bad reading.</summary>
     public async Task<PropagationCareLog> LogAsync(
-        Propagation propagation, PropagationCareKind kind, DateOnly on, int? moisture = null)
+        Propagation propagation, PropagationCareKind kind, DateOnly on, int? moisture = null,
+        IReadOnlyList<ProductDose>? products = null, Feed? feed = null)
     {
         if (!propagation.IsActive)
             throw new InvalidOperationException(Strings.Propagations.ErrFinished);
@@ -32,6 +33,13 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
             OccurredOn = on,
             Moisture = moisture
         };
+        if (feed is not null)
+        {
+            // The entry gets its own copies, so changing the feed or the products later can't change it
+            entry.Products = [.. (products ?? []).Select(p => p.Copy())];
+            entry.FeedId = feed.Id;
+            entry.FeedName = string.IsNullOrWhiteSpace(feed.Name) ? null : feed.Name.Trim();
+        }
         if (entry.Validate().FirstOrDefault() is { } error)
             throw new InvalidOperationException(error);
 
@@ -91,9 +99,11 @@ public sealed class PropagationCareService(IPropagationCareLogRepository logs, T
         _ => [PropagationCareKind.Watered, PropagationCareKind.MoistureReading]
     };
 
-    /// <summary>"Watered", "Changed the water" or "Moisture 4/10".</summary>
+    /// <summary>"Watered", "Watered with rooting water", "Changed the water" or "Moisture 4/10".</summary>
     public static string Describe(PropagationCareLog entry) => entry.Kind switch
     {
+        PropagationCareKind.Watered when entry.FeedName is { } feed => F(Strings.Propagations.CareWateredWith, feed),
+        PropagationCareKind.ChangedWater when entry.FeedName is { } feed => F(Strings.Propagations.CareChangedWaterWith, feed),
         PropagationCareKind.Watered => Strings.Propagations.CareWatered,
         PropagationCareKind.ChangedWater => Strings.Propagations.CareChangedWater,
         PropagationCareKind.MoistureReading => F(Strings.Propagations.CareMoisture, entry.Moisture),

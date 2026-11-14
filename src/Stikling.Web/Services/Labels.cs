@@ -181,6 +181,7 @@ public static class Labels
         ComparedThing.RootingAids => Strings.Propagations.ThingRootingAids,
         ComparedThing.Drying => Strings.Propagations.ThingDrying,
         ComparedThing.Place => Strings.Propagations.ThingPlace,
+        ComparedThing.WaterChanges => Strings.Propagations.ThingWaterChanges,
         _ => thing.ToString()
     };
 
@@ -333,6 +334,14 @@ public static class Labels
     {
         var english = Strings.Labels.ResourceManager.GetString(nameof(Strings.Labels.StatusDied), CultureInfo.InvariantCulture)!;
         var current = For(PlantStatus.Died);
+        return english == current ? [english] : [english, current];
+    }
+
+    /// <summary>The same for "Sold", for finding the day an older plant was sold.</summary>
+    public static string[] SoldInSavedLines()
+    {
+        var english = Strings.Labels.ResourceManager.GetString(nameof(Strings.Labels.StatusSold), CultureInfo.InvariantCulture)!;
+        var current = For(PlantStatus.Sold);
         return english == current ? [english] : [english, current];
     }
 

@@ -433,8 +433,10 @@ public sealed class PropagationService(
     /// The caller's propagation only gets the new counts once they are saved, and a failed history line
     /// after that comes as a <see cref="PartlySavedException"/>.
     /// </summary>
-    public async Task GiveAwayAsync(Propagation propagation, int count, string? to = null, DateOnly? date = null)
+    public async Task GiveAwayAsync(Propagation propagation, int count, string? to = null, DateOnly? date = null, decimal? soldFor = null)
     {
+        if (soldFor < 0)
+            throw new InvalidOperationException(Strings.Propagations.ErrSoldPriceNegative);
         var day = date ?? Today;
         if (day > Today)
             throw new InvalidOperationException(Strings.Propagations.ErrDateCantBeFuture);
@@ -442,11 +444,15 @@ public sealed class PropagationService(
             throw new InvalidOperationException(Strings.Propagations.ErrDateBeforeStart);
         await CountAsync(propagation, p => p.RecordGivenAway(count, day));
 
-        var line = Clean(to) is { } who
-            ? HistoryText.Line("GaveToWho", HistoryArg.Of(count), HistoryArg.Of(who))
-            : HistoryText.Line("GaveAway", HistoryArg.Of(count));
+        var line = (Clean(to), soldFor) switch
+        {
+            ({ } who, { } price) => HistoryText.Line("SoldToWho", HistoryArg.Of(count), HistoryArg.Of(who), HistoryArg.Of(price)),
+            (null, { } price) => HistoryText.Line("SoldCuttings", HistoryArg.Of(count), HistoryArg.Of(price)),
+            ({ } who, null) => HistoryText.Line("GaveToWho", HistoryArg.Of(count), HistoryArg.Of(who)),
+            _ => HistoryText.Line("GaveAway", HistoryArg.Of(count))
+        };
         await PartlySavedException.AfterSaveAsync(() =>
-            AddChangeAsync(propagation, WithOutcome(line, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway));
+            AddChangeAsync(propagation, WithOutcome(line, propagation), time.MomentOn(day), null, TimelineEvent.GaveAway, count: count, price: soldFor));
     }
 
     /// <summary>
@@ -493,6 +499,7 @@ public sealed class PropagationService(
             CormSizeMm = source.CormSizeMm,
             RootingAids = [.. source.RootingAids],
             DriedForHours = source.DriedForHours,
+            WaterChangeDays = source.WaterChangeDays,
             FirstRootOn = source.FirstRootOn,
             FirstLeafOn = source.FirstLeafOn,
             RootedOn = source.RootedOn,
@@ -613,7 +620,7 @@ public sealed class PropagationService(
 
     // The label turns the enums in the lines into the English words that are saved in Text
     private Task AddChangeAsync(Propagation propagation, IReadOnlyList<HistoryLine> lines, DateTimeOffset? occurredAt = null, Guid? plantId = null, TimelineEvent? @event = null,
-        FailReason? failReason = null, int? count = null, Func<Enum, string>? label = null)
+        FailReason? failReason = null, int? count = null, Func<Enum, string>? label = null, decimal? price = null)
     {
         var entry = new TimelineEntry
         {
@@ -624,6 +631,7 @@ public sealed class PropagationService(
             Event = @event,
             FailReason = failReason,
             Count = count,
+            Price = price,
             RelatedType = plantId is null ? null : SubjectType.Plant,
             RelatedId = plantId
         };

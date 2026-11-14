@@ -1,0 +1,103 @@
+.money-heading {
+    align-items: center;
+}
+
+/* The year, as a chip beside the title, like the one on the year in review */
+.money-year-picker {
+    width: auto;
+    min-height: 2.75rem;
+    padding-left: 1rem;
+    border-color: transparent;
+    border-radius: 999px;
+    background-color: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.money-totals {
+    display: grid;
+    gap: 0.75rem;
+    margin-bottom: 0.75rem;
+}
+
+.money-total {
+    padding: 0.9rem 1rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.money-total-label {
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--pa-muted);
+}
+
+.money-total-amount {
+    font-family: var(--pa-font-display);
+    font-size: 1.75rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+.money-parts {
+    margin: 0.5rem 0 0;
+}
+
+.money-parts > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 0.75rem;
+    padding: 0.2rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.money-parts dt {
+    font-weight: 400;
+    color: var(--pa-muted);
+}
+
+.money-parts dd {
+    margin: 0;
+    font-variant-numeric: tabular-nums;
+}
+
+.settings-hint + .stage-group {
+    margin-top: 1.25rem;
+}
+
+.money-amount {
+    flex: none;
+    margin-left: auto;
+    padding-left: 0.5rem;
+    font-weight: 600;
+    font-variant-numeric: tabular-nums;
+}
+
+/* Spent and Brought in side by side, and the lines flow into columns at least 20rem wide, like the Orders list */
+@media (min-width: 48rem) {
+    .money-totals {
+        grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+        align-items: start;
+    }
+}
+
+@media (min-width: 64rem) {
+    .money-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        gap: 0.6rem 0.75rem;
+        align-items: start;
+    }
+
+    .money-grid > li {
+        display: flex;
+        min-width: 0;
+    }
+
+    .money-grid > li > * {
+        flex: 1;
+        min-width: 0;
+    }
+}

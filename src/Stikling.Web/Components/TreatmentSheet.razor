@@ -33,7 +33,19 @@
         </div>
     }
 
-    @if (!Check && recipes.Count > 0)
+    @if (!Check)
+    {
+        <div class="chip-row mb-2" role="group" aria-label="@Strings.Pests.TreatKindLabel">
+            <button type="button" class="chip @(release ? null : "picked")"
+                    aria-pressed="@(release ? "false" : "true")"
+                    @onclick="() => release = false">@Strings.Pests.TreatKindTreated</button>
+            <button type="button" class="chip @(release ? "picked" : null)"
+                    aria-pressed="@(release ? "true" : "false")"
+                    @onclick="() => release = true">@Strings.Pests.TreatKindReleased</button>
+        </div>
+    }
+
+    @if (!Check && !release && recipes.Count > 0)
     {
         <div class="mb-2">
             <div class="form-label">@Strings.Pests.TreatRecipe</div>
@@ -63,12 +75,12 @@
     }
 
     <div class="row g-2">
-        @if (!Check && recipeId is null)
+        @if (!Check && (release || recipeId is null))
         {
             <div class="col-7">
-                <label class="form-label" for="treatment-what">@Strings.Pests.TreatWhatUsed</label>
+                <label class="form-label" for="treatment-what">@(release ? Strings.Pests.TreatWhatReleased : Strings.Pests.TreatWhatUsed)</label>
                 <input type="text" id="treatment-what" class="form-control form-control-sm"
-                       placeholder="@Strings.Pests.TreatWhatPlaceholder" @bind="what" @bind:event="oninput" />
+                       placeholder="@(release ? Strings.Pests.TreatReleasePlaceholder : Strings.Pests.TreatWhatPlaceholder)" @bind="what" @bind:event="oninput" />
             </div>
         }
         <div class="col-5">
@@ -90,7 +102,7 @@
         </div>
     }
 
-    @if (!Check && loaded && recipes.Count == 0)
+    @if (!Check && !release && loaded && recipes.Count == 0)
     {
         <div class="form-text">@((MarkupString)F(Strings.Pests.TreatMakeRecipe, $"<a href=\"treatment-recipes\">{System.Net.WebUtility.HtmlEncode(Strings.Pests.TreatRecipesLink)}</a>"))</div>
     }
@@ -170,6 +182,7 @@
     private int StepNumber => Step is null ? 0 : Case.PlanSteps.FindIndex(s => s.Id == Step.Id) + 1;
 
     private string? what;
+    private bool release;
     private Guid? recipeId;
     private IReadOnlyList<TreatmentRecipe> recipes = [];
     private bool loaded;
@@ -197,6 +210,7 @@
     private void Reset()
     {
         offPlan = false;
+        release = false;
         var draft = Step is { } step
             ? PlanProgress.StartStep(Case, step, Today, recipes, PlanProgress.CurrentRound(Case, Existing))
             : PestService.StartTreatment(Case, Existing, Today, recipes);
@@ -242,13 +256,14 @@
                     CaseId = Case.Id,
                     OccurredOn = occurredOn,
                     What = Clean(what),
+                    IsRelease = release,
                     // Only a date that isn't the plain interval is worth storing, so changing the
                     // interval later still moves the cases that never had a gap set by hand
                     NextDueOn = OnStep || nextDue == Default(occurredOn) ? null : nextDue,
                     PlanStepId = OnStep ? Step!.Id : null,
                     PlanRound = OnStep ? PlanProgress.CurrentRound(Case, Existing) : 0
                 };
-                if (!Check && Picked is { } recipe)
+                if (!Check && !release && Picked is { } recipe)
                     entry.Use(recipe);
                 if (CanTick && tickOff)
                     entry.TreatedPlantIds = [];

@@ -142,7 +142,8 @@ public static class PlantLineage
     /// What a plant has given: units taken per propagation type, how many of them rooted, the
     /// direct offspring given away or sold, and the plants descended from those offspring.
     /// </summary>
-    public static PlantGiven Given(Plant plant, IEnumerable<Plant> all, IEnumerable<Propagation> propagations)
+    /// <param name="entries">Timeline entries that may include the propagations' histories, for what sold cuttings brought in. Left out, only the plants sold count.</param>
+    public static PlantGiven Given(Plant plant, IEnumerable<Plant> all, IEnumerable<Propagation> propagations, IEnumerable<TimelineEntry>? entries = null)
     {
         var list = all.Where(p => !p.IsDeleted).ToList();
         var taken = propagations.Where(p => !p.IsDeleted && p.ParentPlantId == plant.Id).ToList();
@@ -167,6 +168,12 @@ public static class PlantLineage
             }
         }
 
+        var takenIds = taken.Select(p => p.Id).ToHashSet();
+        var broughtIn = offspring.Where(p => p.Status == PlantStatus.Sold).Sum(p => p.SoldPrice ?? 0)
+            + (entries ?? []).Where(e => !e.IsDeleted && e.Event == TimelineEvent.GaveAway
+                                         && e.SubjectType == SubjectType.Propagation && takenIds.Contains(e.SubjectId))
+                             .Sum(e => e.Price ?? 0);
+
         return new PlantGiven(
             taken.GroupBy(p => p.Type)
                  .Select(g => new KeyValuePair<PropagationType, int>(g.Key, g.Sum(p => p.StartedCount)))
@@ -175,7 +182,9 @@ public static class PlantLineage
             taken.Sum(PropagationResults.Succeeded),
             offspring.Count(p => p.Status == PlantStatus.GivenAway),
             offspring.Count(p => p.Status == PlantStatus.Sold),
-            further);
+            further,
+            plant.PricePaid > 0 ? plant.PricePaid : null,
+            broughtIn > 0 ? broughtIn : null);
     }
 }
 
@@ -188,15 +197,23 @@ public sealed record Generation(int Number, Plant Oldest);
 /// <param name="GivenAway">Direct offspring that were given away.</param>
 /// <param name="Sold">Direct offspring that were sold.</param>
 /// <param name="FromThoseInTurn">Plants descended from the offspring, not the offspring themselves.</param>
+/// <param name="Cost">What the plant itself cost, or null. Only for the plant's own page, never the printed story.</param>
+/// <param name="BroughtIn">What the offspring that were sold and the sold cuttings brought in, or null when none had a price.</param>
 public sealed record PlantGiven(
     IReadOnlyList<KeyValuePair<PropagationType, int>> TakenByType,
     int Rooted,
     int GivenAway,
     int Sold,
-    int FromThoseInTurn)
+    int FromThoseInTurn,
+    decimal? Cost = null,
+    decimal? BroughtIn = null)
 {
     public int Taken => TakenByType.Sum(t => t.Value);
 
+    /// <summary>True when there is a price on either side.</summary>
+    public bool HasMoney => Cost is not null || BroughtIn is not null;
+
+    /// <summary>Nothing to say about what it has given. Money is not counted, so the printed story stays without it; see <see cref="HasMoney"/>.</summary>
     public bool IsEmpty => TakenByType.Count == 0 && GivenAway == 0 && Sold == 0 && FromThoseInTurn == 0;
 }
 

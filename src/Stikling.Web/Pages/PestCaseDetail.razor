@@ -311,6 +311,12 @@ else
                 </dd>
             }
 
+            @if (LastRelease is { } released)
+            {
+                <dt>@Strings.Pests.CaseLastRelease</dt>
+                <dd>@Labels.DaysAgo(Math.Max(0, Today.DayNumber - released.OccurredOn.DayNumber)) · @Labels.Date(released.OccurredOn)</dd>
+            }
+
             <dt>@Strings.Pests.CaseLast</dt>
             <dd>@(view.Last is { } last ? $"{Labels.Date(last.OccurredOn)} · {What(last)}" : Strings.Pests.CaseNoTreatments)</dd>
         </dl>
@@ -757,6 +763,11 @@ else
         }
     }
 
+    private PestTreatment? LastRelease => treatments
+        .Where(t => t.IsRelease && !t.IsDeleted)
+        .OrderByDescending(t => t.OccurredOn)
+        .FirstOrDefault();
+
     private bool Trapped => treatments.Any(t => t.Kind == PestTreatmentKind.TrapCount);
 
     // A pest that flies into traps gets the card from the start. Any other gets it once a trap
@@ -819,6 +830,8 @@ else
         { Kind: PestTreatmentKind.TrapCount, OnTrap: { } onTrap } =>
             treatment.NewTrap ? F(Strings.Pests.CaseCountedTrapThenNew, onTrap) : F(Strings.Pests.CaseCountedTrap, onTrap),
         { Kind: PestTreatmentKind.TrapCount } => Strings.Pests.CasePutUpTrap,
+        { IsRelease: true, What: { } released } when !string.IsNullOrWhiteSpace(released) => F(Strings.Pests.CaseReleased, released.Trim()),
+        { IsRelease: true } => Strings.Pests.CaseReleasedPlain,
         { What: { } what } when !string.IsNullOrWhiteSpace(what) => what,
         _ => Strings.Pests.CaseWhatTreated
     };

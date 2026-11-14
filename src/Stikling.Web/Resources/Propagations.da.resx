@@ -1686,4 +1686,82 @@
   <data name="TlOpenPestCase" xml:space="preserve">
     <value>Åbn sagen</value>
   </data>
+  <data name="StatsWaterHeading" xml:space="preserve">
+    <value>Hvor ofte vandet blev skiftet</value>
+  </data>
+  <data name="StatsWaterHow" xml:space="preserve">
+    <value>Kun batches hvor du har logget vandskift, tæller med.</value>
+  </data>
+  <data name="StatsFairWater" xml:space="preserve">
+    <value>Batches med forskellige mellemrum er for det meste også forskellige i {0}, så en forskel her kan ikke tilskrives hvor ofte vandet blev skiftet alene.</value>
+  </data>
+  <data name="ThingWaterChanges" xml:space="preserve">
+    <value>hvor ofte vandet blev skiftet</value>
+  </data>
+  <data name="EditWaterChange" xml:space="preserve">
+    <value>Skift vandet hver … dag</value>
+  </data>
+  <data name="EditWaterChangeHint" xml:space="preserve">
+    <value>Lad feltet stå tomt hvis du ikke vil have en påmindelse.</value>
+  </data>
+  <data name="EditWaterChangeSummary_One" xml:space="preserve">
+    <value>Skift vand hver dag</value>
+  </data>
+  <data name="EditWaterChangeSummary_Other" xml:space="preserve">
+    <value>Skift vand hver {0}. dag</value>
+  </data>
+  <data name="DetWaterChangeReminder" xml:space="preserve">
+    <value>Påmindelse om vandskift</value>
+  </data>
+  <data name="DetWaterChangeEvery_One" xml:space="preserve">
+    <value>Hver dag</value>
+  </data>
+  <data name="DetWaterChangeEvery_Other" xml:space="preserve">
+    <value>Hver {0}. dag</value>
+  </data>
+  <data name="DetRemindWaterChange" xml:space="preserve">
+    <value>Mind mig om at skifte vandet</value>
+  </data>
+  <data name="ReadyByLink" xml:space="preserve">
+    <value>Klar til en dato?</value>
+  </data>
+  <data name="ReadyByTitle" xml:space="preserve">
+    <value>Klar til en dato?</value>
+  </data>
+  <data name="ReadyByHint" xml:space="preserve">
+    <value>Vælg hvornår den skal have slået rødder, og se hvornår du skal starte, ud fra dine egne batches.</value>
+  </data>
+  <data name="ReadyByDate" xml:space="preserve">
+    <value>Skal have rødder senest</value>
+  </data>
+  <data name="ReadyByStart_One" xml:space="preserve">
+    <value>Start senest {1}. Dine {2} batches af typen {3} i {4} var i gennemsnit {0} dag om at slå rødder.</value>
+  </data>
+  <data name="ReadyByStart_Other" xml:space="preserve">
+    <value>Start senest {1}. Dine {2} batches af typen {3} i {4} var i gennemsnit {0} dage om at slå rødder.</value>
+  </data>
+  <data name="ReadyBySafe_One" xml:space="preserve">
+    <value>For en sikkerheds skyld kan du starte senest {1}. Den langsomste var {0} dag om det.</value>
+  </data>
+  <data name="ReadyBySafe_Other" xml:space="preserve">
+    <value>For en sikkerheds skyld kan du starte senest {1}. Den langsomste var {0} dage om det.</value>
+  </data>
+  <data name="ReadyByPast_One" xml:space="preserve">
+    <value>Det var for {0} dag siden. Hvis du starter i dag, har den som regel slået rødder omkring {1}.</value>
+  </data>
+  <data name="ReadyByPast_Other" xml:space="preserve">
+    <value>Det var for {0} dage siden. Hvis du starter i dag, har den som regel slået rødder omkring {1}.</value>
+  </data>
+  <data name="ReadyByTooFew" xml:space="preserve">
+    <value>Det kræver {1} batches med rødder af den type i det vækstmedie. Du har {0}.</value>
+  </data>
+  <data name="DetSold" xml:space="preserve">
+    <value>De blev solgt</value>
+  </data>
+  <data name="DetSoldPrice" xml:space="preserve">
+    <value>Pris for alle sammen</value>
+  </data>
+  <data name="DetSoldPriceHint" xml:space="preserve">
+    <value>Et tal, så det kan lægges sammen under Økonomi.</value>
+  </data>
 </root>

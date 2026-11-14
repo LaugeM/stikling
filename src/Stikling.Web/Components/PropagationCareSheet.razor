@@ -2,12 +2,29 @@
 @using System.Globalization
 @inject PropagationCareService CareService
 @inject ILogger<PropagationCareSheet> Logger
+@inject IFeedRepository FeedRepository
+@inject IProductRepository ProductRepository
 @inject TimeProvider Time
 
 <div class="care-sheet">
     @if (error is not null)
     {
         <div class="alert alert-danger py-2 px-3 mb-2" role="alert">@error</div>
+    }
+
+    @if (feeds.Count > 0 && kinds.Any(PropagationCareLog.TakesFeed))
+    {
+        <div class="mb-2">
+            <div class="form-label">@Strings.Care.SheetFeed</div>
+            <div class="chip-row" role="group" aria-label="@Strings.Care.SheetFeeds">
+                @foreach (var item in feeds)
+                {
+                    <button type="button" class="chip @(feed?.Id == item.Id ? "picked" : null)"
+                            aria-pressed="@(feed?.Id == item.Id ? "true" : "false")"
+                            @onclick="() => PickFeed(item)">@item.Name</button>
+                }
+            </div>
+        </div>
     }
 
     <div class="care-actions">
@@ -64,6 +81,10 @@
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
                         </button>
                     </div>
+                    @if (entry.Products.Count > 0)
+                    {
+                        <div class="care-products">@string.Join(" + ", entry.Products)</div>
+                    }
                 </li>
             }
         </ul>
@@ -90,12 +111,24 @@
     private bool showDate;
     private bool busy;
     private string? error;
+    private IReadOnlyList<Feed> feeds = [];
+    private Feed? feed;
 
     private DateOnly Today => Time.Today();
 
     private IReadOnlyList<PropagationCareKind> kinds => PropagationCareService.KindsFor(Propagation.Medium);
 
-    protected override void OnInitialized() => occurredOn = Today;
+    protected override async Task OnInitializedAsync()
+    {
+        occurredOn = Today;
+        feeds = (await FeedRepository.GetAllAsync())
+            .Where(f => !f.IsDeleted)
+            .OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+    }
+
+    // Picking the feed again leaves it out
+    private void PickFeed(Feed item) => feed = feed?.Id == item.Id ? null : item;
 
     private string ButtonText(PropagationCareKind kind) => (kind, occurredOn == Today) switch
     {
@@ -118,7 +151,9 @@
         error = null;
         try
         {
-            await CareService.LogAsync(Propagation, kind, occurredOn, moisture);
+            var fed = feed is not null && PropagationCareLog.TakesFeed(kind) ? feed : null;
+            var doses = fed is null ? null : fed.Doses(await ProductRepository.GetAllAsync());
+            await CareService.LogAsync(Propagation, kind, occurredOn, moisture, doses, fed);
             await OnLogged.InvokeAsync();
         }
         catch (InvalidOperationException ex)

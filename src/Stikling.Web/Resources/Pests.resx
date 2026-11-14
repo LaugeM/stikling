@@ -1459,4 +1459,36 @@
     <value>Tick off more</value>
     <comment>Link in a recent treatment's history that opens its checklist.</comment>
   </data>
+  <data name="TreatKindTreated" xml:space="preserve">
+    <value>Treated</value>
+    <comment>Choice at the top of the treatment sheet: something was used on the plants.</comment>
+  </data>
+  <data name="TreatKindReleased" xml:space="preserve">
+    <value>Released natural enemies</value>
+    <comment>Choice at the top of the treatment sheet: predatory mites, nematodes or similar were released.</comment>
+  </data>
+  <data name="TreatKindLabel" xml:space="preserve">
+    <value>What you are logging</value>
+    <comment>Accessible name of the choice between treated and released natural enemies.</comment>
+  </data>
+  <data name="TreatWhatReleased" xml:space="preserve">
+    <value>What was released</value>
+    <comment>Label of the field for what was released, in a release of natural enemies.</comment>
+  </data>
+  <data name="TreatReleasePlaceholder" xml:space="preserve">
+    <value>e.g. predatory mites, 2 sachets</value>
+    <comment>Placeholder in the field for what was released.</comment>
+  </data>
+  <data name="CaseReleased" xml:space="preserve">
+    <value>Released: {0}</value>
+    <comment>In the list of what was logged on a pest case. {0} is what was released, like predatory mites, 2 sachets.</comment>
+  </data>
+  <data name="CaseReleasedPlain" xml:space="preserve">
+    <value>Released natural enemies</value>
+    <comment>In the list of what was logged on a pest case, for a release with no text.</comment>
+  </data>
+  <data name="CaseLastRelease" xml:space="preserve">
+    <value>Last release</value>
+    <comment>Label in the details of a pest case, for the latest release of natural enemies.</comment>
+  </data>
 </root>

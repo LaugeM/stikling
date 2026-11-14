@@ -1,0 +1,140 @@
+@* "When do I have to start it for it to be rooted by this date?" Worked out from your own batches. Nothing is stored. *@
+@using System.Globalization
+
+<Sheet Title="@Strings.Propagations.ReadyByTitle" Open="Open" OpenChanged="OpenChanged">
+    <div class="ready-by">
+        <p class="form-text mt-0">@Strings.Propagations.ReadyByHint</p>
+
+        <div class="row g-2 mb-3">
+            <div class="col-6">
+                <label class="form-label" for="ready-type">@Strings.Propagations.EditType</label>
+                <select id="ready-type" class="form-select" @onchange="TypeChanged">
+                    @foreach (var option in Enum.GetValues<PropagationType>())
+                    {
+                        <option value="@option" selected="@(option == type)">@Labels.For(option)</option>
+                    }
+                </select>
+            </div>
+            <div class="col-6">
+                <label class="form-label" for="ready-medium">@Strings.Propagations.EditGrowsIn</label>
+                <select id="ready-medium" class="form-select" @onchange="MediumChanged">
+                    @foreach (var option in Enum.GetValues<GrowingMedium>())
+                    {
+                        <option value="@option" selected="@(option == medium)">@Labels.For(option)</option>
+                    }
+                </select>
+            </div>
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="ready-on">@Strings.Propagations.ReadyByDate</label>
+            <input type="date" id="ready-on" class="form-control" min="@Today.AddDays(1).ToString("yyyy-MM-dd")"
+                   value="@(readyOn?.ToString("yyyy-MM-dd"))" @onchange="DateChanged" />
+        </div>
+
+        @if (result is { } shown && readyOn is { } day)
+        {
+            <div class="ready-by-answer" role="status">
+                @if (!shown.HasEnough)
+                {
+                    <p>@F(Strings.Propagations.ReadyByTooFew, shown.Compared, RootingPace.MinimumToCompare)</p>
+                }
+                else
+                {
+                    var usual = shown.UsualDays!.Value;
+                    var slowest = shown.SlowestDays!.Value;
+                    @if (shown.StartBy!.Value < Today)
+                    {
+                        var ago = Today.DayNumber - shown.StartBy.Value.DayNumber;
+                        <p>
+                            @F(ago == 1 ? Strings.Propagations.ReadyByPast_One : Strings.Propagations.ReadyByPast_Other,
+                               ago, Labels.Date(Today.AddDays(usual)))
+                        </p>
+                    }
+                    else
+                    {
+                        <p>
+                            @F(usual == 1 ? Strings.Propagations.ReadyByStart_One : Strings.Propagations.ReadyByStart_Other,
+                               usual, Labels.Date(shown.StartBy.Value), shown.Compared, Lower(Labels.For(type)), Lower(Labels.For(medium)))
+                        </p>
+                        @if (shown.HasSaferDay && shown.SafeStartBy!.Value >= Today)
+                        {
+                            <p>
+                                @F(slowest == 1 ? Strings.Propagations.ReadyBySafe_One : Strings.Propagations.ReadyBySafe_Other,
+                                   slowest, Labels.Date(shown.SafeStartBy.Value))
+                            </p>
+                        }
+                    }
+                }
+            </div>
+        }
+    </div>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>Every propagation, for the batches to go by.</summary>
+    [Parameter]
+    public IReadOnlyList<Propagation> All { get; set; } = [];
+
+    /// <summary>What it starts on each time the sheet is opened.</summary>
+    [Parameter]
+    public PropagationType StartType { get; set; } = PropagationType.Cutting;
+
+    [Parameter]
+    public GrowingMedium StartMedium { get; set; } = GrowingMedium.Water;
+
+    [Inject]
+    private TimeProvider Time { get; set; } = null!;
+
+    private PropagationType type;
+    private GrowingMedium medium;
+    private DateOnly? readyOn;
+    private bool wasOpen;
+
+    private DateOnly Today => Time.Today();
+
+    private ReadyByResult? result => readyOn is { } day ? ReadyBy.For(type, medium, day, All) : null;
+
+    protected override void OnParametersSet()
+    {
+        // Each time the sheet opens it starts from what the page says, with no date picked
+        if (Open && !wasOpen)
+        {
+            type = StartType;
+            medium = StartMedium;
+            readyOn = null;
+        }
+        wasOpen = Open;
+    }
+
+    private void TypeChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<PropagationType>(e.Value?.ToString(), out var picked))
+            type = picked;
+    }
+
+    private void MediumChanged(ChangeEventArgs e)
+    {
+        if (Enum.TryParse<GrowingMedium>(e.Value?.ToString(), out var picked))
+            medium = picked;
+    }
+
+    private void DateChanged(ChangeEventArgs e)
+    {
+        // An empty or half-typed date, or one that isn't after today, leaves nothing to answer
+        readyOn = DateOnly.TryParseExact(e.Value?.ToString(), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var day)
+                  && day > Today
+            ? day
+            : null;
+    }
+
+    // Mid-sentence, but not LECA or PON
+    private static string Lower(string text) =>
+        text.Any(char.IsLower) ? char.ToLowerInvariant(text[0]) + text[1..] : text;
+}

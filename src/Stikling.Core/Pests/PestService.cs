@@ -368,7 +368,7 @@ public static class PestService
         IEnumerable<TreatmentRecipe>? recipes = null)
     {
         var draft = new PestTreatment { CaseId = item.Id, OccurredOn = today };
-        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated && !t.Skipped);
+        var last = TreatmentsFor(treatments, item.Id).FirstOrDefault(t => t.Kind == PestTreatmentKind.Treated && !t.Skipped && !t.IsRelease);
 
         if (last?.RecipeId is { } id)
         {

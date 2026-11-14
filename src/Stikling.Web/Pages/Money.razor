@@ -1,0 +1,168 @@
+@page "/money"
+@layout WideLayout
+@* What the hobby costs and brings in, per year. The adding up is MoneySums in Core; this page only shows it.
+   Amounts are plain numbers with no currency. *@
+@using Stikling.Core.Spending
+@using Stikling.Core.Sellers
+@using Stikling.Core.Stock
+@using MoneySums = Stikling.Core.Spending.Money
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject IOrderRepository OrderRepository
+@inject IOrderItemRepository OrderItemRepository
+@inject ISupplyEntryRepository SupplyEntryRepository
+@inject IShoppingItemRepository ShoppingItemRepository
+@inject IPotRepository PotRepository
+@inject ITimelineRepository TimelineRepository
+@inject SellerService SellerService
+@inject StockService StockService
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Money.PageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
+
+<div class="page-heading money-heading">
+    <h1>@Strings.Money.Title</h1>
+    @if (years is { Count: > 1 })
+    {
+        <select class="form-select money-year-picker" aria-label="@Strings.Shared.YearPicker" @onchange="PickYear">
+            @foreach (var option in years)
+            {
+                <option value="@option.Year" selected="@(option.Year == current?.Year)">@(option.Year == Time.Today().Year ? F(Strings.Shared.YearSoFar, option.Year) : option.Year.ToString())</option>
+            }
+        </select>
+    }
+</div>
+
+@if (years is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (current is null)
+{
+    <div class="empty-state">
+        <p>@Strings.Money.Empty</p>
+    </div>
+}
+else
+{
+    <div class="money-totals">
+        <div class="money-total">
+            <div class="money-total-label">@Strings.Money.Spent</div>
+            <div class="money-total-amount">@Labels.Money(current.Spent)</div>
+            <dl class="money-parts">
+                @foreach (var (part, label) in SpentParts)
+                {
+                    var amount = Amount(part);
+                    @if (amount > 0)
+                    {
+                        <div>
+                            <dt>@label</dt>
+                            <dd>@Labels.Money(amount)</dd>
+                        </div>
+                    }
+                }
+            </dl>
+        </div>
+        @if (current.BroughtIn > 0)
+        {
+            <div class="money-total">
+                <div class="money-total-label">@Strings.Money.BroughtIn</div>
+                <div class="money-total-amount">@Labels.Money(current.BroughtIn)</div>
+            </div>
+        }
+    </div>
+    <p class="settings-hint">@Strings.Money.Intro</p>
+
+    @foreach (var (part, label) in AllParts)
+    {
+        var lines = current.Of(part);
+        @if (lines.Count > 0)
+        {
+            <section class="stage-group">
+                <h2>@label</h2>
+                <ul class="item-list list-grid money-grid">
+                    @foreach (var line in lines)
+                    {
+                        <li>
+                            <a class="item-card" href="@Href(line)">
+                                <div class="item-text">
+                                    <div class="item-name">@(line.Name ?? Strings.Money.OrderFallback)</div>
+                                    <div class="item-meta">@Labels.Day(line.Date)</div>
+                                </div>
+                                <span class="money-amount">@Labels.Money(line.Amount)</span>
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+    }
+}
+
+@code {
+    private IReadOnlyList<MoneyYear>? years;
+    private MoneyYear? current;
+    private int? picked;
+
+    private (MoneyPart Part, string Label)[] SpentParts =>
+    [
+        (MoneyPart.Plants, Strings.Money.PartPlants),
+        (MoneyPart.Shipping, Strings.Money.PartShipping),
+        (MoneyPart.Supplies, Strings.Money.PartSupplies),
+        (MoneyPart.Other, Strings.Money.PartOther)
+    ];
+
+    private (MoneyPart Part, string Label)[] AllParts =>
+    [
+        .. SpentParts,
+        (MoneyPart.BroughtIn, Strings.Money.BroughtIn)
+    ];
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var sellers = await SellerService.GetSellersAsync();
+        var stock = await StockService.GetAsync();
+        var pots = (await PotRepository.GetAllAsync()).ToDictionary(p => p.Id);
+        var all = MoneySums.ByYear(
+            await PlantRepository.GetAllAsync(),
+            await OrderRepository.GetAllAsync(),
+            await OrderItemRepository.GetAllAsync(),
+            await SupplyEntryRepository.GetAllAsync(),
+            await ShoppingItemRepository.GetAllAsync(),
+            await TimelineRepository.GetSinceAsync(DateTimeOffset.MinValue),
+            await PropagationRepository.GetAllAsync(),
+            Time.LocalDay,
+            order => sellers.For(order.SellerId, order.SellerName)?.Name,
+            supplyId => stock.Find(supplyId)?.Name,
+            potId => pots.TryGetValue(potId, out var pot) ? pot.DisplayName : null,
+            Labels.SoldInSavedLines());
+        years = all;
+        var wanted = picked ?? Time.Today().Year;
+        current = all.FirstOrDefault(y => y.Year == wanted) ?? all.FirstOrDefault();
+    }
+
+    private void PickYear(ChangeEventArgs e)
+    {
+        if (int.TryParse(e.Value?.ToString(), out var year))
+        {
+            picked = year;
+            current = years?.FirstOrDefault(y => y.Year == year) ?? current;
+        }
+    }
+
+    private decimal Amount(MoneyPart part) => current!.Of(part).Sum(l => l.Amount);
+
+    private static string Href(MoneyLine line) => line.Link switch
+    {
+        MoneyLink.Plant => $"plants/{line.LinkId}",
+        MoneyLink.Propagation => $"propagations/{line.LinkId}",
+        MoneyLink.Order => $"orders/{line.LinkId}",
+        MoneyLink.Supply => "stock",
+        _ => "shopping-list"
+    };
+}

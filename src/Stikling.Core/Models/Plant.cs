@@ -166,6 +166,12 @@ public sealed class Plant : Entity
     /// <summary>What it was sold or swapped for, in the person's own words ("150 kr", "a Hoya carnosa"). Kept while the status is GivenAway or Sold.</summary>
     public string? LeftFor { get; set; }
 
+    /// <summary>
+    /// What it was sold for, as a number with no currency, so it can be added up under Money. Sits beside the
+    /// free text <see cref="LeftFor"/>, which is never read as a number. Kept while the status is Sold.
+    /// </summary>
+    public decimal? SoldPrice { get; set; }
+
     public GrowingMedium Medium { get; set; } = GrowingMedium.Soil;
 
     /// <summary>The pot the roots are in.</summary>
@@ -251,6 +257,19 @@ public sealed class Plant : Entity
 
     /// <summary>How it is watered, for the plant-sitter sheet. Null when not said, and older plants read as null.</summary>
     public WaterMethod? WaterBy { get; set; }
+
+    /// <summary>What water it gets. Null when not said, and older plants read as null.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<WaterType>))]
+    public WaterType? WaterType { get; set; }
+
+    /// <summary>What the pot weighs in grams when the soil is dry, for checking it by lifting. Null when not weighed.</summary>
+    public int? DryWeightGrams { get; set; }
+
+    /// <summary>What the pot weighs in grams just after watering. Null when not weighed.</summary>
+    public int? WateredWeightGrams { get; set; }
+
+    /// <summary>The day the pot was last weighed, set when either weight is.</summary>
+    public DateOnly? WeighedOn { get; set; }
 
     /// <summary>A note for whoever looks after it while you are away. Not shared. Older plants read as null.</summary>
     public string? SitterNote { get; set; }
@@ -478,7 +497,7 @@ public sealed class Plant : Entity
 
     /// <summary>
     /// A new plant to add alongside this one, e.g. a second basil pot. It gets the names, room,
-    /// light, origin, how it was raised, source, price paid, medium, soil mix, feed with the watering, how it is watered, tags and the values of its own fields. The nickname, the date it was got, pots, notes,
+    /// light, origin, how it was raised, source, price paid, medium, soil mix, feed with the watering, how it is watered, what water it gets, tags and the values of its own fields. The nickname, the date it was got, pots, notes,
     /// photos and anything about how this plant is doing right now stay behind.
     /// </summary>
     public Plant Duplicate() => new()
@@ -505,6 +524,7 @@ public sealed class Plant : Entity
         WateringFeedId = WateringFeedId,
         WateringFeedEvery = WateringFeedEvery,
         WaterBy = WaterBy,
+        WaterType = WaterType,
         Tags = [.. Tags],
         OwnFields = new(OwnFields),
         ParentPlantId = ParentPlantId
@@ -563,6 +583,8 @@ public sealed class Plant : Entity
             errors.Add(Strings.Plants.ErrReservoirFill);
         if (PricePaid < 0)
             errors.Add(Strings.Plants.ErrPriceNegative);
+        if (SoldPrice < 0)
+            errors.Add(Strings.Plants.ErrSoldPriceNegative);
         if (AcquiredOn is { } acquired && acquired.Start > today)
             errors.Add(Strings.Plants.ErrAcquiredFuture);
         if (InnerPotId is not null && InnerPotId == OuterPotId)
@@ -587,6 +609,10 @@ public sealed class Plant : Entity
             errors.Add(Strings.Plants.ErrCount);
         if (PottedWithPlantId is not null && PottedWithPlantId == Id)
             errors.Add(Strings.Plants.ErrPottedSelf);
+        if (DryWeightGrams is <= 0 or > Text.Weights.MaxGrams || WateredWeightGrams is <= 0 or > Text.Weights.MaxGrams)
+            errors.Add(Strings.Weighing.ErrWeightRange);
+        if (DryWeightGrams is { } dry && WateredWeightGrams is { } wet && dry >= wet)
+            errors.Add(Strings.Weighing.ErrDryBelowWatered);
         if (PotsTaken != PotsTaken.None && !HasLeft)
             errors.Add(Strings.Plants.ErrPotsTaken);
         return errors;

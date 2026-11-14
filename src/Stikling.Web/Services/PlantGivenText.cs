@@ -9,7 +9,8 @@ namespace Stikling.Web.Services;
 /// <summary>What a plant has given, in words: on its page and on its printed story.</summary>
 public static class PlantGivenText
 {
-    public static IEnumerable<string> Parts(PlantGiven given)
+    /// <param name="withMoney">Adds what it cost and brought in. Only the plant's own page does; the printed story never shows money.</param>
+    public static IEnumerable<string> Parts(PlantGiven given, bool withMoney = false)
     {
         if (given.Taken > 0)
             yield return F(Strings.PlantDetail.GivenTaken, Taken(given), given.Rooted);
@@ -17,6 +18,14 @@ public static class PlantGivenText
             yield return PassedOn(given);
         if (given.FromThoseInTurn > 0)
             yield return Plural.Of(given.FromThoseInTurn, Strings.PlantDetail.GrownInTurn_One, Strings.PlantDetail.GrownInTurn_Other);
+        if (withMoney && given.HasMoney)
+            yield return (given.Cost, given.BroughtIn) switch
+            {
+                ({ } cost, { } brought) => F(Strings.PlantDetail.GivenCostAndBroughtIn, Labels.Money(cost), Labels.Money(brought)),
+                ({ } cost, null) => F(Strings.PlantDetail.GivenCost, Labels.Money(cost)),
+                (_, { } brought) => F(Strings.PlantDetail.GivenBroughtIn, Labels.Money(brought)),
+                _ => ""
+            };
     }
 
     private static string Taken(PlantGiven given) => JoinAnd(given.TakenByType.Select(t => t.Key switch

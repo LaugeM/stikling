@@ -164,15 +164,8 @@ public static class FailedComparisons
             : null;
     }
 
-    /// <summary>The days it ran over the days the water was changed. Null without any changes or a stretch of time to go on.</summary>
-    private static double? DaysBetweenChanges(Propagation p, DateOnly? end, List<DateOnly>? days)
-    {
-        if (days is null || days.Count == 0)
-            return null;
-        var until = end ?? days.Max();
-        var span = until.DayNumber - p.StartedOn.DayNumber;
-        return span <= 0 ? null : span / (double)days.Count;
-    }
+    private static double? DaysBetweenChanges(Propagation p, DateOnly? end, List<DateOnly>? days) =>
+        WaterChangeLog.DaysBetween(p, end, days);
 
     private static int Rounded(double days) => (int)Math.Round(days, MidpointRounding.AwayFromZero);
 }

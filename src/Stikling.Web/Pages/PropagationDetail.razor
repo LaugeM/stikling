@@ -414,6 +414,23 @@ else
                             <dt>@Strings.Propagations.DetWaterChanged</dt>
                             <dd>@Labels.Date(changed.Day)</dd>
                         }
+                        @if (WaterChangeLog.Takes(propagation.Medium))
+                        {
+                            @if (propagation.WaterChangeDays is { } every)
+                            {
+                                <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
+                                <dd>
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Plural.Of(every, Strings.Propagations.DetWaterChangeEvery_One, Strings.Propagations.DetWaterChangeEvery_Other)</a>
+                                </dd>
+                            }
+                            else if (propagation.IsActive)
+                            {
+                                <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
+                                <dd>
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Strings.Propagations.DetRemindWaterChange</a>
+                                </dd>
+                            }
+                        }
 
                         @if (propagation.RootingAids.Count > 0)
                         {
@@ -904,13 +921,25 @@ else
                         <label class="form-label" for="gave-to">@Strings.Propagations.DetWhoGot <span class="text-body-secondary">@Strings.Propagations.DetOptional</span></label>
                         <input id="gave-to" class="form-control" @bind="giving.To" @bind:event="oninput" />
                     </div>
+                    <div class="form-check mb-2">
+                        <input id="gave-sold" type="checkbox" class="form-check-input" @bind="giving.Sold" />
+                        <label class="form-check-label" for="gave-sold">@Strings.Propagations.DetSold</label>
+                    </div>
+                    @if (giving.Sold)
+                    {
+                        <div class="mb-2">
+                            <label class="form-label" for="gave-price">@Strings.Propagations.DetSoldPrice <span class="text-body-secondary">@Strings.Propagations.DetOptional</span></label>
+                            <InputNumber id="gave-price" class="form-control" @bind-Value="giving.Price" min="0" step="any" inputmode="decimal" aria-describedby="gave-price-help" />
+                            <div class="form-text" id="gave-price-help">@Strings.Propagations.DetSoldPriceHint</div>
+                        </div>
+                    }
                     <div class="mb-3">
                         <label class="form-label" for="gave-date">@Strings.Propagations.DetDate</label>
                         <input id="gave-date" type="date" class="form-control" @bind="giving.Date"
                                min="@propagation.StartedOn.ToString("yyyy-MM-dd")" max="@Today.ToString("yyyy-MM-dd")" />
                     </div>
                     <div class="form-actions">
-                        <button type="button" class="btn btn-primary" disabled="@(busy || !giving.CountIsValid)" @onclick="GiveAwayAsync">
+                        <button type="button" class="btn btn-primary" disabled="@(busy || !giving.CountIsValid || !giving.PriceIsValid)" @onclick="GiveAwayAsync">
                             @(giving.Count == 1 ? Strings.Propagations.DetMarkAsGiven : F(Strings.Propagations.DetMarkNGiven, giving.Count))
                         </button>
                         <button type="button" class="btn btn-link" @onclick="() => stageView = StageView.Stage">@Strings.Common.Back</button>

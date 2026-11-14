@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WaterLabel" xml:space="preserve">
+    <value>Water</value>
+    <comment>Label of the list where a plant's kind of water is picked, on the plant form.</comment>
+  </data>
+  <data name="WaterHelp" xml:space="preserve">
+    <value>What the plant is watered with. Rain water or demineralised water suits plants that don't like tap water, like carnivorous ones.</value>
+    <comment>Help under the water list on the plant form.</comment>
+  </data>
+  <data name="WeightDry" xml:space="preserve">
+    <value>Weight when dry ({0})</value>
+    <comment>Label of a box on the plant form. The weight of the pot with the soil dry. {0} is the unit, g or oz.</comment>
+  </data>
+  <data name="WeightWatered" xml:space="preserve">
+    <value>Weight just watered ({0})</value>
+    <comment>Label of a box on the plant form. The weight of the pot just after watering. {0} is the unit, g or oz.</comment>
+  </data>
+  <data name="WeightHelp" xml:space="preserve">
+    <value>Weigh the pot when the soil is dry and again just after watering. Then it can be checked by lifting it.</value>
+    <comment>Help under the two weight boxes on the plant form.</comment>
+  </data>
+  <data name="WeighedBeforeRepot" xml:space="preserve">
+    <value>Weighed before it was repotted</value>
+    <comment>Under the weights on a plant's page, when it was repotted after it was weighed.</comment>
+  </data>
+  <data name="DetailWater" xml:space="preserve">
+    <value>Water</value>
+    <comment>Heading on a plant's page for the kind of water it gets.</comment>
+  </data>
+  <data name="DetailWeight" xml:space="preserve">
+    <value>Pot weight</value>
+    <comment>Heading on a plant's page for the weights of its pot.</comment>
+  </data>
+  <data name="HarvestAmount" xml:space="preserve">
+    <value>Amount</value>
+    <comment>Label of the box for how much was harvested, in the care form.</comment>
+  </data>
+  <data name="HarvestUnit" xml:space="preserve">
+    <value>Unit</value>
+    <comment>Label of the choice between grams and pieces for a harvest.</comment>
+  </data>
+  <data name="HarvestPiecesUnit" xml:space="preserve">
+    <value>pieces</value>
+    <comment>A choice next to the harvest amount, counting in pieces.</comment>
+  </data>
+  <data name="HarvestOptional" xml:space="preserve">
+    <value>Optional</value>
+    <comment>Placeholder in the harvest amount box.</comment>
+  </data>
+</root>

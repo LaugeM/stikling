@@ -98,8 +98,12 @@ public static class SitterSheetText
                     text.AppendLine(F(Strings.Care.SitterTextWhere, place));
                 if (subject.How is { } how)
                     text.AppendLine(F(Strings.Care.SitterTextHow, how));
+                if (subject.Water is { } water)
+                    text.AppendLine(water);
                 if (subject.Meter is { } meter)
                     text.AppendLine(meter);
+                if (subject.Weight is { } weight)
+                    text.AppendLine(weight);
                 if (subject.Pace is { } pace)
                     text.AppendLine(pace);
                 if (subject.Note is { } subjectNote)

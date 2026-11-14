@@ -90,6 +90,14 @@ public sealed class PestTreatment : Entity
     public Guid? PlanStepId { get; set; }
 
     /// <summary>
+    /// Natural enemies were released, like predatory mites or nematodes, and <see cref="What"/> says
+    /// which and how much. It is an ordinary treatment otherwise, so older versions show it as a
+    /// treatment with its text. It is a flag and not a kind, because an unknown enum value would stop
+    /// older versions from loading the treatments.
+    /// </summary>
+    public bool IsRelease { get; set; }
+
+    /// <summary>
     /// A step of the plan that was skipped. Saved as a treatment with nothing in it but the date
     /// and notes, so older versions show it as a treatment without text.
     /// </summary>
@@ -158,6 +166,17 @@ public sealed class PestTreatment : Entity
 
         if (Skipped && (PlanStepId is null || Kind != PestTreatmentKind.Treated || treated || trapped))
             errors.Add(Strings.Pests.SkippedStepOnlyDateNotes);
+
+        if (IsRelease)
+        {
+            if (Kind != PestTreatmentKind.Treated || Skipped)
+                errors.Add(Strings.Pests.ReleaseOnlyTreatment);
+            else if (RecipeId is not null || Ingredients.Count > 0 || Method is not null)
+                errors.Add(Strings.Pests.ReleaseNoRecipe);
+
+            if (string.IsNullOrWhiteSpace(What))
+                errors.Add(Strings.Pests.ReleaseNeedsWhat);
+        }
 
         if (PlanStepId is not null && Kind != PestTreatmentKind.Treated)
             errors.Add(Strings.Pests.OnlyTreatmentIsStep);

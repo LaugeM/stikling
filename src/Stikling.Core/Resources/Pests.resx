@@ -535,4 +535,16 @@
     <value>{0}, starts over after {1}</value>
     <comment>Summary of a treatment plan that starts over. {0} is the usual summary, like '2 steps over 4 days'. {1} is the time, like '4 days'.</comment>
   </data>
+  <data name="ReleaseOnlyTreatment" xml:space="preserve">
+    <value>Only a treatment can be a release of natural enemies, not a check, a trap count or a skipped step.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ReleaseNoRecipe" xml:space="preserve">
+    <value>A release doesn't use a recipe.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
+  <data name="ReleaseNeedsWhat" xml:space="preserve">
+    <value>Write what was released.</value>
+    <comment>Shown as an error under a form when it is not filled in right.</comment>
+  </data>
 </root>

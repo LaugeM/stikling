@@ -69,6 +69,9 @@
   <data name="ErrDateCantBeFuture" xml:space="preserve">
     <value>Datoen kan ikke ligge i fremtiden.</value>
   </data>
+  <data name="ErrSoldPriceNegative" xml:space="preserve">
+    <value>Prisen kan ikke være negativ.</value>
+  </data>
   <data name="ErrDateBeforeStart" xml:space="preserve">
     <value>Datoen kan ikke ligge før stiklingen startede.</value>
   </data>
@@ -509,5 +512,26 @@
   </data>
   <data name="ErrCormSize_Inches" xml:space="preserve">
     <value>Knoldens størrelse skal være over 0 og højst 7,8 tommer.</value>
+  </data>
+  <data name="ErrWaterChangeDays" xml:space="preserve">
+    <value>Skriv mellem 1 og {0} dage, eller lad feltet stå tomt hvis du ikke vil have en påmindelse.</value>
+  </data>
+  <data name="ErrOnlyWateringHasFeed" xml:space="preserve">
+    <value>Du kan kun gøde ved en vanding eller et vandskift.</value>
+  </data>
+  <data name="CareWateredWith" xml:space="preserve">
+    <value>Vandet med {0}</value>
+  </data>
+  <data name="CareChangedWaterWith" xml:space="preserve">
+    <value>Skiftede vandet og tilsatte {0}</value>
+  </data>
+  <data name="WaterEveryFewDays" xml:space="preserve">
+    <value>Hver 1. til 3. dag</value>
+  </data>
+  <data name="WaterEveryWeek" xml:space="preserve">
+    <value>Hver 4. til 7. dag</value>
+  </data>
+  <data name="WaterMoreThanWeek" xml:space="preserve">
+    <value>Mere end en uge imellem</value>
   </data>
 </root>
