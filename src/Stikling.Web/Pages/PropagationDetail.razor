@@ -414,6 +414,23 @@ else
                             <dt>@Strings.Propagations.DetWaterChanged</dt>
                             <dd>@Labels.Date(changed.Day)</dd>
                         }
+                        @if (WaterChangeLog.Takes(propagation.Medium))
+                        {
+                            @if (propagation.WaterChangeDays is { } every)
+                            {
+                                <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
+                                <dd>
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Plural.Of(every, Strings.Propagations.DetWaterChangeEvery_One, Strings.Propagations.DetWaterChangeEvery_Other)</a>
+                                </dd>
+                            }
+                            else if (propagation.IsActive)
+                            {
+                                <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
+                                <dd>
+                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Strings.Propagations.DetRemindWaterChange</a>
+                                </dd>
+                            }
+                        }
 
                         @if (propagation.RootingAids.Count > 0)
                         {

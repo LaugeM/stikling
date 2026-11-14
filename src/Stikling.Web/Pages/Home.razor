@@ -22,6 +22,7 @@
 @inject AppBadge Badge
 @inject PlantService PlantService
 @inject PropagationService PropagationService
+@inject PropagationCareService PropagationCare
 @inject ExampleService Example
 @inject TourService Tour
 @inject TimeProvider Time
@@ -617,6 +618,37 @@ else
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRightSmall</svg>
             </a>
         </p>
+    }
+
+    @if (!sections.Away && !sections.Holding && sections.WaterChanges.Count > 0)
+    {
+        <section class="today-section water-changes">
+            <h2>@Strings.Care.TodayChangeWater</h2>
+            @if (waterError is not null)
+            {
+                <div class="alert alert-danger py-2 px-3" role="alert">@waterError</div>
+            }
+            <ul class="item-list">
+                @foreach (var due in sections.WaterChanges)
+                {
+                    <li class="today-row" @key="due.Propagation.Id">
+                        <div class="today-row-main">
+                            <a class="item-card" href="propagations/@due.Propagation.Id">
+                                <PropagationThumb Propagation="due.Propagation" Days="due.Propagation.DaysSinceStart(Today)" />
+                                <div class="item-text">
+                                    <div class="item-name">@due.Propagation.ListName</div>
+                                    <div class="item-meta">
+                                        <span>@WaterChangeLine(due)</span>
+                                    </div>
+                                </div>
+                            </a>
+                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@waterBusy"
+                                    @onclick="() => WaterChangedAsync(due.Propagation)">@Strings.Care.TodayWaterChanged</button>
+                        </div>
+                    </li>
+                }
+            </ul>
+        </section>
     }
 
     @if (!sections.Away && !sections.Holding)
@@ -1462,6 +1494,31 @@ else
         check.DaysSince >= check.Propagation.DaysSinceStart(Today)
             ? Strings.Care.TodayNoNotes
             : F(Strings.Care.TodayLastSeen, Labels.DaysAgo(check.DaysSince));
+
+    private string WaterChangeLine(WaterChangeDue due) => due.LastChanged is null
+        ? F(Strings.Care.TodayWaterNotChanged, Labels.DaysAgo(due.DaysSince))
+        : F(Strings.Care.TodayWaterChangedAgo, Labels.DaysAgo(due.DaysSince));
+
+    private bool waterBusy;
+    private string? waterError;
+
+    // Changing the water is logged as care, which also counts as looking at it. The row drops off as it is no longer due.
+    private async Task WaterChangedAsync(Propagation propagation)
+    {
+        waterBusy = true;
+        waterError = null;
+        try
+        {
+            await PropagationCare.LogAsync(propagation, PropagationCareKind.ChangedWater, Today);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Logging a water change from Today failed");
+            waterError = F(Strings.Care.TodayWaterChangeFailed, ex.Message);
+        }
+        waterBusy = false;
+    }
 
     private string NameOf(TimelineEntry entry) => names[entry.SubjectId];
 

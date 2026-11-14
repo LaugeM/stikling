@@ -52,6 +52,7 @@ public sealed class TodayService(
                 backTimelines[backDay] = await BackTimeline.LoadAsync(entries, backDay, time);
         }
 
+        var propagationCare = await propagationCareLogs.GetAllAsync();
         return new TodayData
         {
             Plants = await plants.GetAllAsync(),
@@ -60,7 +61,8 @@ public sealed class TodayService(
             PutOffs = await putOffs.GetAsync(today),
             Latest = await entries.GetLatestPerSubjectAsync(),
             // Logging care on a propagation is looking at it too
-            PropagationCareDays = PropagationCareService.NewestDays(await propagationCareLogs.GetAllAsync()),
+            PropagationCareDays = PropagationCareService.NewestDays(propagationCare),
+            PropagationCareLogs = propagationCare,
             Problems = await problems.AllAsync(),
             ProblemUpdates = await problems.AllUpdatesAsync(),
             Places = await rooms.GetPlacesAsync(),
