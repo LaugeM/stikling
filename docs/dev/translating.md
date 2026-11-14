@@ -99,7 +99,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | moisture meter, reading | fugtmåler, måling |
 | growing season | vækstsæson |
 | rests, dormant | hviler |
-| grow light | plantelampe |
+| grow light | vækstlys |
 | pest case | sag |
 | treatment, treatment plan | behandling, behandlingsplan |
 | sticky trap | limfælde |
