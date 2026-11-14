@@ -642,8 +642,10 @@ else
                                     </div>
                                 </div>
                             </a>
-                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@waterBusy"
-                                    @onclick="() => WaterChangedAsync(due.Propagation)">@Strings.Care.TodayWaterChanged</button>
+                            <button type="button" class="row-btn" title="@Strings.Care.TodayWaterChanged" aria-label="@Strings.Care.TodayWaterChanged" disabled="@waterBusy"
+                                    @onclick="() => WaterChangedAsync(due.Propagation)">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
+                            </button>
                         </div>
                     </li>
                 }

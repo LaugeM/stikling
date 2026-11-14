@@ -138,7 +138,7 @@ else
     }
 
     <p class="aid-note">
-        <button type="button" class="btn btn-link btn-sm link-action p-0" @onclick="() => readyByOpen = true">@Strings.Propagations.ReadyByLink</button>
+        <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => readyByOpen = true">@Strings.Propagations.ReadyByLink</button>
     </p>
 
     <ReadyBySheet @bind-Open="readyByOpen" All="all!" StartType="byType[0].Key" StartMedium="byMedium[0].Key" />
