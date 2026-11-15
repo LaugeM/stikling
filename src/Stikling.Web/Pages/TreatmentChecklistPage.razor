@@ -1,12 +1,22 @@
+@page "/pests/{CaseId:guid}/round"
 @page "/pests/{CaseId:guid}/treatments/{TreatmentId:guid}"
 @layout WideLayout
 @inject IPestCaseRepository Cases
 @inject IPestTreatmentRepository Treatments
+@inject ITreatmentRecipeRepository RecipeRepository
 @inject IPlantRepository PlantRepository
 @inject RoomService RoomService
+@inject NavigationManager Navigation
+@inject TimeProvider Time
 @inject ILogger<TreatmentChecklistPage> Logger
 
-<PageTitle>@Strings.Pests.TickPageTitle · Stikling</PageTitle>
+@* Today's treatment of a case with several plants: pick what is used and tick the plants as they are
+   treated. Opened from the case as /round, which starts the day's round, or finds the one already
+   started today. A round that is new isn't saved until the first tick, and then the address
+   changes to the treatment's own so a reload finds it. Opened by treatment id it is the checklist
+   of any older treatment. *@
+
+<PageTitle>@(isRound ? Strings.Pests.RoundPageTitle : Strings.Pests.TickPageTitle) · Stikling</PageTitle>
 
 @* No ReloadOnSync: like an edit page, the rows stay put while someone is ticking *@
 
@@ -26,53 +36,132 @@ else if (item is null || treatment is null)
 else
 {
     var (ticked, total) = TreatmentChecklist.Progress(groups);
+    var progressText = F(total == 1 ? Strings.Pests.TickProgress_One : Strings.Pests.TickProgress_Other, ticked, total);
 
     <a class="back-link" href="@BackHref">@Strings.Pests.TickBackToCase</a>
-
-    <h1>@Strings.Pests.TickHeading</h1>
-    <p class="tick-progress" role="status" aria-live="polite">@F(total == 1 ? Strings.Pests.TickProgress_One : Strings.Pests.TickProgress_Other, ticked, total)</p>
 
     @if (error is not null)
     {
         <div class="alert alert-danger py-2 px-3" role="alert">@error</div>
     }
 
-    @if (groups.Count == 0)
-    {
-        <p class="text-body-secondary">@Strings.Pests.TickNoPlants</p>
-    }
+    <div class="round treatment-round">
+        <div class="round-side">
+            <h1>@(isRound ? Strings.Pests.RoundHeading : Strings.Pests.TickHeading)</h1>
 
-    @foreach (var group in groups)
-    {
-        <section class="tick-group">
-            <h2 class="section-label">@(group.FoundOn ? Strings.Pests.TickFoundOn : group.Name)</h2>
-            <ul class="item-list">
-                @foreach (var row in group.Rows)
+            @if (StepOfTreatment is { } step)
+            {
+                <div class="form-text mb-2">
+                    @F(Strings.Pests.TreatStep, StepNumber, item.PlanSteps.Count, item.PlanName)
+                    @if (!string.IsNullOrWhiteSpace(step.Notes))
+                    {
+                        @step.Notes
+                    }
+                </div>
+            }
+
+            <div class="mb-2">
+                <div class="form-label">@Strings.Pests.RoundWhat</div>
+                @if (recipes.Count > 0)
                 {
-                    var plant = row.Plant;
-                    <li>
-                        <button type="button" class="item-card tick-row @(row.Ticked ? "ticked" : null)"
-                                aria-pressed="@(row.Ticked ? "true" : "false")"
-                                @onclick="() => ToggleAsync(plant.Id)">
-                            <SubjectThumb Subject="plant" />
-                            <div class="item-text">
-                                <div class="item-name">@plant.DisplayName</div>
-                            </div>
-                            <span class="tick-box" aria-hidden="true">
-                                @if (row.Ticked)
-                                {
-                                    <svg viewBox="0 0 24 24">@Icons.Check</svg>
-                                }
-                            </span>
-                        </button>
-                    </li>
+                    <div class="chip-row" role="group" aria-label="@Strings.Pests.TreatRecipes">
+                        @foreach (var recipe in recipes)
+                        {
+                            var chosen = recipe;
+                            <button type="button" class="chip @(treatment.RecipeId == chosen.Id ? "picked" : null)"
+                                    aria-pressed="@(treatment.RecipeId == chosen.Id ? "true" : "false")"
+                                    @onclick="() => PickRecipeAsync(chosen)">@chosen.Name</button>
+                        }
+                        <button type="button" class="chip new @(treatment.RecipeId is null ? "picked" : null)"
+                                aria-pressed="@(treatment.RecipeId is null ? "true" : "false")"
+                                @onclick="() => PickRecipeAsync(null)">@Strings.Pests.TreatSomethingElse</button>
+                    </div>
+                    @if (Picked is { } picked)
+                    {
+                        @if (picked.Ingredients.Count > 0)
+                        {
+                            <div class="form-text">@string.Join(" · ", picked.Ingredients)</div>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(picked.Method))
+                        {
+                            <div class="form-text treatment-method">@picked.Method</div>
+                        }
+                    }
                 }
-            </ul>
-        </section>
-    }
+                @if (Picked is null)
+                {
+                    <div class="mt-2">
+                        <label class="form-label" for="round-what">@Strings.Pests.TreatWhatUsed</label>
+                        <input type="text" id="round-what" class="form-control form-control-sm"
+                               placeholder="@Strings.Pests.TreatWhatPlaceholder"
+                               value="@what" @onchange="WhatChangedAsync" />
+                    </div>
+                }
+            </div>
 
-    <div class="tick-actions">
-        <a class="btn btn-primary" href="@BackHref">@Strings.Common.Done</a>
+            <div class="mb-3">
+                <label class="form-label" for="round-notes">@Strings.Pests.CaseEditNotes</label>
+                <input type="text" id="round-notes" class="form-control form-control-sm"
+                       placeholder="@Strings.Pests.TreatNotesPlaceholder"
+                       value="@notes" @onchange="NotesChangedAsync" />
+            </div>
+
+            <div class="form-bar round-bar">
+                <p class="tick-progress" role="status" aria-live="polite">@progressText</p>
+                <div class="round-track" role="progressbar" aria-label="@progressText"
+                     aria-valuemin="0" aria-valuenow="@ticked" aria-valuemax="@total">
+                    <span style="width: @(total == 0 ? 0 : ticked * 100 / total)%"></span>
+                </div>
+                <a class="btn btn-primary round-done" href="@BackHref">@Strings.Common.Done</a>
+            </div>
+        </div>
+
+        <div class="round-groups">
+            @if (groups.Count == 0)
+            {
+                <p class="text-body-secondary">@Strings.Pests.TickNoPlants</p>
+            }
+
+            @foreach (var group in groups)
+            {
+                var current = group;
+                var heading = group.FoundOn ? Strings.Pests.TickFoundOn : group.Name;
+                var all = TreatmentRound.AllTicked(group);
+                <section class="tick-group">
+                    <div class="tick-group-head">
+                        <h2 class="section-label">@heading</h2>
+                        @if (group.Rows.Count >= 2)
+                        {
+                            var label = all ? Strings.Pests.RoundUntickAll : F(Strings.Pests.RoundTickAll, group.Rows.Count);
+                            <button type="button" class="btn btn-link tick-all" aria-label="@($"{label} · {heading}")"
+                                    @onclick="() => TickAllAsync(current, !all)">@label</button>
+                        }
+                    </div>
+                    <ul class="item-list">
+                        @foreach (var row in group.Rows)
+                        {
+                            var plant = row.Plant;
+                            <li>
+                                <button type="button" class="item-card tick-row @(row.Ticked ? "ticked" : null)"
+                                        aria-pressed="@(row.Ticked ? "true" : "false")"
+                                        @onclick="() => ToggleAsync(plant.Id)">
+                                    <SubjectThumb Subject="plant" />
+                                    <div class="item-text">
+                                        <div class="item-name">@plant.DisplayName</div>
+                                    </div>
+                                    <span class="tick-box" aria-hidden="true">
+                                        @if (row.Ticked)
+                                        {
+                                            <svg viewBox="0 0 24 24">@Icons.Check</svg>
+                                        }
+                                    </span>
+                                </button>
+                            </li>
+                        }
+                    </ul>
+                </section>
+            }
+        </div>
     </div>
 }
 
@@ -81,26 +170,76 @@ else
     public Guid CaseId { get; set; }
 
     [Parameter]
-    public Guid TreatmentId { get; set; }
+    public Guid? TreatmentId { get; set; }
 
     private bool loaded;
+    private bool isRound;
+    private bool persisted;
+
+    // One save at a time, so a quick second tap can't race the save that creates the treatment
+    private readonly SemaphoreSlim saving = new(1, 1);
     private string? error;
+    private string? what;
+    private string? notes;
     private PestCase? item;
     private PestTreatment? treatment;
     private IReadOnlyList<ChecklistGroup> groups = [];
     private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<TreatmentRecipe> recipes = [];
     private Places places = Places.None;
 
     private string BackHref => $"pests/{CaseId}";
 
+    private TreatmentRecipe? Picked => treatment?.RecipeId is { } id ? recipes.FirstOrDefault(r => r.Id == id) : null;
+
+    private PlanStep? StepOfTreatment =>
+        treatment?.PlanStepId is { } id ? item?.PlanSteps.FirstOrDefault(s => s.Id == id) : null;
+
+    private int StepNumber => item is null || StepOfTreatment is not { } step ? 0 : item.PlanSteps.FindIndex(s => s.Id == step.Id) + 1;
+
     protected override async Task OnInitializedAsync()
     {
+        isRound = TreatmentId is null;
         var found = await Cases.GetAsync(CaseId);
-        var treated = await Treatments.GetAsync(TreatmentId);
-        if (found is { IsDeleted: false } && treated is { IsDeleted: false, Kind: PestTreatmentKind.Treated } && treated.CaseId == CaseId)
+        if (found is not { IsDeleted: false })
         {
+            loaded = true;
+            return;
+        }
+
+        recipes = (await RecipeRepository.GetAllAsync())
+            .Where(r => !r.IsDeleted)
+            .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
+            .ToList();
+
+        PestTreatment? chosen = null;
+        if (TreatmentId is { } id)
+        {
+            var treated = await Treatments.GetAsync(id);
+            if (treated is { IsDeleted: false, Kind: PestTreatmentKind.Treated } && treated.CaseId == CaseId)
+            {
+                chosen = treated;
+                persisted = true;
+            }
+        }
+        else if (found.IsOpen)
+        {
+            var all = PestService.TreatmentsFor(await Treatments.GetAllAsync(), CaseId);
+            var step = found.PlanRunning && PlanProgress.CurrentIndex(found, all) is >= 0 and var index
+                ? found.PlanSteps[index]
+                : null;
+            chosen = TreatmentRound.Start(found, all, Time.Today(), recipes, step);
+            persisted = all.Any(t => t.Id == chosen.Id);
+        }
+
+        if (chosen is not null)
+        {
+            // Today's round opened again by its own address, after the first tick or a reload, is still a round
+            isRound = isRound || (found.IsOpen && chosen.TreatedPlantIds is not null && chosen.OccurredOn == Time.Today());
             item = found;
-            treatment = treated;
+            treatment = chosen;
+            what = chosen.RecipeId is null ? chosen.What : null;
+            notes = chosen.Notes;
             plants = await PlantRepository.GetAllAsync();
             places = await RoomService.GetPlacesAsync();
             Compute();
@@ -111,28 +250,87 @@ else
     private void Compute() =>
         groups = item is null || treatment is null ? [] : TreatmentChecklist.Rows(item, treatment, plants, places);
 
-    // Saves at once, so leaving the page loses nothing. The tick is taken back if saving fails.
-    private async Task ToggleAsync(Guid plantId)
+    // Saves at once, so leaving the page loses nothing. The change is taken back if saving fails.
+    // A new round is saved at its first change, and then the address becomes the treatment's own.
+    private async Task ChangeTicksAsync(Action change)
     {
         if (treatment is null)
             return;
 
+        await saving.WaitAsync();
         error = null;
-        TreatmentChecklist.Toggle(treatment, plantId);
+        var before = treatment.TreatedPlantIds is null ? null : treatment.TreatedPlantIds.ToList();
+        change();
         Compute();
         try
         {
             await Treatments.SaveAsync(treatment);
+            if (!persisted)
+            {
+                persisted = true;
+                Navigation.NavigateTo($"pests/{CaseId}/treatments/{treatment.Id}", replace: true);
+            }
         }
         catch (Exception ex)
         {
             Logger.LogError(ex, "Saving a tick on a treatment failed");
-            TreatmentChecklist.Toggle(treatment, plantId);
+            treatment.TreatedPlantIds = before;
             error = F(Strings.Pests.TickFailed, ex.Message);
         }
         finally
         {
             Compute();
+            saving.Release();
         }
+    }
+
+    private Task ToggleAsync(Guid plantId) =>
+        ChangeTicksAsync(() => TreatmentChecklist.Toggle(treatment!, plantId));
+
+    private Task TickAllAsync(ChecklistGroup group, bool on) =>
+        ChangeTicksAsync(() => TreatmentRound.TickAll(treatment!, group, on));
+
+    // A change to what is used or the notes is saved only once the treatment has been saved, so
+    // an untouched round leaves nothing behind
+    private async Task SaveDetailsAsync(Action change)
+    {
+        if (treatment is null)
+            return;
+
+        await saving.WaitAsync();
+        try
+        {
+            error = null;
+            change();
+            if (persisted)
+                await Treatments.SaveAsync(treatment);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a treatment's details failed");
+            error = F(Strings.Pests.RoundSaveFailed, ex.Message);
+        }
+        finally
+        {
+            saving.Release();
+        }
+    }
+
+    private Task PickRecipeAsync(TreatmentRecipe? recipe)
+    {
+        what = null;
+        return SaveDetailsAsync(() => TreatmentRound.UseRecipe(treatment!, recipe, null));
+    }
+
+    private Task WhatChangedAsync(ChangeEventArgs e)
+    {
+        what = e.Value?.ToString();
+        return SaveDetailsAsync(() => TreatmentRound.UseRecipe(treatment!, null, what));
+    }
+
+    private Task NotesChangedAsync(ChangeEventArgs e)
+    {
+        notes = e.Value?.ToString();
+        return SaveDetailsAsync(() => treatment!.Notes = Clean(notes));
     }
 }

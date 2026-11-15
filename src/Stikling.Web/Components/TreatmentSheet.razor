@@ -174,7 +174,7 @@
     private void SetPhotosBusy(bool value) => photosBusy = value;
 
     // Ticking off the plants one by one only makes sense for a treatment on more than one plant
-    private bool tickOff = true;
+    private bool tickOff;
     private bool CanTick => !Check && Plants.Count > 1;
 
     private bool offPlan;

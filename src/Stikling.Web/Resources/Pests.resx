@@ -1448,6 +1448,10 @@
     <value>Couldn't save that tick: {0}</value>
     <comment>Error on the checklist. {0} is the reason.</comment>
   </data>
+  <data name="RoundSaveFailed" xml:space="preserve">
+    <value>Couldn't save that: {0}</value>
+    <comment>Error when what is used or the notes on a treatment round can't be saved. {0} is the reason.</comment>
+  </data>
   <data name="TickTreated_One" xml:space="preserve">
     <value>Treated {0} of {1} plant</value>
     <comment>In a treatment's history on a pest case that was ticked off plant by plant. {0} is the plants ticked, {1} the plants in all.</comment>
@@ -1490,5 +1494,52 @@
   <data name="CaseLastRelease" xml:space="preserve">
     <value>Last release</value>
     <comment>Label in the details of a pest case, for the latest release of natural enemies.</comment>
+  </data>
+  <data name="RoundWhat" xml:space="preserve">
+    <value>What are you using?</value>
+    <comment>Label above the choice of what is used, on the page for today's treatment of a pest case.</comment>
+  </data>
+  <data name="RoundHeading" xml:space="preserve">
+    <value>Today's treatment</value>
+    <comment>Heading of the page where the plants of a pest case are ticked off as they are treated.</comment>
+  </data>
+  <data name="RoundPageTitle" xml:space="preserve">
+    <value>Today's treatment</value>
+    <comment>Title of the browser tab for today's treatment.</comment>
+  </data>
+  <data name="RoundTickAll" xml:space="preserve">
+    <value>Tick all {0}</value>
+    <comment>Button on a group of plants on the checklist. {0} is how many plants the group has.</comment>
+  </data>
+  <data name="RoundUntickAll" xml:space="preserve">
+    <value>Untick all</value>
+    <comment>Button on a group of plants on the checklist when every plant in it is ticked.</comment>
+  </data>
+  <data name="CaseStartRound" xml:space="preserve">
+    <value>Start today's treatment</value>
+    <comment>Main button on a pest case with several plants. Opens the checklist for today's treatment.</comment>
+  </data>
+  <data name="CaseContinueRound" xml:space="preserve">
+    <value>Continue today's treatment</value>
+    <comment>Replaces the start button when today's checklist has plants left to tick.</comment>
+  </data>
+  <data name="CaseRoundHint" xml:space="preserve">
+    <value>Tick off the plants on a checklist as you treat them.</value>
+    <comment>Tooltip of the main button, and a line under the buttons on a pest case with several plants.</comment>
+  </data>
+  <data name="CaseRoundProgress_One" xml:space="preserve">
+    <value>{0} of {1} plant ticked off today.</value>
+    <comment>Line under the buttons on a pest case while today's checklist is unfinished. {0} is the plants ticked, {1} the plants in all.</comment>
+  </data>
+  <data name="CaseRoundProgress_Other" xml:space="preserve">
+    <value>{0} of {1} plants ticked off today.</value>
+  </data>
+  <data name="CaseLogTreatmentOther" xml:space="preserve">
+    <value>Log a treatment</value>
+    <comment>Button on a pest case with several plants that opens the form for a treatment already done or a release.</comment>
+  </data>
+  <data name="CaseLogTreatmentOtherHint" xml:space="preserve">
+    <value>For a treatment you've already done, or natural enemies you released</value>
+    <comment>Tooltip of the Log a treatment button.</comment>
   </data>
 </root>

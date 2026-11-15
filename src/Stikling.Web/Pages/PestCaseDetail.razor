@@ -54,9 +54,21 @@ else
     <div class="detail-actions">
         @if (view.Case.IsOpen)
         {
-            <button type="button" class="btn btn-primary" @onclick="ToggleLogging">
-                @(logging ? Strings.Common.Close : view.IsCheck ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)
-            </button>
+            @if (RoundPage)
+            {
+                <a class="btn btn-primary" href="pests/@view.Case.Id/round" title="@Strings.Pests.CaseRoundHint">
+                    @(roundProgress is null ? Strings.Pests.CaseStartRound : Strings.Pests.CaseContinueRound)
+                </a>
+                <button type="button" class="btn btn-outline-primary" title="@Strings.Pests.CaseLogTreatmentOtherHint" @onclick="ToggleLogging">
+                    @(logging ? Strings.Common.Close : Strings.Pests.CaseLogTreatmentOther)
+                </button>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary" @onclick="ToggleLogging">
+                    @(logging ? Strings.Common.Close : view.IsCheck ? Strings.Pests.CaseLogCheck : Strings.Pests.CaseLogTreatment)
+                </button>
+            }
         }
         @if (view.IsCheck)
         {
@@ -78,6 +90,13 @@ else
         }
         <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">@Strings.Common.Edit</a>
     </div>
+
+    @if (RoundPage)
+    {
+        <p class="form-text round-hint">@(roundProgress is { } progress
+            ? Plural.Of(progress.Total, F(Strings.Pests.CaseRoundProgress_One, progress.Ticked, progress.Total), F(Strings.Pests.CaseRoundProgress_Other, progress.Ticked, progress.Total))
+            : Strings.Pests.CaseRoundHint)</p>
+    }
 
     @if (message is not null)
     {
@@ -592,6 +611,12 @@ else
     private int removingPhotos;
 
     private DateOnly Today => Time.Today();
+
+    // A case with several plants starts the day's treatment on a checklist. A case on watch and one with a single plant keep the plain sheet.
+    private bool RoundPage => view is { Case.IsOpen: true, IsCheck: false } && view.Plants.Count >= 2;
+
+    private (int Ticked, int Total)? roundProgress =>
+        view is null ? null : TreatmentRound.InProgress(view.Case, treatments, view.Plants, Today);
 
     protected override async Task OnParametersSetAsync()
     {
