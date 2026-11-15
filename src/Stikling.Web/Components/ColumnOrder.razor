@@ -33,11 +33,11 @@
             </div>
             @if (!isName)
             {
-                <button type="button" class="column-move" aria-label="@F(Strings.Plants.ColumnMoveUp, heading)" disabled="@(index <= 1)"
+                <button type="button" class="column-move" aria-label="@F(Strings.Plants.ColumnMoveUp, heading)" title="@F(Strings.Plants.ColumnMoveUp, heading)" disabled="@(index <= 1)"
                         @onclick="() => OnMove.InvokeAsync((index, index - 1))">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
                 </button>
-                <button type="button" class="column-move" aria-label="@F(Strings.Plants.ColumnMoveDown, heading)" disabled="@(index >= Columns.Count - 1)"
+                <button type="button" class="column-move" aria-label="@F(Strings.Plants.ColumnMoveDown, heading)" title="@F(Strings.Plants.ColumnMoveDown, heading)" disabled="@(index >= Columns.Count - 1)"
                         @onclick="() => OnMove.InvokeAsync((index, index + 1))">
                     <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
                 </button>

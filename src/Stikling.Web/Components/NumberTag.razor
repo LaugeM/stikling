@@ -1,7 +1,7 @@
 @* A collection number, "#117", small and muted, before a name. Nothing when there is none. *@
 @if (CollectionNumbers.Normalize(Code) is { } number)
 {
-    <span class="number-tag">#@number</span>
+    <span class="number-tag" title="@Strings.PlantEdit.CollectionNumber">#@number</span>
 }
 
 @code {

@@ -185,8 +185,10 @@
         }
         @if (plant.Favourite)
         {
-            <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true">@Icons.Star</svg>
-            <span class="visually-hidden">@Strings.PlantDetail.Favourite</span>
+            <span class="favourite-mark" title="@Strings.PlantDetail.Favourite">
+                <svg class="favourite-star" viewBox="0 0 24 24" aria-hidden="true">@Icons.Star</svg>
+                <span class="visually-hidden">@Strings.PlantDetail.Favourite</span>
+            </span>
         }
     </div>;
 }

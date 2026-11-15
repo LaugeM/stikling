@@ -22,7 +22,7 @@
         <div class="reference-row">
             @foreach (var photo in references)
             {
-                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="@Strings.Propagations.TlOpenReference">
+                <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="@Strings.Propagations.TlOpenReference" title="@Strings.Propagations.TlOpenReference">
                     <PhotoImage PhotoId="photo.Id" />
                 </button>
             }
@@ -62,7 +62,7 @@ else
                                     <p class="entry-text">@shotPlace</p>
                                 }
                                 <a class="shelf-history-photo" href="shelf/@shot.Photo.Id?mark=@SubjectId"
-                                   aria-label="@F(Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))">
+                                   aria-label="@F(Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))" title="@F(Strings.Shelf.HistoryOpen, Labels.Date(LocalDay(shot.Photo.TakenAt)))">
                                     <PhotoImage PhotoId="shot.Photo.Id" Thumbnail="false" FrameOverride="PhotoFrame.From(shot.X, shot.Y, 2.5)" />
                                 </a>
                             </li>

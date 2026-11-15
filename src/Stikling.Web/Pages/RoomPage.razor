@@ -51,7 +51,7 @@ else
                 else
                 {
                     <div class="detail-hero room-cover">
-                        <a href="shelf/@photos[0].Id" aria-label="@TileLabel(photos[0])">
+                        <a href="shelf/@photos[0].Id" aria-label="@TileLabel(photos[0])" title="@TileLabel(photos[0])">
                             <PhotoImage PhotoId="photos[0].Id" Thumbnail="false" Framed="false" />
                         </a>
                     </div>
@@ -61,7 +61,7 @@ else
                             @foreach (var photo in photos.Skip(1).Take(5))
                             {
                                 <li>
-                                    <a class="room-tile" href="shelf/@photo.Id" aria-label="@TileLabel(photo)">
+                                    <a class="room-tile" href="shelf/@photo.Id" aria-label="@TileLabel(photo)" title="@TileLabel(photo)">
                                         <PhotoImage PhotoId="photo.Id" Framed="false" />
                                     </a>
                                 </li>

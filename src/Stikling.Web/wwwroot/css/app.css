@@ -1614,6 +1614,12 @@ img.framed {
     text-overflow: ellipsis;
 }
 
+.favourite-mark {
+    display: inline-flex;
+    flex: none;
+    vertical-align: -0.1em;
+}
+
 .favourite-star {
     flex: none;
     width: 0.9rem;

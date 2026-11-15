@@ -54,12 +54,12 @@
                             </label>
                             <div class="feed-tools">
                                 <button type="button" class="feed-tool" disabled="@(index == 0)"
-                                        aria-label="@F(Strings.Supplies.FeedsMoveUp, NameOf(dose))"
+                                        aria-label="@F(Strings.Supplies.FeedsMoveUp, NameOf(dose))" title="@F(Strings.Supplies.FeedsMoveUp, NameOf(dose))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="feed-tool" disabled="@(index == draft.Products.Count - 1)"
-                                        aria-label="@F(Strings.Supplies.FeedsMoveDown, NameOf(dose))"
+                                        aria-label="@F(Strings.Supplies.FeedsMoveDown, NameOf(dose))" title="@F(Strings.Supplies.FeedsMoveDown, NameOf(dose))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="feed-tool remove" aria-label="@F(Strings.Supplies.FeedsRemove, NameOf(dose))"
+                                <button type="button" class="feed-tool remove" aria-label="@F(Strings.Supplies.FeedsRemove, NameOf(dose))" title="@F(Strings.Supplies.FeedsRemove, NameOf(dose))"
                                         @onclick="() => draft.Products.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                             </div>
                             <DoseInput Id="@id" Unit="dose.Unit"

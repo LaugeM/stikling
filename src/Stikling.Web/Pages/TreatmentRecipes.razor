@@ -49,12 +49,12 @@
                                    @oninput="e => ingredient.Name = e.Value?.ToString() ?? string.Empty" />
                             <div class="recipe-tools">
                                 <button type="button" class="recipe-tool" disabled="@(index == 0)"
-                                        aria-label="@(F(Strings.Pests.RecipesMoveUp, Some(ingredient)))"
+                                        aria-label="@(F(Strings.Pests.RecipesMoveUp, Some(ingredient)))" title="@(F(Strings.Pests.RecipesMoveUp, Some(ingredient)))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="recipe-tool" disabled="@(index == draft.Ingredients.Count - 1)"
-                                        aria-label="@(F(Strings.Pests.RecipesMoveDown, Some(ingredient)))"
+                                        aria-label="@(F(Strings.Pests.RecipesMoveDown, Some(ingredient)))" title="@(F(Strings.Pests.RecipesMoveDown, Some(ingredient)))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="recipe-tool remove" aria-label="@(F(Strings.Pests.RecipesRemove, Some(ingredient)))"
+                                <button type="button" class="recipe-tool remove" aria-label="@(F(Strings.Pests.RecipesRemove, Some(ingredient)))" title="@(F(Strings.Pests.RecipesRemove, Some(ingredient)))"
                                         @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                             </div>
                             <DoseInput Label="@Some(ingredient)"
