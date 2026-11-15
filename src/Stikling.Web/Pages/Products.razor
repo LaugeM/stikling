@@ -97,7 +97,7 @@
                                value="@TextOf(nutrient)" @oninput="e => texts[nutrient] = e.Value?.ToString() ?? string.Empty" />
                         <span class="input-group-text">%</span>
                     </div>
-                    <button type="button" class="nutrient-remove" aria-label="@F(Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
+                    <button type="button" class="nutrient-remove" aria-label="@F(Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))" title="@F(Strings.Supplies.ProductRemoveNutrient, Labels.For(nutrient))"
                             @onclick="() => RemoveNutrient(nutrient)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                 </div>
             }

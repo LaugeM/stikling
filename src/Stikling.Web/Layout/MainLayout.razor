@@ -27,10 +27,10 @@
             Stikling
         </a>
         <div class="header-actions">
-        <NavLink class="settings-link" href="search" aria-label="@Strings.Layout.Search">
+        <NavLink class="settings-link" href="search" aria-label="@Strings.Layout.Search" title="@Strings.Layout.Search">
             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Search</svg>
         </NavLink>
-        <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : Strings.Layout.Settings)">
+        <NavLink class="settings-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : Strings.Layout.Settings)" title="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : Strings.Layout.Settings)">
             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Settings</svg>
             @if (Sync.HasProblem)
             {
@@ -105,7 +105,7 @@
                 <span>@Strings.Layout.Help</span>
                 <kbd aria-hidden="true">?</kbd>
             </NavLink>
-            <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)">
+            <NavLink class="app-nav-link" href="settings" aria-label="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)" title="@(Sync.HasProblem ? Strings.Layout.SettingsSyncProblem : null)">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Settings</svg>
                 <span>@Strings.Layout.Settings</span>
                 @if (Sync.HasProblem)

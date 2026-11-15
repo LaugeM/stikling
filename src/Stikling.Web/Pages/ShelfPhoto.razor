@@ -48,7 +48,7 @@ else
                             var picked = MarkSubject == m.Subject.Id;
                             <div class="shelf-mark @(m.Faded ? "faded" : null) @(isOpen ? "open" : null)"
                                  style="left:@Percent(m.Mark.X)%;top:@Percent(m.Mark.Y)%">
-                                <button type="button" id="@MarkId(m)" class="shelf-dot @(picked ? "picked" : null)" aria-label="@m.Name"
+                                <button type="button" id="@MarkId(m)" class="shelf-dot @(picked ? "picked" : null)" aria-label="@m.Name" title="@m.Name"
                                         aria-expanded="@(isOpen ? "true" : "false")" @onclick="() => ToggleLabel(m)" @onclick:stopPropagation>
                                     <span class="shelf-dot-ring"></span>
                                 </button>

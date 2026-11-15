@@ -25,7 +25,7 @@
             {
                 <p class="camera-starting" role="status">@Strings.Camera.Starting</p>
             }
-            <button type="button" class="camera-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close">
+            <button type="button" class="camera-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close" title="@Strings.Common.Close">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
             </button>
         </div>
@@ -55,7 +55,7 @@
                             var current = choice.Id == selectedId;
                             <li>
                                 <button type="button" class="camera-choice @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
-                                        aria-label="@F(Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))"
+                                        aria-label="@F(Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))" title="@F(Strings.Camera.EarlierPhoto, Labels.Date(DateOnly.FromDateTime(choice.TakenAt.LocalDateTime)))"
                                         @onclick="() => selectedId = choice.Id">
                                     <PhotoImage PhotoId="choice.Id" />
                                 </button>
@@ -80,7 +80,7 @@
                             @Strings.Camera.Ghost
                         </button>
                         <input type="range" class="camera-slider" min="10" max="70" step="5" value="@opacity" disabled="@(!ghostOn)"
-                               aria-label="@Strings.Camera.GhostStrength" @oninput="OnSlide" @onchange="SaveOpacityAsync" />
+                               aria-label="@Strings.Camera.GhostStrength" title="@Strings.Camera.GhostStrength" @oninput="OnSlide" @onchange="SaveOpacityAsync" />
                     </div>
                 }
 

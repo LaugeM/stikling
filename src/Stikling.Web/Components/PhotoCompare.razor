@@ -9,7 +9,7 @@
 <div class="cmp" role="dialog" aria-modal="true" aria-label="@Strings.Shared.CompareLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
     <div class="cmp-bar">
         <span class="cmp-count">@ApartText</span>
-        <button type="button" class="cmp-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
+        <button type="button" class="cmp-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close" title="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
     </div>
 
     <div class="cmp-stage @(slider ? "slider" : "halves")" @ref="stage">
@@ -25,7 +25,7 @@
                 </div>
                 <div class="cmp-line" aria-hidden="true"></div>
                 <div class="cmp-handle" role="slider" tabindex="0" aria-valuemin="0" aria-valuemax="100" aria-valuenow="@Percent"
-                     aria-label="@Strings.Shared.CompareSliderHandle" @onkeydown="OnHandleKey" @onkeydown:stopPropagation="true">
+                     aria-label="@Strings.Shared.CompareSliderHandle" title="@Strings.Shared.CompareSliderHandle" @onkeydown="OnHandleKey" @onkeydown:stopPropagation="true">
                     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg>
                     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                 </div>
@@ -43,7 +43,7 @@
                 var id = Shown(h);
                 <div class="cmp-cell">
                     <div class="cmp-half @(active == h ? "active" : null)" data-half="@h" role="button" tabindex="0" aria-pressed="@(active == h ? "true" : "false")"
-                         aria-label="@F(Strings.Shared.ComparePickHalf, DateText(id))" @onclick="() => active = h" @onkeydown="e => OnHalfKey(e, h)">
+                         aria-label="@F(Strings.Shared.ComparePickHalf, DateText(id))" title="@F(Strings.Shared.ComparePhotoFrom, DateText(id))" @onclick="() => active = h" @onkeydown="e => OnHalfKey(e, h)">
                         <PhotoImage @key="id" PhotoId="id" Thumbnail="false" Framed="false" />
                         <span class="cmp-pill left" aria-hidden="true">@DateText(id)</span>
                     </div>
@@ -67,7 +67,7 @@
                 var current = photo.Id == Shown(active);
                 <li data-current="@(current ? "true" : null)">
                     <button type="button" class="cmp-tile @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
-                            aria-label="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" @onclick="() => Pick(photo.Id)">
+                            aria-label="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" title="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" @onclick="() => Pick(photo.Id)">
                         <PhotoImage PhotoId="photo.Id" />
                     </button>
                 </li>

@@ -71,7 +71,7 @@ else
             <div class="year-slot">
                 @if (index > 0)
                 {
-                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearPrevious" @onclick="() => MoveAsync(-1)">
+                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearPrevious" title="@Strings.Shared.YearPrevious" @onclick="() => MoveAsync(-1)">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronLeft</svg>
                     </button>
                 }
@@ -109,7 +109,7 @@ else
                             @for (var i = 0; i < cells.Count; i++)
                             {
                                 var cell = i;
-                                <button type="button" class="year-swap" aria-label="@Strings.Shared.YearSwapPhoto" style="@CellStyle(cells[cell])"
+                                <button type="button" class="year-swap" aria-label="@Strings.Shared.YearSwapPhoto" title="@Strings.Shared.YearSwapPhoto" style="@CellStyle(cells[cell])"
                                         @onclick="() => SwapAsync(cell)"></button>
                             }
                         }
@@ -119,7 +119,7 @@ else
             <div class="year-slot">
                 @if (index < cards.Count - 1)
                 {
-                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearNext" @onclick="() => MoveAsync(1)">
+                    <button type="button" class="year-arrow" aria-label="@Strings.Shared.YearNext" title="@Strings.Shared.YearNext" @onclick="() => MoveAsync(1)">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                     </button>
                 }
