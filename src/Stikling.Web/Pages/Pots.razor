@@ -295,7 +295,7 @@ else
                                 @if (covers.GetValueOrDefault(use.Pot.Id) is { } cover)
                                 {
                                     <button type="button" class="pot-thumb" @onclick="() => OpenPhotosAsync(use.Pot)"
-                                            aria-label="@F(Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)">
+                                            aria-label="@F(Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)" title="@F(Strings.Supplies.PotsPhotosOf, use.Pot.DisplayName)">
                                         <PhotoImage PhotoId="cover.Id" />
                                     </button>
                                 }

@@ -545,15 +545,15 @@ else
                 </button>
                 @if (propagation.IsActive)
                 {
-                    <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="@Strings.Propagations.DetCare" @onclick="() => careOpen = true">
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="@Strings.Propagations.DetCare" title="@Strings.Propagations.DetCare" @onclick="() => careOpen = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Drop</svg>
                         <span class="dock-label">@Strings.Propagations.DetCare</span>
                     </button>
-                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
+                    <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" title="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
                     </button>
-                    <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.Propagations.DetMoreLabel" @onclick="() => more = More.Menu">
+                    <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.Propagations.DetMoreLabel" title="@Strings.Propagations.DetMoreLabel" @onclick="() => more = More.Menu">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.More</svg>
                     </button>
                 }

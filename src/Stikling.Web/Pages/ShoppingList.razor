@@ -39,7 +39,7 @@ else
                 {
                     <li>
                         <button type="button" class="shop-tick" role="checkbox" aria-checked="false" disabled="@busy"
-                                aria-label="@F(Strings.Stock.ShoppingTick, row.Name)" @onclick="() => TickAsync(row)"></button>
+                                aria-label="@F(Strings.Stock.ShoppingTick, row.Name)" title="@F(Strings.Stock.ShoppingTick, row.Name)" @onclick="() => TickAsync(row)"></button>
                         <div class="shop-main">
                             <span class="shop-name">@row.Name</span>
                             @if (row.Level is { } rowLevel && Labels.For(rowLevel) is { } levelText)

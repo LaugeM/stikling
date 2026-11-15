@@ -70,12 +70,12 @@
                             }
                             <div class="mix-tools">
                                 <button type="button" class="mix-tool" disabled="@(index == 0)"
-                                        aria-label="@F(Strings.Supplies.MixesMoveUp, Some(ingredient))"
+                                        aria-label="@F(Strings.Supplies.MixesMoveUp, Some(ingredient))" title="@F(Strings.Supplies.MixesMoveUp, Some(ingredient))"
                                         @onclick="() => draft.MoveUp(index)">▲</button>
                                 <button type="button" class="mix-tool" disabled="@(index == draft.Ingredients.Count - 1)"
-                                        aria-label="@F(Strings.Supplies.MixesMoveDown, Some(ingredient))"
+                                        aria-label="@F(Strings.Supplies.MixesMoveDown, Some(ingredient))" title="@F(Strings.Supplies.MixesMoveDown, Some(ingredient))"
                                         @onclick="() => draft.MoveDown(index)">▼</button>
-                                <button type="button" class="mix-tool remove" aria-label="@F(Strings.Supplies.MixesRemove, Some(ingredient))"
+                                <button type="button" class="mix-tool remove" aria-label="@F(Strings.Supplies.MixesRemove, Some(ingredient))" title="@F(Strings.Supplies.MixesRemove, Some(ingredient))"
                                         @onclick="() => draft.Ingredients.RemoveAt(index)"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
                             </div>
                         </li>

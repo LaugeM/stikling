@@ -88,7 +88,7 @@ else
                             }
                         </h1>
                         <button type="button" class="favourite-toggle @(plant.Favourite ? "on" : null)" aria-pressed="@(plant.Favourite ? "true" : "false")"
-                                aria-label="@Strings.PlantDetail.Favourite" @onclick="ToggleFavouriteAsync">
+                                aria-label="@Strings.PlantDetail.Favourite" title="@(plant.Favourite ? Strings.PlantDetail.FavouriteRemove : Strings.PlantDetail.FavouriteMark)" @onclick="ToggleFavouriteAsync">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Star</svg>
                         </button>
                     </div>
@@ -253,7 +253,7 @@ else
                                 </button>
                                 @if (done is { } doneOn)
                                 {
-                                    <button type="button" class="transition-step-date" aria-label="@F(Strings.PlantDetail.TransitionChangeDay, name)" disabled="@busy"
+                                    <button type="button" class="transition-step-date" aria-label="@F(Strings.PlantDetail.TransitionChangeDay, name)" title="@F(Strings.PlantDetail.TransitionChangeDay, name)" disabled="@busy"
                                             @onclick="() => OpenTransitionStep(step, name, doneOn)">@Labels.Date(doneOn)</button>
                                 }
                             </li>
@@ -821,7 +821,7 @@ else
                         @Strings.PlantDetail.DockCare
                     </button>
                 }
-                <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.PlantDetail.DockMore" @onclick="() => OpenMore(More.Menu)">
+                <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.PlantDetail.DockMore" title="@Strings.PlantDetail.DockMore" @onclick="() => OpenMore(More.Menu)">
                     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.More</svg>
                 </button>
             </div>
@@ -967,7 +967,7 @@ else
                     @foreach (var entry in care)
                     {
                         <li id="entry-@entry.Id">
-                            <button type="button" class="care-entry care-editable" @onclick="() => careEditing = entry"
+                            <button type="button" class="care-entry care-editable" title="@Strings.PlantDetail.FixOrDeleteShort" @onclick="() => careEditing = entry"
                                     aria-label="@F(Strings.PlantDetail.FixOrDelete, CareService.Describe(entry, Labels.For, ownKindLookup), Labels.Date(entry.OccurredOn))">
                                 <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
                                 <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
