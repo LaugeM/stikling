@@ -1,7 +1,67 @@
 .tick-progress {
-    margin: 0 0 1.25rem;
+    margin: 0 0 0.4rem;
     font-weight: 600;
     color: var(--pa-muted);
+}
+
+/* The thin track in the border colour, filled with Potting Green as the plants are ticked */
+.round-track {
+    height: 0.4rem;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--pa-border);
+}
+
+.round-track span {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pa-green);
+    transition: width 0.2s ease-out;
+}
+
+/* The group's name with the button that ticks all of it on the right */
+.tick-group-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.75rem;
+}
+
+.tick-group-head .section-label {
+    margin-top: 0;
+}
+
+.tick-all {
+    min-height: 2.75rem;
+    padding: 0 0.25rem;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* On a phone the page is one column and the progress and Done wait in the pinned bar. The side
+   column's parts and the bar join the page's flow, so the bar can come last. */
+.round {
+    display: flex;
+    flex-direction: column;
+}
+
+.round-side {
+    display: contents;
+}
+
+.round-groups {
+    order: 1;
+}
+
+.round-bar {
+    order: 2;
+}
+
+.round-done {
+    display: block;
+    margin-top: 0.6rem;
+    min-height: 2.75rem;
 }
 
 .tick-group {
@@ -36,7 +96,8 @@
     width: 1.75rem;
     height: 1.75rem;
     margin-left: auto;
-    border: 1px solid var(--pa-border);
+    /* The muted ink, softened, so an empty box still shows on a dark card */
+    border: 1.5px solid color-mix(in srgb, var(--pa-muted) 60%, transparent);
     border-radius: 0.5rem;
     color: var(--pa-green-dark);
 }
@@ -55,19 +116,52 @@
     stroke-linejoin: round;
 }
 
-.tick-actions {
-    margin: 1.5rem 0 1rem;
-}
-
-.tick-actions .btn {
-    min-height: 2.75rem;
-}
-
-/* A long list uses the width of a computer: the plants flow into columns */
+/* A computer: the side column sticks beside the plants, which flow into columns */
 @media (min-width: 64rem) {
+    .round {
+        display: grid;
+        grid-template-columns: 18rem minmax(0, 1fr);
+        gap: 0 2rem;
+        align-items: start;
+    }
+
+    /* Sticks where the page's top padding ends, and scrolls on its own when it is taller than the screen */
+    .round-side {
+        display: block;
+        grid-column: 1;
+        grid-row: 1;
+        position: sticky;
+        top: 1.75rem;
+        max-height: calc(100dvh - 1.75rem);
+        overflow-y: auto;
+        padding: 0.2rem;
+        margin: -0.2rem;
+    }
+
+    .round-groups {
+        grid-column: 2;
+        grid-row: 1;
+        order: 0;
+    }
+
+    /* The bar is the end of the side column's content here and doesn't stick on its own */
+    .round-bar {
+        position: static;
+        margin: 0;
+        padding: 0;
+        background: none;
+        border: 0;
+        box-shadow: none;
+        order: 0;
+    }
+
+    .round-done {
+        display: inline-block;
+    }
+
     .tick-group ul.item-list {
         display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
+        grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
         gap: 0.6rem 0.75rem;
         align-items: start;
     }

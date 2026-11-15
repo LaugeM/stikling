@@ -86,6 +86,11 @@
         --pa-column: 100vw;
     }
 
+    /* A treatment round is ticked across the screen, so its plant grid gets room for four or five across */
+    :root:has(.treatment-round) {
+        --pa-column: 90rem;
+    }
+
     /* Today with nothing due and no Worth a look is a short reading page, so it goes back to the centred column */
     :root:has(.today-columns):not(:has(.today-todo .today-section)):not(:has(.worth-a-look)) {
         --pa-column: 48rem;

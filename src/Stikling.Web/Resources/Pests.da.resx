@@ -1098,6 +1098,9 @@
   <data name="TickFailed" xml:space="preserve">
     <value>Kunne ikke gemme det kryds: {0}</value>
   </data>
+  <data name="RoundSaveFailed" xml:space="preserve">
+    <value>Kunne ikke gemme det: {0}</value>
+  </data>
   <data name="TickTreated_One" xml:space="preserve">
     <value>Behandlet {0} af {1} plante</value>
   </data>
@@ -1130,5 +1133,41 @@
   </data>
   <data name="CaseLastRelease" xml:space="preserve">
     <value>Sidste udsætning</value>
+  </data>
+  <data name="RoundWhat" xml:space="preserve">
+    <value>Hvad bruger du?</value>
+  </data>
+  <data name="RoundHeading" xml:space="preserve">
+    <value>Dagens behandling</value>
+  </data>
+  <data name="RoundPageTitle" xml:space="preserve">
+    <value>Dagens behandling</value>
+  </data>
+  <data name="RoundTickAll" xml:space="preserve">
+    <value>Kryds alle {0} af</value>
+  </data>
+  <data name="RoundUntickAll" xml:space="preserve">
+    <value>Fjern krydsene</value>
+  </data>
+  <data name="CaseStartRound" xml:space="preserve">
+    <value>Start dagens behandling</value>
+  </data>
+  <data name="CaseContinueRound" xml:space="preserve">
+    <value>Fortsæt dagens behandling</value>
+  </data>
+  <data name="CaseRoundHint" xml:space="preserve">
+    <value>Kryds planterne af på en tjekliste, mens du behandler dem.</value>
+  </data>
+  <data name="CaseRoundProgress_One" xml:space="preserve">
+    <value>{0} af {1} plante krydset af i dag.</value>
+  </data>
+  <data name="CaseRoundProgress_Other" xml:space="preserve">
+    <value>{0} af {1} planter krydset af i dag.</value>
+  </data>
+  <data name="CaseLogTreatmentOther" xml:space="preserve">
+    <value>Log en behandling</value>
+  </data>
+  <data name="CaseLogTreatmentOtherHint" xml:space="preserve">
+    <value>Til en behandling du allerede har gjort, eller nyttedyr du har sat ud</value>
   </data>
 </root>
