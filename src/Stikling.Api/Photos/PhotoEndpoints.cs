@@ -55,11 +55,23 @@ public static class PhotoEndpoints
 
         // PUT: the image as it is stored on the device, a WebP or a JPEG, as the body
         photos.MapPut("/{photoId:guid}/{size}", async (
-            Guid collectionId, Guid photoId, string size, HttpRequest request,
+            Guid collectionId, Guid photoId, string size, HttpRequest request, HttpContext http,
             StiklingDbContext db, PhotoStorage storage, IOptions<PhotoOptions> options, TimeProvider clock) =>
         {
             if (ParseSize(size) is not { } which)
                 return Results.NotFound();
+
+            // A helper may only send images for a photo they added themselves
+            var caller = http.Rights();
+            if (!caller.Allows(CollectionRight.Edit))
+            {
+                var owner = await db.Records
+                    .Where(r => r.CollectionId == collectionId && r.Kind == SyncKinds.Photos && r.Id == photoId)
+                    .Select(r => new { r.CreatedBy })
+                    .SingleOrDefaultAsync();
+                if (owner is not null && owner.CreatedBy != caller.PersonId)
+                    return Results.Problem(PeopleRules.HelperOwnershipProblem, statusCode: StatusCodes.Status403Forbidden);
+            }
 
             // The record says whether the photo is still wanted
             if (await PhotoProblemAsync(db, collectionId, photoId) is { } problem)
@@ -113,7 +125,7 @@ public static class PhotoEndpoints
             await transaction.CommitAsync();
             return Results.NoContent();
         })
-        .RequireAuthorization(CollectionPolicies.Edit);
+        .RequireAuthorization(CollectionPolicies.Help);
 
         return app;
     }

@@ -42,8 +42,13 @@ public static class RecordEndpoints
 
         // POST: changes from a device. Each record is kept if it wins over the version here, and
         // one that can't be kept is refused on its own, so it doesn't hold up the rest.
-        records.MapPost("", async (Guid collectionId, PushRequest request, StiklingDbContext db, PhotoStorage photos, TimeProvider clock) =>
+        // A helper may send some kinds of record, and change only what they added themselves. An
+        // editor may send everything.
+        records.MapPost("", async (Guid collectionId, PushRequest request, HttpContext http, StiklingDbContext db, PhotoStorage photos, TimeProvider clock) =>
         {
+            var caller = http.Rights();
+            var isHelper = !caller.Allows(CollectionRight.Edit);
+
             var received = request.Records ?? [];
             if (received.Count > SyncRules.BatchSize)
             {
@@ -55,7 +60,7 @@ public static class RecordEndpoints
 
             var now = clock.GetUtcNow();
             var refused = new List<RefusedRecord>();
-            var incoming = new List<(string Kind, RecordStamp Stamp, string Data)>();
+            var incoming = new List<(string Kind, RecordStamp Stamp, string Data, int Index, JsonElement Element)>();
             for (var i = 0; i < received.Count; i++)
             {
                 var record = received[i];
@@ -68,7 +73,7 @@ public static class RecordEndpoints
                     // A deleted record is stripped before it's compared, so the same deletion sent
                     // again, in full, is seen as the version already here
                     RecordStamp.TryRead(record.Data, out var stamp);
-                    incoming.Add((record.Kind, stamp, SyncRules.AsStored(record.Data)));
+                    incoming.Add((record.Kind, stamp, SyncRules.AsStored(record.Data), i, record.Data));
                 }
             }
 
@@ -94,14 +99,25 @@ public static class RecordEndpoints
             var newer = new List<SyncRecord>();
             var deletedPhotos = new List<Guid>();
             var deletedSubjects = new List<Guid>();
-            foreach (var (kind, stamp, data) in winners)
+            foreach (var (kind, stamp, data, index, element) in winners)
             {
+                existing.TryGetValue((kind, stamp.Id), out var current);
+
+                // Checked one by one, so a refused record doesn't hold up the rest. It is also
+                // kept out of the lists of deleted photos and subjects below.
+                if (isHelper
+                    && PeopleRules.HelperProblem(kind, element, current is not null, current?.CreatedBy, caller.PersonId) is { } problem)
+                {
+                    refused.Add(new RefusedRecord(index, problem));
+                    continue;
+                }
+
                 if (kind == SyncKinds.Photos && stamp.DeletedAt is not null)
                     deletedPhotos.Add(stamp.Id);
                 if (kind is "plants" or "propagations" && stamp.DeletedAt is not null)
                     deletedSubjects.Add(stamp.Id);
 
-                if (!existing.TryGetValue((kind, stamp.Id), out var current))
+                if (current is null)
                 {
                     db.Records.Add(new SyncedRecord
                     {
@@ -111,6 +127,7 @@ public static class RecordEndpoints
                         Version = ++collection.LastVersion,
                         UpdatedAt = stamp.UpdatedAt,
                         DeletedAt = stamp.DeletedAt,
+                        CreatedBy = caller.PersonId,
                         Data = data,
                     });
                     continue;
@@ -158,7 +175,7 @@ public static class RecordEndpoints
 
             return Results.Ok(new PushResponse(newer, refused));
         })
-        .RequireAuthorization(CollectionPolicies.Edit);
+        .RequireAuthorization(CollectionPolicies.Help);
 
         return app;
     }

@@ -300,4 +300,67 @@ public class PhotoTests(ApiFactory api)
         Assert.Empty(await Stored(other, id));
         Assert.Equal(HttpStatusCode.NotFound, (await other.Client.GetAsync($"/collections/{other.CollectionId}/photos/{id}/full")).StatusCode);
     }
+
+    private async Task<(SignedIn Owner, SignedIn Helper)> OwnerAndHelper()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var helper = await people.Join(owner, MemberRole.Helper);
+        return (new SignedIn(owner.Client, owner.PersonId, owner.CollectionId), new SignedIn(helper.Client, helper.PersonId, helper.CollectionId));
+    }
+
+    [Fact]
+    public async Task A_helper_can_send_images_for_a_photo_they_added()
+    {
+        var (owner, helper) = await OwnerAndHelper();
+        var id = await AddPhoto(helper);
+
+        var full = await Upload(helper, id, "full", Jpeg(100));
+        var thumb = await Upload(helper, id, "thumb", Jpeg(10));
+
+        Assert.Equal(HttpStatusCode.NoContent, full.StatusCode);
+        Assert.Equal(HttpStatusCode.NoContent, thumb.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await owner.Client.GetAsync($"/collections/{owner.CollectionId}/photos/{id}/full")).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_helper_cannot_send_images_for_someone_elses_photo()
+    {
+        var (owner, helper) = await OwnerAndHelper();
+        var id = await AddPhoto(owner);
+
+        var response = await Upload(helper, id, "full", Jpeg(100));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+        Assert.Empty(await Stored(owner, id));
+    }
+
+    [Fact]
+    public async Task A_helper_cannot_delete_someone_elses_photo_so_its_images_stay()
+    {
+        var (owner, helper) = await OwnerAndHelper();
+        var id = await AddPhoto(owner);
+        await Upload(owner, id, "full", Jpeg(100));
+
+        var response = await helper.Client.PostAsJsonAsync(
+            $"/collections/{owner.CollectionId}/records",
+            new PushRequest([PhotoRecord(id, Monday.AddHours(1), deletedAt: Monday.AddHours(1))]), ApiFactory.Json);
+
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        Assert.Single((await response.Content.ReadFromJsonAsync<PushResponse>(ApiFactory.Json))!.Refused);
+        Assert.Single(await Stored(owner, id));
+    }
+
+    [Fact]
+    public async Task A_viewer_cannot_send_images()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var viewer = await people.Join(owner, MemberRole.Viewer);
+        var id = await AddPhoto(new SignedIn(owner.Client, owner.PersonId, owner.CollectionId));
+
+        var response = await Upload(new SignedIn(viewer.Client, viewer.PersonId, viewer.CollectionId), id, "full", Jpeg(100));
+
+        Assert.Equal(HttpStatusCode.Forbidden, response.StatusCode);
+    }
 }

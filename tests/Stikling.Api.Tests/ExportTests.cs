@@ -230,6 +230,54 @@ public class ExportTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task The_zip_has_the_name_the_rights_and_the_invites_the_person_made_without_tokens_or_other_members()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn("Anna");
+        var used = await people.InviteOk(owner, Stikling.Api.Data.MemberRole.Viewer);
+        var open = await people.InviteOk(owner, Stikling.Api.Data.MemberRole.Editor, managesPeople: true);
+        var guest = await people.SignIn("Bo-Secret");
+        await people.Accept(guest, used.Token!);
+        var ownerSignedIn = new SignedIn(owner.Client, owner.PersonId, owner.CollectionId);
+
+        using var zip = await Export(ownerSignedIn);
+
+        Assert.Equal("Anna", Read(zip, "person.json").GetProperty("name").GetString());
+        var collection = Assert.Single(Read(zip, "collections.json").EnumerateArray());
+        Assert.True(collection.GetProperty("managesPeople").GetBoolean());
+        Assert.True(collection.GetProperty("isOwner").GetBoolean());
+        var invites = Read(zip, $"collections/{owner.CollectionId}/invites.json").EnumerateArray().ToList();
+        Assert.Equal(2, invites.Count);
+        Assert.Equal("Viewer", invites.Single(i => i.GetProperty("id").GetGuid() == used.Id).GetProperty("role").GetString());
+        Assert.NotEqual(JsonValueKind.Null, invites.Single(i => i.GetProperty("id").GetGuid() == used.Id).GetProperty("usedAt").ValueKind);
+        Assert.True(invites.Single(i => i.GetProperty("id").GetGuid() == open.Id).GetProperty("managesPeople").GetBoolean());
+        Assert.All(invites, i =>
+        {
+            Assert.False(i.TryGetProperty("token", out _));
+            Assert.False(i.TryGetProperty("usedBy", out _));
+        });
+
+        var everything = string.Join("\n", zip.Entries.Where(e => e.FullName.EndsWith(".json") || e.FullName.EndsWith(".txt"))
+            .Select(e => Encoding.UTF8.GetString(Bytes(zip, e.FullName))));
+        Assert.DoesNotContain(used.Token, everything);
+        Assert.DoesNotContain(open.Token, everything);
+        Assert.DoesNotContain("Bo-Secret", everything);
+        Assert.DoesNotContain(guest.PersonId.ToString(), everything);
+    }
+
+    [Fact]
+    public async Task There_is_no_invites_file_when_the_person_made_no_invites()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var guest = await people.Join(owner, Stikling.Api.Data.MemberRole.Editor);
+
+        using var zip = await Export(new SignedIn(guest.Client, guest.PersonId, guest.CollectionId));
+
+        Assert.Null(zip.GetEntry($"collections/{owner.CollectionId}/invites.json"));
+    }
+
+    [Fact]
     public async Task A_body_over_64_KB_is_refused()
     {
         var me = await SignIn();

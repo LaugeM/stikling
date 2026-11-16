@@ -178,6 +178,131 @@ public class AccountDeletionTests(ApiFactory api)
         });
     }
 
+    private async Task<(Guid? OwnerId, Membership Member)> OwnerAfterDeleting(Who owner, Who member)
+    {
+        Assert.Equal(HttpStatusCode.NoContent, (await owner.Client.DeleteAsync("/me")).StatusCode);
+        Guid? ownerId = null;
+        Membership? found = null;
+        await api.WithDbAsync(async db =>
+        {
+            ownerId = (await db.Collections.SingleAsync(c => c.Id == owner.CollectionId)).OwnerPersonId;
+            found = await db.Memberships.SingleAsync(m => m.CollectionId == owner.CollectionId && m.PersonId == member.PersonId);
+        });
+        return (ownerId, found!);
+    }
+
+    [Fact]
+    public async Task An_owner_who_is_deleted_hands_a_shared_collection_to_the_oldest_editor_who_manages_people()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        await people.Join(owner, MemberRole.Viewer);
+        await people.Join(owner, MemberRole.Editor);
+        var manager = await people.Join(owner, MemberRole.Editor, managesPeople: true);
+        await people.Join(owner, MemberRole.Editor, managesPeople: true);
+
+        var (ownerId, member) = await OwnerAfterDeleting(owner, manager);
+
+        Assert.Equal(manager.PersonId, ownerId);
+        Assert.Equal(MemberRole.Editor, member.Role);
+        Assert.True(member.ManagesPeople);
+    }
+
+    [Fact]
+    public async Task Without_a_manager_it_goes_to_the_oldest_editor()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        await people.Join(owner, MemberRole.Viewer);
+        await people.Join(owner, MemberRole.Helper);
+        var editor = await people.Join(owner, MemberRole.Editor);
+        await people.Join(owner, MemberRole.Editor);
+
+        var (ownerId, member) = await OwnerAfterDeleting(owner, editor);
+
+        Assert.Equal(editor.PersonId, ownerId);
+        Assert.Equal(MemberRole.Editor, member.Role);
+        Assert.True(member.ManagesPeople);
+    }
+
+    [Fact]
+    public async Task Without_an_editor_it_goes_to_the_oldest_member_who_becomes_an_editor()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var oldest = await people.Join(owner, MemberRole.Helper);
+        await people.Join(owner, MemberRole.Viewer);
+
+        var (ownerId, member) = await OwnerAfterDeleting(owner, oldest);
+
+        Assert.Equal(oldest.PersonId, ownerId);
+        Assert.Equal(MemberRole.Editor, member.Role);
+        Assert.True(member.ManagesPeople);
+    }
+
+    [Fact]
+    public async Task The_others_keep_what_a_deleted_owner_and_a_deleted_member_made()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var helper = await people.Join(owner, MemberRole.Helper);
+        var editor = await people.Join(owner, MemberRole.Editor);
+        var plant = Guid.NewGuid();
+        var careLog = Guid.NewGuid();
+        await people.PushOk(owner, PeopleSupport.Plant(plant, Monday));
+        await people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday));
+
+        await helper.Client.DeleteAsync("/me");
+        await owner.Client.DeleteAsync("/me");
+
+        Assert.Equal(HttpStatusCode.OK, (await editor.Client.GetAsync($"/collections/{owner.CollectionId}/records")).StatusCode);
+        await api.WithDbAsync(async db =>
+        {
+            Assert.Equal(2, await db.Records.CountAsync(r => r.CollectionId == owner.CollectionId));
+            Assert.Null((await db.Records.SingleAsync(r => r.Id == plant)).CreatedBy);
+            Assert.Null((await db.Records.SingleAsync(r => r.Id == careLog)).CreatedBy);
+            Assert.Equal(editor.PersonId, (await db.Collections.SingleAsync(c => c.Id == owner.CollectionId)).OwnerPersonId);        });
+    }
+
+    [Fact]
+    public async Task Invites_used_by_a_deleted_person_forget_who_used_them()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var invite = await people.InviteOk(owner, MemberRole.Viewer);
+        var guest = await people.SignIn();
+        await people.Accept(guest, invite.Token!);
+
+        await guest.Client.DeleteAsync("/me");
+
+        await api.WithDbAsync(async db =>
+        {
+            var stored = await db.Invites.SingleAsync(i => i.Id == invite.Id);
+            Assert.Null(stored.UsedBy);
+            Assert.NotNull(stored.UsedAt);
+        });
+    }
+
+    [Fact]
+    public async Task A_deleted_person_is_gone_from_the_former_members_and_the_invites_they_made_lose_their_name()
+    {
+        var people = new PeopleSupport(api);
+        var owner = await people.SignIn();
+        var manager = await people.Join(owner, MemberRole.Editor, managesPeople: true);
+        var guest = await people.Join(manager, MemberRole.Viewer);
+        await people.Leave(guest);
+        var invite = await people.InviteOk(manager, MemberRole.Viewer);
+
+        await manager.Client.DeleteAsync("/me");
+        await guest.Client.DeleteAsync("/me");
+
+        await api.WithDbAsync(async db =>
+        {
+            Assert.Null((await db.Invites.SingleAsync(i => i.Id == invite.Id)).CreatedBy);
+            Assert.False(await db.FormerMembers.AnyAsync(f => f.PersonId == guest.PersonId));
+        });
+    }
+
     [Fact]
     public async Task Asking_to_delete_again_is_fine()
     {

@@ -135,6 +135,7 @@ app.MapMe();
 app.MapExport();
 app.MapSettings();
 app.MapCollections();
+app.MapInvites();
 app.MapRecords();
 app.MapPhotos();
 app.MapShareLinks();

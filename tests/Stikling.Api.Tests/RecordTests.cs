@@ -491,4 +491,184 @@ public class RecordTests(ApiFactory api)
         Assert.Empty(ahead.Records);
         Assert.False(caughtUp.StartOver);
     }
+
+    private readonly PeopleSupport _people = new(api);
+
+    private async Task<Guid?> CreatedBy(Guid collectionId, Guid id)
+    {
+        Guid? by = null;
+        await api.WithDbAsync(async db => by = (await db.Records.SingleAsync(r => r.CollectionId == collectionId && r.Id == id)).CreatedBy);
+        return by;
+    }
+
+    private async Task<SyncedRecord> Stored(Guid collectionId, Guid id)
+    {
+        SyncedRecord? record = null;
+        await api.WithDbAsync(async db => record = await db.Records.AsNoTracking().SingleAsync(r => r.CollectionId == collectionId && r.Id == id));
+        return record!;
+    }
+
+    [Fact]
+    public async Task A_record_is_stamped_with_who_first_sent_it_and_it_never_changes()
+    {
+        var owner = await _people.SignIn();
+        var editor = await _people.Join(owner, MemberRole.Editor);
+        var id = Guid.NewGuid();
+
+        await _people.PushOk(owner, PeopleSupport.Plant(id, Monday));
+        await _people.PushOk(editor, PeopleSupport.Plant(id, Monday.AddHours(1)));
+
+        Assert.Equal(owner.PersonId, await CreatedBy(owner.CollectionId, id));
+        Assert.Equal(Monday.AddHours(1), (await Stored(owner.CollectionId, id)).UpdatedAt);
+    }
+
+    [Fact]
+    public async Task A_helper_can_send_care_logs_and_they_are_stamped()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var id = Guid.NewGuid();
+
+        var response = await _people.PushOk(helper, PeopleSupport.CareLog(id, Monday));
+
+        Assert.Empty(response.Refused);
+        Assert.Equal(helper.PersonId, await CreatedBy(owner.CollectionId, id));
+        Assert.Single((await Pull(owner.Client, owner.CollectionId)).Records);
+    }
+
+    [Fact]
+    public async Task A_helper_can_send_propagation_care_logs_photos_and_notes()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var propagationLog = new SyncRecord("propagationCareLogs", JsonSerializer.SerializeToElement(
+            new { id = Guid.NewGuid(), createdAt = Monday, updatedAt = Monday }, ApiFactory.Json));
+
+        var response = await _people.PushOk(helper,
+            propagationLog,
+            PeopleSupport.PhotoRecord(Guid.NewGuid(), Monday),
+            PeopleSupport.Timeline(Guid.NewGuid(), "Note", Monday));
+
+        Assert.Empty(response.Refused);
+        Assert.Equal(3, (await Pull(owner.Client, owner.CollectionId)).Records.Count);
+    }
+
+    [Fact]
+    public async Task A_helper_cannot_send_a_plant_but_the_rest_of_the_upload_is_kept()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var plant = Guid.NewGuid();
+        var careLog = Guid.NewGuid();
+        var note = Guid.NewGuid();
+
+        var response = await _people.PushOk(helper,
+            PeopleSupport.Plant(plant, Monday),
+            PeopleSupport.CareLog(careLog, Monday),
+            PeopleSupport.Timeline(note, "Note", Monday));
+
+        var refused = Assert.Single(response.Refused);
+        Assert.Equal(0, refused.Index);
+        Assert.Equal("A helper can't change this kind of record.", refused.Reason);
+        var kept = (await Pull(owner.Client, owner.CollectionId)).Records.Select(r => r.Data.GetProperty("id").GetGuid()).ToList();
+        Assert.Equal(2, kept.Count);
+        Assert.Contains(careLog, kept);
+        Assert.Contains(note, kept);
+        Assert.DoesNotContain(plant, kept);
+    }
+
+    [Fact]
+    public async Task A_helper_can_send_a_timeline_note_but_not_another_kind_of_entry()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var note = Guid.NewGuid();
+
+        var response = await _people.PushOk(helper,
+            PeopleSupport.Timeline(note, "Note", Monday),
+            PeopleSupport.Timeline(Guid.NewGuid(), "Change", Monday),
+            PeopleSupport.Timeline(Guid.NewGuid(), "Created", Monday),
+            PeopleSupport.Timeline(Guid.NewGuid(), "Photo", Monday));
+
+        Assert.Equal([1, 2, 3], response.Refused.Select(r => r.Index));
+        Assert.All(response.Refused, r => Assert.Equal("A helper can't change this kind of record.", r.Reason));
+        Assert.Equal(note, Assert.Single((await Pull(owner.Client, owner.CollectionId)).Records).Data.GetProperty("id").GetGuid());
+    }
+
+    [Fact]
+    public async Task A_helper_cannot_change_or_delete_what_someone_else_added()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var careLog = Guid.NewGuid();
+        var note = Guid.NewGuid();
+        await _people.PushOk(owner, PeopleSupport.CareLog(careLog, Monday), PeopleSupport.Timeline(note, "Note", Monday));
+
+        var response = await _people.PushOk(helper,
+            PeopleSupport.CareLog(careLog, Monday.AddHours(1)),
+            PeopleSupport.Timeline(note, "Note", Monday.AddHours(1), deletedAt: Monday.AddHours(1)));
+
+        Assert.Equal([0, 1], response.Refused.Select(r => r.Index));
+        Assert.All(response.Refused, r => Assert.Equal("Only the person who added it can change it.", r.Reason));
+        Assert.Equal(Monday, (await Stored(owner.CollectionId, careLog)).UpdatedAt);
+        Assert.Null((await Stored(owner.CollectionId, note)).DeletedAt);
+    }
+
+    [Fact]
+    public async Task A_helper_cannot_change_a_record_from_before_records_were_stamped()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var careLog = Guid.NewGuid();
+        await _people.PushOk(owner, PeopleSupport.CareLog(careLog, Monday));
+        await api.WithDbAsync(async db => await db.Records.Where(r => r.Id == careLog)
+            .ExecuteUpdateAsync(set => set.SetProperty(r => r.CreatedBy, (Guid?)null)));
+
+        var response = await _people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday.AddHours(1)));
+
+        Assert.Single(response.Refused);
+    }
+
+    [Fact]
+    public async Task A_helper_changes_and_deletes_their_own_entries()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var careLog = Guid.NewGuid();
+        var note = Guid.NewGuid();
+        await _people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday), PeopleSupport.Timeline(note, "Note", Monday));
+
+        var changed = await _people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday.AddHours(1)));
+        var deleted = await _people.PushOk(helper,
+            PeopleSupport.CareLog(careLog, Monday.AddHours(2), deletedAt: Monday.AddHours(2)),
+            PeopleSupport.Timeline(note, "Note", Monday.AddHours(2), deletedAt: Monday.AddHours(2)));
+
+        Assert.Empty(changed.Refused);
+        Assert.Empty(deleted.Refused);
+        Assert.NotNull((await Stored(owner.CollectionId, careLog)).DeletedAt);
+        Assert.NotNull((await Stored(owner.CollectionId, note)).DeletedAt);
+        Assert.Equal(helper.PersonId, await CreatedBy(owner.CollectionId, careLog));
+    }
+
+    [Fact]
+    public async Task A_helper_can_fetch_what_the_collection_holds()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        await _people.PushOk(owner, PeopleSupport.Plant(Guid.NewGuid(), Monday));
+
+        Assert.Single((await Pull(helper.Client, owner.CollectionId)).Records);
+    }
+
+    [Fact]
+    public async Task A_viewer_who_joined_with_an_invite_cannot_send()
+    {
+        var owner = await _people.SignIn();
+        var viewer = await _people.Join(owner, MemberRole.Viewer);
+
+        var push = await _people.Push(viewer, PeopleSupport.CareLog(Guid.NewGuid(), Monday));
+
+        Assert.Equal(HttpStatusCode.Forbidden, push.StatusCode);
+        Assert.Empty((await Pull(owner.Client, owner.CollectionId)).Records);
+    }
 }

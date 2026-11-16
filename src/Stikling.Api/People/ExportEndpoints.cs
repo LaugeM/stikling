@@ -99,7 +99,7 @@ public static class ExportEndpoints
         var memberships = await db.Memberships.AsNoTracking()
             .Where(m => m.PersonId == person.Id)
             .OrderBy(m => m.CreatedAt)
-            .Select(m => new { m.CollectionId, m.Collection.Name, CollectionCreatedAt = m.Collection.CreatedAt, m.Role, m.CreatedAt })
+            .Select(m => new { m.CollectionId, m.Collection.Name, CollectionCreatedAt = m.Collection.CreatedAt, m.Role, m.ManagesPeople, IsOwner = m.Collection.OwnerPersonId == m.PersonId, m.CreatedAt })
             .ToListAsync(cancel);
         var settings = await db.PersonSettings.AsNoTracking().Where(s => s.PersonId == person.Id).SingleOrDefaultAsync(cancel);
 
@@ -110,7 +110,7 @@ public static class ExportEndpoints
         if (account is { } details)
             await WriteJsonAsync(zip, "account.json", details, cancel);
 
-        await WriteJsonAsync(zip, "person.json", new { person.Id, person.ClerkUserId, person.CreatedAt }, cancel);
+        await WriteJsonAsync(zip, "person.json", new { person.Id, person.ClerkUserId, person.Name, person.CreatedAt }, cancel);
 
         if (settings is not null)
             await WriteRawAsync(zip, "settings.json", settings.Data, cancel);
@@ -121,6 +121,8 @@ public static class ExportEndpoints
             m.Name,
             CreatedAt = m.CollectionCreatedAt,
             Role = m.Role.ToString(),
+            m.ManagesPeople,
+            m.IsOwner,
             JoinedAt = m.CreatedAt,
         }), cancel);
 
@@ -164,6 +166,23 @@ public static class ExportEndpoints
                     l.Line,
                     l.LeftOutPhotoIds,
                     l.TimeZone,
+                }), cancel);
+
+            // The invites this person made. Never the token, and never who used it, since that is someone else's.
+            var invites = await db.Invites.AsNoTracking()
+                .Where(i => i.CollectionId == collectionId && i.CreatedBy == person.Id)
+                .OrderBy(i => i.CreatedAt)
+                .ToListAsync(cancel);
+            if (invites.Count > 0)
+                await WriteJsonAsync(zip, $"collections/{collectionId}/invites.json", invites.Select(i => new
+                {
+                    i.Id,
+                    Role = i.Role.ToString(),
+                    i.ManagesPeople,
+                    i.CreatedAt,
+                    i.ExpiresAt,
+                    i.UsedAt,
+                    i.RevokedAt,
                 }), cancel);
 
             // The public page of the whole collection, with its settings. What it says is built from the records above.
@@ -266,15 +285,18 @@ public static class ExportEndpoints
         account.json      What the sign-in service has about you, such as your name and email
                           address. The app fetched it when you asked for this download, and the
                           Stikling server doesn't keep it. Left out if it wasn't sent.
-        person.json       Your account on the Stikling server.
+        person.json       Your account on the Stikling server, with the name other people see.
         settings.json     Your settings, such as the theme. Left out if you have none.
-        collections.json  The collections you are in, when you joined, and your role in each.
+        collections.json  The collections you are in, when you joined, your role in each, whether
+                          you manage people there and whether you own it.
         collections/      One folder for each collection, named by its id.
           <kind>.json     The records of one kind, such as plants or timeline, as the app stores
                           them. Something you deleted is in there as only its id and dates, since
                           the rest is removed from the server when it's deleted.
           shareLinks.json The pages you shared with a link, and their settings. Left out if you
                           have none.
+          invites.json    The invites you made to the collection, and when they run out or were
+                          used or withdrawn. Left out if you made none.
           publicPages.json The public page of the whole collection, and its settings. Left out
                           if you never turned it on.
           photos/         Your photos. The file name is the photo's id. A file ending in -small
