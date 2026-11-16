@@ -10,6 +10,8 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<Person> People => Set<Person>();
     public DbSet<Collection> Collections => Set<Collection>();
     public DbSet<Membership> Memberships => Set<Membership>();
+    public DbSet<Invite> Invites => Set<Invite>();
+    public DbSet<FormerMember> FormerMembers => Set<FormerMember>();
     public DbSet<SyncedRecord> Records => Set<SyncedRecord>();
     public DbSet<PersonSettings> PersonSettings => Set<PersonSettings>();
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
@@ -37,11 +39,36 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             // Clerk's ids are case sensitive, and SQL Server compares text without case by default
             person.Property(p => p.ClerkUserId).HasMaxLength(100).UseCollation("Latin1_General_100_BIN2");
             person.HasIndex(p => p.ClerkUserId).IsUnique();
+            person.Property(p => p.Name).HasMaxLength(Person.MaxNameLength);
         });
 
         model.Entity<Collection>(collection =>
         {
             collection.Property(c => c.Name).HasMaxLength(Collection.MaxNameLength);
+
+            // Restrict, since a cascade from Person would give SQL Server more than one cascade path
+            collection.HasOne<Person>().WithMany().HasForeignKey(c => c.OwnerPersonId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        model.Entity<Invite>(invite =>
+        {
+            // The token is case sensitive
+            invite.Property(i => i.Token).HasMaxLength(40).UseCollation("Latin1_General_100_BIN2");
+            invite.HasIndex(i => i.Token).IsUnique();
+            invite.Property(i => i.Role).HasConversion<string>().HasMaxLength(20);
+            invite.HasIndex(i => new { i.CreatedBy, i.CreatedAt });
+            invite.HasIndex(i => i.CollectionId);
+
+            invite.HasOne<Collection>().WithMany().HasForeignKey(i => i.CollectionId).OnDelete(DeleteBehavior.Cascade);
+            invite.HasOne<Person>().WithMany().HasForeignKey(i => i.CreatedBy).OnDelete(DeleteBehavior.SetNull);
+        });
+
+        model.Entity<FormerMember>(former =>
+        {
+            former.HasKey(f => new { f.CollectionId, f.PersonId });
+            former.HasIndex(f => f.PersonId);
+            former.HasOne<Collection>().WithMany().HasForeignKey(f => f.CollectionId).OnDelete(DeleteBehavior.Cascade);
+            former.HasOne<Person>().WithMany().HasForeignKey(f => f.PersonId).OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<Membership>(membership =>

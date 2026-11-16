@@ -1,3 +1,4 @@
+using System.Net;
 using System.Net.Http.Json;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
@@ -20,6 +21,72 @@ public class MeTests(ApiFactory api)
         var collection = Assert.Single(me!.Collections);
         Assert.Equal(CurrentPerson.FirstCollectionName, collection.Name);
         Assert.Equal(MemberRole.Editor, collection.Role);
+    }
+
+    [Fact]
+    public async Task A_new_person_owns_their_collection_and_manages_people_in_it()
+    {
+        var client = api.ClientFor(ApiFactory.NewClerkUserId());
+
+        var me = await GetMe(client);
+
+        var collection = Assert.Single(me!.Collections);
+        Assert.True(collection.IsOwner);
+        Assert.True(collection.ManagesPeople);
+        Assert.Null(me.Name);
+        await api.WithDbAsync(async db =>
+            Assert.Equal(me.PersonId, (await db.Collections.SingleAsync(c => c.Id == collection.Id)).OwnerPersonId));
+    }
+
+    [Fact]
+    public async Task The_name_is_set_trimmed_and_shown_in_me()
+    {
+        var client = api.ClientFor(ApiFactory.NewClerkUserId());
+
+        var response = await client.PutAsJsonAsync("/me/name", new NameRequest("  Anna  "));
+        var me = await GetMe(client);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Equal("Anna", me!.Name);
+    }
+
+    [Fact]
+    public async Task Setting_the_name_first_creates_the_person()
+    {
+        var client = api.ClientFor(ApiFactory.NewClerkUserId());
+
+        var response = await client.PutAsJsonAsync("/me/name", new NameRequest("Anna"));
+        var me = await GetMe(client);
+
+        Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
+        Assert.Single(me!.Collections);
+        Assert.Equal("Anna", me.Name);
+    }
+
+    [Fact]
+    public async Task A_name_can_have_1_to_40_characters()
+    {
+        var client = api.ClientFor(ApiFactory.NewClerkUserId());
+
+        var longest = await client.PutAsJsonAsync("/me/name", new NameRequest(new string('a', Person.MaxNameLength)));
+        var tooLong = await client.PutAsJsonAsync("/me/name", new NameRequest(new string('a', Person.MaxNameLength + 1)));
+        var empty = await client.PutAsJsonAsync("/me/name", new NameRequest("   "));
+        var missing = await client.PutAsJsonAsync("/me/name", new NameRequest(null));
+
+        Assert.Equal(HttpStatusCode.NoContent, longest.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, empty.StatusCode);
+        Assert.Equal(HttpStatusCode.BadRequest, missing.StatusCode);
+        Assert.Contains("name", await tooLong.Content.ReadAsStringAsync());
+        Assert.Equal(new string('a', Person.MaxNameLength), (await GetMe(client))!.Name);
+    }
+
+    [Fact]
+    public async Task Setting_the_name_needs_a_token()
+    {
+        var response = await api.CreateClient().PutAsJsonAsync("/me/name", new NameRequest("Anna"));
+
+        Assert.Equal(HttpStatusCode.Unauthorized, response.StatusCode);
     }
 
     [Fact]

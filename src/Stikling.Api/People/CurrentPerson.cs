@@ -19,6 +19,24 @@ public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, Time
         http.HttpContext?.User.FindFirstValue("sub")
         ?? throw new InvalidOperationException("The request has no signed-in user.");
 
+    /// <summary>
+    /// Adds a collection of their own for the person, with them as its owner: an editor who manages
+    /// people. Used for a new person, and for someone who has been left without any collection.
+    /// The caller saves.
+    /// </summary>
+    public static void AddOwnCollection(StiklingDbContext db, Person person, DateTimeOffset now)
+    {
+        var collection = new Collection { Name = FirstCollectionName, CreatedAt = now, OwnerPersonId = person.Id };
+        db.Memberships.Add(new Membership
+        {
+            Person = person,
+            Collection = collection,
+            Role = MemberRole.Editor,
+            ManagesPeople = true,
+            CreatedAt = now,
+        });
+    }
+
     /// <summary>The person, or null if they have never called <c>/me</c>.</summary>
     public async Task<Person?> FindAsync()
     {
@@ -46,8 +64,7 @@ public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, Time
 
         var now = clock.GetUtcNow();
         var person = new Person { ClerkUserId = clerkUserId, CreatedAt = now };
-        var collection = new Collection { Name = FirstCollectionName, CreatedAt = now };
-        db.Memberships.Add(new Membership { Person = person, Collection = collection, Role = MemberRole.Editor, CreatedAt = now });
+        AddOwnCollection(db, person, now);
 
         try
         {

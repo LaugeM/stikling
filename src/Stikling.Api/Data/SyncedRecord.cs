@@ -24,5 +24,8 @@ public class SyncedRecord
     public DateTimeOffset UpdatedAt { get; set; }
     public DateTimeOffset? DeletedAt { get; set; }
 
+    /// <summary>Who first sent it. Set once on insert and never changed. Null on records from before this was kept.</summary>
+    public Guid? CreatedBy { get; set; }
+
     public required string Data { get; set; }
 }

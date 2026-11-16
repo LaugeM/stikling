@@ -39,7 +39,12 @@ namespace Stikling.Api.Data.Migrations
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
+                    b.Property<Guid?>("OwnerPersonId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.HasKey("Id");
+
+                    b.HasIndex("OwnerPersonId");
 
                     b.ToTable("Collections");
                 });
@@ -57,6 +62,24 @@ namespace Stikling.Api.Data.Migrations
                     b.HasKey("ClerkUserId");
 
                     b.ToTable("DeletedAccounts");
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.FormerMember", b =>
+                {
+                    b.Property<Guid>("CollectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("LeftAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("CollectionId", "PersonId");
+
+                    b.HasIndex("PersonId");
+
+                    b.ToTable("FormerMembers");
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
@@ -77,6 +100,59 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("IdentificationUses");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.Invite", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("CollectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("ExpiresAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("ManagesPeople")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTimeOffset?>("RevokedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Role")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)")
+                        .UseCollation("Latin1_General_100_BIN2");
+
+                    b.Property<DateTimeOffset?>("UsedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<Guid?>("UsedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CollectionId");
+
+                    b.HasIndex("Token")
+                        .IsUnique();
+
+                    b.HasIndex("CreatedBy", "CreatedAt");
+
+                    b.ToTable("Invites");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>
                 {
                     b.Property<Guid>("CollectionId")
@@ -87,6 +163,9 @@ namespace Stikling.Api.Data.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<bool>("ManagesPeople")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Role")
                         .IsRequired()
@@ -147,6 +226,10 @@ namespace Stikling.Api.Data.Migrations
 
                     b.Property<DateTimeOffset>("CreatedAt")
                         .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("Name")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.HasKey("Id");
 
@@ -441,6 +524,9 @@ namespace Stikling.Api.Data.Migrations
                     b.Property<Guid>("Id")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Data")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -462,6 +548,29 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("Records");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.Collection", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("OwnerPersonId")
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.FormerMember", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.IdentificationUse", b =>
                 {
                     b.HasOne("Stikling.Api.Data.Person", null)
@@ -469,6 +578,20 @@ namespace Stikling.Api.Data.Migrations
                         .HasForeignKey("PersonId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.Invite", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.SetNull);
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.Membership", b =>
