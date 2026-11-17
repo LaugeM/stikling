@@ -56,6 +56,22 @@
     <value>Placed in {0}</value>
     <comment>A plant or propagation was put in a room or spot for the first time. {0} is its name.</comment>
   </data>
+  <data name="GotGrowLight" xml:space="preserve">
+    <value>Got a grow light: {0}</value>
+    <comment>A grow light was added to the room or spot a plant or propagation stands in. {0} is the light's name.</comment>
+  </data>
+  <data name="GrowLightRemoved" xml:space="preserve">
+    <value>Grow light removed: {0}</value>
+    <comment>A grow light was removed from, or moved away from, the place a plant or propagation stands in. {0} is the light's name.</comment>
+  </data>
+  <data name="NowUnderGrowLight" xml:space="preserve">
+    <value>Now under a grow light: {0}</value>
+    <comment>Added to a move when the new place has a grow light and the old one had none. {0} is the light's name, or several names.</comment>
+  </data>
+  <data name="NoLongerUnderGrowLight" xml:space="preserve">
+    <value>No longer under a grow light</value>
+    <comment>Added to a move when the old place had a grow light and the new one has none.</comment>
+  </data>
   <data name="MovedTo" xml:space="preserve">
     <value>Moved to {0}</value>
     <comment>A plant or propagation was moved to a room or spot whose old place isn't known. {0} is the new place.</comment>

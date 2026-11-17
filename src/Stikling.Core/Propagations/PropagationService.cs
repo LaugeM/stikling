@@ -114,11 +114,13 @@ public sealed class PropagationService(
     /// change twice.
     /// </summary>
     /// <param name="placeName">Turns a room or spot id into its name, so the history can say where it went.</param>
+    /// <param name="lampLines">For a move to another place: the lines about grow lights to add to its entry.</param>
     public async Task UpdateAsync(
         Propagation before,
         Propagation after,
         Func<Enum, string> label,
-        Func<Guid, string?>? placeName = null)
+        Func<Guid, string?>? placeName = null,
+        Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         after.ClearMixUnlessSoil();
         after.SyncStageWithCounts(Today);
@@ -129,6 +131,8 @@ public sealed class PropagationService(
         await PartlySavedException.AfterSaveAsync(async () =>
         {
             var changes = PropagationChanges.Lines(before, after, placeName);
+            if (changes.Count > 0 && before.PlaceId != after.PlaceId && lampLines is not null)
+                changes = [.. changes, .. lampLines(before.PlaceId, after.PlaceId)];
             if (changes.Count > 0)
                 await AddChangeAsync(after, changes, label: label);
             if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))

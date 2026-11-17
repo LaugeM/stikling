@@ -1,13 +1,24 @@
 @* "Where it stands: 1,200 lux, 19.5°, 60% · 3 Nov", under a plant or cutting's place or what it likes. It is a link to the
-   room or spot page. Nothing is shown without a reading, and nothing is compared with what the plant likes. *@
-@if (Conditions is { Any: true } && PlaceId is { } place)
+   room or spot page, with the way its windows face. Nothing is shown without a reading or a window, and nothing is compared with what the plant likes. *@
+@if (Line is { Length: > 0 } line && PlaceId is { } place)
 {
-    <div class="detail-sub"><a href="rooms/@place?@Query">@ReadingText.Stands(Conditions)</a></div>
+    <div class="detail-sub"><a href="rooms/@place?@Query">@line</a></div>
 }
 
 @code {
     [Parameter]
     public PlaceConditions? Conditions { get; set; }
+
+    /// <summary>Every place, for the windows of the one it stands in.</summary>
+    [Parameter]
+    public Places? Places { get; set; }
+
+    // "Where it stands: 1,200 lux, 19.5°, 60% · 3 Nov · South and west windows"
+    private string? Line => string.Join(" · ", new[]
+    {
+        Conditions is { Any: true } ? ReadingText.Stands(Conditions) : null,
+        Places is null ? null : LightText.WindowsLine(Places, PlaceId)
+    }.Where(t => !string.IsNullOrEmpty(t)));
 
     /// <summary>The room or spot the readings are from, with a merged place already followed.</summary>
     [Parameter]

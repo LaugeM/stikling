@@ -453,7 +453,7 @@ else
                             {
                                 @Strings.Propagations.DetNotSet
                             }
-                            <StandingLine Conditions="standing" PlaceId="standingPlace" Query="@($"propagation={propagation.Id}")" />
+                            <StandingLine Conditions="standing" Places="places" PlaceId="standingPlace" Query="@($"propagation={propagation.Id}")" />
                         </dd>
 
                         @if (propagation.DormantSince is { } dormantSince)

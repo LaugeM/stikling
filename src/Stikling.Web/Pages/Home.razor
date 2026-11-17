@@ -475,6 +475,28 @@ else
         </section>
     }
 
+    @if (!sections.Away && sections.WinterLightNow.Count > 0 && sections.WinterLightSeason is { } winter)
+    {
+        <section class="today-section">
+            <h2>@LightStrings.WinterText</h2>
+            <p class="text-body-secondary">@LightStrings.WinterAdvice</p>
+            <ul class="item-list">
+                @foreach (var plant in sections.WinterLightNow)
+                {
+                    <li @key="plant.Id">
+                        <a class="item-card" href="plants/@plant.Id">
+                            <SubjectThumb Subject="plant" />
+                            <div class="item-text">
+                                <div class="item-name">@plant.DisplayName</div>
+                            </div>
+                        </a>
+                    </li>
+                }
+            </ul>
+            <button type="button" class="btn btn-outline-primary btn-sm today-winter-not" @onclick="() => PutOffAsync(WinterLight.Key(winter.Start), WinterLight.PutOffUntil(winter))">@LightStrings.WinterNot</button>
+        </section>
+    }
+
     @if (!sections.Away && sections.OuterPot.Due.Count > 0)
     {
         <section class="today-section">

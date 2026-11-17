@@ -32,7 +32,8 @@ public sealed class PropagationForms(
     RoomService roomService,
     SellerService sellerService,
     PotService potService,
-    TimeProvider time)
+    TimeProvider time,
+    Lights.GrowLightService? growLights = null)
 {
     internal PropagationService PropagationService => propagationService;
 
@@ -45,6 +46,10 @@ public sealed class PropagationForms(
     internal PotService PotService => potService;
 
     internal TimeProvider Time => time;
+
+    internal Task<Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?> LampLinesAsync() =>
+        growLights is null ? Task.FromResult<Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?>(null)
+        : growLights.MoveLinesAsync().ContinueWith(t => (Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?)t.Result);
 
     /// <summary>Whether a propagation is stored. When that can't be read either, it counts as stored, so its photos are kept.</summary>
     internal async Task<bool> IsStoredAsync(Guid id)

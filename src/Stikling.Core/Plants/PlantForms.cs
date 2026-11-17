@@ -42,7 +42,8 @@ public sealed class PlantForms(
     RoomService roomService,
     SellerService sellerService,
     OwnFieldService ownFieldService,
-    TimeProvider time)
+    TimeProvider time,
+    Lights.GrowLightService? growLights = null)
 {
     internal PlantService PlantService => plantService;
 
@@ -57,6 +58,10 @@ public sealed class PlantForms(
     internal IPestTreatmentRepository PestTreatments => pestTreatments;
 
     internal TimeProvider Time => time;
+
+    internal Task<Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?> LampLinesAsync() =>
+        growLights is null ? Task.FromResult<Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?>(null)
+        : growLights.MoveLinesAsync().ContinueWith(t => (Func<Guid?, Guid?, IReadOnlyList<Models.HistoryLine>>?)t.Result);
 
     /// <summary>Whether a plant is stored. When that can't be read either, it counts as stored, so its photos are kept.</summary>
     internal async Task<bool> IsStoredAsync(Guid id)

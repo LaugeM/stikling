@@ -1,0 +1,46 @@
+.room-section {
+    margin-top: 1.75rem;
+}
+
+.lamp-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+}
+
+.lamp-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.6rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    background: var(--pa-surface);
+    color: var(--pa-text);
+    text-align: left;
+}
+
+.lamp-tag {
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.check-summary {
+    margin: 0 0 0.15rem;
+}
+
+.room-edit {
+    min-width: 2.75rem;
+    min-height: 2.75rem;
+    margin-top: 0.25rem;
+}
+
+.chip {
+    min-height: 2.75rem;
+}

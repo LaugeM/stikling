@@ -1,0 +1,60 @@
+@* Under the light field of a plant or propagation: what the light check of the place it stands in says, with a button that
+   only fills the field, or a link to answer the three questions when the place has no answers. The answers are saved on
+   the place. Nothing here ever sets a light level by itself. *@
+@inject RoomService Rooms
+
+@if (place is { } there)
+{
+    @if (LightText.CheckOf(there, room) is ({ } level, _))
+    {
+        <div class="check-offer">
+            <span>@F(LightStrings.CheckSays, name, LightText.Level(level))</span>
+            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => OnUse.InvokeAsync(level)">@LightStrings.CheckUse</button>
+        </div>
+    }
+    else
+    {
+        <button type="button" class="btn btn-link btn-sm link-action check-offer-link" @onclick="() => open = true">@LightStrings.CheckNotSure</button>
+    }
+
+    <LightCheckSheet @bind-Open="open" PlaceId="there.Id" PlaceName="@name" Place="there" OnSaved="SavedAsync" />
+}
+
+@code {
+    /// <summary>The place as typed on the form, "Living room" or "Living room / Windowsill". Nothing is offered until it is one that exists.</summary>
+    [Parameter]
+    public string? Location { get; set; }
+
+    /// <summary>Raised with the level when the person taps Use this.</summary>
+    [Parameter]
+    public EventCallback<LightLevel> OnUse { get; set; }
+
+    private Place? place;
+    private Place? room;
+    private string name = "";
+    private bool open;
+    private string? loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != Location)
+        {
+            loadedFor = Location;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        var places = await Rooms.GetPlacesAsync();
+        place = string.IsNullOrWhiteSpace(Location) ? null : places.Named(Location);
+        room = place is { IsSpot: true } ? places.Find(place.RoomId) : null;
+        name = place is null ? "" : places.NameOf(place.Id) ?? place.Name;
+    }
+
+    private async Task SavedAsync()
+    {
+        open = false;
+        await LoadAsync();
+    }
+}

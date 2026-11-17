@@ -35,6 +35,10 @@ public static partial class HistoryText
         Add("RemovedFromRoom");
         Add("RemovedFrom", Txt());
         Add("PlacedIn", Txt());
+        Add("GotGrowLight", Txt());
+        Add("GrowLightRemoved", Txt());
+        Add("NowUnderGrowLight", Txt());
+        Add("NoLongerUnderGrowLight");
         Add("MovedTo", Txt());
         Add("MovedFromTo", Txt(), Txt());
         Add("MediumChanged", En(typeof(GrowingMedium)), En(typeof(GrowingMedium)));

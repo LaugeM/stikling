@@ -63,6 +63,9 @@ public sealed record FieldPick(Guid? FieldId, string? Value);
 /// <param name="FavouritesFirst">Favourites come first. Off for the sorts that show a heading per group, so a
 /// favourite stays with the rest of its group. Within a group they still come first.</param>
 /// <param name="RoomName">The name of a plant's room alone, with no spot. Rooms are the groups of the Room sort.</param>
+/// <param name="UnderGrowLight">Only the plants <paramref name="IsLit"/> says are under a grow light.</param>
+/// <param name="LightAt">Only the plants whose light where it stands (<see cref="Plant.Light"/>) is this.</param>
+/// <param name="IsLit">Says whether a plant is under a grow light. Without it nothing counts as lit.</param>
 public sealed record PlantFilter(
     string? Search = null,
     StatusFilter Status = StatusFilter.Active,
@@ -82,7 +85,10 @@ public sealed record PlantFilter(
     string? Genus = null,
     bool WithoutGenus = false,
     bool FavouritesFirst = true,
-    Func<Guid?, string?>? RoomName = null)
+    Func<Guid?, string?>? RoomName = null,
+    bool UnderGrowLight = false,
+    LightLevel? LightAt = null,
+    Func<Plant, bool>? IsLit = null)
 {
     /// <summary>
     /// How many plants there are under the status picked, before the other filters. A dead or
@@ -99,6 +105,8 @@ public sealed record PlantFilter(
             .Where(MatchesLocation)
             .Where(p => !Quarantine || p.InQuarantine)
             .Where(p => !Dormant || p.IsDormant)
+            .Where(p => !UnderGrowLight || IsLit?.Invoke(p) == true)
+            .Where(p => LightAt is null || p.Light == LightAt)
             .Where(p => OnlyIds is null || OnlyIds.Contains(p.Id))
             .Where(MatchesLikes)
             .Where(MatchesPicks)
