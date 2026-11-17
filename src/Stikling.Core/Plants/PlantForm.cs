@@ -370,7 +370,7 @@ public sealed class PlantForm
             sellerTextStart = SellerText;
         }
 
-        Plant.PlaceId = await deps.RoomService.PlaceIdAsync(Location);
+        Plant.PlaceId = await deps.RoomService.PlaceIdAsync(Location, Plant.PlaceId);
 
         // What the change is worked out from before the write, and kept once it's written
         if (!written)

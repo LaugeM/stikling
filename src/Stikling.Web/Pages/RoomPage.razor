@@ -1,6 +1,7 @@
 @page "/rooms/{Id:guid}"
 @layout WideLayout
 @inject RoomService RoomService
+@inject MovingService Moving
 @inject ShelfService Shelf
 @inject PhotoService Photos
 @inject GrowLightService LightService
@@ -35,6 +36,7 @@ else
     var name = here.Place.Name;
     var outdoors = here.RoomIsOutdoors || here.Place.Outdoors;
     var anything = here.Plants.Count + here.Propagations.Count > 0;
+    var leftOn = here.Place.LeftOn ?? here.Room?.LeftOn;
 
     @* On a wide screen these are two columns: the place on the left, what stands there on the right *@
     <div class="profile-layout">
@@ -82,6 +84,12 @@ else
             @if (here.Room is { } room)
             {
                 <p class="room-meta"><a href="rooms/@room.Id">@room.Name</a></p>
+            }
+            @if (leftOn is { } left)
+            {
+                <p class="room-meta">@F(Strings.Moving.FromBeforeTheMove, Labels.Date(left))</p>
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                        @onclick="UseAgainAsync">@Strings.Moving.UseAgain</button>
             }
 
             <section class="room-section" aria-labelledby="room-note-heading">
@@ -194,9 +202,14 @@ else
             }
 
             <div class="settings-rows room-section">
-                @if (anything)
+                @if (anything && leftOn is null)
                 {
                     <SettingsRow Href="@($"round/{placeId}?from=room")" Title="@Strings.Shared.RoomsGoRound" Detail="@Strings.Shared.RoomPageGoRoundDetail" />
+                }
+                @if (anything && leftOn is null && !here.Place.IsSpot)
+                {
+                    <SettingsRow Href="@($"rooms/{placeId}/order")" Title="@Strings.Moving.OrderRow"
+                                 Detail="@(here.Place.RoundOrder is null ? Strings.Moving.OrderRowUsual : Strings.Moving.OrderRowOwn)" />
                 }
                 <SettingsRow Href="@($"rooms-and-tags/history/{placeId}")" Title="@Strings.Shared.SpotHistoryPageTitle" Detail="@Strings.Shared.RoomPageHistoryDetail" />
                 <SettingsRow Href="@($"plants?room={placeId}")" Title="@Strings.Shared.RoomPageShowInPlants" Detail="@Strings.Shared.RoomPageShowInPlantsDetail" />
@@ -277,6 +290,23 @@ else
         }
 
         await LoadAsync();
+    }
+
+    private async Task UseAgainAsync()
+    {
+        busy = true;
+        try
+        {
+            await Moving.UseAgainAsync(Id);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Bringing a room from before a move back into use failed");
+            message = F(Strings.Moving.Error, ex.Message);
+        }
+
+        busy = false;
     }
 
     private async Task LoadAsync()

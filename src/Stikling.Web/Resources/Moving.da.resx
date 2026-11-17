@@ -1,0 +1,270 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="PageTitle" xml:space="preserve">
+    <value>Vi er flyttet</value>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Vi er flyttet</value>
+  </data>
+  <data name="StepOf" xml:space="preserve">
+    <value>Trin {0} af {1}</value>
+  </data>
+  <data name="DayHeading" xml:space="preserve">
+    <value>Hvornår flyttede du?</value>
+  </data>
+  <data name="DayHint" xml:space="preserve">
+    <value>Hver plante og stikling får en linje i sin historik den dag. Du kan vælge en dag tilbage i tiden, men ikke frem.</value>
+  </data>
+  <data name="DayLabel" xml:space="preserve">
+    <value>Flyttedag</value>
+  </data>
+  <data name="DayFuture" xml:space="preserve">
+    <value>Flyttedagen kan ikke ligge efter i dag.</value>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Næste</value>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Tilbage</value>
+  </data>
+  <data name="RoomsHeading" xml:space="preserve">
+    <value>Hvad sker der med hvert rum?</value>
+  </data>
+  <data name="RoomsHint" xml:space="preserve">
+    <value>Et rum du lader blive tilbage, bliver gemt som det var, med sin historik og sine billeder.</value>
+  </data>
+  <data name="WhatHappensTo" xml:space="preserve">
+    <value>Hvad sker der med {0}</value>
+  </data>
+  <data name="GoesTo" xml:space="preserve">
+    <value>Flytter til</value>
+  </data>
+  <data name="CameAlong" xml:space="preserve">
+    <value>Fulgte med</value>
+  </data>
+  <data name="PlaceLater" xml:space="preserve">
+    <value>Placér senere</value>
+  </data>
+  <data name="LeftBehind" xml:space="preserve">
+    <value>Blev tilbage</value>
+  </data>
+  <data name="GoesToHint" xml:space="preserve">
+    <value>Alt i rummet flytter til et nyt rum.</value>
+  </data>
+  <data name="CameAlongHint" xml:space="preserve">
+    <value>Rummet flyttede med, som et plantestativ. Det bliver som det er.</value>
+  </data>
+  <data name="PlaceLaterHint" xml:space="preserve">
+    <value>Rummet bliver tilbage. Bagefter placerer du det der står i det, ét ad gangen.</value>
+  </data>
+  <data name="LeftBehindHint" xml:space="preserve">
+    <value>Der står ikke noget i det, så det bliver bare tilbage.</value>
+  </data>
+  <data name="NewRoomLabel" xml:space="preserve">
+    <value>Nyt rum</value>
+  </data>
+  <data name="NewRoomPlaceholder" xml:space="preserve">
+    <value>Navn på det nye rum</value>
+  </data>
+  <data name="MadeHere" xml:space="preserve">
+    <value>Nye rum du har navngivet her</value>
+  </data>
+  <data name="NeedsName" xml:space="preserve">
+    <value>Giv hvert nyt rum et navn for at gå videre.</value>
+  </data>
+  <data name="SummaryHeading" xml:space="preserve">
+    <value>Tjek flytningen</value>
+  </data>
+  <data name="SummaryDay" xml:space="preserve">
+    <value>Flyttet den {0}.</value>
+  </data>
+  <data name="SummaryGoesTo" xml:space="preserve">
+    <value>flytter til {0}</value>
+  </data>
+  <data name="SummaryCameAlong" xml:space="preserve">
+    <value>fulgte med</value>
+  </data>
+  <data name="SummaryPlaceLater" xml:space="preserve">
+    <value>bliver tilbage, og du placerer planterne senere</value>
+  </data>
+  <data name="SummaryLeftBehind" xml:space="preserve">
+    <value>bliver tilbage</value>
+  </data>
+  <data name="SummaryNotes" xml:space="preserve">
+    <value>Rum du lader blive tilbage, bliver gemt som de var, men du kan ikke vælge dem til nye planter. Vandingspåmindelserne lærer forfra fra flytningen.</value>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Gem flytningen</value>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>Det lykkedes ikke: {0}</value>
+  </data>
+  <data name="SaveError" xml:space="preserve">
+    <value>Flytningen kunne ikke gemmes: {0}</value>
+  </data>
+  <data name="DoneHeading" xml:space="preserve">
+    <value>Flyttet</value>
+  </data>
+  <data name="DoneText" xml:space="preserve">
+    <value>Flytningen den {0} er gemt.</value>
+  </data>
+  <data name="DoneNewRooms_One" xml:space="preserve">
+    <value>{0} nyt rum oprettet</value>
+  </data>
+  <data name="DoneNewRooms_Other" xml:space="preserve">
+    <value>{0} nye rum oprettet</value>
+  </data>
+  <data name="DoneMoved_One" xml:space="preserve">
+    <value>{0} plante eller stikling flyttet til sit nye rum</value>
+  </data>
+  <data name="DoneMoved_Other" xml:space="preserve">
+    <value>{0} planter og stiklinger flyttet til deres nye rum</value>
+  </data>
+  <data name="DoneToPlace_One" xml:space="preserve">
+    <value>{0} plante eller stikling mangler stadig et rum</value>
+  </data>
+  <data name="DoneToPlace_Other" xml:space="preserve">
+    <value>{0} planter og stiklinger mangler stadig et rum</value>
+  </data>
+  <data name="DonePlace" xml:space="preserve">
+    <value>Placér dem nu</value>
+  </data>
+  <data name="DoneBack" xml:space="preserve">
+    <value>Tilbage til Rum og tags</value>
+  </data>
+  <data name="NoRooms" xml:space="preserve">
+    <value>Du har ikke nogen rum endnu.</value>
+  </data>
+  <data name="NoRoomsHint" xml:space="preserve">
+    <value>Tilføj først de rum du boede i under Rum og tags. Kom så tilbage og fortæl hvor det hele kom hen.</value>
+  </data>
+  <data name="StillToPlace_One" xml:space="preserve">
+    <value>{0} plante eller stikling mangler et rum efter flytningen</value>
+  </data>
+  <data name="StillToPlace_Other" xml:space="preserve">
+    <value>{0} planter og stiklinger mangler et rum efter flytningen</value>
+  </data>
+  <data name="StillToPlaceDetail" xml:space="preserve">
+    <value>Vælg et rum til hver</value>
+  </data>
+  <data name="RowTitle" xml:space="preserve">
+    <value>Vi er flyttet</value>
+  </data>
+  <data name="RowDetail" xml:space="preserve">
+    <value>Fortæl hvor det hele kom hen, og behold de gamle rum</value>
+  </data>
+  <data name="BeforeTheMove" xml:space="preserve">
+    <value>Før flytningen</value>
+  </data>
+  <data name="BeforeTheMoveHint" xml:space="preserve">
+    <value>Rum du lod blive tilbage. De er gemt med deres historik og billeder.</value>
+  </data>
+  <data name="LeftOn" xml:space="preserve">
+    <value>Flyttet fra den {0}</value>
+  </data>
+  <data name="FromBeforeTheMove" xml:space="preserve">
+    <value>Fra før flytningen, flyttet fra den {0}</value>
+  </data>
+  <data name="UseAgain" xml:space="preserve">
+    <value>Brug dette rum igen</value>
+  </data>
+  <data name="PlaceTitle" xml:space="preserve">
+    <value>Placér efter flytningen</value>
+  </data>
+  <data name="PlaceHint" xml:space="preserve">
+    <value>Vælg et rum til hver plante og stikling, eller flyt alt fra et gammelt rum på én gang. Intet bliver flyttet før du gemmer.</value>
+  </data>
+  <data name="PlaceFrom" xml:space="preserve">
+    <value>Fra {0}</value>
+  </data>
+  <data name="MoveAll" xml:space="preserve">
+    <value>Flyt alle til…</value>
+  </data>
+  <data name="MoveAllLabel" xml:space="preserve">
+    <value>Flyt alt fra {0} til</value>
+  </data>
+  <data name="PickRoom" xml:space="preserve">
+    <value>Vælg et rum</value>
+  </data>
+  <data name="PlaceOneLabel" xml:space="preserve">
+    <value>Rum til {0}</value>
+  </data>
+  <data name="KindPropagation" xml:space="preserve">
+    <value>Stikling</value>
+  </data>
+  <data name="PlaceSave" xml:space="preserve">
+    <value>Flyt</value>
+  </data>
+  <data name="PlaceSaveCount_One" xml:space="preserve">
+    <value>Flyt {0}</value>
+  </data>
+  <data name="PlaceSaveCount_Other" xml:space="preserve">
+    <value>Flyt {0}</value>
+  </data>
+  <data name="PlaceEmpty" xml:space="preserve">
+    <value>Der er ikke mere at placere.</value>
+  </data>
+  <data name="PlaceEmptyHint" xml:space="preserve">
+    <value>Alt der stod i et gammelt rum, har nu fået et rum.</value>
+  </data>
+  <data name="PlaceNoRooms" xml:space="preserve">
+    <value>Der er intet rum at flytte til.</value>
+  </data>
+  <data name="PlaceNoRoomsHint" xml:space="preserve">
+    <value>Tilføj først et rum under Rum og tags.</value>
+  </data>
+  <data name="TlKindMovedHouse" xml:space="preserve">
+    <value>Flytning</value>
+  </data>
+  <data name="OrderRow" xml:space="preserve">
+    <value>Rækkefølge på runden</value>
+  </data>
+  <data name="OrderRowUsual" xml:space="preserve">
+    <value>Den sædvanlige rækkefølge</value>
+  </data>
+  <data name="OrderRowOwn" xml:space="preserve">
+    <value>Din egen rækkefølge</value>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>Rækkefølge på runden</value>
+  </data>
+  <data name="OrderHint" xml:space="preserve">
+    <value>Sådan går du rundt i {0} på runden. Træk i et håndtag, eller brug pilene.</value>
+  </data>
+  <data name="OrderMoveUp" xml:space="preserve">
+    <value>Flyt {0} op</value>
+  </data>
+  <data name="OrderMoveDown" xml:space="preserve">
+    <value>Flyt {0} ned</value>
+  </data>
+  <data name="OrderUsual" xml:space="preserve">
+    <value>Brug den sædvanlige rækkefølge</value>
+  </data>
+  <data name="OrderSaved" xml:space="preserve">
+    <value>Rækkefølgen er gemt.</value>
+  </data>
+  <data name="OrderUsualDone" xml:space="preserve">
+    <value>Tilbage til den sædvanlige rækkefølge.</value>
+  </data>
+  <data name="OrderNotHere" xml:space="preserve">
+    <value>Kun et rum der er i brug, har en rækkefølge på runden.</value>
+  </data>
+  <data name="OrderEmpty" xml:space="preserve">
+    <value>Der står ikke noget i dette rum endnu.</value>
+  </data>
+  <data name="OrderEmptyHint" xml:space="preserve">
+    <value>Når du tilføjer planter eller stiklinger her, kan du sætte dem i rækkefølge.</value>
+  </data>
+</root>
