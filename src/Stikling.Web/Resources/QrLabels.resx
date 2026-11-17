@@ -106,4 +106,44 @@
   <data name="LinkNotMineText" xml:space="preserve">
     <value>This label is for a plant that isn't in the collection on this device. It may be from someone else's collection.</value>
   </data>
+  <data name="ScanTitle" xml:space="preserve">
+    <value>Scan a label</value>
+    <comment>Name of the button on Plants and Propagations, the title of the scanner page and the name the hint on a label's link page uses. Keep it the same as in the hint.</comment>
+  </data>
+  <data name="ScanPageTitle" xml:space="preserve">
+    <value>Scan a label · Stikling</value>
+    <comment>Title of the browser tab on the scanner page.</comment>
+  </data>
+  <data name="ScanDialogLabel" xml:space="preserve">
+    <value>Scan a label</value>
+    <comment>Label of the full-screen scanner for screen readers.</comment>
+  </data>
+  <data name="ScanFrameHint" xml:space="preserve">
+    <value>Point the camera at the QR code on a label.</value>
+    <comment>Line under the frame in the scanner.</comment>
+  </data>
+  <data name="ScanNotStikling" xml:space="preserve">
+    <value>That code isn't a Stikling label.</value>
+    <comment>Shown for a few seconds in the scanner when it reads a code that doesn't open a plant or cutting in Stikling.</comment>
+  </data>
+  <data name="ScanStarting" xml:space="preserve">
+    <value>Starting the camera</value>
+    <comment>Shown in the scanner while the camera starts.</comment>
+  </data>
+  <data name="ScanNoCamera" xml:space="preserve">
+    <value>This device has no camera Stikling can use.</value>
+    <comment>Shown in the scanner when there is no camera.</comment>
+  </data>
+  <data name="ScanDenied" xml:space="preserve">
+    <value>Stikling isn't allowed to use the camera. Allow it in the browser's site settings and try again.</value>
+    <comment>Shown in the scanner when access to the camera was refused.</comment>
+  </data>
+  <data name="ScanFailed" xml:space="preserve">
+    <value>The camera didn't start.</value>
+    <comment>Shown in the scanner when the camera failed to start.</comment>
+  </data>
+  <data name="ScanTryAgain" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Button in the scanner that asks for the camera again.</comment>
+  </data>
 </root>
