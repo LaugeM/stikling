@@ -473,7 +473,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="RoomsSpotsWorkA1" xml:space="preserve">
-    <value>A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of the PC". Pick one you have used before so the same room doesn't end up with two names. Filtering the plant list by a room includes its spots. Under Rooms and tags in Settings you can add a room or spot before any plant is in it, rename or merge them, remove one that is empty, and mark one as having a grow light or as outdoors. Each room and spot also has a page of its own, with a note and photos.</value>
+    <value>A room is where a plant lives, and a spot is a place inside it, like "Living room / On top of the PC". Pick one you have used before so the same room doesn't end up with two names. Filtering the plant list by a room includes its spots. Under Rooms and tags in Settings you can add a room or spot before any plant is in it, rename or merge them, remove one that is empty, and mark one as having a grow light or as outdoors. Each room and spot also has a page of its own, with a note and photos, and its grow lights, windows and light check.</value>
     <comment>Answer to "How do rooms and spots work?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="HappensWhenPlantDiesOrQ" xml:space="preserve">
@@ -1844,7 +1844,7 @@
     <comment>Question on the Help page.</comment>
   </data>
   <data name="RoomPageA1" xml:space="preserve">
-    <value>Every room and spot has a page with its photos, a note about what the place is like, the plants and cuttings that stand there and, for a room, its spots. Open it from Rooms and tags in Settings, from Location on a plant or a cutting, or from the Plants list when a room or spot is picked. The note and the photos belong to the room or spot, not to a plant, so they stay when the plants change. Renaming or removing a room is still done under Rooms and tags.</value>
+    <value>Every room and spot has a page with its photos, a note about what the place is like, its grow lights, windows and light check, the plants and cuttings that stand there and, for a room, its spots. Open it from Rooms and tags in Settings, from Location on a plant or a cutting, or from the Plants list when a room or spot is picked. The note and the photos belong to the room or spot, not to a plant, so they stay when the plants change. Renaming or removing a room is still done under Rooms and tags.</value>
     <comment>Answer to "What is a room's page?" on the Help page.</comment>
   </data>
   <data name="MovingHouseQ" xml:space="preserve">
@@ -1986,6 +1986,38 @@
   <data name="SeeWhatSpentA1" xml:space="preserve">
     <value>Yes. Under &lt;em&gt;Supplies&lt;/em&gt;, open &lt;em&gt;Money&lt;/em&gt;, or tap the link on the Orders page. It adds up the prices you typed, year by year: plants (what you paid, and items on an order that have not become plants yet), shipping, supplies you marked as bought and other things ticked off the shopping list. If you sold plants or cuttings and typed the price, what they brought in is shown beside it. Each line opens the plant, order or supply it is from. Prices are plain numbers with no currency, and only what has a price is counted. A plant you got from an order counts once, with its own price, and an item that did not come is left out. Money is never put on a shared page or a printed story.</value>
     <comment>Answer to "Can I see what I have spent?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="GrowLightsQ" xml:space="preserve">
+    <value>How do I add a grow light?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="GrowLightsA1" xml:space="preserve">
+    <value>Open the room or spot and tap &lt;em&gt;Add a grow light&lt;/em&gt; under &lt;em&gt;Grow lights&lt;/em&gt;. Give it a name, pick the room or spot it lights, and write the watts and the hours a day it is on if you like. A light on a room lights its spots too, and a spot's page shows its room's lights marked as the room's. Tap a light to change it or remove it. When a light is added, removed or moved to another place, each plant and cutting standing there gets a line in its history that names it. Changing the name, watts or hours writes nothing. Moving a plant to a place with a different light adds a line to the move, like &lt;em&gt;Now under a grow light&lt;/em&gt;. A plant under a grow light isn't watered by the seasons, and the watts and hours are only a note for you.</value>
+    <comment>Answer to "How do I add a grow light?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WindowDirectionQ" xml:space="preserve">
+    <value>Can I say which way the windows face?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="WindowDirectionA1" xml:space="preserve">
+    <value>Yes. On the page of a room or spot, tick the directions under &lt;em&gt;Windows&lt;/em&gt;: north, east, south, west or roof. You can tick several. A spot with none ticked uses its room's. A plant's page then says it next to the readings under &lt;em&gt;What it likes&lt;/em&gt;, like &lt;em&gt;South and west windows&lt;/em&gt;. It is only a note, and it doesn't change anything on a plant.</value>
+    <comment>Answer to "Can I say which way the windows face?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LightCheckQ" xml:space="preserve">
+    <value>What is the light check?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="LightCheckA1" xml:space="preserve">
+    <value>It is three questions about a room or spot, for when you have no light meter: how much direct sun it gets, how far it is from the window, and whether anything is in the way. Open it from &lt;em&gt;Light check&lt;/em&gt; on the page of the room or spot, or from the link under the light field on a plant's form. The guess starts from the sun (none is medium light, up to 4 hours of sun is bright indirect light, over 4 hours is direct sun). A spot 1 to 2 metres (3 to 6 feet) from the window goes down one level, over 2 metres (6 feet) goes down two, some in the way, like a sheer curtain, goes down one, and a lot in the way, like a building close by, goes down two. It never goes below low light. It is a rough guess, nothing is saved on a plant, and the plant form only fills in the light field when you tap &lt;em&gt;Use this&lt;/em&gt;.</value>
+    <comment>Answer to "What is the light check?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WinterLightQ" xml:space="preserve">
+    <value>Why does Today say short days are ahead?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="WinterLightA1" xml:space="preserve">
+    <value>From 15 October to the end of February, or 15 April to 31 August if you are in the southern hemisphere, Today lists the plants in your collection that you have set to like bright indirect light or direct sun and that have no grow light, when they aren't outdoors. It is a reminder to move them closer to a window or add a grow light on their room's page. It never changes a plant. &lt;em&gt;Not this winter&lt;/em&gt; hides it until the season is over.</value>
+    <comment>Answer to "Why does Today say short days are ahead?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="LabelQrQ" xml:space="preserve">
     <value>Can a label open the plant when I scan it?</value>

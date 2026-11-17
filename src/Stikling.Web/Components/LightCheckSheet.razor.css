@@ -1,0 +1,29 @@
+.check-place {
+    margin: 0 0 1rem;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.check-question {
+    margin: 0 0 1.25rem;
+    padding: 0;
+    border: 0;
+}
+
+.check-question legend {
+    float: none;
+    width: auto;
+    margin: 0 0 0.5rem;
+    padding: 0;
+    font-size: 1rem;
+    font-weight: 600;
+}
+
+.check-question .chip {
+    min-height: 2.75rem;
+}
+
+.check-guess {
+    margin: 0 0 1rem;
+    font-weight: 600;
+}

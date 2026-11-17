@@ -4,7 +4,6 @@
 @inject MovingService Moving
 @inject ShelfService Shelf
 @inject PhotoService Photos
-@inject GrowLightService LightService
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject TimeProvider Time
@@ -121,13 +120,9 @@ else
 
             <ReadingsBlock PlaceId="placeId" PlaceName="@name" />
 
+            <RoomLightBlock Place="here.Place" Room="here.Room" PlaceName="@name" OnChanged="LoadAsync" />
+
             <div class="room-switches">
-                <div class="form-check form-switch room-light">
-                    <input class="form-check-input" type="checkbox" role="switch" id="room-light" disabled="@busy"
-                           aria-label="@F(Strings.Shared.RoomsGrowLightIn, name)"
-                           checked="@lit" @onchange="e => SetLitAsync(e.Value is true)" />
-                    <label class="form-check-label" for="room-light">@Strings.Shared.RoomsGrowLight</label>
-                </div>
                 <div class="form-check form-switch room-light">
                     <input class="form-check-input" type="checkbox" role="switch" id="room-outdoors" disabled="@(busy || here.RoomIsOutdoors)"
                            aria-label="@F(here.RoomIsOutdoors ? Strings.Shared.RoomsOutdoorsBecauseRoom : Strings.Shared.RoomsOutdoorsFor, name)"
@@ -264,7 +259,6 @@ else
     private Guid? loadedFor;
     private RoomPageView? view;
     private IReadOnlyList<Photo> photos = [];
-    private bool lit;
     private (string Href, string Label) back = ("rooms-and-tags", Strings.Shared.RoomsTitle);
     private bool editingNote;
     private bool focusNote;
@@ -315,7 +309,6 @@ else
         if (view is { } here)
         {
             photos = await Shelf.GetForPlaceAsync(here.Place.Id);
-            lit = (await LightService.GetAllAsync()).Any(l => !l.IsDeleted && l.PlaceId == here.Place.Id);
         }
         else
             photos = [];
@@ -382,27 +375,6 @@ else
         {
             Logger.LogError(ex, "Saving the note of a room or spot failed");
             message = F(Strings.Shared.RoomsSaveError, ex.Message);
-        }
-
-        busy = false;
-    }
-
-    private async Task SetLitAsync(bool on)
-    {
-        if (view is not { } here)
-            return;
-
-        busy = true;
-        try
-        {
-            await LightService.SetLitAsync(here.Place.Id, on);
-            message = null;
-            await LoadAsync();
-        }
-        catch (Exception ex)
-        {
-            Logger.LogError(ex, "Changing whether a spot has a grow light failed");
-            message = F(Strings.Shared.RoomsLightError, ex.Message);
         }
 
         busy = false;
