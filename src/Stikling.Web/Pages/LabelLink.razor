@@ -47,6 +47,15 @@
                 <div class="link-bar" role="progressbar" aria-label="@Strings.QrLabels.LinkWaitingProgress"><span></span></div>
                 break;
 
+            case LinkState.SyncFailed:
+                <h1>@Strings.QrLabels.LinkSyncFailedTitle</h1>
+                <p>@Strings.QrLabels.LinkSyncFailedText</p>
+                <div class="first-run-actions">
+                    <button type="button" class="btn btn-primary" @onclick="Sync.SyncNowAsync">@Strings.QrLabels.ScanTryAgain</button>
+                </div>
+                <p class="link-hint">@Strings.QrLabels.LinkAppHint</p>
+                break;
+
             case LinkState.SignedOut:
                 <h1>@Strings.QrLabels.LinkSignedOutTitle</h1>
                 <p>@Strings.QrLabels.LinkSignedOutText</p>
@@ -73,18 +82,30 @@
 }
 
 @code {
-    private enum LinkState { Bad, Deleted, Waiting, SignedOut, NotMine }
+    private enum LinkState { Bad, Deleted, Waiting, SyncFailed, SignedOut, NotMine }
 
     [Parameter]
     public string Code { get; set; } = "";
 
+    // How long a signed-in device waits for a first sync that hasn't started, before it stops waiting.
+    // A sync can end without a date or a problem, for example when the session turned out to be signed out.
+    private static readonly TimeSpan WaitForFirstSync = TimeSpan.FromSeconds(20);
+
     private LinkState? state;
     private Guid? id;
+    private bool leaving;
+    private readonly DateTime opened = DateTime.UtcNow;
+    private Timer? recheck;
 
     // Back to this page once signed in, so the plant opens when it has arrived
     private string SignInUrl => $"sign-in?return={Uri.EscapeDataString($"l/{id:N}")}";
 
-    protected override void OnInitialized() => Sync.StatusChanged += OnSyncStatus;
+    protected override void OnInitialized()
+    {
+        Sync.StatusChanged += OnSyncStatus;
+        // Looks once more when the wait is over, since nothing else may fire after it
+        recheck = new Timer(_ => OnSyncStatus(), null, WaitForFirstSync + TimeSpan.FromSeconds(1), Timeout.InfiniteTimeSpan);
+    }
 
     protected override async Task OnParametersSetAsync() => await CheckAsync();
 
@@ -93,6 +114,9 @@
 
     private async Task CheckAsync()
     {
+        // ReloadOnSync and the status event can both call this for one sync
+        if (leaving)
+            return;
         id = LabelLinks.ParseCode(Code);
         if (id is not { } code)
         {
@@ -104,11 +128,13 @@
         // Replaces this page in the history, so going back from the plant doesn't open the label again
         if (await PlantRepository.GetAsync(code) is not null)
         {
+            leaving = true;
             Navigation.NavigateTo($"plants/{code}", replace: true);
             return;
         }
         if (await PropagationRepository.GetAsync(code) is not null)
         {
+            leaving = true;
             Navigation.NavigateTo($"propagations/{code}", replace: true);
             return;
         }
@@ -117,13 +143,20 @@
             state = LinkState.Deleted;
         else if (!Account.IsAvailable || !await Account.WasSignedInAsync())
             state = LinkState.SignedOut;
-        else if (Sync.Running || (Sync.LastSynced is null && Sync.Problem is null))
+        else if (Sync.Running || (Sync.LastSynced is null && Sync.Problem is null && DateTime.UtcNow - opened < WaitForFirstSync))
             // Before the first sync is done on this device, the collection may not have arrived yet
             state = LinkState.Waiting;
+        else if (Sync.Problem is not null)
+            // The last sync failed, so the plant may still be on its way
+            state = LinkState.SyncFailed;
         else
             state = LinkState.NotMine;
         StateHasChanged();
     }
 
-    public void Dispose() => Sync.StatusChanged -= OnSyncStatus;
+    public void Dispose()
+    {
+        Sync.StatusChanged -= OnSyncStatus;
+        recheck?.Dispose();
+    }
 }
