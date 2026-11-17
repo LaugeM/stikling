@@ -38,6 +38,8 @@ public sealed record TodaySections
     public IReadOnlyList<Plant> QuarantineNow { get; init; } = [];
     public IReadOnlyList<Plant> TransitionNow { get; init; } = [];
     public IReadOnlyList<(Plant Plant, DateOnly WindowStart)> RestNow { get; init; } = [];
+    public IReadOnlyList<Plant> WinterLightNow { get; init; } = [];
+    public (DateOnly Start, DateOnly End)? WinterLightSeason { get; init; }
     public OuterPotReminders OuterPot { get; init; } = OuterPotReminders.None;
     public IReadOnlyList<WateringDue> WateringDue { get; init; } = [];
     public IReadOnlyList<WateringDue> WaterNow { get; init; } = [];
@@ -110,6 +112,8 @@ public sealed record TodaySections
 
         var restAsk = RestSeason.AskNow(plants, p => DormantPeriods.Of(p, data.PlantChanges, clock), hemisphere, day)
             .Where(r => !putOffs.IsPutOff(PutOffs.Rest(r.Plant.Id, r.WindowStart), day)).ToList();
+
+        var winterLight = WinterLight.Plants(plants, data.Lights, places, day, hemisphere, putOffs);
 
         var wateringDue = settings.WateringReminder
             ? WateringRound.Due(plants, data.CareLogs, data.PlantChanges, PotOf, data.Lights, places, data.Stretches, hemisphere, clock, putOffs, roundDays)
@@ -186,7 +190,7 @@ public sealed record TodaySections
         // While away nothing is asked for, and while the list on the day back is up it stands for Water and Worth a look
         var dueCount = awayNow is not null ? 0
             : dueTreatmentList.Count + dueChecks.Count + readyNow.Count + planDoneNow.Count + flagged.Count + lookAgain.Count
-              + quarantineNow.Count + transitionNow.Count + restAsk.Count
+              + quarantineNow.Count + transitionNow.Count + restAsk.Count + (winterLight.Count > 0 ? 1 : 0)
               + (holding ? backRows.Count : checksNow.Count + wateringDue.Count(d => d.DueNow))
               + (holding ? 0 : careNow.Sum(g => g.Items.Count) + waterChanges.Count)
               + (roundSuggestion is not null ? 1 : 0)
@@ -210,6 +214,8 @@ public sealed record TodaySections
             QuarantineNow = quarantineNow,
             TransitionNow = transitionNow,
             RestNow = restAsk,
+            WinterLightNow = winterLight,
+            WinterLightSeason = WinterLight.SeasonOf(day, hemisphere),
             OuterPot = OuterPotReminders.Find(plants, data.CareLogs, settings, clock),
             WateringDue = wateringDue,
             WaterNow = waterNow,

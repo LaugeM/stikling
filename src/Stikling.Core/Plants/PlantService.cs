@@ -119,6 +119,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     /// <param name="placeName">The same for the room or spot, so the history can say where it went.</param>
     /// <param name="pot">Finds a pot by id, to see whether a pot waters itself.</param>
     /// <param name="feedName">Turns a feed id into its name, for the feed given with the watering.</param>
+    /// <param name="lampLines">For a move to another place: the lines about grow lights to add to its entry, from <see cref="Lights.GrowLightService.MoveLinesAsync"/>.</param>
     public async Task UpdateAsync(
         Plant before,
         Plant after,
@@ -127,7 +128,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid, string?>? mixName = null,
         Func<Guid, string?>? placeName = null,
         Func<Guid, Pot?>? pot = null,
-        Func<Guid, string?>? feedName = null)
+        Func<Guid, string?>? feedName = null,
+        Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
         Normalize(after, numberChanged: after.CollectionNumber != before.CollectionNumber);
@@ -167,6 +169,8 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         await PartlySavedException.AfterSaveAsync(async () =>
         {
             var changes = PlantChanges.Lines(before, after, potName, mixName, placeName, feedName);
+            if (changes.Count > 0 && before.PlaceId != after.PlaceId && lampLines is not null)
+                changes = [.. changes, .. lampLines(before.PlaceId, after.PlaceId)];
             if (changes.Count > 0)
                 await AddChangeAsync(after.Id, changes, label);
             if (PlantNames.WasIdentified(before.NameQualifier, after.NameQualifier))
@@ -245,14 +249,15 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         IEnumerable<Plant> selected,
         Guid? placeId,
         Func<Enum, string> label,
-        Func<Guid, string?>? placeName = null)
+        Func<Guid, string?>? placeName = null,
+        Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         var moved = 0;
         foreach (var plant in selected.Where(p => !p.IsDeleted && p.PlaceId != placeId))
         {
             var before = plant.Copy();
             plant.PlaceId = placeId;
-            await UpdateAsync(before, plant, label, placeName: placeName);
+            await UpdateAsync(before, plant, label, placeName: placeName, lampLines: lampLines);
             moved++;
         }
 

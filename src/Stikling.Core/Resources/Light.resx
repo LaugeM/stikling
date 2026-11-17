@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="WattsRange" xml:space="preserve">
+    <value>Watts must be a whole number from 1 to 5000.</value>
+    <comment>Error when saving a grow light.</comment>
+  </data>
+  <data name="HoursRange" xml:space="preserve">
+    <value>Hours a day must be from 0 to 24, in halves.</value>
+    <comment>Error when saving a grow light.</comment>
+  </data>
+  <data name="WindowNorth" xml:space="preserve">
+    <value>North</value>
+    <comment>A direction a window faces. Also shown in lower case in a list.</comment>
+  </data>
+  <data name="WindowEast" xml:space="preserve">
+    <value>East</value>
+    <comment>A direction a window faces.</comment>
+  </data>
+  <data name="WindowSouth" xml:space="preserve">
+    <value>South</value>
+    <comment>A direction a window faces.</comment>
+  </data>
+  <data name="WindowWest" xml:space="preserve">
+    <value>West</value>
+    <comment>A direction a window faces.</comment>
+  </data>
+  <data name="WindowRoof" xml:space="preserve">
+    <value>Roof</value>
+    <comment>A skylight or roof window.</comment>
+  </data>
+  <data name="WindowsList_One" xml:space="preserve">
+    <value>{0} window</value>
+    <comment>A place's windows. {0} is the direction, with a capital first letter when WindowsCapital is 1.</comment>
+  </data>
+  <data name="WindowsList_Other" xml:space="preserve">
+    <value>{0} windows</value>
+    <comment>A place's windows. {0} is the directions joined with 'and', with a capital first letter when WindowsCapital is 1.</comment>
+  </data>
+  <data name="WindowsCapital" xml:space="preserve">
+    <value>1</value>
+    <comment>Write 1 when a list of windows starts with a capital letter, as the English does, and 0 when it doesn't.</comment>
+  </data>
+  <data name="ListAnd" xml:space="preserve">
+    <value>{0} and {1}</value>
+    <comment>Joins the last two directions in a list.</comment>
+  </data>
+  <data name="LevelLow" xml:space="preserve">
+    <value>low light</value>
+    <comment>A rough light level, used inside a sentence.</comment>
+  </data>
+  <data name="LevelMedium" xml:space="preserve">
+    <value>medium light</value>
+    <comment>A rough light level, used inside a sentence.</comment>
+  </data>
+  <data name="LevelBrightIndirect" xml:space="preserve">
+    <value>bright indirect light</value>
+    <comment>A rough light level, used inside a sentence.</comment>
+  </data>
+  <data name="LevelDirectSun" xml:space="preserve">
+    <value>direct sun</value>
+    <comment>A rough light level, used inside a sentence.</comment>
+  </data>
+</root>

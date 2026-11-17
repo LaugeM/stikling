@@ -343,7 +343,8 @@ public sealed class PropagationForm
             var places = await deps.RoomService.GetPlacesAsync();
             try
             {
-                await deps.PropagationService.UpdateAsync(Original!, Propagation, label(Propagation), id => places.NameOf(id));
+                await deps.PropagationService.UpdateAsync(Original!, Propagation, label(Propagation), id => places.NameOf(id),
+                    Original!.PlaceId != Propagation.PlaceId ? await deps.LampLinesAsync() : null);
             }
             catch (PartlySavedException ex)
             {

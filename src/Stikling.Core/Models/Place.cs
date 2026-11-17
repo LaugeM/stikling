@@ -35,6 +35,25 @@ public sealed class Place : Entity
     public string? Notes { get; set; }
 
     /// <summary>
+    /// The directions of the windows the place gets light from. Null or empty when none is written
+    /// down, and a spot then uses its room's. Names this version doesn't know are dropped on reading.
+    /// </summary>
+    [JsonConverter(typeof(TolerantEnumListConverter<WindowDirection>))]
+    public List<WindowDirection>? Windows { get; set; }
+
+    /// <summary>How much sun the place gets, from the light check. Null until answered.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<SunHours>))]
+    public SunHours? SunHours { get; set; }
+
+    /// <summary>How far from the window it is, from the light check. Null until answered.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<WindowDistance>))]
+    public WindowDistance? FromWindow { get; set; }
+
+    /// <summary>How much is in the way of the light, from the light check. Null until answered.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<Shade>))]
+    public Shade? InTheWay { get; set; }
+
+    /// <summary>
     /// The day of a move house this room, or spot, was left behind on. Set on a room and on its spots
     /// by the moving flow. The room stays as it was, with its history and photos, but isn't offered
     /// for new things any more. Null for a place in use, and on records from before it existed.
@@ -63,4 +82,40 @@ public sealed class Place : Entity
 
         return errors;
     }
+}
+
+/// <summary>The side a window faces. Roof is a skylight or a roof window.</summary>
+public enum WindowDirection
+{
+    North,
+    East,
+    South,
+    West,
+    Roof
+}
+
+/// <summary>Hours of direct sun a place gets, as one of the light check's answers.</summary>
+public enum SunHours
+{
+    None,
+    UnderTwo,
+    TwoToFour,
+    OverFour
+}
+
+/// <summary>How far a place is from its window, as one of the light check's answers.</summary>
+public enum WindowDistance
+{
+    AtWindow,
+    UnderOneMetre,
+    OneToTwoMetres,
+    OverTwoMetres
+}
+
+/// <summary>How much stands between the window and the place, as one of the light check's answers.</summary>
+public enum Shade
+{
+    Nothing,
+    Some,
+    Lots
 }

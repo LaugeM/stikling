@@ -1,0 +1,164 @@
+@* The light of a room or spot on its page: which way the windows face, the grow lights that shine here and the light check.
+   A spot with no windows or answers of its own shows its room's, marked as the room's, and a spot shows the lamps on its
+   room as the room's too. *@
+@inject GrowLightService LightService
+@inject RoomService Rooms
+@inject ILogger<RoomLightBlock> Logger
+
+<section class="room-section" aria-labelledby="room-windows-heading">
+    <h2 class="section-label" id="room-windows-heading">@LightStrings.WindowsHeading</h2>
+    <div class="chip-row" role="group" aria-labelledby="room-windows-heading">
+        @foreach (var direction in Enum.GetValues<WindowDirection>())
+        {
+            var on = Place.Windows?.Contains(direction) == true;
+            <button type="button" class="chip @(on ? "picked" : null)" aria-pressed="@(on ? "true" : "false")" disabled="@busy"
+                    @onclick="() => ToggleWindowAsync(direction)">@LightText.Direction(direction)</button>
+        }
+    </div>
+    @if (WindowsOf is ({ Count: > 0 } shown, var fromRoom))
+    {
+        <p class="settings-hint">@(fromRoom ? F(LightStrings.WindowsFromRoom, LightText.Windows(shown)) : LightText.Windows(shown))</p>
+    }
+    else
+    {
+        <p class="settings-hint">@LightStrings.WindowsHint</p>
+    }
+</section>
+
+<section class="room-section" aria-labelledby="room-lamps-heading">
+    <h2 class="section-label" id="room-lamps-heading">@LightStrings.LampsHeading</h2>
+    @if (lamps.Count == 0)
+    {
+        <p class="settings-hint">@LightStrings.LampsNone</p>
+    }
+    else
+    {
+        <ul class="lamp-list">
+            @foreach (var (lamp, fromRoomLamp) in lamps)
+            {
+                var item = lamp;
+                <li>
+                    <button type="button" class="lamp-row" @onclick="() => OpenLamp(item)">
+                        <span class="lamp-text">@LampText(item)</span>
+                        @if (fromRoomLamp)
+                        {
+                            <span class="lamp-tag">@LightStrings.LampFromRoom</span>
+                        }
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+    <button type="button" class="btn btn-link btn-sm link-action room-edit" @onclick="() => OpenLamp(null)">@LightStrings.LampAdd</button>
+</section>
+
+<section class="room-section" aria-labelledby="room-check-heading">
+    <h2 class="section-label" id="room-check-heading">@LightStrings.CheckHeading</h2>
+    @if (CheckOf is ({ } level, var checkFromRoom))
+    {
+        <p class="check-summary">@F(LightStrings.CheckSummary, LightText.Level(level))</p>
+        <p class="settings-hint">@LightStrings.CheckRough@(checkFromRoom ? " " + LightStrings.CheckFromRoom : "")</p>
+        <button type="button" class="btn btn-link btn-sm link-action room-edit" @onclick="() => checkOpen = true">@LightStrings.CheckChange</button>
+    }
+    else
+    {
+        <p class="settings-hint">@LightStrings.CheckNone</p>
+        <button type="button" class="btn btn-link btn-sm link-action room-edit" @onclick="() => checkOpen = true">@LightStrings.CheckAnswer</button>
+    }
+    @if (message is not null)
+    {
+        <p class="settings-message" role="status">@message</p>
+    }
+</section>
+
+<GrowLightSheet @bind-Open="lampOpen" Light="editingLamp" StartPlaceId="Place.Id" OnSaved="LampSavedAsync" />
+<LightCheckSheet @bind-Open="checkOpen" PlaceId="Place.Id" PlaceName="@PlaceName" Place="Place" OnSaved="CheckSavedAsync" />
+
+@code {
+    /// <summary>The room or spot the page is about.</summary>
+    [Parameter, EditorRequired]
+    public Place Place { get; set; } = default!;
+
+    /// <summary>The room of a spot. Null for a room.</summary>
+    [Parameter]
+    public Place? Room { get; set; }
+
+    [Parameter]
+    public string PlaceName { get; set; } = "";
+
+    /// <summary>Raised after something was saved, so the page can load again.</summary>
+    [Parameter]
+    public EventCallback OnChanged { get; set; }
+
+    private List<(GrowLight Lamp, bool FromRoom)> lamps = [];
+    private GrowLight? editingLamp;
+    private bool lampOpen;
+    private bool checkOpen;
+    private bool busy;
+    private string? message;
+
+    private (IReadOnlyList<WindowDirection> Windows, bool FromRoom) WindowsOf => LightText.WindowsOf(Place, Room);
+
+    private (LightLevel? Level, bool FromRoom) CheckOf => LightText.CheckOf(Place, Room);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var places = await Rooms.GetPlacesAsync();
+        var all = await LightService.GetAllAsync();
+        var roomId = Place.IsSpot ? Room?.Id : null;
+        lamps = [.. all
+            .Where(l => !l.IsDeleted && places.Find(l.PlaceId) is { } at && (at.Id == Place.Id || at.Id == roomId))
+            .OrderBy(l => l.CreatedAt).ThenBy(l => l.Id)
+            .Select(l => (l, places.Find(l.PlaceId)!.Id != Place.Id))
+            .OrderBy(t => t.Item2)];
+    }
+
+    // "Shelf LED · 24 W · 12 h a day", leaving out what isn't written down
+    private static string LampText(GrowLight lamp)
+    {
+        var parts = new List<string> { lamp.Name };
+        if (lamp.Watts is { } watts)
+            parts.Add(F(LightStrings.LampWatts, watts.ToString("0", System.Globalization.CultureInfo.CurrentCulture)));
+        if (lamp.HoursPerDay is { } hours)
+            parts.Add(F(LightStrings.LampHours, hours.ToString("0.#", System.Globalization.CultureInfo.CurrentCulture)));
+        return string.Join(" · ", parts);
+    }
+
+    private void OpenLamp(GrowLight? lamp)
+    {
+        editingLamp = lamp;
+        lampOpen = true;
+    }
+
+    private async Task LampSavedAsync()
+    {
+        lampOpen = false;
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task CheckSavedAsync()
+    {
+        checkOpen = false;
+        await OnChanged.InvokeAsync();
+    }
+
+    private async Task ToggleWindowAsync(WindowDirection direction)
+    {
+        busy = true;
+        try
+        {
+            var now = (Place.Windows ?? []).ToList();
+            if (!now.Remove(direction))
+                now.Add(direction);
+            await Rooms.SetWindowsAsync(Place.Id, now);
+            message = null;
+            await OnChanged.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the windows of a room or spot failed");
+            message = F(Strings.Shared.RoomsSaveError, ex.Message);
+        }
+        busy = false;
+    }
+}

@@ -183,6 +183,36 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         await places.SaveAsync(place);
     }
 
+    /// <summary>Sets the directions the windows of a room or spot face. An empty list clears them. Throws when the place isn't there.</summary>
+    public async Task SetWindowsAsync(Guid id, IEnumerable<WindowDirection> windows)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
+
+        var set = windows.Distinct().Order().ToList();
+        var now = set.Count == 0 ? null : set;
+        if ((place.Windows ?? []).Order().SequenceEqual(set))
+            return;
+        place.Windows = now;
+        await places.SaveAsync(place);
+    }
+
+    /// <summary>Saves the three answers of the light check. A null answer clears it. Throws when the place isn't there.</summary>
+    public async Task SetLightCheckAsync(Guid id, SunHours? sun, WindowDistance? distance, Shade? shade)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(id) is not { } place)
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(id));
+
+        if (place.SunHours == sun && place.FromWindow == distance && place.InTheWay == shade)
+            return;
+        place.SunHours = sun;
+        place.FromWindow = distance;
+        place.InTheWay = shade;
+        await places.SaveAsync(place);
+    }
+
     /// <summary>
     /// Sets the order plants and propagations are visited in when going round a room. Null goes back to
     /// the usual order. Only a room has one, so a spot throws.
@@ -255,11 +285,24 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
             var (kept, other) when kept.Trim() == other.Trim() => kept,
             var (kept, other) => kept + "\n\n" + other
         };
-        if (notes != into.Notes)
+        var changed = notes != into.Notes;
+        into.Notes = notes;
+
+        // Windows and light check answers the place that stays has none of are taken from the other one
+        if (into.Windows is not { Count: > 0 } && from.Windows is { Count: > 0 })
         {
-            into.Notes = notes;
-            await places.SaveAsync(into);
+            into.Windows = from.Windows;
+            changed = true;
         }
+        if (into.SunHours is null && into.FromWindow is null && into.InTheWay is null
+            && (from.SunHours is not null || from.FromWindow is not null || from.InTheWay is not null))
+        {
+            (into.SunHours, into.FromWindow, into.InTheWay) = (from.SunHours, from.FromWindow, from.InTheWay);
+            changed = true;
+        }
+
+        if (changed)
+            await places.SaveAsync(into);
 
         from.MergedIntoId = into.Id;
         await places.SaveAsync(from);

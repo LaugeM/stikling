@@ -1,0 +1,243 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="LampsHeading" xml:space="preserve">
+    <value>Grow lights</value>
+    <comment>Heading on a room or spot page.</comment>
+  </data>
+  <data name="LampsNone" xml:space="preserve">
+    <value>No grow light here.</value>
+    <comment>Under the Grow lights heading when there are none.</comment>
+  </data>
+  <data name="LampAdd" xml:space="preserve">
+    <value>Add a grow light</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="LampWatts" xml:space="preserve">
+    <value>{0} W</value>
+    <comment>Watts of a lamp.</comment>
+  </data>
+  <data name="LampHours" xml:space="preserve">
+    <value>{0} h a day</value>
+    <comment>Hours a lamp is on.</comment>
+  </data>
+  <data name="LampFromRoom" xml:space="preserve">
+    <value>The room's</value>
+    <comment>Marks a lamp on the room when shown on a spot.</comment>
+  </data>
+  <data name="LampSheetAdd" xml:space="preserve">
+    <value>Add a grow light</value>
+    <comment>Title of the sheet.</comment>
+  </data>
+  <data name="LampSheetEdit" xml:space="preserve">
+    <value>Grow light</value>
+    <comment>Title of the sheet.</comment>
+  </data>
+  <data name="LampName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Field label.</comment>
+  </data>
+  <data name="LampLights" xml:space="preserve">
+    <value>What it lights</value>
+    <comment>Field label: the room or spot the lamp lights.</comment>
+  </data>
+  <data name="LampWattsLabel" xml:space="preserve">
+    <value>Watts</value>
+    <comment>Field label.</comment>
+  </data>
+  <data name="LampHoursLabel" xml:space="preserve">
+    <value>Hours a day</value>
+    <comment>Field label.</comment>
+  </data>
+  <data name="LampNote" xml:space="preserve">
+    <value>Note</value>
+    <comment>Field label.</comment>
+  </data>
+  <data name="LampRemove" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button that removes a grow light.</comment>
+  </data>
+  <data name="LampSaveError" xml:space="preserve">
+    <value>Couldn't save the grow light: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="LampDefaultName" xml:space="preserve">
+    <value>Grow light</value>
+    <comment>The name a new grow light starts with.</comment>
+  </data>
+  <data name="WindowsHeading" xml:space="preserve">
+    <value>Windows</value>
+    <comment>Heading on a room or spot page.</comment>
+  </data>
+  <data name="WindowsHint" xml:space="preserve">
+    <value>Which way they face. Tick all that apply.</value>
+    <comment>Under the Windows heading.</comment>
+  </data>
+  <data name="WindowsNone" xml:space="preserve">
+    <value>No windows written down.</value>
+    <comment>Under the Windows heading when none is ticked.</comment>
+  </data>
+  <data name="WindowsFromRoom" xml:space="preserve">
+    <value>{0}. The room's windows.</value>
+    <comment>A spot with none of its own shows its room's. {0} is the list.</comment>
+  </data>
+  <data name="CheckHeading" xml:space="preserve">
+    <value>Light check</value>
+    <comment>Heading on a room or spot page.</comment>
+  </data>
+  <data name="CheckSummary" xml:space="preserve">
+    <value>Light check: looks like {0}.</value>
+    <comment>{0} is a light level like 'bright indirect light'.</comment>
+  </data>
+  <data name="CheckRough" xml:space="preserve">
+    <value>A rough guess from your answers.</value>
+    <comment>Under the light check summary.</comment>
+  </data>
+  <data name="CheckFromRoom" xml:space="preserve">
+    <value>From the room.</value>
+    <comment>Shown when a spot has no answers and shows its room's.</comment>
+  </data>
+  <data name="CheckChange" xml:space="preserve">
+    <value>Change</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="CheckNone" xml:space="preserve">
+    <value>Answer three questions for a rough guess of the light here.</value>
+    <comment>Under the Light check heading when nothing is answered.</comment>
+  </data>
+  <data name="CheckAnswer" xml:space="preserve">
+    <value>Do the light check</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="CheckSheetTitle" xml:space="preserve">
+    <value>Light check</value>
+    <comment>Title of the sheet.</comment>
+  </data>
+  <data name="CheckSheetIntro" xml:space="preserve">
+    <value>Three questions about {0}. The answer is a rough guess, and nothing is changed on any plant.</value>
+    <comment>{0} is the name of the room or spot.</comment>
+  </data>
+  <data name="CheckSun" xml:space="preserve">
+    <value>How much direct sun does it get?</value>
+    <comment>Question.</comment>
+  </data>
+  <data name="SunNone" xml:space="preserve">
+    <value>None</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="SunUnderTwo" xml:space="preserve">
+    <value>Under 2 hours</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="SunTwoToFour" xml:space="preserve">
+    <value>2 to 4 hours</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="SunOverFour" xml:space="preserve">
+    <value>Over 4 hours</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="CheckDistance" xml:space="preserve">
+    <value>How far is it from the window?</value>
+    <comment>Question.</comment>
+  </data>
+  <data name="DistanceAtWindow" xml:space="preserve">
+    <value>At the window</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="DistanceUnderOneMetre" xml:space="preserve">
+    <value>Under 1 m</value>
+    <comment>Answer in metres.</comment>
+  </data>
+  <data name="DistanceOneToTwoMetres" xml:space="preserve">
+    <value>1 to 2 m</value>
+    <comment>Answer in metres.</comment>
+  </data>
+  <data name="DistanceOverTwoMetres" xml:space="preserve">
+    <value>Over 2 m</value>
+    <comment>Answer in metres.</comment>
+  </data>
+  <data name="DistanceUnderOneMetreFeet" xml:space="preserve">
+    <value>Under 3 ft</value>
+    <comment>Answer in feet.</comment>
+  </data>
+  <data name="DistanceOneToTwoMetresFeet" xml:space="preserve">
+    <value>3 to 6 ft</value>
+    <comment>Answer in feet.</comment>
+  </data>
+  <data name="DistanceOverTwoMetresFeet" xml:space="preserve">
+    <value>Over 6 ft</value>
+    <comment>Answer in feet.</comment>
+  </data>
+  <data name="CheckShade" xml:space="preserve">
+    <value>Is anything in the way of the light?</value>
+    <comment>Question.</comment>
+  </data>
+  <data name="ShadeNothing" xml:space="preserve">
+    <value>Nothing</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="ShadeSome" xml:space="preserve">
+    <value>Some</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="ShadeLots" xml:space="preserve">
+    <value>A lot</value>
+    <comment>Answer.</comment>
+  </data>
+  <data name="ShadeSomeExample" xml:space="preserve">
+    <value>A sheer curtain or a tree outside</value>
+    <comment>Example under the answer Some.</comment>
+  </data>
+  <data name="ShadeLotsExample" xml:space="preserve">
+    <value>A building close by or a balcony above</value>
+    <comment>Example under the answer A lot.</comment>
+  </data>
+  <data name="CheckClear" xml:space="preserve">
+    <value>Clear the answers</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="CheckSays" xml:space="preserve">
+    <value>The light check for {0} says {1}.</value>
+    <comment>On the plant form. {0} is the place, {1} a light level.</comment>
+  </data>
+  <data name="CheckUse" xml:space="preserve">
+    <value>Use this</value>
+    <comment>Button that fills the light field with the guess.</comment>
+  </data>
+  <data name="CheckNotSure" xml:space="preserve">
+    <value>Not sure? Answer three questions about the spot</value>
+    <comment>Link on the plant form that opens the light check.</comment>
+  </data>
+  <data name="FilterGrowLight" xml:space="preserve">
+    <value>Under a grow light</value>
+    <comment>A filter on the plant list.</comment>
+  </data>
+  <data name="FilterLight" xml:space="preserve">
+    <value>Light where it stands</value>
+    <comment>Heading of the light filter on the plant list.</comment>
+  </data>
+  <data name="WinterText" xml:space="preserve">
+    <value>Short days ahead. These like bright light and have no grow light.</value>
+    <comment>Card on Today, with a list of plants under it.</comment>
+  </data>
+  <data name="WinterAdvice" xml:space="preserve">
+    <value>Move them closer to a window, or add a grow light on their room's page.</value>
+    <comment>Under the plants in the winter card.</comment>
+  </data>
+  <data name="WinterNot" xml:space="preserve">
+    <value>Not this winter</value>
+    <comment>Button that hides the winter card for the season.</comment>
+  </data>
+</root>

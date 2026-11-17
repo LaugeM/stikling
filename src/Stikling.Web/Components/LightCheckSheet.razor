@@ -1,0 +1,161 @@
+@* A Sheet with the three questions of the light check about a room or spot. The answers are saved on the place and give
+   a rough guess of its light level. They never change a plant. *@
+@inject RoomService Rooms
+@inject ILogger<LightCheckSheet> Logger
+
+<Sheet Title="@LightStrings.CheckSheetTitle" Open="Open" OpenChanged="OpenChanged">
+    <div class="check-sheet">
+        <p class="check-place">@F(LightStrings.CheckSheetIntro, PlaceName)</p>
+
+        @if (error is not null)
+        {
+            <div class="alert alert-danger py-2 px-3 mb-3" role="alert">@error</div>
+        }
+
+        <fieldset class="check-question">
+            <legend>@LightStrings.CheckSun</legend>
+            <div class="chip-row">
+                @foreach (var (value, label) in SunOptions)
+                {
+                    <button type="button" class="chip @(sun == value ? "picked" : null)" aria-pressed="@(sun == value ? "true" : "false")"
+                            @onclick="() => sun = value">@label</button>
+                }
+            </div>
+        </fieldset>
+
+        <fieldset class="check-question">
+            <legend>@LightStrings.CheckDistance</legend>
+            <div class="chip-row">
+                @foreach (var (value, label) in DistanceOptions)
+                {
+                    <button type="button" class="chip @(distance == value ? "picked" : null)" aria-pressed="@(distance == value ? "true" : "false")"
+                            @onclick="() => distance = value">@label</button>
+                }
+            </div>
+        </fieldset>
+
+        <fieldset class="check-question">
+            <legend>@LightStrings.CheckShade</legend>
+            <div class="chip-row">
+                @foreach (var (value, label) in ShadeOptions)
+                {
+                    <button type="button" class="chip @(shade == value ? "picked" : null)" aria-pressed="@(shade == value ? "true" : "false")"
+                            @onclick="() => shade = value">@label</button>
+                }
+            </div>
+            <p class="form-text mb-0">
+                @if (shade is Shade.Some)
+                {
+                    <text>@LightStrings.ShadeSome: @LightStrings.ShadeSomeExample</text>
+                }
+                else if (shade is Shade.Lots)
+                {
+                    <text>@LightStrings.ShadeLots: @LightStrings.ShadeLotsExample</text>
+                }
+                else
+                {
+                    <text>@LightStrings.ShadeSome: @LightStrings.ShadeSomeExample. @LightStrings.ShadeLots: @LightStrings.ShadeLotsExample.</text>
+                }
+            </p>
+        </fieldset>
+
+        @if (LightCheck.Guess(sun, distance, shade) is { } guess)
+        {
+            <p class="check-guess" role="status">@F(LightStrings.CheckSummary, LightText.Level(guess))</p>
+        }
+
+        <div class="form-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">@Strings.Common.Save</button>
+            @if (sun is not null || distance is not null || shade is not null)
+            {
+                <button type="button" class="btn btn-link ms-auto" disabled="@busy" @onclick="Clear">@LightStrings.CheckClear</button>
+            }
+        </div>
+    </div>
+</Sheet>
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    /// <summary>The room or spot the answers are about.</summary>
+    [Parameter, EditorRequired]
+    public Guid PlaceId { get; set; }
+
+    [Parameter]
+    public string PlaceName { get; set; } = "";
+
+    /// <summary>The place, for the answers it starts from.</summary>
+    [Parameter]
+    public Place? Place { get; set; }
+
+    /// <summary>Raised after the answers were saved, so the page can close the Sheet and show them.</summary>
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    private SunHours? sun;
+    private WindowDistance? distance;
+    private Shade? shade;
+    private string? error;
+    private bool busy;
+    private bool wasOpen;
+
+    private (SunHours Value, string Label)[] SunOptions =>
+    [
+        (SunHours.None, LightStrings.SunNone),
+        (SunHours.UnderTwo, LightStrings.SunUnderTwo),
+        (SunHours.TwoToFour, LightStrings.SunTwoToFour),
+        (SunHours.OverFour, LightStrings.SunOverFour)
+    ];
+
+    // Metres or feet by the lengths setting: 1 m is 3 ft and 2 m is 6 ft
+    private (WindowDistance Value, string Label)[] DistanceOptions =>
+    [
+        (WindowDistance.AtWindow, LightStrings.DistanceAtWindow),
+        (WindowDistance.UnderOneMetre, Lengths.IsInches ? LightStrings.DistanceUnderOneMetreFeet : LightStrings.DistanceUnderOneMetre),
+        (WindowDistance.OneToTwoMetres, Lengths.IsInches ? LightStrings.DistanceOneToTwoMetresFeet : LightStrings.DistanceOneToTwoMetres),
+        (WindowDistance.OverTwoMetres, Lengths.IsInches ? LightStrings.DistanceOverTwoMetresFeet : LightStrings.DistanceOverTwoMetres)
+    ];
+
+    private (Shade Value, string Label)[] ShadeOptions =>
+    [
+        (Shade.Nothing, LightStrings.ShadeNothing),
+        (Shade.Some, LightStrings.ShadeSome),
+        (Shade.Lots, LightStrings.ShadeLots)
+    ];
+
+    protected override void OnParametersSet()
+    {
+        if (Open && !wasOpen)
+        {
+            error = null;
+            busy = false;
+            sun = Place?.SunHours;
+            distance = Place?.FromWindow;
+            shade = Place?.InTheWay;
+        }
+        wasOpen = Open;
+    }
+
+    private void Clear() => (sun, distance, shade) = (null, null, null);
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        error = null;
+        try
+        {
+            await Rooms.SetLightCheckAsync(PlaceId, sun, distance, shade);
+            await OnSaved.InvokeAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the light check failed");
+            error = F(Strings.Shared.RoomsSaveError, ex.Message);
+        }
+        busy = false;
+    }
+}
