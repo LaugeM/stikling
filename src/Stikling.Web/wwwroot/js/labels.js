@@ -2,9 +2,10 @@
 // Labels page, in a picture for a label maker's app, or on a printed page, so they all look alike.
 // The drawing is always black on white, whatever theme the app is in, because that is what prints.
 //
-// The shape says how big the label is: { widthMm, heightMm, cut, stake, oneLine }. It comes from
-// Core (LabelShape), which decides what counts as a stake or as one line.
-// A label is { number, name, botanical, dateLine }, the parts are { number, name, botanical, date }.
+// The shape says how big the label is: { widthMm, heightMm, cut, stake, oneLine, qrFits }. It comes from
+// Core (LabelShape), which decides what counts as a stake or as one line, and whether a QR code fits.
+// A label is { number, name, botanical, dateLine, qr }, the parts are { number, name, botanical, date, qr }.
+// The qr of a label is the rows of its QR code, a string of "1" (dark) and "0" for each row, made in Core.
 
 import { download } from "./files.js";
 import { DISPLAY, BODY, loadFonts } from "./sharecard.js";
@@ -44,14 +45,26 @@ export function drawLabel(canvas, label, parts, shape, dotsPerMm) {
     ctx.textAlign = "left";
 
     const shown = whatIsShown(label, parts, shape);
+    // The same padding as LabelShape.PaddingMm in Core, which decides whether a QR code fits
     const pad = Math.max(0.8, Math.min(2, Math.min(shape.widthMm, shape.heightMm) * 0.08)) * mm;
 
-    if (shape.stake)
+    if (shape.stake) {
         drawStake(ctx, shown, shape, pad, mm);
-    else if (shape.oneLine)
-        drawOneLine(ctx, shown, { x: pad, y: pad, w: width - 2 * pad, h: height - 2 * pad }, mm);
-    else
-        drawFlat(ctx, shown, { x: pad, y: pad, w: width - 2 * pad, h: height - 2 * pad }, mm);
+    } else {
+        // The QR code is a square at the right end, as high as the label, and the text gets the rest
+        let box = { x: pad, y: pad, w: width - 2 * pad, h: height - 2 * pad };
+        if (shown.qr) {
+            const side = box.h;
+            const hasText = shown.number || shown.name || shown.botanical || shown.date;
+            drawQr(ctx, shown.qr, hasText ? box.x + box.w - side : box.x + (box.w - side) / 2, box.y, side);
+            if (hasText)
+                box = { ...box, w: box.w - side - (2 * side) / shown.qr.length };
+        }
+        if (shape.oneLine)
+            drawOneLine(ctx, shown, box, mm);
+        else
+            drawFlat(ctx, shown, box, mm);
+    }
 
     drawCutLine(ctx, shape, width, height, mm);
 }
@@ -64,7 +77,34 @@ function whatIsShown(label, parts, shape) {
         name: parts.name && label.name ? label.name : null,
         botanical: roomy && parts.botanical && label.botanical ? label.botanical : null,
         date: roomy && parts.date && label.dateLine ? label.dateLine : null,
+        qr: parts.qr && shape.qrFits && label.qr?.length ? label.qr : null,
     };
+}
+
+// The QR code in a square: filled rectangles on whole dots, black on white. Every module is the same
+// whole number of dots, so the edges stay sharp in the label maker's picture and on paper, and the
+// code is centred in its square. The margin around it is the label's own white.
+function drawQr(ctx, rows, x, y, side) {
+    const size = rows.length;
+    const module = Math.floor(side / size);
+    if (module < 1)
+        return;
+    const left = Math.round(x + (side - module * size) / 2);
+    const top = Math.round(y + (side - module * size) / 2);
+    ctx.fillStyle = INK;
+    for (let row = 0; row < size; row++) {
+        const line = rows[row];
+        // A run of dark modules is one rectangle
+        for (let column = 0; column < size; column++) {
+            if (line[column] !== "1")
+                continue;
+            let end = column;
+            while (end + 1 < size && line[end + 1] === "1")
+                end++;
+            ctx.fillRect(left + column * module, top + row * module, (end - column + 1) * module, module);
+            column = end;
+        }
+    }
 }
 
 function font(ctx, style, weight, size, family) {
@@ -205,13 +245,20 @@ function drawStake(ctx, shown, shape, pad, mm) {
     const inner = width - 2 * pad;
     const point = shape.cut === "point" ? Math.min(width * 0.7, height * 0.2) : 0;
 
-    let textTop = pad;
+    // The QR code at the top as wide as the stake, then the number under it
+    let top = pad;
+    if (shown.qr) {
+        drawQr(ctx, shown.qr, pad, pad, inner);
+        top = pad + inner + 1.5 * mm;
+    }
+
+    let textTop = top;
     if (shown.number) {
         const size = numberSize(ctx, shown.number, inner, inner * 1.1, 2 * mm);
         const numberWidth = ctx.measureText(shown.number).width;
         const cap = size * CAP;
-        ctx.fillText(shown.number, pad + (inner - numberWidth) / 2, pad + cap);
-        textTop = pad + cap + 2 * mm;
+        ctx.fillText(shown.number, pad + (inner - numberWidth) / 2, top + cap);
+        textTop = top + cap + 2 * mm;
     }
 
     const length = height - point - pad - textTop;

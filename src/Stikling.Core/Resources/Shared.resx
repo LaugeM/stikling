@@ -528,4 +528,12 @@
     <value>Humidity has to be between 0 and 100%.</value>
     <comment>Error when the humidity is out of range.</comment>
   </data>
+  <data name="LabelQrNoRoomTape" xml:space="preserve">
+    <value>There's no room for a QR code on {0} mm tape.</value>
+    <comment>Note under the tick boxes on the Labels page. {0} is the tape width.</comment>
+  </data>
+  <data name="LabelQrNoRoomSmall" xml:space="preserve">
+    <value>There's no room for a QR code on a label this small.</value>
+    <comment>Note under the tick boxes on the Labels page.</comment>
+  </data>
 </root>

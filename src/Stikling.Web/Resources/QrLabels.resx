@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ShowQr" xml:space="preserve">
+    <value>QR code that opens it</value>
+    <comment>Tick box on the Labels page. The QR code on a label opens its plant or cutting when scanned.</comment>
+  </data>
+  <data name="LayoutStickers" xml:space="preserve">
+    <value>Stickers</value>
+    <comment>A choice of layout on the Sheet tab of the Labels page, next to Pots and Stakes. Sheets of sticker paper.</comment>
+  </data>
+  <data name="LayoutStickersNoteA4" xml:space="preserve">
+    <value>21 stickers per sheet, 63.5 × 38.1 mm, the size most office shops sell.</value>
+    <comment>Note under the layout choice on the Labels page, with A4 paper.</comment>
+  </data>
+  <data name="LayoutStickersNoteLetter" xml:space="preserve">
+    <value>30 stickers per sheet, 66.7 × 25.4 mm, the most common address-label sheet.</value>
+    <comment>Note under the layout choice on the Labels page, with Letter paper.</comment>
+  </data>
+  <data name="PrintActualSize" xml:space="preserve">
+    <value>Print at actual size (100 %), not fit to page.</value>
+    <comment>Note by the Print button on the Labels page when sticker sheets are chosen, so the labels land on the stickers.</comment>
+  </data>
+  <data name="StartAt" xml:space="preserve">
+    <value>Start at sticker</value>
+    <comment>Label of a number box on the Labels page. The first sheet leaves the stickers before this number empty, so a half-used sheet can be used.</comment>
+  </data>
+  <data name="StartsAt" xml:space="preserve">
+    <value>Starts at sticker {0}: row {1}, column {2}.</value>
+    <comment>Under the start number on the Labels page. {0} is the sticker number, {1} its row and {2} its column on the sheet.</comment>
+  </data>
+  <data name="LinkPageTitle" xml:space="preserve">
+    <value>Label · Stikling</value>
+    <comment>Title of the browser tab on the page a label's QR code opens.</comment>
+  </data>
+  <data name="LinkBadTitle" xml:space="preserve">
+    <value>This label can't be read</value>
+    <comment>Heading on the page a label's QR code opens, when the link isn't one Stikling knows.</comment>
+  </data>
+  <data name="LinkBadText" xml:space="preserve">
+    <value>The link on it isn't one Stikling knows.</value>
+  </data>
+  <data name="LinkGoToStikling" xml:space="preserve">
+    <value>Go to Stikling</value>
+    <comment>Button to the front page of the app.</comment>
+  </data>
+  <data name="LinkDeletedTitle" xml:space="preserve">
+    <value>It was deleted</value>
+    <comment>Heading on the page a label's QR code opens, when its plant or cutting was deleted on this device.</comment>
+  </data>
+  <data name="LinkDeletedText" xml:space="preserve">
+    <value>The plant or cutting this label is for was deleted on this device.</value>
+  </data>
+  <data name="LinkGoToPlants" xml:space="preserve">
+    <value>Go to Plants</value>
+    <comment>Button to the Plants page.</comment>
+  </data>
+  <data name="LinkWaitingTitle" xml:space="preserve">
+    <value>Getting your plants</value>
+    <comment>Heading on the page a label's QR code opens, while the first sync after signing in brings the collection to this device.</comment>
+  </data>
+  <data name="LinkWaitingText" xml:space="preserve">
+    <value>It opens as soon as your collection has arrived on this device.</value>
+  </data>
+  <data name="LinkWaitingProgress" xml:space="preserve">
+    <value>Getting your plants</value>
+    <comment>Spoken name of the progress bar on the same page.</comment>
+  </data>
+  <data name="LinkSignedOutTitle" xml:space="preserve">
+    <value>This label is from Stikling</value>
+    <comment>Heading on the page a label's QR code opens, when the plant isn't on this device and nobody is signed in.</comment>
+  </data>
+  <data name="LinkSignedOutText" xml:space="preserve">
+    <value>The plant it belongs to isn't on this device. If it's yours, sign in and it opens once your plants have arrived.</value>
+  </data>
+  <data name="LinkSignIn" xml:space="preserve">
+    <value>Sign in</value>
+    <comment>Button to the sign-in page.</comment>
+  </data>
+  <data name="LinkAppHint" xml:space="preserve">
+    <value>Keep Stikling as an app on your phone? Open it there and use Scan a label.</value>
+    <comment>Scan a label is the name of a button in the app that reads a QR code with the camera.</comment>
+  </data>
+  <data name="LinkAbout" xml:space="preserve">
+    <value>Stikling keeps track of plants and their cuttings, for free and on your own phone.</value>
+  </data>
+  <data name="LinkAboutLink" xml:space="preserve">
+    <value>What is Stikling?</value>
+    <comment>Link to the front page.</comment>
+  </data>
+  <data name="LinkNotMineTitle" xml:space="preserve">
+    <value>Not in your collection</value>
+    <comment>Heading on the page a label's QR code opens, when someone is signed in and their collection is up to date but doesn't have the plant.</comment>
+  </data>
+  <data name="LinkNotMineText" xml:space="preserve">
+    <value>This label is for a plant that isn't in the collection on this device. It may be from someone else's collection.</value>
+  </data>
+</root>
