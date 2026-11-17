@@ -62,6 +62,8 @@ public sealed class PropagationService(
     public async Task CreateAsync(Propagation propagation, Func<Enum, string> label, IReadOnlyList<Photo>? photos = null)
     {
         propagation.ClearMixUnlessSoil();
+        if (propagation.ParentPlantId is null)
+            propagation.ParentIsGuess = false;
         if (photos is { Count: > 0 })
             propagation.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
         // Only a create run again has history to look through, so a first one doesn't read the whole store
@@ -123,6 +125,8 @@ public sealed class PropagationService(
         Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         after.ClearMixUnlessSoil();
+        if (after.ParentPlantId is null)
+            after.ParentIsGuess = false;
         after.SyncStageWithCounts(Today);
         after.NoteFirstRoot();
         after.NoteRooted(Today);
@@ -297,6 +301,7 @@ public sealed class PropagationService(
             InnerPotId = request.PotId,
             SoilMixId = request.Medium == GrowingMedium.Soil ? request.SoilMixId : null,
             ParentPlantId = propagation.ParentPlantId,
+            ParentIsGuess = propagation.ParentIsGuess,
             FromPropagationId = propagation.Id,
             Count = oneRecord ? request.Count : null
         }).ToList();
@@ -490,6 +495,7 @@ public sealed class PropagationService(
             NameQualifier = source.NameQualifier,
             NameNote = source.NameNote,
             ParentPlantId = source.ParentPlantId,
+            ParentIsGuess = source.ParentIsGuess,
             Source = source.Source,
             SellerId = source.SellerId,
             Type = source.Type,

@@ -1,0 +1,295 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="PageTitle" xml:space="preserve">
+    <value>Tidy up · Stikling</value>
+    <comment>Title of the browser tab on the Tidy up page.</comment>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>Tidy up</value>
+    <comment>Heading of the Tidy up page.</comment>
+  </data>
+  <data name="SettingsRow" xml:space="preserve">
+    <value>Tidy up</value>
+    <comment>Row in Settings that opens the Tidy up page.</comment>
+  </data>
+  <data name="SettingsRowDetail" xml:space="preserve">
+    <value>Gaps, doubles and things nothing uses</value>
+    <comment>Line under the Tidy up row in Settings.</comment>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>Things that may be worth a look. Nothing changes until you pick it.</value>
+    <comment>Line under the heading of the Tidy up page.</comment>
+  </data>
+  <data name="Nothing" xml:space="preserve">
+    <value>Nothing to tidy up.</value>
+    <comment>Shown on the Tidy up page when no section has anything in it.</comment>
+  </data>
+  <data name="SectionNoGenus" xml:space="preserve">
+    <value>Plants with no genus</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionNoPhoto" xml:space="preserve">
+    <value>Plants with no photo</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionNoRoom" xml:space="preserve">
+    <value>Plants with no room</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionParentMissing" xml:space="preserve">
+    <value>Cuttings whose parent plant is gone</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionSame" xml:space="preserve">
+    <value>Plants that may be the same</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionTags" xml:space="preserve">
+    <value>Tags nothing uses</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionProducts" xml:space="preserve">
+    <value>Products nothing uses</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="SectionMixes" xml:space="preserve">
+    <value>Soil mixes nothing uses</value>
+    <comment>Heading of a section on the Tidy up page.</comment>
+  </data>
+  <data name="HintOpen" xml:space="preserve">
+    <value>Tap one to open it and fix it there.</value>
+    <comment>Line under a section on the Tidy up page whose lines open a plant.</comment>
+  </data>
+  <data name="HintParentMissing" xml:space="preserve">
+    <value>The plant they were taken from was removed. Open the cutting to pick another parent, or none.</value>
+    <comment>Line under a section on the Tidy up page.</comment>
+  </data>
+  <data name="HintSame" xml:space="preserve">
+    <value>Two plants in the same room with the same name. If they are different plants, say so and they stop showing.</value>
+    <comment>Line under a section on the Tidy up page.</comment>
+  </data>
+  <data name="HintTags" xml:space="preserve">
+    <value>No plant in your collection has these. They are only left on plants that are gone.</value>
+    <comment>Line under a section on the Tidy up page.</comment>
+  </data>
+  <data name="HintProducts" xml:space="preserve">
+    <value>No care entry, feed or stock points at these.</value>
+    <comment>Line under a section on the Tidy up page.</comment>
+  </data>
+  <data name="HintMixes" xml:space="preserve">
+    <value>No plant or cutting is in these.</value>
+    <comment>Line under a section on the Tidy up page.</comment>
+  </data>
+  <data name="And" xml:space="preserve">
+    <value>and</value>
+    <comment>Between the names of two plants that may be the same, as in 'Basil and Basil'.</comment>
+  </data>
+  <data name="InRoom" xml:space="preserve">
+    <value>in {0}</value>
+    <comment>After two plants that may be the same. {0} is the room they are in.</comment>
+  </data>
+  <data name="NotTheSame" xml:space="preserve">
+    <value>Not the same</value>
+    <comment>Button on a pair of plants that may be the same. They stop showing in the list.</comment>
+  </data>
+  <data name="NotTheSameFor" xml:space="preserve">
+    <value>{0} and {1} are not the same plant</value>
+    <comment>Name read out for the Not the same button. {0} and {1} are plant names.</comment>
+  </data>
+  <data name="NotTheSameDone" xml:space="preserve">
+    <value>{0} and {1} won't show as the same again.</value>
+    <comment>Shown after Not the same was tapped. {0} and {1} are plant names.</comment>
+  </data>
+  <data name="RemoveNamed" xml:space="preserve">
+    <value>Remove {0}</value>
+    <comment>Name read out for a Remove button. {0} is a tag, product or soil mix.</comment>
+  </data>
+  <data name="ConfirmRemove" xml:space="preserve">
+    <value>Remove {0}?</value>
+    <comment>Asked before an unused tag, product or soil mix is removed. {0} is its name.</comment>
+  </data>
+  <data name="ConfirmYes" xml:space="preserve">
+    <value>Yes, remove</value>
+    <comment>Button that removes it after the question.</comment>
+  </data>
+  <data name="Removed" xml:space="preserve">
+    <value>Removed {0}.</value>
+    <comment>Shown after removing. {0} is the name.</comment>
+  </data>
+  <data name="StillUsed" xml:space="preserve">
+    <value>{0} is used after all, so it stays.</value>
+    <comment>Shown when something was used again before it could be removed. {0} is the name.</comment>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>That didn't work: {0}</value>
+    <comment>Shown on the Tidy up page when a change fails. {0} is the reason.</comment>
+  </data>
+  <data name="ShowAll" xml:space="preserve">
+    <value>Show all {0}</value>
+    <comment>Button under a long section on the Tidy up page. {0} is how many there are.</comment>
+  </data>
+  <data name="ShowFewer" xml:space="preserve">
+    <value>Show fewer</value>
+    <comment>Button that folds a long section back up.</comment>
+  </data>
+  <data name="MentionChoices" xml:space="preserve">
+    <value>Plants, propagations and pots to link</value>
+    <comment>Name of the list that opens when typing @ in a note, read out by a screen reader.</comment>
+  </data>
+  <data name="MentionKindPlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Small word after a plant in the list that opens when typing @ in a note.</comment>
+  </data>
+  <data name="MentionKindPropagation" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Small word after a propagation in the list that opens when typing @ in a note.</comment>
+  </data>
+  <data name="MentionKindPot" xml:space="preserve">
+    <value>Pot</value>
+    <comment>Small word after a pot in the list that opens when typing @ in a note.</comment>
+  </data>
+  <data name="MentionedInHeading" xml:space="preserve">
+    <value>Mentioned in</value>
+    <comment>Heading of the card on a plant or propagation that lists the notes that mention it.</comment>
+  </data>
+  <data name="MentionedInCase" xml:space="preserve">
+    <value>Pest case: {0}</value>
+    <comment>Name of a pest case update in the Mentioned in card. {0} is the pest.</comment>
+  </data>
+  <data name="ParentIsGuess" xml:space="preserve">
+    <value>It's a guess</value>
+    <comment>Checkbox on the edit form, shown once a parent is picked. Ticked when the parent isn't certain.</comment>
+  </data>
+  <data name="ProbablyFromPlant" xml:space="preserve">
+    <value>probably from {0}{1}</value>
+    <comment>On a plant's page in place of 'from {0}' when the parent is a guess. {0} is the parent, {1} a note like 'lives with Anna' or empty.</comment>
+  </data>
+  <data name="ProbablyFromParent" xml:space="preserve">
+    <value>probably from {0}</value>
+    <comment>On a propagation's page in place of 'from {0}' when the parent plant is a guess. {0} is the parent.</comment>
+  </data>
+  <data name="ImportKindLabel" xml:space="preserve">
+    <value>What to import</value>
+    <comment>Name of the choice at the start of the spreadsheet import, read out by a screen reader.</comment>
+  </data>
+  <data name="ImportKindPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Choice at the start of the spreadsheet import: plants.</comment>
+  </data>
+  <data name="ImportKindPropagations" xml:space="preserve">
+    <value>Propagations</value>
+    <comment>Choice at the start of the spreadsheet import: propagations.</comment>
+  </data>
+  <data name="ImportPropsPageTitle" xml:space="preserve">
+    <value>Import propagations · Stikling</value>
+    <comment>Title of the browser tab on the page that imports propagations from a spreadsheet.</comment>
+  </data>
+  <data name="ImportPropsTitle" xml:space="preserve">
+    <value>Import</value>
+    <comment>Heading of the page that imports propagations from a spreadsheet.</comment>
+  </data>
+  <data name="ImportPropsIntro" xml:space="preserve">
+    <value>Bring in propagations from Excel, Google Sheets or a list you keep somewhere else. Save the sheet as CSV and choose the file, or copy the cells, headings included, and paste them. A column with the plant each one was taken from links it to that plant.</value>
+    <comment>Introduction on the first step of the page that imports propagations from a spreadsheet.</comment>
+  </data>
+  <data name="ImportPropagationsLabel" xml:space="preserve">
+    <value>Propagations</value>
+    <comment>Heading and name of the step that lists the propagations found in the file.</comment>
+  </data>
+  <data name="ImportPropagation_One" xml:space="preserve">
+    <value>{0} propagation</value>
+    <comment>Count of propagations in the button to check them. {0} is 1.</comment>
+  </data>
+  <data name="ImportPropagation_Other" xml:space="preserve">
+    <value>{0} propagations</value>
+    <comment>Count of propagations in the button to check them. {0} is the number, not 1.</comment>
+  </data>
+  <data name="ImportNextCheck" xml:space="preserve">
+    <value>Next: check {0}</value>
+    <comment>Button that goes on to the propagations. {0} is a count like '3 propagations'.</comment>
+  </data>
+  <data name="ImportNoRows" xml:space="preserve">
+    <value>There are no propagations to import.</value>
+    <comment>Shown when the file has no rows.</comment>
+  </data>
+  <data name="ImportNoRowsInFile" xml:space="preserve">
+    <value>There are no propagations in that file.</value>
+    <comment>Shown after choosing a file with no rows.</comment>
+  </data>
+  <data name="ImportNoRowsPasted" xml:space="preserve">
+    <value>There are no propagations in what you pasted.</value>
+    <comment>Shown after pasting cells with no rows.</comment>
+  </data>
+  <data name="ImportParentIs" xml:space="preserve">
+    <value>Taken from {0}</value>
+    <comment>On a row of the import: the plant its parent column matched. {0} is the plant.</comment>
+  </data>
+  <data name="ImportParentNotFound" xml:space="preserve">
+    <value>Parent not found: {0}</value>
+    <comment>On a row of the import and in the result: no plant has the name in the parent column, so the parent is left empty. {0} is the name from the file.</comment>
+  </data>
+  <data name="ImportParentSeveral" xml:space="preserve">
+    <value>More than one plant matched: {0}</value>
+    <comment>On a row of the import and in the result: more than one plant has the name in the parent column, so the parent is left empty. {0} is the name from the file.</comment>
+  </data>
+  <data name="ImportNoParentCount" xml:space="preserve">
+    <value>{0} without a parent</value>
+    <comment>In the line of counts above the rows of the import. {0} is how many rows have no parent because it wasn't found or was unclear.</comment>
+  </data>
+  <data name="ImportNoParent" xml:space="preserve">
+    <value>Added without a parent</value>
+    <comment>Heading in the result of the import over the rows whose parent plant wasn't found or was unclear.</comment>
+  </data>
+  <data name="ImportCount" xml:space="preserve">
+    <value>{0} of them</value>
+    <comment>On a row of the import. {0} is how many cuttings the row starts with.</comment>
+  </data>
+  <data name="ImportAdd_One" xml:space="preserve">
+    <value>Add {0} propagation</value>
+    <comment>Button that adds the ticked propagation. {0} is 1.</comment>
+  </data>
+  <data name="ImportAdd_Other" xml:space="preserve">
+    <value>Add {0} propagations</value>
+    <comment>Button that adds the ticked propagations. {0} is the number, not 1.</comment>
+  </data>
+  <data name="ImportAdded_One" xml:space="preserve">
+    <value>{0} propagation added</value>
+    <comment>Heading of the result of the import. {0} is 1.</comment>
+  </data>
+  <data name="ImportAdded_Other" xml:space="preserve">
+    <value>{0} propagations added</value>
+    <comment>Heading of the result of the import. {0} is the number, not 1.</comment>
+  </data>
+  <data name="ImportNoneAdded" xml:space="preserve">
+    <value>No propagations added</value>
+    <comment>Heading of the result of the import when nothing was added.</comment>
+  </data>
+  <data name="ImportUndone_One" xml:space="preserve">
+    <value>Removed the propagation again.</value>
+    <comment>Shown after Undo on the result of the import. {0} is 1, so it isn't in the text.</comment>
+  </data>
+  <data name="ImportUndone_Other" xml:space="preserve">
+    <value>Removed the {0} propagations again.</value>
+    <comment>Shown after Undo on the result of the import. {0} is the number, not 1.</comment>
+  </data>
+  <data name="ImportGoToPropagations" xml:space="preserve">
+    <value>Go to propagations</value>
+    <comment>Button on the result of the import that opens the list of propagations.</comment>
+  </data>
+  <data name="ImportAddFailedNone" xml:space="preserve">
+    <value>Couldn't add the propagations on this device. Nothing was added, so you can try again.</value>
+    <comment>Shown when the import of propagations failed before anything was added.</comment>
+  </data>
+</root>

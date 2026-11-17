@@ -68,6 +68,9 @@ public sealed class PestTreatment : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>The plants, propagations and pots named with an @ in <see cref="Notes"/>. Null when none are, and on every older treatment.</summary>
+    public List<Mention>? Mentions { get; set; }
+
     /// <summary>
     /// When the next treatment is due, when it shouldn't simply be the case's interval. Left
     /// empty the interval decides, so this is only filled in when you want a different gap.
@@ -115,6 +118,7 @@ public sealed class PestTreatment : Entity
         var copy = (PestTreatment)MemberwiseClone();
         copy.TreatedPlantIds = TreatedPlantIds is null ? null : [.. TreatedPlantIds];
         copy.Ingredients = [.. Ingredients.Select(i => i.Copy())];
+        copy.Mentions = Mentions is null ? null : [.. Mentions];
         return copy;
     }
 

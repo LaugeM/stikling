@@ -13,6 +13,7 @@
 @inject TimeProvider Time
 @inject PestFoundService PestFound
 @inject PestPhotoService PestPhotos
+@inject MentionService MentionLookup
 @inject IPhotoRepository PhotoRepository
 
 <PageTitle>@(view is null ? Strings.Pests.CasePageTitle : Labels.For(view.Case.Pest)) · Stikling</PageTitle>
@@ -423,7 +424,7 @@ else
                                 @What(treatment)
                                 @if (!string.IsNullOrWhiteSpace(treatment.Notes))
                                 {
-                                    <span class="text-body-secondary"> · @treatment.Notes</span>
+                                    <span class="text-body-secondary"> · <MentionLinks Text="@treatment.Notes" Named="treatment.Mentions" Live="mentionTargets" /></span>
                                 }
                             </span>
                             <span class="care-when">@Labels.Date(treatment.OccurredOn)</span>
@@ -634,6 +635,8 @@ else
         loaded = true;
     }
 
+    private IReadOnlySet<Guid> mentionTargets = new HashSet<Guid>();
+
     private async Task ReloadAsync()
     {
         if (await Repository.GetAsync(Id) is not { } item)
@@ -644,6 +647,7 @@ else
 
         var all = await Treatments.GetAllAsync();
         treatments = PestService.TreatmentsFor(all, item.Id);
+        mentionTargets = treatments.Any(t => t.Mentions is { Count: > 0 }) ? await MentionLookup.LiveTargetsAsync() : new HashSet<Guid>();
         catches = PestService.Catches(item, all);
         places = await RoomService.GetPlacesAsync();
         var plants = await PlantRepository.GetAllAsync();

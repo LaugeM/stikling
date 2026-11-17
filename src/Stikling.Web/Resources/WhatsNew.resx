@@ -37,11 +37,9 @@
   <data name="ComingNextHint" xml:space="preserve">
     <value>In the order they are planned. Plans can change, so there are no dates.</value>
   </data>
-  <data name="ComingNextNotes" xml:space="preserve">
-    <value>Link to another plant in a note, and a page for tidying up.</value>
-  </data>
   <data name="ComingNextTranslating" xml:space="preserve">
     <value>A way for others to help translate Stikling.</value>
+    <comment>The planned items are listed in the order they are planned.</comment>
   </data>
   <data name="ComingNextPeople" xml:space="preserve">
     <value>Invite someone to see your collection or log care.</value>
@@ -315,6 +313,9 @@
   <data name="Nov2026Calendar" xml:space="preserve">
     <value>Today can show in your calendar app: get a private link under Today in your calendar in Settings.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026NotesAndTidying" xml:space="preserve">
+    <value>Type @ in a note to link to another plant, propagation or pot, and the plant gets a Mentioned in card. A new Tidy up page in Settings lists gaps and doubles, you can mark a parent as a guess, and you can import cuttings from a spreadsheet.</value>
   </data>
   <data name="Nov2026Light" xml:space="preserve">
     <value>Each room and spot has grow lights with their watts and hours, the direction its windows face, and a light check of three questions that gives a rough guess of the light. Plants get a history line when a lamp is added or removed where they stand. Filter the plant list by light, and Today reminds you about bright-light plants with no lamp before the short days.</value>

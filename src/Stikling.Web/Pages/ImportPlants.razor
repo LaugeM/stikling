@@ -19,6 +19,7 @@
 @if (step == Step.Choose)
 {
     <div class="import-narrow">
+        <ImportKind />
         <p>@Strings.Account.ImportIntro</p>
 
         @if (error is not null)
