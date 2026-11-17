@@ -52,6 +52,9 @@ public sealed record WaterChangeGroup(string Name, PropagationResult<string> Res
 /// </summary>
 public static class PropagationResults
 {
+    /// <summary>Below this many decided units a percentage looks more certain than it is, so the counts are shown instead.</summary>
+    public const int SmallSample = 5;
+
     /// <summary>One row per medium that has been used, the most used first.</summary>
     public static IReadOnlyList<PropagationResult<GrowingMedium>> ByMedium(IEnumerable<Propagation> propagations) =>
         By(propagations, p => p.Medium);

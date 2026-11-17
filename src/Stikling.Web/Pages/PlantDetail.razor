@@ -100,6 +100,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
+                    <NameNoteLines Genus="@plant.Genus" Species="@plant.KnownSpecies" Cultivar="@plant.Cultivar" />
                     @if (identifyOffered && IdentifyWanted)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="YoursHeading" xml:space="preserve">
+    <value>Yours</value>
+    <comment>Heading of the card on a dictionary page that holds what you have of the name, how its cuttings went and your own note.</comment>
+  </data>
+  <data name="NoteLabel" xml:space="preserve">
+    <value>Your note</value>
+    <comment>Small heading over your own note on a dictionary page.</comment>
+  </data>
+  <data name="NoteAdd" xml:space="preserve">
+    <value>Add a note</value>
+    <comment>Button on a dictionary page that opens the box for your own note on a name.</comment>
+  </data>
+  <data name="NotePlaceholder" xml:space="preserve">
+    <value>For example: mine like it tight</value>
+    <comment>Hint in the empty box for a note on a name.</comment>
+  </data>
+  <data name="NoteHint" xml:space="preserve">
+    <value>Shows under the name on your plants of this name.</value>
+    <comment>Line under the box for a note on a genus, species or cultivar.</comment>
+  </data>
+  <data name="NoteAria" xml:space="preserve">
+    <value>Your note on {0}</value>
+    <comment>Screen reader name of the note box. {0} is the name, like Monstera deliciosa.</comment>
+  </data>
+  <data name="NoteError" xml:space="preserve">
+    <value>The note could not be saved.</value>
+    <comment>Shown when saving a note on a name fails.</comment>
+  </data>
+  <data name="Empty" xml:space="preserve">
+    <value>You have nothing of this yet. What you add shows up here with how its cuttings went. A note you write stays with the name.</value>
+    <comment>Line in the card on a dictionary page when you have no plants, cuttings or wishes of that name.</comment>
+  </data>
+  <data name="HadHeading" xml:space="preserve">
+    <value>You had</value>
+    <comment>Small heading over the plants that died or went to someone else and the cuttings that are finished, in the card on a dictionary page.</comment>
+  </data>
+  <data name="ResultsHeading" xml:space="preserve">
+    <value>How your cuttings went</value>
+    <comment>Small heading over the success rate per medium in the card on a dictionary page.</comment>
+  </data>
+  <data name="ResultsLink" xml:space="preserve">
+    <value>All results</value>
+    <comment>Link under the cuttings results on a dictionary page to the results of all cuttings.</comment>
+  </data>
+  <data name="LineGenus" xml:space="preserve">
+    <value>Genus note</value>
+    <comment>Label before your note on the genus, under a plant's name.</comment>
+  </data>
+  <data name="LineSpecies" xml:space="preserve">
+    <value>Species note</value>
+    <comment>Label before your note on the species, under a plant's name.</comment>
+  </data>
+  <data name="LineCultivar" xml:space="preserve">
+    <value>Cultivar note</value>
+    <comment>Label before your note on the cultivar, under a plant's name.</comment>
+  </data>
+  <data name="Line" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>One line under a plant's name. {0} is the label like Genus note, {1} is the start of the note.</comment>
+  </data>
+</root>

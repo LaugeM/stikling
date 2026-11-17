@@ -94,6 +94,7 @@ public static class RecordKinds
     public static readonly RecordKind<OwnMeasureKind> OwnMeasureKinds = new("ownMeasureKinds");
     public static readonly RecordKind<PhotoMarkup> PhotoMarkups = new("photoMarkups");
     public static readonly RecordKind<PlaceReading> PlaceReadings = new("placeReadings");
+    public static readonly RecordKind<NameNote> NameNotes = new("nameNotes");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -142,6 +143,7 @@ public static class RecordKinds
         OwnMeasureKinds,
         PhotoMarkups,
         PlaceReadings,
+        NameNotes,
         Settings,
     ];
 }

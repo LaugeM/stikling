@@ -5,8 +5,30 @@ using Stikling.Core.Wishlist;
 
 namespace Stikling.Core.Names;
 
-/// <summary>What the person has of a genus, species or cultivar.</summary>
-public sealed record Yours(IReadOnlyList<Plant> Plants, IReadOnlyList<Propagation> Propagations, IReadOnlyList<Wish> Wishes);
+/// <summary>
+/// What is the person's own about a genus, species or cultivar: what they have now (Plants,
+/// Propagations, Wishes), what they had (Had, Past), how its propagations went in each medium
+/// and their note on the name. A genus covers its species and cultivars.
+/// </summary>
+/// <param name="Plants">Plants still in the collection.</param>
+/// <param name="Propagations">Propagations still going.</param>
+/// <param name="Wishes">Wishes not got yet.</param>
+/// <param name="Had">Plants that died or went to someone else.</param>
+/// <param name="Past">Propagations that are finished: rooted and done, or failed.</param>
+/// <param name="Results">One row per medium used, from every propagation of the name, finished or not.</param>
+/// <param name="Note">The person's note on the name, or null.</param>
+public sealed record Yours(
+    IReadOnlyList<Plant> Plants,
+    IReadOnlyList<Propagation> Propagations,
+    IReadOnlyList<Wish> Wishes,
+    IReadOnlyList<Plant> Had,
+    IReadOnlyList<Propagation> Past,
+    IReadOnlyList<PropagationResult<GrowingMedium>> Results,
+    NameNote? Note)
+{
+    /// <summary>True when there is something besides the note to show.</summary>
+    public bool HasAnything => Plants.Count + Propagations.Count + Wishes.Count + Had.Count + Past.Count > 0;
+}
 
 /// <summary>How many plants and propagations still going the person has, per genus and per species.</summary>
 public sealed class OwnedCounts
@@ -37,7 +59,8 @@ public sealed class DictionaryService(
     PlantNameService names,
     IPlantRepository plants,
     IPropagationRepository propagations,
-    IWishRepository wishes)
+    IWishRepository wishes,
+    NameNoteService notes)
 {
     private DictionaryBrowser? browser;
     private string? language;
@@ -77,15 +100,23 @@ public sealed class DictionaryService(
         var mine = (await plants.GetAllAsync())
             .Where(p => p.Status == PlantStatus.Active && Matches(p.Genus, p.KnownSpecies, p.Cultivar))
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var had = (await plants.GetAllAsync())
+            .Where(p => p.Status != PlantStatus.Active && Matches(p.Genus, p.KnownSpecies, p.Cultivar))
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var ofName = (await propagations.GetAllAsync())
+            .Where(p => Matches(p.Genus, p.KnownSpecies, p.Cultivar)).ToList();
         // Still going, as in the Active progress filter of the Propagations list
-        var going = (await propagations.GetAllAsync())
-            .Where(p => p.IsActive && Matches(p.Genus, p.KnownSpecies, p.Cultivar))
+        var going = ofName.Where(p => p.IsActive)
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
+        var past = ofName.Where(p => !p.IsActive)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
         // Still wished for, as the open list on the Wishlist page
         var wished = (await wishes.GetAllAsync())
             .Where(w => !w.IsGot && Matches(w.Genus, w.KnownSpecies, w.Cultivar))
             .OrderBy(w => w.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();
-        return new Yours(mine, going, wished);
+        var level = c.Length > 0 ? NameLevel.Cultivar : s.Length > 0 ? NameLevel.Species : NameLevel.Genus;
+        return new Yours(mine, going, wished, had, past, PropagationResults.ByMedium(ofName),
+            await notes.GetAsync(level, genus, species, cultivar));
     }
 
     public async Task<OwnedCounts> GetOwnedCountsAsync()

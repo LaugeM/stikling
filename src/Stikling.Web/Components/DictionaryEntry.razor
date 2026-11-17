@@ -33,32 +33,9 @@
             </section>
         }
 
-        @if (Yours is { } yours && (yours.Plants.Count + yours.Propagations.Count + yours.Wishes.Count) > 0)
+        @if (Yours is { } yours)
         {
-            <section class="detail-card" aria-labelledby="dict-yours">
-                <h2 id="dict-yours">@Strings.Dictionary.YouHaveHeading</h2>
-                <ul class="item-list">
-                    @foreach (var plant in yours.Plants)
-                    {
-                        <li><PlantCard Plant="plant" /></li>
-                    }
-                    @foreach (var propagation in yours.Propagations)
-                    {
-                        <li><PropagationCard Propagation="propagation" /></li>
-                    }
-                    @foreach (var wish in yours.Wishes)
-                    {
-                        <li>
-                            <a class="item-card" href="wishlist/@wish.Id/edit">
-                                <span class="item-text">
-                                    <span class="item-name">@wish.DisplayName</span>
-                                    <span class="item-meta">@Strings.Dictionary.OnWishlist</span>
-                                </span>
-                            </a>
-                        </li>
-                    }
-                </ul>
-            </section>
+            <YourNamePart Yours="yours" Name="@Name" Genus="@Genus" Species="@Species" Cultivar="@Cultivar" />
         }
     </div>
 

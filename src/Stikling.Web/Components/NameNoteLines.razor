@@ -1,0 +1,78 @@
+@* Short lines under the name on a plant's page with the notes the person wrote on its genus, species and
+   cultivar. Only the ones that exist, each cut off to one line and linking to the dictionary page where it
+   is written. An old name finds the note on the current one. *@
+@inject NameNoteService Notes
+@inject DictionaryService Dictionary
+@inject PlantNameService Names
+
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (lines.Count > 0)
+{
+    <ul class="name-note-lines">
+        @foreach (var line in lines)
+        {
+            <li>
+                @if (line.Href is { } href)
+                {
+                    <a class="name-note-line" href="@href">@line.Text</a>
+                }
+                else
+                {
+                    <span class="name-note-line">@line.Text</span>
+                }
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private sealed record Line(string Text, string? Href);
+
+    [Parameter]
+    public string? Genus { get; set; }
+
+    /// <summary>The species to look the note up by, none for a plant whose species isn't known.</summary>
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    private List<Line> lines = [];
+
+    protected override Task OnParametersSetAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        var found = await Notes.ForNameAsync(Genus, Species, Cultivar);
+        if (found.Count == 0)
+        {
+            lines = [];
+            return;
+        }
+
+        var dictionary = await Names.GetDictionaryAsync();
+        var browser = await Dictionary.GetBrowserAsync();
+        var (genus, species) = dictionary.Current(Genus, Species);
+        var made = new List<Line>();
+        foreach (var note in found)
+        {
+            var (label, href) = note.Level switch
+            {
+                NameLevel.Genus => (Strings.NameNotes.LineGenus, genus is not null && browser.Genus(genus) is not null ? DictionaryLinks.Genus(genus) : null),
+                NameLevel.Species => (Strings.NameNotes.LineSpecies, genus is not null && species is not null && browser.Species(genus, species) is not null ? DictionaryLinks.Species(genus, species) : null),
+                _ => (Strings.NameNotes.LineCultivar, CultivarHref(browser, genus, species))
+            };
+            made.Add(new Line(F(Strings.NameNotes.Line, label, note.Text), href));
+        }
+        lines = made;
+    }
+
+    private string? CultivarHref(DictionaryBrowser browser, string? genus, string? species)
+    {
+        if (genus is null || PlantNames.Cultivar(Cultivar) is not { } cultivar)
+            return null;
+        return browser.Cultivar(genus, cultivar, species) is { } entry ? DictionaryLinks.Cultivar(genus, cultivar, entry.Species) : null;
+    }
+}

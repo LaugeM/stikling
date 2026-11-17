@@ -1,0 +1,19 @@
+.name-note-lines {
+    list-style: none;
+    margin: 0.15rem 0 0.3rem;
+    padding: 0;
+}
+
+/* One line each, so a long note never makes the header tall */
+.name-note-line {
+    display: block;
+    overflow: hidden;
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+a.name-note-line:hover {
+    color: var(--pa-green-dark);
+}
