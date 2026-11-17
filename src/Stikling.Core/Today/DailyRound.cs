@@ -70,7 +70,7 @@ public static class DailyRound
         var propagationCount = activePropagations.Select(p => places.RoomOf(p.PlaceId)?.Id)
             .OfType<Guid>().GroupBy(id => id).ToDictionary(g => g.Key, g => g.Count());
 
-        var candidates = places.Rooms
+        var candidates = places.CurrentRooms
             .Where(r => (plantCount.GetValueOrDefault(r.Id) + propagationCount.GetValueOrDefault(r.Id)) > 0
                 && !putOffs.IsPutOff(PutOffs.Round(r.Id), today))
             .OrderBy(r => last.TryGetValue(r.Id, out var day) ? day : DateOnly.MinValue)

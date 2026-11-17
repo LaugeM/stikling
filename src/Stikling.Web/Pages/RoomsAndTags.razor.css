@@ -39,3 +39,32 @@
     min-height: 2.75rem;
     margin-block: -0.7rem;
 }
+
+/* Says what is still waiting after a move house, and opens the page that places it */
+.move-card {
+    display: grid;
+    gap: 0.15rem;
+    margin: 0.75rem 0;
+    padding: 0.7rem 1rem;
+    border: 1px solid var(--pa-green);
+    border-radius: 0.75rem;
+    background: var(--pa-green-soft);
+    color: var(--pa-text);
+    text-decoration: none;
+}
+
+.move-card:hover,
+.move-card:focus-visible {
+    border-color: var(--pa-green-dark);
+}
+
+.move-card-title {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    color: var(--pa-green-dark);
+}
+
+.move-card-detail {
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}

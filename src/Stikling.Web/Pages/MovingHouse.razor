@@ -1,0 +1,242 @@
+@page "/moving-house"
+@inject MovingService Moving
+@inject RoomService RoomService
+@inject TimeProvider Time
+@inject ILogger<MovingHouse> Logger
+
+<PageTitle>@Strings.Moving.PageTitle</PageTitle>
+
+<a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+<h1>@Strings.Moving.Title</h1>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (stage == Stage.Done && result is { } done)
+{
+    <section class="move-step" aria-live="polite">
+        <h2 class="section-label">@Strings.Moving.DoneHeading</h2>
+        <p>@F(Strings.Moving.DoneText, Labels.Date(day))</p>
+        <ul class="move-done">
+            @if (done.NewRooms > 0)
+            {
+                <li>@Plural.Of(done.NewRooms, Strings.Moving.DoneNewRooms_One, Strings.Moving.DoneNewRooms_Other)</li>
+            }
+            @if (done.Moved > 0)
+            {
+                <li>@Plural.Of(done.Moved, Strings.Moving.DoneMoved_One, Strings.Moving.DoneMoved_Other)</li>
+            }
+            @if (done.ToPlace > 0)
+            {
+                <li>@Plural.Of(done.ToPlace, Strings.Moving.DoneToPlace_One, Strings.Moving.DoneToPlace_Other)</li>
+            }
+        </ul>
+        <div class="add-actions">
+            @if (done.ToPlace > 0)
+            {
+                <a class="btn btn-primary" href="moving-house/place">@Strings.Moving.DonePlace</a>
+            }
+            <a class="btn @(done.ToPlace > 0 ? "btn-link" : "btn-primary")" href="rooms-and-tags">@Strings.Moving.DoneBack</a>
+        </div>
+    </section>
+}
+else if (rooms.Count == 0)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Moving.NoRooms</p>
+        <p class="text-body-secondary">@Strings.Moving.NoRoomsHint</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+    </div>
+}
+else if (stage == Stage.Day)
+{
+    <section class="move-step">
+        <p class="step-count">@F(Strings.Moving.StepOf, 1, 3)</p>
+        <h2 class="section-label">@Strings.Moving.DayHeading</h2>
+        <p class="settings-hint">@Strings.Moving.DayHint</p>
+        <label class="form-label" for="move-day">@Strings.Moving.DayLabel</label>
+        <input id="move-day" type="date" class="form-control move-day" @bind="day" max="@Today.ToString("yyyy-MM-dd")" />
+        @if (day > Today)
+        {
+            <p class="text-danger small mt-2" role="alert">@Strings.Moving.DayFuture</p>
+        }
+        <div class="add-actions">
+            <button type="button" class="btn btn-primary" disabled="@(day > Today)" @onclick="() => stage = Stage.Rooms">@Strings.Moving.Next</button>
+            <a class="btn btn-link" href="rooms-and-tags">@Strings.Common.Cancel</a>
+        </div>
+    </section>
+}
+else if (stage == Stage.Rooms)
+{
+    <section class="move-step">
+        <p class="step-count">@F(Strings.Moving.StepOf, 2, 3)</p>
+        <h2 class="section-label">@Strings.Moving.RoomsHeading</h2>
+        <p class="settings-hint">@Strings.Moving.RoomsHint</p>
+
+        <ul class="move-rooms">
+            @foreach (var room in rooms)
+            {
+                var choice = plan[room.Id];
+                var id = $"move-{room.Id:N}";
+                var hasThings = room.Total > 0;
+                <li class="move-room">
+                    <div class="move-room-head">
+                        <span class="room-name">@room.Name</span>
+                        <span class="room-count">@RoomText.Held(room.AllPlants, room.AllPropagations)</span>
+                    </div>
+                    <div class="btn-group segmented w-100" role="radiogroup" aria-label="@F(Strings.Moving.WhatHappensTo, room.Name)">
+                        @foreach (var option in OptionsFor(hasThings))
+                        {
+                            <input type="radio" class="btn-check" name="@id" id="@($"{id}-{option}")"
+                                   checked="@(choice.Move == option)" @onchange="() => Pick(room.Id, option)" />
+                            <label class="btn btn-outline-primary" for="@($"{id}-{option}")">@OptionLabel(option)</label>
+                        }
+                    </div>
+                    <p class="settings-hint mb-0">@OptionHint(choice.Move)</p>
+
+                    @if (choice.Move == RoomMove.GoesTo)
+                    {
+                        var typed = choice.NewRoom ?? "";
+                        <label class="form-label mt-2" for="@($"{id}-name")">@Strings.Moving.NewRoomLabel</label>
+                        <input id="@($"{id}-name")" class="form-control" autocomplete="off" placeholder="@Strings.Moving.NewRoomPlaceholder"
+                               value="@typed" @oninput="e => Type(room.Id, e.Value?.ToString())" />
+                        @if (NamesMade(room.Id).ToList() is { Count: > 0 } made)
+                        {
+                            <div class="room-chips mt-2" role="group" aria-label="@Strings.Moving.MadeHere">
+                                @foreach (var name in made)
+                                {
+                                    <button type="button" class="room-chip @(RoomName.Same(name, typed) ? "picked" : null)"
+                                            @onclick="() => Type(room.Id, name)">@name</button>
+                                }
+                            </div>
+                        }
+                    }
+                </li>
+            }
+        </ul>
+
+        @if (!AllNamed)
+        {
+            <p class="settings-hint">@Strings.Moving.NeedsName</p>
+        }
+        <div class="add-actions">
+            <button type="button" class="btn btn-primary" disabled="@(!AllNamed)" @onclick="() => stage = Stage.Summary">@Strings.Moving.Next</button>
+            <button type="button" class="btn btn-link" @onclick="() => stage = Stage.Day">@Strings.Moving.Back</button>
+        </div>
+    </section>
+}
+else
+{
+    <section class="move-step">
+        <p class="step-count">@F(Strings.Moving.StepOf, 3, 3)</p>
+        <h2 class="section-label">@Strings.Moving.SummaryHeading</h2>
+        <p>@F(Strings.Moving.SummaryDay, Labels.Date(day))</p>
+        <ul class="move-summary">
+            @foreach (var room in rooms)
+            {
+                var choice = plan[room.Id];
+                <li><strong>@room.Name</strong> @SummaryLine(choice)</li>
+            }
+        </ul>
+        <p class="settings-hint">@Strings.Moving.SummaryNotes</p>
+        @if (message is not null)
+        {
+            <p class="text-danger small" role="alert">@message</p>
+        }
+        <div class="add-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="SaveAsync">@Strings.Moving.Save</button>
+            <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => stage = Stage.Rooms">@Strings.Moving.Back</button>
+        </div>
+    </section>
+}
+
+@code {
+    private enum Stage { Day, Rooms, Summary, Done }
+
+    private bool loaded;
+    private bool busy;
+    private string? message;
+    private Stage stage = Stage.Day;
+    private DateOnly day;
+    private IReadOnlyList<Room> rooms = [];
+    private Dictionary<Guid, RoomPlan> plan = [];
+    private MoveResult? result;
+
+    private DateOnly Today => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        day = Today;
+        rooms = await RoomService.GetAllAsync();
+        plan = MovingService.Defaults(rooms).ToDictionary(p => p.RoomId);
+        loaded = true;
+    }
+
+    private static IEnumerable<RoomMove> OptionsFor(bool hasThings) =>
+        hasThings ? [RoomMove.GoesTo, RoomMove.CameAlong, RoomMove.PlaceLater] : [RoomMove.CameAlong, RoomMove.LeftBehind];
+
+    private static string OptionLabel(RoomMove move) => move switch
+    {
+        RoomMove.GoesTo => Strings.Moving.GoesTo,
+        RoomMove.CameAlong => Strings.Moving.CameAlong,
+        RoomMove.PlaceLater => Strings.Moving.PlaceLater,
+        _ => Strings.Moving.LeftBehind
+    };
+
+    private static string OptionHint(RoomMove move) => move switch
+    {
+        RoomMove.GoesTo => Strings.Moving.GoesToHint,
+        RoomMove.CameAlong => Strings.Moving.CameAlongHint,
+        RoomMove.PlaceLater => Strings.Moving.PlaceLaterHint,
+        _ => Strings.Moving.LeftBehindHint
+    };
+
+    private void Pick(Guid roomId, RoomMove move) =>
+        plan[roomId] = plan[roomId] with { Move = move };
+
+    private void Type(Guid roomId, string? name) =>
+        plan[roomId] = plan[roomId] with { NewRoom = name };
+
+    // The names typed for the other rooms, so two rooms can go to the same new one with a tap
+    private IEnumerable<string> NamesMade(Guid roomId) =>
+        plan.Values
+            .Where(p => p.RoomId != roomId && p.Move == RoomMove.GoesTo && RoomName.Clean(p.NewRoom) is not null)
+            .Select(p => RoomName.Clean(p.NewRoom)!)
+            .Distinct(StringComparer.CurrentCultureIgnoreCase);
+
+    private bool AllNamed => plan.Values.Where(p => p.Move == RoomMove.GoesTo).All(p => NameOk(p.NewRoom));
+
+    private static bool NameOk(string? name) =>
+        new Place { Name = RoomName.Clean(name) ?? "" }.Validate().Count == 0;
+
+    private string SummaryLine(RoomPlan choice) => choice.Move switch
+    {
+        RoomMove.GoesTo => F(Strings.Moving.SummaryGoesTo, RoomName.Clean(choice.NewRoom)),
+        RoomMove.CameAlong => Strings.Moving.SummaryCameAlong,
+        RoomMove.PlaceLater => Strings.Moving.SummaryPlaceLater,
+        _ => Strings.Moving.SummaryLeftBehind
+    };
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            result = await Moving.MoveAsync(new MovePlan(day, [.. plan.Values]));
+            stage = Stage.Done;
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            message = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving a move house failed");
+            message = F(Strings.Moving.SaveError, ex.Message);
+        }
+
+        busy = false;
+    }
+}
