@@ -31,6 +31,7 @@ public sealed class SyncRunner(
     PublicPageService publicPage,
     DeviceFiles files,
     NotificationService notifications,
+    CalendarFeedService calendar,
     IJSRuntime js,
     TimeProvider time) : JsModule(js, ModulePath)
 {
@@ -232,6 +233,7 @@ public sealed class SyncRunner(
 
         // While the sign-in still lets the server be asked. Never throws
         await notifications.TurnOffAsync();
+        await calendar.ForgetDeviceAsync();
 
         try
         {
@@ -275,6 +277,7 @@ public sealed class SyncRunner(
 
         // The server deleted the subscriptions with the account
         await notifications.TurnOffAsync(fromServer: false);
+        await calendar.ForgetDeviceAsync();
         await ForgetAsync();
         if (!keepData)
             await store.ClearAllAsync();
@@ -304,7 +307,10 @@ public sealed class SyncRunner(
 
             // The records are as they will be for a while, so the notification text is worked out from them
             if (Problem is null && signedIn)
+            {
                 _ = notifications.UploadAsync();
+                _ = calendar.UploadAsync();
+            }
         }
         catch (Exception e)
         {
@@ -434,6 +440,7 @@ public sealed class SyncRunner(
         try
         {
             await notifications.TurnOffAsync(fromServer: false);
+            await calendar.ForgetDeviceAsync();
             await ForgetAsync();
         }
         catch (JSException)

@@ -23,6 +23,8 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<IdentificationUse> IdentificationUses => Set<IdentificationUse>();
     public DbSet<NotificationSchedule> NotificationSchedules => Set<NotificationSchedule>();
 
+    public DbSet<CalendarFeed> CalendarFeeds => Set<CalendarFeed>();
+
     /// <summary>
     /// Locks the collection's row until the end of the transaction, so changes to one collection
     /// take turns. Call it inside a transaction.
@@ -185,6 +187,14 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             schedule.Property(s => s.TimeZone).HasMaxLength(100);
             schedule.HasIndex(s => s.NextSendAt);
             schedule.HasOne<Person>().WithOne().HasForeignKey<NotificationSchedule>(s => s.PersonId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        model.Entity<CalendarFeed>(feed =>
+        {
+            feed.HasKey(f => f.PersonId);
+            feed.Property(f => f.TokenHash).HasColumnType("char(64)").IsFixedLength();
+            feed.HasIndex(f => f.TokenHash).IsUnique();
+            feed.HasOne<Person>().WithOne().HasForeignKey<CalendarFeed>(f => f.PersonId).OnDelete(DeleteBehavior.Cascade);
         });
 
         model.Entity<IdentificationUse>(use =>

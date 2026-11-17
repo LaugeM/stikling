@@ -57,7 +57,7 @@ public static class ErrorReporting
         DropMessages(e);
         if (e.Request is { } request)
         {
-            request.Url = ReportScrubbing.WithoutQueryOrFragment(request.Url);
+            request.Url = ReportScrubbing.WithoutCalendarToken(ReportScrubbing.WithoutQueryOrFragment(request.Url));
             request.QueryString = null;
             request.Cookies = null;
             request.Headers.Clear();

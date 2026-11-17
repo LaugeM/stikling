@@ -26,6 +26,12 @@ public sealed class RequestLimitOptions
 
     /// <summary>How many more requests to the plant facts that address gets each minute after that.</summary>
     public int FactsPerMinute { get; set; } = 30;
+
+    /// <summary>How many requests to a calendar link one address can send at once.</summary>
+    public int CalendarBurst { get; set; } = 60;
+
+    /// <summary>How many more requests to calendar links that address gets each minute after that.</summary>
+    public int CalendarPerMinute { get; set; } = 60;
 }
 
 /// <summary>
@@ -35,7 +41,7 @@ public sealed class RequestLimitOptions
 /// waits and carries on. Requests without a sign-in aren't counted: they are turned away before
 /// they reach the database, and the health check has to answer whatever happens. The one exception
 /// are the public share pages under /s/, which anyone can open and which do read the database, and the
-/// plant facts, which ask other sites. Each address gets a bucket of its own there, one for each.
+/// plant facts, which ask other sites, and the calendar links. Each address gets a bucket of its own there, one for each.
 /// </summary>
 public static class RequestLimits
 {
@@ -61,6 +67,16 @@ public static class RequestLimits
                             TokenLimit = options.FactsBurst,
                             TokensPerPeriod = 1,
                             ReplenishmentPeriod = TimeSpan.FromSeconds(60.0 / Math.Max(1, options.FactsPerMinute)),
+                            QueueLimit = 0,
+                        });
+
+                    // Calendar apps fetch the link on their own, and a wrong token still reads the database
+                    if (context.Request.Path.StartsWithSegments("/calendar"))
+                        return RateLimitPartition.GetTokenBucketLimiter("calendar-ip:" + address, _ => new TokenBucketRateLimiterOptions
+                        {
+                            TokenLimit = options.CalendarBurst,
+                            TokensPerPeriod = 1,
+                            ReplenishmentPeriod = TimeSpan.FromSeconds(60.0 / Math.Max(1, options.CalendarPerMinute)),
                             QueueLimit = 0,
                         });
 

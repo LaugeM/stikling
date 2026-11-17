@@ -193,6 +193,7 @@ builder.Services.AddScoped<IReceivedPhotos>(services => services.GetRequiredServ
 builder.Services.AddScoped<ReceivingService>();
 builder.Services.AddScoped<IndexedDbSyncStore>();
 builder.Services.AddScoped<NotificationService>();
+builder.Services.AddScoped<CalendarFeedService>();
 builder.Services.AddScoped<SyncRunner>();
 
 var host = builder.Build();

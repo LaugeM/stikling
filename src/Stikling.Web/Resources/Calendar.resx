@@ -1,0 +1,143 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Today in your calendar</value>
+    <comment>Heading of a section in Settings, and its link. Today is the name of the Today page.</comment>
+  </data>
+  <data name="NeedsAccount" xml:space="preserve">
+    <value>Sign in to get a calendar link. The server makes it from what Today shows.</value>
+    <comment>In Settings, under Today in your calendar. Shown when nobody is signed in.</comment>
+  </data>
+  <data name="Unreachable" xml:space="preserve">
+    <value>Couldn't reach the server. Try again when you're online.</value>
+    <comment>In Settings, under Today in your calendar.</comment>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>A private link to add to the calendar app on your phone or computer. Each day with something due gets one event with what Today will ask, 30 days ahead. It never says to water, only to check, and works without notifications.</value>
+    <comment>In Settings, under Today in your calendar. Shown while there is no link.</comment>
+  </data>
+  <data name="GetLink" xml:space="preserve">
+    <value>Get a calendar link</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="LinkLabel" xml:space="preserve">
+    <value>Your calendar link</value>
+    <comment>Label of the box with the link.</comment>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy link</value>
+    <comment>Button.</comment>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+    <comment>Shown after the link was copied.</comment>
+  </data>
+  <data name="AddToGoogle" xml:space="preserve">
+    <value>Add to Google Calendar</value>
+    <comment>Link that opens Google Calendar with the link ready to add.</comment>
+  </data>
+  <data name="OtherApps" xml:space="preserve">
+    <value>Other calendar apps</value>
+    <comment>Link that opens the phone or computer calendar app with the link ready to add.</comment>
+  </data>
+  <data name="LinkHint" xml:space="preserve">
+    <value>Anyone with the link can see what's due and your plants' names, so only give it to your calendar app. Calendar apps fetch it on their own, from every hour to about once a day for Google.</value>
+    <comment>In Settings, under Today in your calendar. Under the link.</comment>
+  </data>
+  <data name="NoLinkHint" xml:space="preserve">
+    <value>The calendar link is on. Only the device that made it can show it. Make a new link to see it here, and the old one stops working.</value>
+    <comment>In Settings, under Today in your calendar. Shown on a device that did not make the link.</comment>
+  </data>
+  <data name="NewLink" xml:space="preserve">
+    <value>Make a new link</value>
+    <comment>Button, and the button that confirms it.</comment>
+  </data>
+  <data name="TurnOff" xml:space="preserve">
+    <value>Turn off</value>
+    <comment>Button for the calendar link, and the button that confirms it.</comment>
+  </data>
+  <data name="ConfirmNewLink" xml:space="preserve">
+    <value>Make a new link? The old link stops working, and calendars using it need the new one.</value>
+    <comment>Asked before making a new calendar link.</comment>
+  </data>
+  <data name="ConfirmTurnOff" xml:space="preserve">
+    <value>Turn off the calendar link? It stops working, and the calendar stops getting new events.</value>
+    <comment>Asked before turning off the calendar link.</comment>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>That didn't work. Try again when you're online.</value>
+    <comment>In Settings, under Today in your calendar.</comment>
+  </data>
+  <data name="ShowTitle" xml:space="preserve">
+    <value>What shows in the calendar</value>
+    <comment>Label above the tick boxes that pick what goes in the calendar.</comment>
+  </data>
+  <data name="PartRound" xml:space="preserve">
+    <value>The daily round</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartSoil" xml:space="preserve">
+    <value>Soil checks</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartCare" xml:space="preserve">
+    <value>Care on an interval, like feeding and repotting</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartPests" xml:space="preserve">
+    <value>Pests and treatments</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartPlants" xml:space="preserve">
+    <value>Flags, quarantine and other plant reminders</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartPropagations" xml:space="preserve">
+    <value>Propagation checks</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="PartPhotos" xml:space="preserve">
+    <value>The photo round</value>
+    <comment>Tick box.</comment>
+  </data>
+  <data name="ShowHint" xml:space="preserve">
+    <value>Something that waits until it's done, like the photo round, shows every day until then.</value>
+    <comment>Under the tick boxes.</comment>
+  </data>
+  <data name="HelpCanISeeQ" xml:space="preserve">
+    <value>Can I see Today in my calendar?</value>
+    <comment>Question on the Help page. Today is the name of the Today page.</comment>
+  </data>
+  <data name="HelpCanISeeA1" xml:space="preserve">
+    <value>Yes. Under &lt;em&gt;Today in your calendar&lt;/em&gt; in &lt;a href="settings?section=calendar"&gt;Settings&lt;/a&gt; you get a private link to add to your calendar app: &lt;em&gt;Add to Google Calendar&lt;/em&gt;, or &lt;em&gt;Other calendar apps&lt;/em&gt; on iPhone, Mac and Outlook. You can also copy the link and add it by its address (&lt;em&gt;From URL&lt;/em&gt; in Google Calendar on a computer, &lt;em&gt;Add subscribed calendar&lt;/em&gt; on iPhone). Each day with something due gets one all-day event with what Today will ask, for the next 30 days, and it never says to water. Under the link you can pick what shows, for example leave out the photo round. It needs an account and works without notifications.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="HelpCanISeeA2" xml:space="preserve">
+    <value>Calendar apps fetch the link on their own schedule, from every hour to about once a day for Google, so something you just did can show for a while. Changes go up the next time the app syncs.</value>
+    <comment>Second paragraph of the answer.</comment>
+  </data>
+  <data name="HelpWhoQ" xml:space="preserve">
+    <value>Who can see my calendar link?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="HelpWhoA1" xml:space="preserve">
+    <value>Anyone who has the link can see what's due and your plants' names, so keep it to your calendar apps. Stikling only keeps a fingerprint of it, so only the device that made it can show it again. &lt;em&gt;Make a new link&lt;/em&gt; or &lt;em&gt;Turn off&lt;/em&gt; stops the old one straight away. Events already in a calendar stay until it fetches again.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Try again</value>
+    <comment>Button under the message that the server couldn't be reached, in Settings under Today in your calendar.</comment>
+  </data>
+</root>

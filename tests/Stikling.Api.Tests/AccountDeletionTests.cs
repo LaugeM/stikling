@@ -72,6 +72,19 @@ public class AccountDeletionTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Deleting_an_account_removes_its_calendar_link()
+    {
+        var me = await SignIn();
+        var made = await me.Client.PostAsync("/me/calendar", null);
+        var token = (await made.Content.ReadFromJsonAsync<Stikling.Core.Calendar.CalendarLinkResponse>(ApiFactory.Json))!.Token;
+
+        Assert.Equal(HttpStatusCode.NoContent, (await me.Client.DeleteAsync("/me")).StatusCode);
+
+        await api.WithDbAsync(async db => Assert.False(await db.CalendarFeeds.AnyAsync(f => f.PersonId == me.PersonId)));
+        Assert.Equal(HttpStatusCode.NotFound, (await api.CreateClient().GetAsync($"/calendar/{token}.ics")).StatusCode);
+    }
+
+    [Fact]
     public async Task Deleting_an_account_erases_the_share_links_of_its_collection()
     {
         var me = await SignIn();

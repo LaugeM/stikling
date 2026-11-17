@@ -1,3 +1,4 @@
+using Stikling.Core.Calendar;
 using Stikling.Core.Care;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
@@ -37,47 +38,12 @@ public static class TodayNotice
     /// <summary>The body for a day, or null when nothing is due and nothing is sent.</summary>
     public static string? Text(TodaySections sections)
     {
-        if (sections.Away)
-            return null;
+        return Join(Parts(sections));
+    }
 
-        var parts = new List<string>();
-        var holding = sections.Holding;
-
-        if (holding)
-            parts.Add(F(Strings.Care.NoticeBackToLookOver, sections.BackRows.Count));
-
-        if (sections.RoundSuggestion is { } round)
-            parts.Add(F(Strings.Care.NoticeGoRound, round.Room.Name));
-
-        Count(parts, sections.DueTreatments.Count, Strings.Care.NoticeTreatmentDue_One, Strings.Care.NoticeTreatmentDue_Other);
-        Count(parts, sections.DueChecks.Count, Strings.Care.NoticeCheck_One, Strings.Care.NoticeCheck_Other);
-        Count(parts, sections.ReadyNow.Count, Strings.Care.NoticeReady_One, Strings.Care.NoticeReady_Other);
-        Count(parts, sections.PlanDoneNow.Count, Strings.Care.NoticePlanDone_One, Strings.Care.NoticePlanDone_Other);
-
-        One(parts, sections.FlaggedNow.Count, Strings.Care.NoticeFlaggedOne, () => sections.FlaggedNow[0].Name, Strings.Care.NoticeFlaggedMany);
-        One(parts, sections.LookAgainNow.Count, Strings.Care.NoticeLookAgainOne, () => sections.LookAgainNow[0].Plant.DisplayName, Strings.Care.NoticeLookAgainMany);
-        One(parts, sections.QuarantineNow.Count, Strings.Care.NoticeQuarantineOne, () => sections.QuarantineNow[0].DisplayName, Strings.Care.NoticeQuarantineMany);
-        One(parts, sections.TransitionNow.Count, Strings.Care.NoticeTransitionOne, () => sections.TransitionNow[0].DisplayName, Strings.Care.NoticeTransitionMany);
-        One(parts, sections.RestNow.Count, Strings.Care.NoticeRestOne, () => sections.RestNow[0].Plant.DisplayName, Strings.Care.NoticeRestMany);
-
-        if (!holding)
-        {
-            // Only the soil checks, never a request to water
-            var soil = sections.WaterNow.Where(d => d.Guess.Form == WateringForm.TopWatered).ToList();
-            One(parts, soil.Count, Strings.Care.NoticeSoilOne, () => soil[0].Plant.DisplayName, Strings.Care.NoticeSoilMany);
-
-            foreach (var group in sections.CareNow)
-            {
-                var plants = group.Items.Select(i => i.Plant).DistinctBy(p => p.Id).ToList();
-                One(parts, plants.Count, Strings.Care.NoticeCareOne, () => plants[0].DisplayName, Strings.Care.NoticeCareMany, group.Label);
-            }
-
-            One(parts, sections.ChecksNow.Count, Strings.Care.NoticeCheckOne, () => sections.ChecksNow[0].Propagation.ListName, Strings.Care.NoticeCheckMany);
-        }
-
-        if (sections.PhotoRoundShows)
-            Count(parts, sections.PhotosDue.Count, Strings.Care.NoticePhoto_One, Strings.Care.NoticePhoto_Other);
-
+    /// <summary>The parts as the one line of text, capped at 4 with "and N more". Null for none.</summary>
+    public static string? Join(IReadOnlyList<string> parts)
+    {
         if (parts.Count == 0)
             return null;
 
@@ -85,6 +51,69 @@ public static class TodayNotice
         if (parts.Count > MostParts + 1)
             parts = [.. parts.Take(MostParts), F(Strings.Care.NoticeAndMore, parts.Count - MostParts)];
         return string.Join(" · ", parts);
+    }
+
+    /// <summary>
+    /// Everything the day asks for, one part each, with no cap. Empty when away or nothing is due.
+    /// Groups named in <paramref name="leaveOut"/> (the keys in <see cref="CalendarParts"/>) are skipped.
+    /// </summary>
+    public static IReadOnlyList<string> Parts(TodaySections sections, IReadOnlyCollection<string>? leaveOut = null)
+    {
+        if (sections.Away)
+            return [];
+
+        bool Shown(string key) => leaveOut?.Contains(key) != true;
+
+        var parts = new List<string>();
+        var holding = sections.Holding;
+
+        if (holding && Shown(CalendarParts.Plants))
+            parts.Add(F(Strings.Care.NoticeBackToLookOver, sections.BackRows.Count));
+
+        if (sections.RoundSuggestion is { } round && Shown(CalendarParts.Round))
+            parts.Add(F(Strings.Care.NoticeGoRound, round.Room.Name));
+
+        if (Shown(CalendarParts.Pests))
+            Count(parts, sections.DueTreatments.Count, Strings.Care.NoticeTreatmentDue_One, Strings.Care.NoticeTreatmentDue_Other);
+        if (Shown(CalendarParts.Pests))
+            Count(parts, sections.DueChecks.Count, Strings.Care.NoticeCheck_One, Strings.Care.NoticeCheck_Other);
+        if (Shown(CalendarParts.Pests))
+            Count(parts, sections.ReadyNow.Count, Strings.Care.NoticeReady_One, Strings.Care.NoticeReady_Other);
+        if (Shown(CalendarParts.Pests))
+            Count(parts, sections.PlanDoneNow.Count, Strings.Care.NoticePlanDone_One, Strings.Care.NoticePlanDone_Other);
+
+        if (Shown(CalendarParts.Plants))
+            One(parts, sections.FlaggedNow.Count, Strings.Care.NoticeFlaggedOne, () => sections.FlaggedNow[0].Name, Strings.Care.NoticeFlaggedMany);
+        if (Shown(CalendarParts.Plants))
+            One(parts, sections.LookAgainNow.Count, Strings.Care.NoticeLookAgainOne, () => sections.LookAgainNow[0].Plant.DisplayName, Strings.Care.NoticeLookAgainMany);
+        if (Shown(CalendarParts.Plants))
+            One(parts, sections.QuarantineNow.Count, Strings.Care.NoticeQuarantineOne, () => sections.QuarantineNow[0].DisplayName, Strings.Care.NoticeQuarantineMany);
+        if (Shown(CalendarParts.Plants))
+            One(parts, sections.TransitionNow.Count, Strings.Care.NoticeTransitionOne, () => sections.TransitionNow[0].DisplayName, Strings.Care.NoticeTransitionMany);
+        if (Shown(CalendarParts.Plants))
+            One(parts, sections.RestNow.Count, Strings.Care.NoticeRestOne, () => sections.RestNow[0].Plant.DisplayName, Strings.Care.NoticeRestMany);
+
+        if (!holding)
+        {
+            // Only the soil checks, never a request to water
+            var soil = sections.WaterNow.Where(d => d.Guess.Form == WateringForm.TopWatered).ToList();
+            if (Shown(CalendarParts.Soil))
+                One(parts, soil.Count, Strings.Care.NoticeSoilOne, () => soil[0].Plant.DisplayName, Strings.Care.NoticeSoilMany);
+
+            foreach (var group in Shown(CalendarParts.Care) ? sections.CareNow : [])
+            {
+                var plants = group.Items.Select(i => i.Plant).DistinctBy(p => p.Id).ToList();
+                One(parts, plants.Count, Strings.Care.NoticeCareOne, () => plants[0].DisplayName, Strings.Care.NoticeCareMany, group.Label);
+            }
+
+            if (Shown(CalendarParts.Propagations))
+                One(parts, sections.ChecksNow.Count, Strings.Care.NoticeCheckOne, () => sections.ChecksNow[0].Propagation.ListName, Strings.Care.NoticeCheckMany);
+        }
+
+        if (sections.PhotoRoundShows && Shown(CalendarParts.Photos))
+            Count(parts, sections.PhotosDue.Count, Strings.Care.NoticePhoto_One, Strings.Care.NoticePhoto_Other);
+
+        return parts;
     }
 
     private static void Count(List<string> parts, int count, string one, string other)

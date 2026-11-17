@@ -352,6 +352,12 @@
             }
         </section>
 
+        <section class="settings-group @Closed("calendar")" id="calendar">
+            <h2>@Strings.Calendar.SectionTitle</h2>
+            <CalendarFeedSettings NeedsAccount="@(!Account.IsAvailable || (accountHintRead && !accountChecking && account is not { SignedIn: true }))"
+                                  Checking="@accountChecking" SignedIn="@(account is { SignedIn: true })" />
+        </section>
+
         <section class="settings-group @Closed("pests")" id="pests">
             <h2>@Strings.Settings.SectionPests</h2>
             <div class="theme-label" id="clean-weeks-label">@Strings.Settings.CleanWeeks</div>
@@ -964,6 +970,7 @@
             yield return ("care", Strings.Settings.SectionCare);
             yield return ("plants", Strings.Settings.SectionPlants);
             yield return ("notifications", Strings.Settings.SectionNotifications);
+            yield return ("calendar", Strings.Calendar.SectionTitle);
             yield return ("pests", Strings.Settings.SectionPests);
             yield return ("data", Strings.Settings.SectionData);
             yield return ("about", Strings.Settings.SectionAbout);

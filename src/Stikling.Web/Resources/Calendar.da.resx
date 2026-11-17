@@ -1,0 +1,111 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>I dag i din kalender</value>
+  </data>
+  <data name="NeedsAccount" xml:space="preserve">
+    <value>Log ind for at få et kalenderlink. Serveren laver det ud fra det "I dag" viser.</value>
+  </data>
+  <data name="Unreachable" xml:space="preserve">
+    <value>Kunne ikke nå serveren. Prøv igen når du er online.</value>
+  </data>
+  <data name="Intro" xml:space="preserve">
+    <value>Et privat link du kan tilføje i kalenderen på din telefon eller computer. Hver dag hvor der er noget at gøre, får én begivenhed med det "I dag" vil spørge om, 30 dage frem. Der står aldrig at du skal vande, kun at du skal tjekke, og det virker uden notifikationer.</value>
+  </data>
+  <data name="GetLink" xml:space="preserve">
+    <value>Få et kalenderlink</value>
+  </data>
+  <data name="LinkLabel" xml:space="preserve">
+    <value>Dit kalenderlink</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiér link</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Kopieret</value>
+  </data>
+  <data name="AddToGoogle" xml:space="preserve">
+    <value>Tilføj til Google Kalender</value>
+  </data>
+  <data name="OtherApps" xml:space="preserve">
+    <value>Andre kalenderapps</value>
+  </data>
+  <data name="LinkHint" xml:space="preserve">
+    <value>Alle der har linket, kan se hvad der skal gøres og hvad dine planter hedder, så giv det kun til din kalenderapp. Kalenderapps henter det selv, nogle hver time og Google omkring en gang i døgnet.</value>
+  </data>
+  <data name="NoLinkHint" xml:space="preserve">
+    <value>Kalenderlinket er slået til. Kun den enhed der lavede det, kan vise det. Laver du et nyt link for at se det her, holder det gamle op med at virke.</value>
+  </data>
+  <data name="NewLink" xml:space="preserve">
+    <value>Lav et nyt link</value>
+  </data>
+  <data name="TurnOff" xml:space="preserve">
+    <value>Slå fra</value>
+  </data>
+  <data name="ConfirmNewLink" xml:space="preserve">
+    <value>Lav et nyt link? Det gamle link holder op med at virke, og kalendere der bruger det, skal have det nye.</value>
+  </data>
+  <data name="ConfirmTurnOff" xml:space="preserve">
+    <value>Slå kalenderlinket fra? Det holder op med at virke, og kalenderen får ikke flere begivenheder.</value>
+  </data>
+  <data name="Failed" xml:space="preserve">
+    <value>Det virkede ikke. Prøv igen når du er online.</value>
+  </data>
+  <data name="ShowTitle" xml:space="preserve">
+    <value>Det skal med i kalenderen</value>
+  </data>
+  <data name="PartRound" xml:space="preserve">
+    <value>Den daglige runde</value>
+  </data>
+  <data name="PartSoil" xml:space="preserve">
+    <value>Tjek af jorden</value>
+  </data>
+  <data name="PartCare" xml:space="preserve">
+    <value>Pleje med et interval, fx gødning og ompotning</value>
+  </data>
+  <data name="PartPests" xml:space="preserve">
+    <value>Skadedyr og behandlinger</value>
+  </data>
+  <data name="PartPlants" xml:space="preserve">
+    <value>Markeringer, karantæne og andre påmindelser om planter</value>
+  </data>
+  <data name="PartPropagations" xml:space="preserve">
+    <value>Tjek af stiklinger</value>
+  </data>
+  <data name="PartPhotos" xml:space="preserve">
+    <value>Billedrunden</value>
+  </data>
+  <data name="ShowHint" xml:space="preserve">
+    <value>Ting der venter til de er gjort, fx billedrunden, vises hver dag indtil da.</value>
+  </data>
+  <data name="HelpCanISeeQ" xml:space="preserve">
+    <value>Kan jeg se "I dag" i min kalender?</value>
+  </data>
+  <data name="HelpCanISeeA1" xml:space="preserve">
+    <value>Ja. Under &lt;em&gt;I dag i din kalender&lt;/em&gt; i &lt;a href="settings?section=calendar"&gt;Indstillinger&lt;/a&gt; får du et privat link som du kan tilføje til din kalenderapp: &lt;em&gt;Tilføj til Google Kalender&lt;/em&gt;, eller &lt;em&gt;Andre kalenderapps&lt;/em&gt; på iPhone, Mac og Outlook. Du kan også kopiere linket og sætte adressen ind selv (&lt;em&gt;Fra webadresse&lt;/em&gt; i Google Kalender på en computer, &lt;em&gt;Tilføj abonnementskalender&lt;/em&gt; på iPhone). Hver dag hvor der er noget at gøre, får én heldagsbegivenhed med det "I dag" vil spørge om, 30 dage frem, og der står aldrig at du skal vande. Under linket kan du vælge hvad der skal med, fx kan du droppe billedrunden. Det kræver en konto og virker uden notifikationer.</value>
+  </data>
+  <data name="HelpCanISeeA2" xml:space="preserve">
+    <value>Kalenderapps henter linket når det passer dem, fra hver time til omkring en gang i døgnet hos Google, så noget du lige har gjort, kan blive stående et stykke tid. Dine ændringer kommer med næste gang appen synkroniserer.</value>
+  </data>
+  <data name="HelpWhoQ" xml:space="preserve">
+    <value>Hvem kan se mit kalenderlink?</value>
+  </data>
+  <data name="HelpWhoA1" xml:space="preserve">
+    <value>Alle der har linket, kan se hvad der skal gøres og hvad dine planter hedder, så giv det kun til dine kalenderapps. Stikling gemmer kun et fingeraftryk af det, så kun den enhed der lavede linket, kan vise det igen. &lt;em&gt;Lav et nyt link&lt;/em&gt; eller &lt;em&gt;Slå fra&lt;/em&gt; stopper det gamle med det samme. Begivenheder der allerede er i en kalender, bliver stående til den henter igen.</value>
+  </data>
+  <data name="TryAgain" xml:space="preserve">
+    <value>Prøv igen</value>
+  </data>
+</root>
