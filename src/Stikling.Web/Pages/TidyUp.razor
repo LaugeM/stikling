@@ -1,0 +1,188 @@
+@page "/settings/tidy-up"
+@inject TidyService Tidy
+@inject IPlaceRepository PlaceRepository
+@inject ILogger<TidyUp> Logger
+
+<PageTitle>@Strings.Tidy.PageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings?section=data">@Strings.Layout.Settings</a>
+<h1>@Strings.Tidy.Title</h1>
+
+@if (report is null)
+{
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else if (report.IsEmpty)
+{
+    <div class="empty-state">
+        <p>@Strings.Tidy.Nothing</p>
+    </div>
+}
+else
+{
+    <p class="settings-hint">@Strings.Tidy.Intro</p>
+
+    @PlantSection("no-genus", Strings.Tidy.SectionNoGenus, Strings.Tidy.HintOpen, report.NoGenus)
+    @PlantSection("no-photo", Strings.Tidy.SectionNoPhoto, Strings.Tidy.HintOpen, report.NoPhoto)
+    @PlantSection("no-room", Strings.Tidy.SectionNoRoom, Strings.Tidy.HintOpen, report.NoRoom)
+
+    @Section("parent", Strings.Tidy.SectionParentMissing, Strings.Tidy.HintParentMissing, report.ParentMissing, (Propagation p) =>
+        @<a class="tidy-link" href="propagations/@p.Id">@p.DisplayName</a>)
+
+    @Section("same", Strings.Tidy.SectionSame, Strings.Tidy.HintSame, report.MaybeSame, (SamePair pair) =>
+        @<div class="tidy-row">
+            <span class="tidy-pair">
+                <a class="tidy-link" href="plants/@pair.First.Id">@pair.First.DisplayName</a>
+                <span class="text-body-secondary">@Strings.Tidy.And</span>
+                <a class="tidy-link" href="plants/@pair.Second.Id">@pair.Second.DisplayName</a>
+                @if (RoomOf(pair.First) is { } room)
+                {
+                    <span class="text-body-secondary small">@F(Strings.Tidy.InRoom, room)</span>
+                }
+            </span>
+            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                    aria-label="@F(Strings.Tidy.NotTheSameFor, pair.First.DisplayName, pair.Second.DisplayName)"
+                    @onclick="() => NotTheSameAsync(pair)">@Strings.Tidy.NotTheSame</button>
+        </div>)
+
+    @Section("tags", Strings.Tidy.SectionTags, Strings.Tidy.HintTags, report.UnusedTags, (string tag) =>
+        @<div class="tidy-row">
+            <span class="tidy-name">@tag</span>
+            @RemoveControl("tag:" + tag, tag, () => Tidy.RemoveTagAsync(tag))
+        </div>)
+
+    @Section("products", Strings.Tidy.SectionProducts, Strings.Tidy.HintProducts, report.UnusedProducts, (Product product) =>
+        @<div class="tidy-row">
+            <span class="tidy-name">@(product.Name ?? "")</span>
+            @RemoveControl("product:" + product.Id, product.Name ?? "", () => Tidy.RemoveProductAsync(product.Id))
+        </div>)
+
+    @Section("mixes", Strings.Tidy.SectionMixes, Strings.Tidy.HintMixes, report.UnusedMixes, (SoilMix mix) =>
+        @<div class="tidy-row">
+            <span class="tidy-name">@(mix.Name ?? "")</span>
+            @RemoveControl("mix:" + mix.Id, mix.Name ?? "", () => Tidy.RemoveMixAsync(mix.Id))
+        </div>)
+}
+
+@if (message is not null)
+{
+    <p class="settings-message" role="status">@message</p>
+}
+
+@code {
+    // How many lines a section shows before "Show all"
+    private const int Shown = 20;
+
+    private TidyReport? report;
+    private Places places = Places.None;
+    private readonly HashSet<string> expanded = [];
+    private string? confirming;
+    private string? message;
+    private bool busy;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        places = await PlaceRepository.GetPlacesAsync();
+        report = await Tidy.GetAsync();
+    }
+
+    private string? RoomOf(Plant plant) => places.RoomOf(plant.PlaceId)?.Name;
+
+    private RenderFragment PlantSection(string key, string heading, string hint, IReadOnlyList<Plant> plants) =>
+        Section(key, heading, hint, plants, (Plant p) =>
+            @<a class="tidy-link" href="plants/@p.Id">@p.DisplayName</a>);
+
+    // One section of the page, hidden when it has nothing in it. A long one shows its first lines and then "Show all".
+    private RenderFragment Section<T>(string key, string heading, string hint, IReadOnlyList<T> items, RenderFragment<T> row) => __builder =>
+    {
+        if (items.Count == 0)
+            return;
+
+        var all = expanded.Contains(key);
+        var visible = all ? items : [.. items.Take(Shown)];
+        var id = "tidy-" + key;
+
+        <section class="tidy-section" aria-labelledby="@id">
+            <h2 class="section-label" id="@id">@heading <span class="tidy-count">@items.Count</span></h2>
+            <p class="settings-hint">@hint</p>
+            <ul class="tidy-list">
+                @foreach (var item in visible)
+                {
+                    <li>@row(item)</li>
+                }
+            </ul>
+            @if (items.Count > Shown)
+            {
+                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@all"
+                        @onclick="() => Toggle(key)">@(all ? Strings.Tidy.ShowFewer : F(Strings.Tidy.ShowAll, items.Count))</button>
+            }
+        </section>
+    };
+
+    private void Toggle(string key)
+    {
+        if (!expanded.Add(key))
+            expanded.Remove(key);
+    }
+
+    // Remove, then an "Are you sure" in the same place. Nothing is removed without that second tap.
+    private RenderFragment RemoveControl(string key, string name, Func<Task<bool>> remove) => __builder =>
+    {
+        if (confirming == key)
+        {
+            <span class="tidy-confirm" role="group" aria-label="@F(Strings.Tidy.ConfirmRemove, name)">
+                <span>@F(Strings.Tidy.ConfirmRemove, name)</span>
+                <button type="button" class="btn btn-danger" disabled="@busy" @onclick="() => RemoveAsync(name, remove)">@Strings.Tidy.ConfirmYes</button>
+                <button type="button" class="btn btn-link" disabled="@busy" @onclick="() => confirming = null">@Strings.Common.Cancel</button>
+            </span>
+        }
+        else
+        {
+            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                    aria-label="@F(Strings.Tidy.RemoveNamed, name)" @onclick="() => { confirming = key; message = null; }">@Strings.Common.Remove</button>
+        }
+    };
+
+    private async Task RemoveAsync(string name, Func<Task<bool>> remove)
+    {
+        busy = true;
+        try
+        {
+            message = await remove() ? F(Strings.Tidy.Removed, name) : F(Strings.Tidy.StillUsed, name);
+            confirming = null;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Removing from Tidy up failed");
+            message = F(Strings.Tidy.Error, ex.Message);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task NotTheSameAsync(SamePair pair)
+    {
+        busy = true;
+        try
+        {
+            await Tidy.NotTheSameAsync(pair.First.Id, pair.Second.Id);
+            message = F(Strings.Tidy.NotTheSameDone, pair.First.DisplayName, pair.Second.DisplayName);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saying two plants are not the same failed");
+            message = F(Strings.Tidy.Error, ex.Message);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

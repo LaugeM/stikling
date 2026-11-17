@@ -32,9 +32,8 @@
         }
 
         @* A dialog focuses what has autofocus when it opens: the note box for a note, nothing typed for a photo *@
-        <textarea class="form-control" rows="3" aria-label="@Strings.Propagations.TlKindNote" autofocus="@forNote"
-                  placeholder="@(photos.Count > 0 ? Strings.Propagations.ComposerPhotoNoteHint : Strings.Propagations.ComposerNoteHint)"
-                  @bind="noteText" @bind:event="oninput"></textarea>
+        <MentionBox @bind-Text="noteText" @bind-Picked="picked" Rows="3" AriaLabel="@Strings.Propagations.TlKindNote" autofocus="@forNote" Own="SubjectId"
+                    Placeholder="@(photos.Count > 0 ? Strings.Propagations.ComposerPhotoNoteHint : Strings.Propagations.ComposerNoteHint)" />
         <PublicNoteHint SubjectId="SubjectId" />
 
         <div class="composer-date">
@@ -152,6 +151,7 @@
     // The ones among them that were taken with Stikling's own camera, which Retake takes again
     private readonly HashSet<Guid> fromCamera = [];
     private string? noteText;
+    private List<Mention> picked = [];
     private DateOnly? occurredOn;
     private bool pickDate;
     private BringBackChoice bringBack = new();
@@ -389,7 +389,7 @@
             if (photos.Count > 0)
             {
                 var text = Clean(noteText);
-                var added = await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn);
+                var added = await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn, picked);
                 if (values is { Count: > 0 } && added.Count > 0)
                     await MeasureService.SetForEntryAsync(added.MaxBy(e => e.OccurredAt)!, values);
                 if (CoverPhotoId is null)
@@ -404,6 +404,7 @@
                     Kind = TimelineKind.Note,
                     OccurredAt = occurredOn is { } d ? Time.MomentOn(d) : Time.GetUtcNow(),
                     Text = noteText.Trim(),
+                    Mentions = Mentions.Keep(noteText.Trim(), picked),
                     ComesBackOn = bringBack.Resolve(NoteDay, Today)
                 };
                 await Entries.AddAsync(note);
@@ -449,6 +450,7 @@
     private void Reset()
     {
         noteText = null;
+        picked = [];
         measure.Clear();
         failed = 0;
         undated = 0;

@@ -164,6 +164,13 @@ else
                             <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                         }
                     </InputSelect>
+                    @if (plant.ParentPlantId is not null)
+                    {
+                        <div class="form-check parent-guess">
+                            <InputCheckbox id="parent-guess" class="form-check-input" @bind-Value="plant.ParentIsGuess" />
+                            <label class="form-check-label" for="parent-guess">@Strings.Tidy.ParentIsGuess</label>
+                        </div>
+                    }
                     <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">@Strings.PlantEdit.ParentNotMine</button>
                     @if (IsNew && plant.ParentPlantId is { } parentId)
                     {

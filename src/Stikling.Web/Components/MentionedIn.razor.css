@@ -1,0 +1,24 @@
+.mentioned-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mentioned-list li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.mentioned-link {
+    display: grid;
+    gap: 0.125rem;
+    min-height: 2.75rem;
+    padding-block: 0.5rem;
+    color: inherit;
+    text-decoration: none;
+    overflow-wrap: anywhere;
+}
+
+.mentioned-link:hover > span:last-child,
+.mentioned-link:focus-visible > span:last-child {
+    text-decoration: underline;
+}

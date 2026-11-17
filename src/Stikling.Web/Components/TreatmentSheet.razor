@@ -109,9 +109,8 @@
 
     <div class="mt-2">
         <label class="form-label" for="treatment-notes">@Strings.Pests.CaseEditNotes</label>
-        <input type="text" id="treatment-notes" class="form-control form-control-sm"
-               placeholder="@(Check ? Strings.Pests.TreatCheckNotesPlaceholder : Strings.Pests.TreatNotesPlaceholder)"
-               @bind="notes" @bind:event="oninput" />
+        <MentionBox id="treatment-notes" @bind-Text="notes" @bind-Picked="pickedNotes" Rows="2"
+                    Placeholder="@(Check ? Strings.Pests.TreatCheckNotesPlaceholder : Strings.Pests.TreatNotesPlaceholder)" />
     </div>
 
     @if (CanTick)
@@ -187,6 +186,7 @@
     private IReadOnlyList<TreatmentRecipe> recipes = [];
     private bool loaded;
     private string? notes;
+    private List<Mention> pickedNotes = [];
     private DateOnly occurredOn;
     private DateOnly nextDue;
     private string? error;
@@ -217,6 +217,7 @@
         recipeId = draft.RecipeId;
         what = draft.RecipeId is null ? draft.What : null;
         notes = null;
+        pickedNotes = [];
         occurredOn = draft.OccurredOn;
         nextDue = Default(occurredOn);
     }
@@ -268,6 +269,7 @@
                 if (CanTick && tickOff)
                     entry.TreatedPlantIds = [];
                 entry.Notes = Clean(notes);
+                entry.Mentions = Mentions.Keep(entry.Notes, pickedNotes);
                 await Repository.SaveAsync(entry);
                 saved = entry;
             }

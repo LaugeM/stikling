@@ -1,0 +1,33 @@
+@* A note's text with each "@Name" that matches a mention as a link to that record. A record that is gone, and
+   everything else, stays plain text, and the text is never changed. *@
+@foreach (var part in Mentions.Split(Text, Named))
+{
+    @if (part.Mention is { } mention && Live.Contains(mention.Id))
+    {
+        <a class="mention-link" href="@Href(mention)">@part.Text</a>
+    }
+    else
+    {
+        @part.Text
+    }
+}
+
+@code {
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public List<Mention>? Named { get; set; }
+
+    /// <summary>The ids of the records that still exist, from <see cref="MentionService.LiveTargetsAsync"/>.</summary>
+    [Parameter]
+    public IReadOnlySet<Guid> Live { get; set; } = new HashSet<Guid>();
+
+    // A pot has no page of its own, so it links to the list
+    private static string Href(Mention mention) => mention.Kind switch
+    {
+        SubjectType.Plant => $"plants/{mention.Id}",
+        SubjectType.Propagation => $"propagations/{mention.Id}",
+        _ => "pots"
+    };
+}
