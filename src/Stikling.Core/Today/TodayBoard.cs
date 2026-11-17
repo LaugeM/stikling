@@ -168,14 +168,14 @@ public static class TodayBoard
     /// <summary>
     /// The newest entries across the given plants and propagations, from <paramref name="since"/>
     /// on. Anything written down about a subject that has since been deleted is left out, so the
-    /// list only shows what you can open. A look over is left out too, since it isn't news, and so is an entry that was only reference photos.
+    /// list only shows what you can open. A look over and the line of a move house are left out too, since they aren't news, and so is an entry that was only reference photos.
     /// </summary>
     public static IReadOnlyList<TimelineEntry> RecentActivity(
         IEnumerable<TimelineEntry> entries, IReadOnlySet<Guid> subjectIds, DateTimeOffset since, int count = 8,
         IReadOnlySet<Guid>? referencePhotoIds = null) =>
         Timeline.TimelineOrder.NewestFirst(entries)
             .Where(e => subjectIds.Contains(e.SubjectId) && e.OccurredAt >= since
-                && Timeline.TimelineEvents.Of(e) != TimelineEvent.LookedOver
+                && Timeline.TimelineEvents.Of(e) is not (TimelineEvent.LookedOver or TimelineEvent.MovedHouse)
                 && (referencePhotoIds is null || !Timeline.PhotoKinds.OnlyReferences(e, referencePhotoIds)))
             .Take(count)
             .ToList();

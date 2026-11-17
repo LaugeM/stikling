@@ -680,6 +680,7 @@ else
         TimelineEvent.NewLeaf => Strings.Propagations.TlKindNewLeaf,
         TimelineEvent.Pest => Strings.Propagations.TlKindPest,
         TimelineEvent.Measured => Strings.Measurements.TlKindMeasured,
+        TimelineEvent.MovedHouse => Strings.Moving.TlKindMovedHouse,
         _ => KindLabel(entry.Kind)
     };
 
@@ -695,6 +696,7 @@ else
         TimelineEvent.NewLeaf => new($"""<svg viewBox="0 0 24 24" aria-hidden="true">{Icons.Seedling}</svg>"""),
         TimelineEvent.Pest => new($"""<svg viewBox="0 0 24 24" aria-hidden="true">{Icons.Pest}</svg>"""),
         TimelineEvent.Measured => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 8.500h18v7H3Z" /><path d="M7 8.500v3M11 8.500v2.500M15 8.500v3M19 8.500v2.500" /></svg>"""),
+        TimelineEvent.MovedHouse => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 11l9-7 9 7" /><path d="M5 10v10h14V10" /><path d="M10 20v-6h4v6" /></svg>"""),
         TimelineEvent.Arrived => new("""<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 11h16v9H4Z" /><path d="M3 7.5h18V11H3Z" /><path d="M12 7.5V20" /><path d="M12 7.5C10 7.5 7.5 7 7.5 5.25 7.5 4 8.500 3.5 9.500 3.5 11 3.5 12 5 12 7.5Z" /><path d="M12 7.5c2 0 4.500-.5 4.500-2.250 0-1.250-1-1.750-2-1.750C13 3.5 12 5 12 7.5Z" /></svg>"""),
         _ => KindIcon(entry.Kind)
     };

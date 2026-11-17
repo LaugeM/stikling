@@ -1,0 +1,74 @@
+.place-group {
+    margin-top: 1.5rem;
+}
+
+.place-group-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.5rem 1rem;
+}
+
+.place-group-head h2 {
+    margin: 0;
+}
+
+.place-all {
+    width: auto;
+    max-width: 100%;
+}
+
+.place-list {
+    margin: 0.5rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.place-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 0.4rem 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.place-name {
+    display: grid;
+    min-width: 0;
+    flex: 1 1 10rem;
+}
+
+.place-name .item-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.place-meta {
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+}
+
+.place-pick {
+    flex: 0 1 14rem;
+    min-width: 9rem;
+}
+
+.add-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1.25rem;
+}
+
+.place-pick,
+.place-all {
+    min-height: 2.75rem;
+}
+
+.add-actions .btn {
+    min-height: 2.75rem;
+}

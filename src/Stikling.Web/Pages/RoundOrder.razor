@@ -1,0 +1,227 @@
+@page "/rooms/{Id:guid}/order"
+@implements IAsyncDisposable
+@inject RoomService RoomService
+@inject IJSRuntime JS
+@inject ILogger<RoundOrder> Logger
+
+<PageTitle>@Strings.Moving.OrderTitle</PageTitle>
+
+@if (loaded)
+{
+    <a class="back-link" href="rooms/@Id">@(view?.Name ?? Strings.Shared.RoomsTitle)</a>
+}
+<h1>@Strings.Moving.OrderTitle</h1>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (view is not { } here || here.Place.IsSpot || here.Place.LeftOn is not null)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Moving.OrderNotHere</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+    </div>
+}
+else if (rows.Count == 0)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Moving.OrderEmpty</p>
+        <p class="text-body-secondary">@Strings.Moving.OrderEmptyHint</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms/@Id">@view.Name</a>
+    </div>
+}
+else
+{
+    <p class="settings-hint">@F(Strings.Moving.OrderHint, view.Name)</p>
+
+    <ul class="order-list" @ref="list">
+        @for (var i = 0; i < rows.Count; i++)
+        {
+            var index = i;
+            var row = rows[i];
+            <li @key="row.Id" class="order-row" data-row>
+                <span class="order-handle" data-handle aria-hidden="true">
+                    <svg viewBox="0 0 24 24"><path d="M9 6h.01M15 6h.01M9 12h.01M15 12h.01M9 18h.01M15 18h.01" /></svg>
+                </span>
+                <div class="order-text">
+                    <span class="order-name">@row.Name</span>
+                    @if (Meta(row) is { } meta)
+                    {
+                        <span class="order-meta">@meta</span>
+                    }
+                </div>
+                <button type="button" class="order-move" aria-label="@F(Strings.Moving.OrderMoveUp, row.Name)" title="@F(Strings.Moving.OrderMoveUp, row.Name)"
+                        disabled="@(index == 0)" @onclick="() => Move(index, index - 1)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 15l6-6 6 6" /></svg>
+                </button>
+                <button type="button" class="order-move" aria-label="@F(Strings.Moving.OrderMoveDown, row.Name)" title="@F(Strings.Moving.OrderMoveDown, row.Name)"
+                        disabled="@(index == rows.Count - 1)" @onclick="() => Move(index, index + 1)">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 9l6 6 6-6" /></svg>
+                </button>
+            </li>
+        }
+    </ul>
+
+    @if (message is not null)
+    {
+        <p class="settings-message" role="status">@message</p>
+    }
+    <div class="order-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || !changed)" @onclick="SaveAsync">@Strings.Common.Save</button>
+        @if (here.Place.RoundOrder is not null)
+        {
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="UseUsualAsync">@Strings.Moving.OrderUsual</button>
+        }
+        <a class="btn btn-link" href="rooms/@Id">@Strings.Common.Cancel</a>
+    </div>
+}
+
+@code {
+    private sealed record OrderRow(Guid Id, string Name, string? Spot, bool Propagation);
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private bool loaded;
+    private bool busy;
+    private bool changed;
+    private string? message;
+    private RoomPageView? view;
+    private List<OrderRow> rows = [];
+    private ElementReference list;
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+    private DotNetObjectReference<RoundOrder>? self;
+    private bool needsAttach;
+
+    protected override async Task OnParametersSetAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        view = await RoomService.GetPageAsync(Id);
+        if (view is { } here)
+        {
+            // The usual order first, which is the one the round uses without an order, then the saved one on top of it
+            IReadOnlyList<OrderRow> usual =
+            [
+                .. here.Plants.Select(p => new OrderRow(p.Plant.Id, p.Plant.DisplayName, p.SpotName, false)),
+                .. here.Propagations.Select(p => new OrderRow(p.Propagation.Id, p.Propagation.DisplayName, p.SpotName, true))
+            ];
+            var placeOf = here.Plants.Select(p => (p.Plant.Id, p.Plant.PlaceId))
+                .Concat(here.Propagations.Select(p => (p.Propagation.Id, p.Propagation.PlaceId)))
+                .ToDictionary(x => x.Item1, x => x.Item2);
+            rows = here.Place.RoundOrder is { Count: > 0 } order
+                ? [.. RoundOrders.Apply(usual, order, r => r.Id, r => placeOf.GetValueOrDefault(r.Id))]
+                : [.. usual];
+            changed = false;
+            needsAttach = true;
+        }
+        loaded = true;
+    }
+
+    private string? Meta(OrderRow row) => (row.Spot, row.Propagation) switch
+    {
+        (null, false) => null,
+        (null, true) => Strings.Moving.KindPropagation,
+        (var spot, false) => spot,
+        (var spot, true) => $"{Strings.Moving.KindPropagation} · {spot}"
+    };
+
+    private void Move(int from, int to)
+    {
+        if (from == to || from < 0 || to < 0 || from >= rows.Count || to >= rows.Count)
+            return;
+        var row = rows[from];
+        rows.RemoveAt(from);
+        rows.Insert(to, row);
+        changed = true;
+        message = null;
+    }
+
+    [JSInvokable]
+    public Task Moved(int from, int to)
+    {
+        Move(from, to);
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!needsAttach || rows.Count == 0)
+            return;
+
+        needsAttach = false;
+        await DetachAsync();
+        self ??= DotNetObjectReference.Create(this);
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/reorder.js");
+        attached = await module.InvokeAsync<IJSObjectReference>("attach", list, self);
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        try
+        {
+            await RoomService.SetRoundOrderAsync(Id, [.. rows.Select(r => r.Id)]);
+            message = Strings.Moving.OrderSaved;
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the order for going round failed");
+            message = F(Strings.Moving.Error, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task UseUsualAsync()
+    {
+        busy = true;
+        try
+        {
+            await RoomService.SetRoundOrderAsync(Id, null);
+            await LoadAsync();
+            message = Strings.Moving.OrderUsualDone;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Going back to the usual order for going round failed");
+            message = F(Strings.Moving.Error, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private async Task DetachAsync()
+    {
+        if (attached is null)
+            return;
+        try
+        {
+            await attached.InvokeVoidAsync("dispose");
+            await attached.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away anyway
+        }
+        attached = null;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            await DetachAsync();
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

@@ -1,0 +1,167 @@
+@page "/moving-house/place"
+@inject MovingService Moving
+@inject RoomService RoomService
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject ILogger<PlaceAfterMove> Logger
+
+<PageTitle>@Strings.Moving.PlaceTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+<h1>@Strings.Moving.PlaceTitle</h1>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (groups.Count == 0)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Moving.PlaceEmpty</p>
+        <p class="text-body-secondary">@Strings.Moving.PlaceEmptyHint</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+    </div>
+}
+else if (current.Count == 0)
+{
+    <div class="empty-state mt-3">
+        <p>@Strings.Moving.PlaceNoRooms</p>
+        <p class="text-body-secondary">@Strings.Moving.PlaceNoRoomsHint</p>
+        <a class="btn btn-outline-primary mt-3" href="rooms-and-tags">@Strings.Shared.RoomsTitle</a>
+    </div>
+}
+else
+{
+    <p class="settings-hint">@Strings.Moving.PlaceHint</p>
+
+    @foreach (var group in groups)
+    {
+        var allId = $"all-{group.Room.Id:N}";
+        <section class="place-group" aria-labelledby="@($"h-{group.Room.Id:N}")">
+            <div class="place-group-head">
+                <h2 class="section-label" id="@($"h-{group.Room.Id:N}")">@F(Strings.Moving.PlaceFrom, group.Room.Name)</h2>
+                <label class="visually-hidden" for="@allId">@F(Strings.Moving.MoveAllLabel, group.Room.Name)</label>
+                <select id="@allId" class="form-select form-select-sm place-all" @onchange="e => PickAll(group, e.Value?.ToString())">
+                    <option value="">@Strings.Moving.MoveAll</option>
+                    @foreach (var room in current)
+                    {
+                        <option value="@room.Id">@room.Name</option>
+                    }
+                </select>
+            </div>
+            <ul class="place-list">
+                @foreach (var plant in group.Plants)
+                {
+                    @Row(SubjectType.Plant, plant.Id, plant.DisplayName, Spot(plant.PlaceId))
+                }
+                @foreach (var cutting in group.Propagations)
+                {
+                    @Row(SubjectType.Propagation, cutting.Id, cutting.DisplayName, Spot(cutting.PlaceId))
+                }
+            </ul>
+        </section>
+    }
+
+    @if (message is not null)
+    {
+        <p class="text-danger small" role="alert">@message</p>
+    }
+    <div class="add-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || picks.Count == 0)" @onclick="SaveAsync">
+            @(picks.Count == 0 ? Strings.Moving.PlaceSave : Plural.Of(picks.Count, Strings.Moving.PlaceSaveCount_One, Strings.Moving.PlaceSaveCount_Other))
+        </button>
+    </div>
+}
+
+@code {
+    private RenderFragment Row(SubjectType type, Guid id, string name, string? spot) => __builder =>
+    {
+        var selectId = $"place-{id:N}";
+        <li class="place-row">
+            <div class="place-name">
+                <span class="item-name">@name</span>
+                @if (type == SubjectType.Propagation || spot is not null)
+                {
+                    <span class="place-meta">@(type == SubjectType.Propagation && spot is not null ? $"{Strings.Moving.KindPropagation} · {spot}" : type == SubjectType.Propagation ? Strings.Moving.KindPropagation : spot)</span>
+                }
+            </div>
+            <label class="visually-hidden" for="@selectId">@F(Strings.Moving.PlaceOneLabel, name)</label>
+            <select id="@selectId" class="form-select form-select-sm place-pick" @onchange="e => Pick(type, id, e.Value?.ToString())">
+                <option value="" selected="@(!picks.ContainsKey(id))">@Strings.Moving.PickRoom</option>
+                @foreach (var room in current)
+                {
+                    <option value="@room.Id" selected="@(picks.TryGetValue(id, out var picked) && picked.RoomId == room.Id)">@room.Name</option>
+                }
+            </select>
+        </li>
+    };
+
+    private bool loaded;
+    private bool busy;
+    private string? message;
+    private Places places = Places.None;
+    private IReadOnlyList<StillToPlaceRoom> groups = [];
+    private IReadOnlyList<Place> current = [];
+    private readonly Dictionary<Guid, (SubjectType Type, Guid RoomId)> picks = [];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        places = await RoomService.GetPlacesAsync();
+        groups = MovingService.StillToPlace(await PlantRepository.GetAllAsync(), await PropagationRepository.GetAllAsync(), places);
+        current = [.. places.CurrentRooms.OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)];
+
+        // What was picked for something that has been placed, or has gone, from another device, is dropped
+        var left = groups.SelectMany(g => g.Plants.Select(p => p.Id).Concat(g.Propagations.Select(p => p.Id))).ToHashSet();
+        foreach (var id in picks.Keys.Where(id => !left.Contains(id)).ToList())
+            picks.Remove(id);
+        loaded = true;
+    }
+
+    // The spot in the old room, when it was in one
+    private string? Spot(Guid? placeId) =>
+        places.Find(placeId) is { IsSpot: true } spot ? spot.Name : null;
+
+    private void Pick(SubjectType type, Guid id, string? room)
+    {
+        if (Guid.TryParse(room, out var roomId))
+            picks[id] = (type, roomId);
+        else
+            picks.Remove(id);
+    }
+
+    private void PickAll(StillToPlaceRoom group, string? room)
+    {
+        if (!Guid.TryParse(room, out var roomId))
+            return;
+        foreach (var plant in group.Plants)
+            picks[plant.Id] = (SubjectType.Plant, roomId);
+        foreach (var cutting in group.Propagations)
+            picks[cutting.Id] = (SubjectType.Propagation, roomId);
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            await Moving.PlaceAsync(picks.Select(p => (p.Value.Type, p.Key, p.Value.RoomId)).ToList());
+            picks.Clear();
+            await LoadAsync();
+        }
+        catch (Exception ex) when (ex is ArgumentException or InvalidOperationException)
+        {
+            message = ex.Message;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Placing plants after a move house failed");
+            message = F(Strings.Moving.SaveError, ex.Message);
+        }
+
+        busy = false;
+    }
+}

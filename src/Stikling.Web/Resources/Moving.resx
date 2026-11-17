@@ -1,0 +1,355 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+    <data name="PageTitle" xml:space="preserve">
+    <value>We moved house</value>
+    <comment>Page title of the move house page.</comment>
+  </data>
+  <data name="Title" xml:space="preserve">
+    <value>We moved house</value>
+    <comment>Heading of the move house page, opened from Rooms and tags.</comment>
+  </data>
+  <data name="StepOf" xml:space="preserve">
+    <value>Step {0} of {1}</value>
+    <comment>Above each step of the move. {0} is the step, {1} how many there are.</comment>
+  </data>
+  <data name="DayHeading" xml:space="preserve">
+    <value>When did you move?</value>
+    <comment>Heading of step 1.</comment>
+  </data>
+  <data name="DayHint" xml:space="preserve">
+    <value>Every plant and propagation gets a line in its history on this day. It can be earlier, not later.</value>
+    <comment>Under the heading of step 1.</comment>
+  </data>
+  <data name="DayLabel" xml:space="preserve">
+    <value>Day of the move</value>
+    <comment>Label of the date field in step 1.</comment>
+  </data>
+  <data name="DayFuture" xml:space="preserve">
+    <value>The day of the move cannot be later than today.</value>
+    <comment>Shown when the date picked is in the future.</comment>
+  </data>
+  <data name="Next" xml:space="preserve">
+    <value>Next</value>
+    <comment>Button that goes to the next step.</comment>
+  </data>
+  <data name="Back" xml:space="preserve">
+    <value>Back</value>
+    <comment>Button that goes to the step before.</comment>
+  </data>
+  <data name="RoomsHeading" xml:space="preserve">
+    <value>What happens to each room?</value>
+    <comment>Heading of step 2.</comment>
+  </data>
+  <data name="RoomsHint" xml:space="preserve">
+    <value>A room you leave behind is kept as it was, with its history and photos.</value>
+    <comment>Under the heading of step 2.</comment>
+  </data>
+  <data name="WhatHappensTo" xml:space="preserve">
+    <value>What happens to {0}</value>
+    <comment>Read out for the choice of what happens to a room. {0} is the room.</comment>
+  </data>
+  <data name="GoesTo" xml:space="preserve">
+    <value>Goes to</value>
+    <comment>Choice for a room: what is in it goes to a new room.</comment>
+  </data>
+  <data name="CameAlong" xml:space="preserve">
+    <value>Came along</value>
+    <comment>Choice for a room: the room itself moved along, like a plant cabinet.</comment>
+  </data>
+  <data name="PlaceLater" xml:space="preserve">
+    <value>Place later</value>
+    <comment>Choice for a room: what is in it is placed one by one after the move.</comment>
+  </data>
+  <data name="LeftBehind" xml:space="preserve">
+    <value>Left behind</value>
+    <comment>Choice for a room with nothing in it: it is left behind.</comment>
+  </data>
+  <data name="GoesToHint" xml:space="preserve">
+    <value>Everything in it moves to a new room.</value>
+    <comment>Under the choice Goes to.</comment>
+  </data>
+  <data name="CameAlongHint" xml:space="preserve">
+    <value>The room moved with you, like a plant cabinet. It stays as it is.</value>
+    <comment>Under the choice Came along.</comment>
+  </data>
+  <data name="PlaceLaterHint" xml:space="preserve">
+    <value>The room is left behind. You place what is in it afterwards, one by one.</value>
+    <comment>Under the choice Place later.</comment>
+  </data>
+  <data name="LeftBehindHint" xml:space="preserve">
+    <value>Nothing is in it, so it is just left behind.</value>
+    <comment>Under the choice Left behind.</comment>
+  </data>
+  <data name="NewRoomLabel" xml:space="preserve">
+    <value>New room</value>
+    <comment>Label of the name of the room things go to.</comment>
+  </data>
+  <data name="NewRoomPlaceholder" xml:space="preserve">
+    <value>Name of the new room</value>
+    <comment>Placeholder in the name of the new room.</comment>
+  </data>
+  <data name="MadeHere" xml:space="preserve">
+    <value>New rooms you have named here</value>
+    <comment>Read out for the names to tap, which are the new rooms named for other rooms in this move.</comment>
+  </data>
+  <data name="NeedsName" xml:space="preserve">
+    <value>Give every new room a name to go on.</value>
+    <comment>Shown when a room that goes somewhere has no name for the new room.</comment>
+  </data>
+  <data name="SummaryHeading" xml:space="preserve">
+    <value>Check the move</value>
+    <comment>Heading of step 3.</comment>
+  </data>
+  <data name="SummaryDay" xml:space="preserve">
+    <value>Moved on {0}.</value>
+    <comment>First line of step 3. {0} is the date.</comment>
+  </data>
+  <data name="SummaryGoesTo" xml:space="preserve">
+    <value>goes to {0}</value>
+    <comment>After a room's name in the summary. {0} is the new room.</comment>
+  </data>
+  <data name="SummaryCameAlong" xml:space="preserve">
+    <value>came along</value>
+    <comment>After a room's name in the summary.</comment>
+  </data>
+  <data name="SummaryPlaceLater" xml:space="preserve">
+    <value>is left behind, to place later</value>
+    <comment>After a room's name in the summary.</comment>
+  </data>
+  <data name="SummaryLeftBehind" xml:space="preserve">
+    <value>is left behind</value>
+    <comment>After a room's name in the summary.</comment>
+  </data>
+  <data name="SummaryNotes" xml:space="preserve">
+    <value>Rooms you leave behind are kept as they were, and are not offered for new plants. Watering reminders learn again from the move.</value>
+    <comment>Under the summary of the move.</comment>
+  </data>
+  <data name="Save" xml:space="preserve">
+    <value>Save the move</value>
+    <comment>Button that saves the move.</comment>
+  </data>
+  <data name="Error" xml:space="preserve">
+    <value>That did not work: {0}</value>
+    <comment>Shown when saving the order for going round, or using a room again, fails. {0} is the reason.</comment>
+  </data>
+  <data name="SaveError" xml:space="preserve">
+    <value>The move could not be saved: {0}</value>
+    <comment>{0} is the reason.</comment>
+  </data>
+  <data name="DoneHeading" xml:space="preserve">
+    <value>Moved</value>
+    <comment>Heading after the move was saved.</comment>
+  </data>
+  <data name="DoneText" xml:space="preserve">
+    <value>The move on {0} is saved.</value>
+    <comment>After saving. {0} is the date.</comment>
+  </data>
+  <data name="DoneNewRooms_One" xml:space="preserve">
+    <value>{0} new room made</value>
+    <comment>After saving, when {0} is 1.</comment>
+  </data>
+  <data name="DoneNewRooms_Other" xml:space="preserve">
+    <value>{0} new rooms made</value>
+    <comment>After saving.</comment>
+  </data>
+  <data name="DoneMoved_One" xml:space="preserve">
+    <value>{0} plant or propagation moved to its new room</value>
+    <comment>After saving, when {0} is 1.</comment>
+  </data>
+  <data name="DoneMoved_Other" xml:space="preserve">
+    <value>{0} plants and propagations moved to their new rooms</value>
+    <comment>After saving.</comment>
+  </data>
+  <data name="DoneToPlace_One" xml:space="preserve">
+    <value>{0} plant or propagation still to place</value>
+    <comment>After saving, when {0} is 1.</comment>
+  </data>
+  <data name="DoneToPlace_Other" xml:space="preserve">
+    <value>{0} plants and propagations still to place</value>
+    <comment>After saving.</comment>
+  </data>
+  <data name="DonePlace" xml:space="preserve">
+    <value>Place them now</value>
+    <comment>Button after saving that opens the page for placing what is left.</comment>
+  </data>
+  <data name="DoneBack" xml:space="preserve">
+    <value>Back to Rooms and tags</value>
+    <comment>Link after saving.</comment>
+  </data>
+  <data name="NoRooms" xml:space="preserve">
+    <value>You have no rooms yet.</value>
+    <comment>Empty state of the move page.</comment>
+  </data>
+  <data name="NoRoomsHint" xml:space="preserve">
+    <value>Add the rooms you lived in on Rooms and tags first, then come back to say where everything went.</value>
+    <comment>Under the empty state of the move page.</comment>
+  </data>
+  <data name="StillToPlace_One" xml:space="preserve">
+    <value>{0} plant or propagation still to place after the move</value>
+    <comment>Card on Today and line on Rooms and tags, when {0} is 1.</comment>
+  </data>
+  <data name="StillToPlace_Other" xml:space="preserve">
+    <value>{0} plants and propagations still to place after the move</value>
+    <comment>Card on Today and line on Rooms and tags.</comment>
+  </data>
+  <data name="StillToPlaceDetail" xml:space="preserve">
+    <value>Pick a room for each</value>
+    <comment>Under the line about what is still to place.</comment>
+  </data>
+  <data name="RowTitle" xml:space="preserve">
+    <value>We moved house</value>
+    <comment>Row on Rooms and tags that opens the move.</comment>
+  </data>
+  <data name="RowDetail" xml:space="preserve">
+    <value>Say where everything went and keep the old rooms</value>
+    <comment>Under the row on Rooms and tags.</comment>
+  </data>
+  <data name="BeforeTheMove" xml:space="preserve">
+    <value>Before the move</value>
+    <comment>Heading on Rooms and tags over the rooms left behind in a move.</comment>
+  </data>
+  <data name="BeforeTheMoveHint" xml:space="preserve">
+    <value>Rooms you left behind. They are kept with their history and photos.</value>
+    <comment>Under the heading Before the move.</comment>
+  </data>
+  <data name="LeftOn" xml:space="preserve">
+    <value>Left {0}</value>
+    <comment>Under a room from before the move. {0} is the date.</comment>
+  </data>
+  <data name="FromBeforeTheMove" xml:space="preserve">
+    <value>From before the move, left {0}</value>
+    <comment>On the page of a room from before a move. {0} is the date.</comment>
+  </data>
+  <data name="UseAgain" xml:space="preserve">
+    <value>Use this room again</value>
+    <comment>Button on the page of a room from before a move.</comment>
+  </data>
+  <data name="PlaceTitle" xml:space="preserve">
+    <value>Place after the move</value>
+    <comment>Heading of the page that places what is left after a move.</comment>
+  </data>
+  <data name="PlaceHint" xml:space="preserve">
+    <value>Pick a room for each plant and propagation, or move everything from one old room at once. Nothing moves until you save.</value>
+    <comment>Under the heading of the place page.</comment>
+  </data>
+  <data name="PlaceFrom" xml:space="preserve">
+    <value>From {0}</value>
+    <comment>Heading over the group of things in one old room. {0} is the room.</comment>
+  </data>
+  <data name="MoveAll" xml:space="preserve">
+    <value>Move all to…</value>
+    <comment>Choice in a list of rooms that moves everything in an old room.</comment>
+  </data>
+  <data name="MoveAllLabel" xml:space="preserve">
+    <value>Move everything from {0} to</value>
+    <comment>Read out for the list above. {0} is the old room.</comment>
+  </data>
+  <data name="PickRoom" xml:space="preserve">
+    <value>Pick a room</value>
+    <comment>First choice in the list of rooms for one plant.</comment>
+  </data>
+  <data name="PlaceOneLabel" xml:space="preserve">
+    <value>Room for {0}</value>
+    <comment>Read out for the list of rooms for one plant. {0} is the plant.</comment>
+  </data>
+  <data name="KindPropagation" xml:space="preserve">
+    <value>Propagation</value>
+    <comment>Small text after a name, for a propagation.</comment>
+  </data>
+  <data name="PlaceSave" xml:space="preserve">
+    <value>Move</value>
+    <comment>Button that moves what was picked, when nothing is picked.</comment>
+  </data>
+  <data name="PlaceSaveCount_One" xml:space="preserve">
+    <value>Move {0}</value>
+    <comment>Button that moves what was picked, when {0} is 1.</comment>
+  </data>
+  <data name="PlaceSaveCount_Other" xml:space="preserve">
+    <value>Move {0}</value>
+    <comment>Button that moves what was picked.</comment>
+  </data>
+  <data name="PlaceEmpty" xml:space="preserve">
+    <value>Nothing is left to place.</value>
+    <comment>Empty state of the place page.</comment>
+  </data>
+  <data name="PlaceEmptyHint" xml:space="preserve">
+    <value>Everything that stood in an old room has a room now.</value>
+    <comment>Under the empty state of the place page.</comment>
+  </data>
+  <data name="PlaceNoRooms" xml:space="preserve">
+    <value>There is no room to move things to.</value>
+    <comment>Shown on the place page when there is no room in use.</comment>
+  </data>
+  <data name="PlaceNoRoomsHint" xml:space="preserve">
+    <value>Add a room on Rooms and tags first.</value>
+    <comment>Under the line above.</comment>
+  </data>
+  <data name="TlKindMovedHouse" xml:space="preserve">
+    <value>Moved house</value>
+    <comment>Label on a history line made by a move house.</comment>
+  </data>
+  <data name="OrderRow" xml:space="preserve">
+    <value>Order for going round</value>
+    <comment>Row on a room's page that opens the walking order.</comment>
+  </data>
+  <data name="OrderRowUsual" xml:space="preserve">
+    <value>The usual order</value>
+    <comment>Under the row, when the room has no order of its own.</comment>
+  </data>
+  <data name="OrderRowOwn" xml:space="preserve">
+    <value>Your own order</value>
+    <comment>Under the row, when the room has an order of its own.</comment>
+  </data>
+  <data name="OrderTitle" xml:space="preserve">
+    <value>Order for going round</value>
+    <comment>Heading of the page for the walking order of a room.</comment>
+  </data>
+  <data name="OrderHint" xml:space="preserve">
+    <value>The order you walk through {0} when you go round it. Drag a handle, or use the arrows.</value>
+    <comment>Under the heading. {0} is the room.</comment>
+  </data>
+  <data name="OrderMoveUp" xml:space="preserve">
+    <value>Move {0} up</value>
+    <comment>Read out for the button that moves a row up.</comment>
+  </data>
+  <data name="OrderMoveDown" xml:space="preserve">
+    <value>Move {0} down</value>
+    <comment>Read out for the button that moves a row down.</comment>
+  </data>
+  <data name="OrderUsual" xml:space="preserve">
+    <value>Use the usual order</value>
+    <comment>Button that removes the order of your own.</comment>
+  </data>
+  <data name="OrderSaved" xml:space="preserve">
+    <value>The order is saved.</value>
+    <comment>After saving the order.</comment>
+  </data>
+  <data name="OrderUsualDone" xml:space="preserve">
+    <value>Back to the usual order.</value>
+    <comment>After going back to the usual order.</comment>
+  </data>
+  <data name="OrderNotHere" xml:space="preserve">
+    <value>Only a room in use has an order for going round.</value>
+    <comment>Shown on the order page for a spot, a room that is gone or a room from before a move.</comment>
+  </data>
+  <data name="OrderEmpty" xml:space="preserve">
+    <value>Nothing stands in this room yet.</value>
+    <comment>Empty state of the order page.</comment>
+  </data>
+  <data name="OrderEmptyHint" xml:space="preserve">
+    <value>Add plants or propagations here and they will show up to put in order.</value>
+    <comment>Under the empty state of the order page.</comment>
+  </data>
+</root>

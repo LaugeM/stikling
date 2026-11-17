@@ -77,7 +77,10 @@ public enum TimelineEvent
     Pest,
 
     /// <summary>Measurements were taken, with no note or photos. A line written by the app, see <see cref="Measurement"/>.</summary>
-    Measured
+    Measured,
+
+    /// <summary>The household moved house. One line on each plant and propagation that was in the collection then.</summary>
+    MovedHouse
 }
 
 /// <summary>Writes the event as text and reads a name this version doesn't know as null.</summary>

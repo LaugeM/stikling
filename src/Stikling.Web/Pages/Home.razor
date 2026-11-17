@@ -657,11 +657,20 @@ else
     {
     <section class="today-section worth-a-look">
         <h2>@Strings.Care.TodayWorthALook</h2>
+        @if (StillToPlace > 0)
+        {
+            <a class="item-card still-to-place" href="moving-house/place">
+                <div class="item-text">
+                    <div class="item-name">@Plural.Of(StillToPlace, Strings.Moving.StillToPlace_One, Strings.Moving.StillToPlace_Other)</div>
+                    <div class="item-meta"><span>@Strings.Moving.StillToPlaceDetail</span></div>
+                </div>
+            </a>
+        }
         @if (NextRoundChecksLine is { } nextChecks)
         {
             <p class="today-next-round"><span>@nextChecks</span></p>
         }
-        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null)
+        @if (sections.ChecksNow.Count == 0 && NextRoundChecksLine is null && StillToPlace == 0)
         {
             <p class="text-body-secondary mb-0">
                 @(active.Count == 0
@@ -963,6 +972,9 @@ else
 
     private string? CareNextRoundLine => sections.CareNextRound is { } round
         ? NextRoundLine(round, Strings.Care.TodayNextRoundPlants_One, Strings.Care.TodayNextRoundPlants_Other) : null;
+
+    // Plants and propagations still in a room from before a move house, until they are placed
+    private int StillToPlace => MovingService.CountStillToPlace(data.Plants, data.Propagations, data.Places);
 
     private string? NextRoundChecksLine => sections.NextRoundChecks is { } round
         ? NextRoundLine(round, Strings.Care.TodayNextRoundProps_One, Strings.Care.TodayNextRoundProps_Other) : null;

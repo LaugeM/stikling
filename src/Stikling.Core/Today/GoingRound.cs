@@ -94,8 +94,20 @@ public static class GoingRound
             p => p.PlaceId, p => p.DisplayName, scope, places)
             .Select(x => new RoundCard(x.Item, x.Item.ListName, x.Heading, null, null, false, x.Item.IsDormant));
 
-        return [.. cards, .. propagationCards];
+        var all = cards.Concat(propagationCards).ToList();
+        return places.RoomOf(scope.Id)?.RoundOrder is { Count: > 0 } order ? InOrder(all, order) : all;
     }
+
+    /// <summary>
+    /// The cards in the order set for the room, see <see cref="RoundOrders.Apply{T}"/>.
+    /// </summary>
+    public static IReadOnlyList<RoundCard> InOrder(IReadOnlyList<RoundCard> cards, IReadOnlyList<Guid> order) =>
+        RoundOrders.Apply(cards, order, c => c.Subject.Id, c => c.Subject switch
+        {
+            Plant plant => plant.PlaceId,
+            Propagation propagation => propagation.PlaceId,
+            _ => null
+        });
 
     /// <summary>
     /// The plants Today says are due for a check on watering, in the order of the rooms: by room

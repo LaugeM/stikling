@@ -3,6 +3,7 @@
 @inject ILogger<RoomsAndTags> Logger
 @inject PlantService PlantService
 @inject IPlantRepository Plants
+@inject IPropagationRepository PropagationRepository
 @inject GrowLightService LightService
 
 <PageTitle>@Strings.Shared.RoomsPageTitle</PageTitle>
@@ -14,6 +15,17 @@
 <section class="settings-section">
     <h2 class="section-label">@Strings.Shared.RoomsRooms</h2>
     <p class="settings-hint">@Strings.Shared.RoomsHint</p>
+
+    @if (stillToPlace > 0)
+    {
+        <a class="move-card" href="moving-house/place">
+            <span class="move-card-title">@Plural.Of(stillToPlace, Strings.Moving.StillToPlace_One, Strings.Moving.StillToPlace_Other)</span>
+            <span class="move-card-detail">@Strings.Moving.StillToPlaceDetail</span>
+        </a>
+    }
+    <div class="settings-rows">
+        <SettingsRow Href="moving-house" Title="@Strings.Moving.RowTitle" Detail="@Strings.Moving.RowDetail" />
+    </div>
 
     @if (rooms.Count == 0)
     {
@@ -111,6 +123,21 @@
     }
 </section>
 
+@if (oldRooms.Count > 0)
+{
+    <section class="settings-section">
+        <h2 class="section-label">@Strings.Moving.BeforeTheMove</h2>
+        <p class="settings-hint">@Strings.Moving.BeforeTheMoveHint</p>
+        <div class="settings-rows">
+            @foreach (var old in oldRooms)
+            {
+                <SettingsRow Href="@($"rooms/{old.Id}")" Title="@old.Name"
+                             Detail="@(old.LeftOn is { } left ? F(Strings.Moving.LeftOn, Labels.Date(left)) : RoomText.Held(old.AllPlants, old.AllPropagations))" />
+            }
+        </div>
+    </section>
+}
+
 <section class="settings-section">
     <h2 class="section-label">@Strings.Shared.RoomsTags</h2>
     <p class="settings-hint">@Strings.Shared.RoomsTagsHint</p>
@@ -182,6 +209,8 @@
     };
 
     private Places placeInfo = Places.None;
+    private IReadOnlyList<Room> oldRooms = [];
+    private int stillToPlace;
 
     private async Task SetOutdoorsAsync(Guid placeId, bool on)
     {
@@ -429,9 +458,11 @@
     private async Task LoadDataAsync()
     {
         rooms = await RoomService.GetAllAsync();
+        oldRooms = await RoomService.GetBeforeMoveAsync();
         placeInfo = await RoomService.GetPlacesAsync();
         await LoadLightsAsync();
         var all = await Plants.GetAllAsync();
+        stillToPlace = MovingService.CountStillToPlace(all, await PropagationRepository.GetAllAsync(), placeInfo);
         tags = PlantTags.InUse(all);
         activePlants = all.Where(p => !p.IsDeleted && p.InCollection)
             .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase).ToList();

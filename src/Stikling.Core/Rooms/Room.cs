@@ -12,7 +12,8 @@ public sealed record RoomSpot(Guid Id, string Name, string Place, int Plants, in
 
 /// <summary>A room in use, and the spots inside it.</summary>
 /// <param name="Plants">Plants placed in the room itself, not counting the spots.</param>
-public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, int Plants, int Propagations)
+public sealed record Room(
+    Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, int Plants, int Propagations, DateOnly? LeftOn = null)
 {
     /// <summary>Plants in the room itself and in every spot inside it.</summary>
     public int AllPlants => Plants + Spots.Sum(s => s.Plants);
@@ -26,7 +27,9 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
     /// nothing in it is kept, since one can be made on the Rooms and tags page before anything is
     /// placed there. Screens that only want what is in use use <see cref="InUse"/>.
     /// </summary>
-    public static IReadOnlyList<Room> List(Places places, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations)
+    /// <param name="fromBeforeMove">The rooms left behind in a move house instead of the ones in use.</param>
+    public static IReadOnlyList<Room> List(
+        Places places, IEnumerable<Plant> plants, IEnumerable<Propagation> propagations, bool fromBeforeMove = false)
     {
         var plantsIn = Tally(places, plants.Where(p => !p.IsDeleted && !p.LivesElsewhere).Select(p => p.PlaceId));
         var propagationsIn = Tally(places, propagations.Where(p => !p.IsDeleted).Select(p => p.PlaceId));
@@ -34,7 +37,7 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
         int PlantsIn(Place place) => plantsIn.GetValueOrDefault(place.Id);
         int PropagationsIn(Place place) => propagationsIn.GetValueOrDefault(place.Id);
 
-        return places.Rooms
+        return (fromBeforeMove ? places.RoomsFromBeforeMove : places.CurrentRooms)
             .Select(room => new Room(
                 room.Id,
                 room.Name,
@@ -43,7 +46,8 @@ public sealed record Room(Guid Id, string Name, IReadOnlyList<RoomSpot> Spots, i
                     .OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)
                     .ToList(),
                 PlantsIn(room),
-                PropagationsIn(room)))
+                PropagationsIn(room),
+                room.LeftOn))
             .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
     }
