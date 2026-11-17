@@ -153,6 +153,7 @@ public static partial class HistoryText
         Add("PestChecked", EnLowerFirst(typeof(Pest)));
         Add("NewLeaf", En(typeof(Variegation)));
         Add("LookedOver");
+        Add("MovedHouse");
         Add("ReceivedFrom", Txt());
         NoParse("TextLine", Txt());
 

@@ -984,6 +984,13 @@
     <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, and tells the watering reminder that the plant isn't ready yet. You can leave halfway. Opening the round again the same day starts at the first one with nothing logged.</value>
     <comment>Answer to "How do I go round a room?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="WalkingOrderQ" xml:space="preserve">
+    <value>Can I choose the order I go round a room in?</value>
+  </data>
+  <data name="WalkingOrderA1" xml:space="preserve">
+    <value>Yes. Open the room's page and tap &lt;em&gt;Order for going round&lt;/em&gt;. It lists every plant and cutting in the room and its spots. Drag a handle to move one, or use the arrows. &lt;em&gt;Go round&lt;/em&gt; in that room, or in one of its spots, then follows your order. A plant you add later goes after the last one in the same spot. &lt;em&gt;Use the usual order&lt;/em&gt; puts it back to the way it was.</value>
+    <comment>Answer to "Can I choose the order I go round a room in?" on the Help page.</comment>
+  </data>
   <data name="DailyRoundQ" xml:space="preserve">
     <value>What is the daily round?</value>
     <comment>Question in the "Today" part of the Help page.</comment>
@@ -1839,6 +1846,21 @@
   <data name="RoomPageA1" xml:space="preserve">
     <value>Every room and spot has a page with its photos, a note about what the place is like, its grow lights, windows and light check, the plants and cuttings that stand there and, for a room, its spots. Open it from Rooms and tags in Settings, from Location on a plant or a cutting, or from the Plants list when a room or spot is picked. The note and the photos belong to the room or spot, not to a plant, so they stay when the plants change. Renaming or removing a room is still done under Rooms and tags.</value>
     <comment>Answer to "What is a room's page?" on the Help page.</comment>
+  </data>
+  <data name="MovingHouseQ" xml:space="preserve">
+    <value>We moved house. What do I do?</value>
+  </data>
+  <data name="MovingHouseA1" xml:space="preserve">
+    <value>Open Rooms and tags in Settings and tap &lt;em&gt;We moved house&lt;/em&gt;. Pick the day you moved, then say what happens to each room. What is in a room can go to a new room that you name, the room itself can come along, like a plant cabinet, or its plants can wait to be placed later. A room with nothing in it comes along or is left behind. Nothing is deleted: a room you leave behind is kept under &lt;em&gt;Before the move&lt;/em&gt;, with its history and photos.</value>
+    <comment>Answer to "We moved house. What do I do?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="MovingHouseA2" xml:space="preserve">
+    <value>Every plant and cutting gets a line in its history, &lt;em&gt;Moved house&lt;/em&gt;, on the day of the move, and the ones that go to a new room also get the usual line about the room. The waterings before the move stay in the history, but the watering reminder learns again from the move, since the light and warmth are different in a new home.</value>
+    <comment>Answer to "We moved house. What do I do?" on the Help page.</comment>
+  </data>
+  <data name="MovingHouseA3" xml:space="preserve">
+    <value>What you chose to place later shows on Today, under &lt;em&gt;Worth a look&lt;/em&gt;, and at the top of Rooms and tags as plants still to place. Open it to pick a room for each one, or to move everything from an old room at once. Nothing moves until you save. A room from before the move is left out when you pick a room for a plant, and from Today's round and Go round. Open it from &lt;em&gt;Before the move&lt;/em&gt; and tap &lt;em&gt;Use this room again&lt;/em&gt; if you moved back.</value>
+    <comment>Answer to "We moved house. What do I do?" on the Help page.</comment>
   </data>
   <data name="SpotHistoryQ" xml:space="preserve">
     <value>Can I see which plants have stood in a room?</value>

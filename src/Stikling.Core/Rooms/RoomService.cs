@@ -20,9 +20,13 @@ public sealed record RoomRename(string Name, int Plants, int Propagations, bool 
 /// </summary>
 public sealed class RoomService(IPlaceRepository places, IPlantRepository plants, IPropagationRepository propagations)
 {
-    /// <summary>Every room, with the spots inside it, including the ones with nothing in them.</summary>
+    /// <summary>Every room in use, with the spots inside it, including the ones with nothing in them.</summary>
     public async Task<IReadOnlyList<Room>> GetAllAsync() =>
         Room.List(await places.GetPlacesAsync(), await plants.GetAllAsync(), await propagations.GetAllAsync());
+
+    /// <summary>The rooms left behind in a move house, with their spots.</summary>
+    public async Task<IReadOnlyList<Room>> GetBeforeMoveAsync() =>
+        Room.List(await places.GetPlacesAsync(), await plants.GetAllAsync(), await propagations.GetAllAsync(), fromBeforeMove: true);
 
     public Task<Places> GetPlacesAsync() => places.GetPlacesAsync();
 
@@ -30,13 +34,17 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
     /// The place written as "Living room" or "Living room / On top of the PC", made if it doesn't
     /// exist yet. Null when nothing was written.
     /// </summary>
-    public async Task<Guid?> PlaceIdAsync(string? place)
+    /// <param name="current">The place it is in now. When that is a place from before a move house and the text still names it, it stays there.</param>
+    public async Task<Guid?> PlaceIdAsync(string? place, Guid? current = null)
     {
         var (roomName, spotName) = RoomName.Split(place);
         if (roomName is null)
             return null;
 
         var all = await places.GetPlacesAsync();
+        if (current is not null && all.IsFromBeforeMove(current) && all.Find(current) is { } kept
+            && RoomName.Same(all.NameOf(kept.Id), place))
+            return kept.Id;
         var room = all.RoomNamed(roomName) ?? await AddAsync(new Place { Name = roomName });
         if (spotName is null)
             return room.Id;
@@ -203,6 +211,23 @@ public sealed class RoomService(IPlaceRepository places, IPlantRepository plants
         place.FromWindow = distance;
         place.InTheWay = shade;
         await places.SaveAsync(place);
+    }
+
+    /// <summary>
+    /// Sets the order plants and propagations are visited in when going round a room. Null goes back to
+    /// the usual order. Only a room has one, so a spot throws.
+    /// </summary>
+    public async Task SetRoundOrderAsync(Guid roomId, IReadOnlyList<Guid>? order)
+    {
+        var all = await places.GetPlacesAsync();
+        if (all.Find(roomId) is not { IsSpot: false } room)
+            throw new ArgumentException(Strings.Shared.RoomGone, nameof(roomId));
+
+        List<Guid>? kept = order is { Count: > 0 } ? [.. order.Distinct()] : null;
+        if ((room.RoundOrder ?? []).SequenceEqual(kept ?? []))
+            return;
+        room.RoundOrder = kept;
+        await places.SaveAsync(room);
     }
 
     /// <summary>

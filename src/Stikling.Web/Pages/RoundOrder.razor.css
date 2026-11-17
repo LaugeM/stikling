@@ -1,0 +1,113 @@
+.order-list {
+    margin: 0 0 1rem;
+    padding: 0;
+    list-style: none;
+}
+
+.order-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+    min-height: 2.75rem;
+    border-radius: 0.5rem;
+    background: transparent;
+}
+
+.order-row.dragging {
+    background: var(--pa-green-soft);
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.15);
+}
+
+/* The handle is the only part that doesn't scroll the sheet, so a finger can still scroll everywhere else */
+.order-handle {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2rem;
+    height: 2.75rem;
+    color: var(--pa-muted);
+    touch-action: none;
+}
+
+.order-handle[data-handle] {
+    cursor: grab;
+}
+
+.order-row.dragging .order-handle {
+    cursor: grabbing;
+}
+
+.order-handle svg,
+.order-move svg {
+    width: 1.25rem;
+    height: 1.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.5;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.order-text {
+    flex: 1;
+    min-width: 0;
+    margin: 0;
+}
+
+.order-move {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.25rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--pa-muted);
+}
+
+.order-move:hover:not(:disabled),
+.order-move:focus-visible {
+    background: var(--pa-green-soft);
+    color: var(--pa-green-dark);
+}
+
+.order-move:disabled {
+    opacity: 0.35;
+}
+
+.order-text {
+    display: grid;
+    gap: 0.1rem;
+    padding: 0.4rem 0;
+}
+
+.order-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.order-meta {
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+}
+
+.order-row {
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.order-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.order-move {
+    width: 2.75rem;
+}
+
+.order-actions .btn {
+    min-height: 2.75rem;
+}

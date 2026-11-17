@@ -741,6 +741,12 @@
   <data name="GoRoundRoomA2" xml:space="preserve">
     <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer i plantens historik og fortæller vandingspåmindelsen at planten ikke er klar endnu. Du kan sagtens stoppe halvvejs. Åbner du runden igen samme dag, starter den ved den første uden noget logget.</value>
   </data>
+  <data name="WalkingOrderQ" xml:space="preserve">
+    <value>Kan jeg selv vælge rækkefølgen når jeg går runden i et rum?</value>
+  </data>
+  <data name="WalkingOrderA1" xml:space="preserve">
+    <value>Ja. Åbn rummets side og tryk på &lt;em&gt;Rækkefølge på runden&lt;/em&gt;. Der står alle planter og stiklinger i rummet og på dets pladser. Træk i et håndtag for at flytte en, eller brug pilene. Når du trykker på &lt;em&gt;Gå runden&lt;/em&gt; i rummet eller på en af dets pladser, følger runden din rækkefølge. En plante du tilføjer senere, kommer efter den sidste på samme plads. &lt;em&gt;Brug den sædvanlige rækkefølge&lt;/em&gt; sætter rækkefølgen tilbage som den var.</value>
+  </data>
   <data name="DailyRoundQ" xml:space="preserve">
     <value>Hvad er den daglige runde?</value>
   </data>
@@ -1391,6 +1397,18 @@
   </data>
   <data name="RoomPageA1" xml:space="preserve">
     <value>Hvert rum og hver plads har en side med billeder, en note om hvordan stedet er, vækstlys, vinduer og lystjek, og de planter og stiklinger der står der. Siden for et rum viser også dets pladser. Du åbner den fra Rum og tags i Indstillinger, fra Placering på en plante eller en stikling, eller fra plantelisten når du har valgt et rum eller en plads. Noten og billederne hører til rummet eller pladsen og ikke til en plante, så de er der stadig når planterne skifter. Du omdøber eller fjerner stadig et rum under Rum og tags.</value>
+  </data>
+  <data name="MovingHouseQ" xml:space="preserve">
+    <value>Vi er flyttet. Hvad gør jeg?</value>
+  </data>
+  <data name="MovingHouseA1" xml:space="preserve">
+    <value>Åbn Rum og tags i Indstillinger og tryk på &lt;em&gt;Vi er flyttet&lt;/em&gt;. Vælg den dag du flyttede, og vælg så hvad der sker med hvert rum. Det der står i et rum, kan flytte til et nyt rum som du giver et navn. Rummet kan også selv følge med, som et plantestativ, eller planterne kan vente til du placerer dem senere. Et tomt rum følger med eller bliver tilbage. Intet bliver slettet: et rum du lader blive tilbage, bliver gemt under &lt;em&gt;Før flytningen&lt;/em&gt; med sin historik og sine billeder.</value>
+  </data>
+  <data name="MovingHouseA2" xml:space="preserve">
+    <value>Hver plante og stikling får linjen &lt;em&gt;Vi flyttede&lt;/em&gt; i sin historik på flyttedagen, og dem der flytter til et nyt rum, får også den sædvanlige linje om rummet. Vandingerne fra før flytningen bliver i historikken, men vandingspåmindelsen lærer forfra fra flytningen, fordi lys og varme er anderledes i et nyt hjem.</value>
+  </data>
+  <data name="MovingHouseA3" xml:space="preserve">
+    <value>Det du valgte at placere senere, står i I dag under &lt;em&gt;Værd at se på&lt;/em&gt; og øverst under Rum og tags som planter der mangler et rum. Tryk på det for at vælge et rum til hver, eller flyt alt fra et gammelt rum på én gang. Intet bliver flyttet før du gemmer. Et rum fra før flytningen er ikke med når du vælger rum til en plante, og heller ikke i dagens runde eller i Gå runden. Er du flyttet tilbage, kan du åbne rummet under &lt;em&gt;Før flytningen&lt;/em&gt; og trykke på &lt;em&gt;Brug dette rum igen&lt;/em&gt;.</value>
   </data>
   <data name="SpotHistoryQ" xml:space="preserve">
     <value>Kan jeg se hvilke planter der har stået i et rum?</value>

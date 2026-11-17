@@ -194,6 +194,7 @@ public class HistoryTextTests
         (L("PestTreated", Pest.SpiderMites), "Treated for spider mites"),
         (L("PestChecked", Pest.SpiderMites), "Checked for spider mites"),
         (L("LookedOver"), "Looked over"),
+        (L("MovedHouse"), "Moved house"),
         (L("ReceivedFrom", "Anna"), "From Anna"),
         (L("TextLine", "A note about it"), "A note about it"),
         (HistoryText.CareLine(new CareLog { Kind = CareKind.Watered }, null, null), "Watered"),

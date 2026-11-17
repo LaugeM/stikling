@@ -53,6 +53,20 @@ public sealed class Place : Entity
     [JsonConverter(typeof(TolerantNullableEnumConverter<Shade>))]
     public Shade? InTheWay { get; set; }
 
+    /// <summary>
+    /// The day of a move house this room, or spot, was left behind on. Set on a room and on its spots
+    /// by the moving flow. The room stays as it was, with its history and photos, but isn't offered
+    /// for new things any more. Null for a place in use, and on records from before it existed.
+    /// </summary>
+    public DateOnly? LeftOn { get; set; }
+
+    /// <summary>
+    /// The order the plants and propagations in a room are visited in when going round it, as their
+    /// ids. Only on a room, never on a spot. Ids that are gone are skipped, and what isn't in the list
+    /// follows its neighbours. Null for the usual order, and on records from before it existed.
+    /// </summary>
+    public List<Guid>? RoundOrder { get; set; }
+
     [JsonIgnore]
     public bool IsSpot => RoomId is not null;
 

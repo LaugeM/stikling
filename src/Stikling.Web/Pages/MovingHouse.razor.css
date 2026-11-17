@@ -1,0 +1,73 @@
+.step-count {
+    margin: 0 0 0.25rem;
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+}
+
+.move-day {
+    max-width: 14rem;
+}
+
+.add-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.move-rooms,
+.move-summary,
+.move-done {
+    margin: 0.75rem 0 0;
+    padding: 0;
+    list-style: none;
+}
+
+.move-rooms {
+    display: grid;
+    gap: 0.75rem;
+}
+
+.move-room {
+    padding: 1rem;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+    background: var(--pa-surface);
+}
+
+.move-room-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 0.25rem 0.75rem;
+    margin-bottom: 0.6rem;
+}
+
+.move-room-head .room-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.move-room-head .room-count {
+    color: var(--pa-muted);
+    font-size: 0.9rem;
+}
+
+.move-room .settings-hint {
+    margin-top: 0.5rem;
+}
+
+.move-summary li,
+.move-done li {
+    padding: 0.4rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.add-actions .btn {
+    min-height: 2.75rem;
+}
+
+.move-room .room-chip {
+    min-height: 2.75rem;
+}
