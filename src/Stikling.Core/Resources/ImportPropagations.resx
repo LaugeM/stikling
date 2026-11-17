@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ProblemMethod" xml:space="preserve">
+    <value>Didn't know "{0}" as how it was started, kept in About it</value>
+    <comment>Shown on a row of the spreadsheet import of propagations when the cell for how it was started (cutting, seed and so on) isn't one the app knows. {0} is the cell.</comment>
+  </data>
+  <data name="ProblemHowMany" xml:space="preserve">
+    <value>Couldn't read "{0}" as a number of cuttings, kept in About it</value>
+    <comment>Shown on a row of the spreadsheet import of propagations when the cell for how many isn't a whole number from 1. {0} is the cell.</comment>
+  </data>
+  <data name="FieldParent" xml:space="preserve">
+    <value>Parent plant</value>
+    <comment>Name of a choice for what a column holds, in the spreadsheet import of propagations: the plant it was taken from.</comment>
+  </data>
+  <data name="FieldStartedOn" xml:space="preserve">
+    <value>Started on</value>
+    <comment>Name of a choice for what a column holds, in the spreadsheet import of propagations: the day it was started.</comment>
+  </data>
+  <data name="FieldMethod" xml:space="preserve">
+    <value>How it was started</value>
+    <comment>Name of a choice for what a column holds, in the spreadsheet import of propagations: cutting, seed, division and so on.</comment>
+  </data>
+</root>

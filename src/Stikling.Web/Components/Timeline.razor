@@ -1,6 +1,7 @@
 @* History of a plant or propagation, newest first and grouped by day. Photos and notes are added with EntryComposer. *@
 @inject ITimelineRepository Entries
 @inject IPestCaseRepository PestCases
+@inject MentionService MentionLookup
 @inject TimelineService TimelineService
 @inject IPhotoRepository PhotoRepository
 @inject IReceivedHistoryRepository ReceivedHistories
@@ -114,7 +115,7 @@ else
                                 <div class="entry-editor">
                                     @if (!MeasuredEntries.IsMeasured(entry))
                                     {
-                                        <textarea class="form-control" rows="2" aria-label="@Strings.Propagations.TlCorrectedNote" @bind="editText" @bind:event="oninput"></textarea>
+                                        <MentionBox @bind-Text="editText" @bind-Picked="editPicked" Rows="2" AriaLabel="@Strings.Propagations.TlCorrectedNote" Own="SubjectId" />
                                     }
                                     <MeasureFields Draft="editMeasure" Changed="() => { }" Disabled="busy" />
                                     <div class="entry-editor-row">
@@ -140,7 +141,14 @@ else
                             else if (!string.IsNullOrWhiteSpace(entry.Text) && TimelineEvents.Of(entry) != TimelineEvent.LookedOver
                                 && !(MeasuredEntries.IsMeasured(entry) && measurementsByEntry.ContainsKey(entry.Id)))
                             {
-                                <p class="entry-text">@HistoryText.Show(entry, Labels.For, Labels.English, CultureInfo.CurrentUICulture)</p>
+                                @if (entry.Mentions is { Count: > 0 })
+                                {
+                                    <p class="entry-text"><MentionLinks Text="@entry.Text" Named="entry.Mentions" Live="mentionTargets" /></p>
+                                }
+                                else
+                                {
+                                    <p class="entry-text">@HistoryText.Show(entry, Labels.For, Labels.English, CultureInfo.CurrentUICulture)</p>
+                                }
                             }
                             @if (editId != entry.Id && measurementsByEntry.TryGetValue(entry.Id, out var taken))
                             {
@@ -352,6 +360,7 @@ else
     private CompareState? compare;
     private Guid? editId;
     private string? editText;
+    private List<Mention> editPicked = [];
     private DateOnly editDay;
     private BringBackChoice editBringBack = new();
     private MeasureDraft editMeasure = new();
@@ -376,9 +385,15 @@ else
     // The pest cases that still exist, for the links on the lines about a pest. Only read when there is such a line.
     private HashSet<Guid> pestCaseIds = [];
 
+    // The plants, propagations and pots that still exist, for the links in notes. Only read when a note has one.
+    private IReadOnlySet<Guid> mentionTargets = new HashSet<Guid>();
+
     private async Task LoadAsync()
     {
         var allEntries = await Entries.GetForAsync(SubjectId);
+        mentionTargets = allEntries.Any(e => !e.IsDeleted && e.Mentions is { Count: > 0 })
+            ? await MentionLookup.LiveTargetsAsync()
+            : new HashSet<Guid>();
         pestCaseIds = allEntries.Any(e => !e.IsDeleted && e.PestCaseId is not null)
             ? (await PestCases.GetAllAsync()).Where(c => !c.IsDeleted).Select(c => c.Id).ToHashSet()
             : [];
@@ -545,6 +560,7 @@ else
     {
         editId = entry.Id;
         editText = MeasuredEntries.IsMeasured(entry) ? null : entry.Text;
+        editPicked = [.. entry.Mentions ?? []];
         editMeasure = MeasureDraft.For(measurementsByEntry.GetValueOrDefault(entry.Id) ?? []);
         editDay = LocalDay(entry.OccurredAt);
         editBringBack = BringBackChoice.For(entry.ComesBackOn);
@@ -582,7 +598,7 @@ else
             }
 
             await MeasureService.CheckAsync(entry, values);
-            await TimelineService.CorrectAsync(entry, editText, editDay, keepsMeasurements: values.Count > 0);
+            await TimelineService.CorrectAsync(entry, editText, editDay, keepsMeasurements: values.Count > 0, mentions: editPicked);
             await MeasureService.SetForEntryAsync(entry, values);
             if (entry.Kind == TimelineKind.Note || entry.ComesBackOn is not null)
                 await TimelineService.SetComesBackAsync(entry, editBringBack.Resolve(editDay, Today));

@@ -38,6 +38,9 @@ public sealed class Propagation : Entity
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 
+    /// <summary>The parent is a guess, so the page says "Probably from" and the family tree draws the line dotted. False on every older record.</summary>
+    public bool ParentIsGuess { get; set; }
+
     /// <summary>Where it came from when there's no parent plant, e.g. "Seeds from the garden centre".</summary>
     public string? Source { get; set; }
 

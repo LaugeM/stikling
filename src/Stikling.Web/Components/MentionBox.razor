@@ -1,0 +1,174 @@
+@* A note box where typing @ offers the plants, propagations and pots that match what comes after it. Picking one puts
+   plain "@Name" in the text and keeps the record in Picked, so the history can show it as a link. The text is
+   never changed otherwise, and which names are still links is worked out when the note is saved. *@
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject IPotRepository PotRepository
+@inject IJSRuntime JS
+@implements IAsyncDisposable
+
+<div class="mention-box">
+    <textarea @ref="box" class="form-control" rows="@Rows" placeholder="@Placeholder" aria-label="@AriaLabel" disabled="@Disabled"
+              value="@Text" @oninput="TypedAsync" @onkeydown="KeyDownAsync" @onclick="LookAsync" @attributes="Extra"></textarea>
+    @if (shown.Count > 0)
+    {
+        <ul class="mention-choices" aria-label="@Strings.Tidy.MentionChoices">
+            @foreach (var choice in shown)
+            {
+                <li>
+                    @* Mouse down would take the focus off the note box before the click lands *@
+                    <button type="button" class="mention-choice" @onmousedown:preventDefault @onclick="() => PickAsync(choice)">
+                        <span class="item-name">@choice.Name</span>
+                        @if (KindText(choice) is { } kind)
+                    {
+                        <span class="text-body-secondary small">@kind</span>
+                    }
+                    </button>
+                </li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter]
+    public string? Text { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> TextChanged { get; set; }
+
+    /// <summary>The records picked so far in this note. Some may no longer be in the text, which is sorted out on saving.</summary>
+    [Parameter]
+    public List<Mention> Picked { get; set; } = [];
+
+    [Parameter]
+    public EventCallback<List<Mention>> PickedChanged { get; set; }
+
+    [Parameter]
+    public int Rows { get; set; } = 3;
+
+    [Parameter]
+    public string? Placeholder { get; set; }
+
+    [Parameter]
+    public string? AriaLabel { get; set; }
+
+    [Parameter]
+    public bool Disabled { get; set; }
+
+    /// <summary>The record the note is on, left out of the choices, since a note rarely names its own plant.</summary>
+    [Parameter]
+    public Guid? Own { get; set; }
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? Extra { get; set; }
+
+    private ElementReference box;
+    private IJSObjectReference? module;
+    private List<MentionChoice>? everything;
+    private IReadOnlyList<MentionChoice> shown = [];
+
+    private async Task<IJSObjectReference> ModuleAsync() =>
+        module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/mention.js");
+
+    private async Task TypedAsync(ChangeEventArgs e)
+    {
+        Text = e.Value?.ToString();
+        await TextChanged.InvokeAsync(Text);
+        await LookAsync();
+    }
+
+    private async Task KeyDownAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape" && shown.Count > 0)
+            shown = [];
+        else if (e.Key is "ArrowLeft" or "ArrowRight" or "Home" or "End")
+            await LookAsync();
+    }
+
+    // Looks at what is typed after an @ just before the caret, and offers what matches
+    private async Task LookAsync()
+    {
+        if (Text is null || !Text.Contains('@'))
+        {
+            shown = [];
+            return;
+        }
+
+        var position = await (await ModuleAsync()).InvokeAsync<int>("caret", box);
+        if (Mentions.Typing(Text, position) is not { } typing)
+        {
+            shown = [];
+            return;
+        }
+
+        everything ??= await LoadAsync();
+        shown = Mentions.Choose(typing.Query, everything);
+    }
+
+    private async Task<List<MentionChoice>> LoadAsync()
+    {
+        var all = new List<MentionChoice>();
+        foreach (var plant in await PlantRepository.GetAllAsync())
+        {
+            if (!plant.IsDeleted && plant.Id != Own)
+                all.Add(new MentionChoice(SubjectType.Plant, plant.Id, plant.DisplayName, plant.BotanicalName));
+        }
+        foreach (var propagation in await PropagationRepository.GetAllAsync())
+        {
+            if (!propagation.IsDeleted && propagation.Id != Own)
+                all.Add(new MentionChoice(SubjectType.Propagation, propagation.Id, propagation.DisplayName, null));
+        }
+        foreach (var pot in await PotRepository.GetAllAsync())
+        {
+            if (!pot.IsDeleted)
+                all.Add(new MentionChoice(SubjectType.Pot, pot.Id, pot.FamilyName, pot.DisplayName));
+        }
+        return all;
+    }
+
+    private async Task PickAsync(MentionChoice choice)
+    {
+        var text = Text ?? "";
+        var position = await (await ModuleAsync()).InvokeAsync<int>("caret", box);
+        if (Mentions.Typing(text, position) is not { } typing)
+            return;
+
+        var mention = new Mention { Kind = choice.Kind, Id = choice.Id, Name = choice.Name };
+        var after = text[position..];
+        // A space after the name, so what comes next doesn't run into it
+        var gap = after.Length == 0 || !char.IsWhiteSpace(after[0]) ? " " : "";
+        var newText = text[..typing.Start] + Mentions.TextOf(mention) + gap + after;
+        var newPicked = Mentions.With(Picked, mention);
+        Text = newText;
+        Picked = newPicked;
+        shown = [];
+
+        // Each call below makes the page draw again, and that hands this component its old Text and Picked back,
+        // so both are passed on from these copies
+        await TextChanged.InvokeAsync(newText);
+        await PickedChanged.InvokeAsync(newPicked);
+        await (await ModuleAsync()).InvokeVoidAsync("setCaret", box, typing.Start + Mentions.TextOf(mention).Length + 1);
+    }
+
+    private static string? KindText(MentionChoice choice) => choice.Kind switch
+    {
+        SubjectType.Propagation => Strings.Tidy.MentionKindPropagation,
+        SubjectType.Pot => Strings.Tidy.MentionKindPot,
+        _ => choice.Detail is { } botanical && botanical != choice.Name ? botanical : null
+    };
+
+    public async ValueTask DisposeAsync()
+    {
+        if (module is not null)
+        {
+            try
+            {
+                await module.DisposeAsync();
+            }
+            catch (JSDisconnectedException)
+            {
+            }
+        }
+    }
+}

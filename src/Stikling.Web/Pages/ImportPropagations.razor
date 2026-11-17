@@ -1,0 +1,612 @@
+@page "/propagations/import"
+@layout WideLayout
+@using System.Globalization
+@using System.Text.RegularExpressions
+@using Stikling.Core.Import
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository Repository
+@inject PlantNameService Names
+@inject IDeviceLanguages Languages
+@inject PropagationImportService Importer
+@inject TimeProvider Time
+@inject ILogger<ImportPropagations> Logger
+
+<PageTitle>@Strings.Tidy.ImportPropsPageTitle</PageTitle>
+
+<a class="back-link" href="propagations">@Strings.Common.Back</a>
+<h1>@Strings.Tidy.ImportPropsTitle</h1>
+
+@if (step == Step.Choose)
+{
+    <div class="import-narrow">
+        <ImportKind Propagations="true" />
+        <p>@Strings.Tidy.ImportPropsIntro</p>
+
+        @if (error is not null)
+        {
+            <div class="alert alert-danger" role="alert">@error</div>
+        }
+
+        <div class="mb-4">
+            <label class="btn btn-primary @(busy ? "disabled" : null)" for="import-file">@Strings.Account.ImportChooseFile</label>
+            <InputFile id="import-file" class="visually-hidden" OnChange="ChooseFileAsync" disabled="@busy"
+                       accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values,text/plain" />
+        </div>
+
+        <div class="mb-3">
+            <label class="form-label" for="import-paste">@Strings.Account.ImportPasteLabel</label>
+            <textarea id="import-paste" class="form-control" rows="5" spellcheck="false"
+                      @bind="pasted" @bind:event="oninput"></textarea>
+        </div>
+        <button type="button" class="btn btn-outline-primary" disabled="@(busy || string.IsNullOrWhiteSpace(pasted))" @onclick="UsePasted">@Strings.Account.ImportUseCells</button>
+    </div>
+}
+else if (step == Step.Result && result is not null)
+{
+    <div class="import-narrow">
+        @if (undone)
+        {
+            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">@Plural.Of(result.Added, Strings.Tidy.ImportUndone_One, Strings.Tidy.ImportUndone_Other)</h2>
+            <div class="import-buttons">
+                <a class="btn btn-primary" href="propagations">@Strings.Tidy.ImportGoToPropagations</a>
+                <button type="button" class="btn btn-outline-primary" @onclick="StartAgain">@Strings.Account.ImportImportMore</button>
+            </div>
+        }
+        else
+        {
+            <h2 class="import-title" role="status" tabindex="-1" @ref="resultHeading">@(result.Added == 0 ? Strings.Tidy.ImportNoneAdded : Plural.Of(result.Added, Strings.Tidy.ImportAdded_One, Strings.Tidy.ImportAdded_Other))</h2>
+            @if (result.RoomsMade > 0)
+            {
+                <p class="import-muted">@Plural.Of(result.RoomsMade, Strings.Account.ImportRoomMade_One, Strings.Account.ImportRoomMade_Other)</p>
+            }
+            @if (addError is not null)
+            {
+                <div class="alert alert-danger" role="alert">@addError</div>
+            }
+            else if (added.Count > 0)
+            {
+                <div class="import-block mt-3">
+                    @foreach (var row in added)
+                    {
+                        <div class="import-row">
+                            <div class="import-name">@row.Draft.DisplayName</div>
+                            @if (ParentIssue(row) is { } issue || !string.IsNullOrWhiteSpace(row.Place))
+                            {
+                                <div class="import-meta">@string.Join(" · ", new[] { row.Place, ParentIssue(row) }.Where(t => !string.IsNullOrWhiteSpace(t)))</div>
+                            }
+                        </div>
+                    }
+                </div>
+            }
+            @if (WithoutParent.Count > 0)
+            {
+                <h2 class="section-label mt-4">@Strings.Tidy.ImportNoParent</h2>
+                <div class="import-block">
+                    @foreach (var row in WithoutParent)
+                    {
+                        <div class="import-row">
+                            <div class="import-name">@F(Strings.Account.ImportRowName, row.Line, row.Draft.DisplayName)</div>
+                            <div class="import-meta">@ParentIssue(row)</div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (result.Skipped.Count > 0)
+            {
+                <h2 class="section-label mt-4">@Strings.Account.ImportNotAdded</h2>
+                <div class="import-block">
+                    @foreach (var skipped in result.Skipped)
+                    {
+                        <div class="import-row">
+                            <div class="import-name">@F(Strings.Account.ImportRowName, skipped.Line, skipped.Name)</div>
+                            <div class="import-meta">@skipped.Reason</div>
+                        </div>
+                    }
+                </div>
+            }
+            @if (undoError is not null)
+            {
+                <div class="alert alert-danger mt-3" role="alert">@undoError</div>
+            }
+            <div class="import-buttons">
+                <a class="btn btn-primary" href="propagations">@Strings.Tidy.ImportGoToPropagations</a>
+                @if (result.Added > 0)
+                {
+                    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="UndoAsync">@Strings.Account.ImportUndo</button>
+                }
+            </div>
+        }
+    </div>
+}
+else if (sheet is not null)
+{
+    <div class="import-review page-full">
+        <section class="import-pane @(step == Step.Columns ? "current" : null)" aria-label="@Strings.Account.ImportColumnsLabel">
+            <p class="import-muted">
+                @sourceName · @Plural.Of(sheet.Rows.Count, Strings.Account.ImportRow_One, Strings.Account.ImportRow_Other) · @Plural.Of(sheet.Headings.Count, Strings.Account.ImportColumn_One, Strings.Account.ImportColumn_Other)
+                <button type="button" class="btn btn-link link-action ms-2" @onclick="StartAgain">@Strings.Account.ImportStartAgain</button>
+            </p>
+
+            <div class="form-check mb-3 import-check">
+                <input class="form-check-input" type="checkbox" id="import-headings" checked="@firstRowIsHeadings" @onchange="HeadingsChanged" />
+                <label class="form-check-label" for="import-headings">@Strings.Account.ImportFirstRowHeadings</label>
+            </div>
+
+            <h2 class="section-label" tabindex="-1" @ref="columnsHeading">@Strings.Account.ImportYourColumns</h2>
+            <div class="import-block">
+                @for (var column = 0; column < sheet.Headings.Count; column++)
+                {
+                    var c = column;
+                    <div class="import-row import-column">
+                        <div class="import-column-text">
+                            <div class="import-name">@sheet.Headings[c]</div>
+                            <div class="import-meta">@Samples(c)</div>
+                        </div>
+                        <div class="import-column-pick">
+                            <select class="form-select" aria-label="@sheet.Headings[c]" @onchange="e => MatchChanged(c, e)">
+                                @foreach (var field in PropagationImportFields.All)
+                                {
+                                    <option value="@field" selected="@(matches[c] == field)">@PropagationImportFields.Label(field)</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                }
+            </div>
+
+            @if (askOrder)
+            {
+                <div class="mt-3">
+                    <div class="section-label" id="import-order-label">@Strings.Account.ImportDatesInFile</div>
+                    <div class="btn-group segmented import-order" role="radiogroup" aria-labelledby="import-order-label">
+                        <input type="radio" class="btn-check" name="import-order" id="import-day-first"
+                               checked="@(order == DateOrder.DayFirst)" @onchange="() => OrderChanged(DateOrder.DayFirst)" />
+                        <label class="btn btn-outline-primary" for="import-day-first">
+                            <span>@Strings.Account.ImportDayFirst<small>@Strings.Account.ImportDayFirstExample</small></span>
+                        </label>
+                        <input type="radio" class="btn-check" name="import-order" id="import-month-first"
+                               checked="@(order == DateOrder.MonthFirst)" @onchange="() => OrderChanged(DateOrder.MonthFirst)" />
+                        <label class="btn btn-outline-primary" for="import-month-first">
+                            <span>@Strings.Account.ImportMonthFirst<small>@Strings.Account.ImportMonthFirstExample</small></span>
+                        </label>
+                    </div>
+                </div>
+            }
+
+            @if (!HasNameColumn)
+            {
+                <p class="import-muted mt-3">@Strings.Account.ImportNoNameColumn</p>
+            }
+
+            <div class="form-bar import-next">
+                <button type="button" class="btn btn-primary" disabled="@(rows.Count == 0)" @onclick="() => GoTo(Step.Rows)">
+                    @F(Strings.Tidy.ImportNextCheck, Plural.Of(rows.Count, Strings.Tidy.ImportPropagation_One, Strings.Tidy.ImportPropagation_Other))
+                </button>
+            </div>
+        </section>
+
+        <section class="import-pane @(step == Step.Rows ? "current" : null)" aria-label="@Strings.Tidy.ImportPropagationsLabel">
+            @if (rows.Count == 0)
+            {
+                <p class="import-muted">@Strings.Tidy.ImportNoRows</p>
+            }
+            else
+            {
+                <h2 class="section-label" tabindex="-1" @ref="rowsHeading">@Strings.Tidy.ImportPropagationsLabel</h2>
+                <p class="import-muted" aria-live="polite">@CountLine</p>
+                <div class="mb-2">
+                    <button type="button" class="btn btn-link link-action me-3" @onclick="TickAll">@Strings.Account.ImportTickAll</button>
+                    <button type="button" class="btn btn-link link-action" @onclick="UntickAll">@Strings.Account.ImportUntickAll</button>
+                </div>
+
+                <div class="import-block import-plants">
+                    @for (var i = 0; i < rows.Count; i++)
+                    {
+                        var index = i;
+                        var row = rows[i];
+                        <label class="import-row import-plant @(ticked.Contains(index) ? null : "unticked")">
+                            <input type="checkbox" class="form-check-input" checked="@ticked.Contains(index)"
+                                   disabled="@(row.CantAdd is not null || adding)" @onchange="() => Toggle(index)" />
+                            <span class="import-plant-text">
+                                <span class="import-name">@row.Draft.DisplayName</span>
+                                @if (!string.IsNullOrWhiteSpace(row.Draft.Nickname) && !string.IsNullOrEmpty(row.Draft.BotanicalName))
+                                {
+                                    <span class="import-botanical"><BotanicalName Genus="@row.Draft.Genus" Species="@row.Draft.Species" Cultivar="@row.Draft.Cultivar" Qualifier="@row.Draft.NameQualifier" Note="@row.Draft.NameNote" /></span>
+                                }
+                                <span class="import-meta">@MetaLine(row)</span>
+                                @if (row.Parent == ParentMatch.Found)
+                                {
+                                    <span class="import-meta">@F(Strings.Tidy.ImportParentIs, row.ParentName)</span>
+                                }
+                                else if (ParentIssue(row) is { } issue)
+                                {
+                                    <span class="import-cant">@issue</span>
+                                }
+                                @if (!string.IsNullOrWhiteSpace(row.Draft.Notes))
+                                {
+                                    <span class="import-meta import-about">@F(Strings.Account.ImportAboutIt, row.Draft.Notes.ReplaceLineEndings(" · "))</span>
+                                }
+                                @if (row.LooksLikeYours)
+                                {
+                                    <span class="import-yours">@Strings.Account.ImportLooksLikeYours</span>
+                                }
+                                @if (row.CantAdd is { } reason)
+                                {
+                                    <span class="import-cant">@F(Strings.Account.ImportCantAdd, LowerFirst(reason))</span>
+                                }
+                                @foreach (var problem in row.Problems)
+                                {
+                                    <span class="import-meta">@problem</span>
+                                }
+                            </span>
+                        </label>
+                    }
+                </div>
+
+                <div class="form-bar import-add">
+                    @if (adding)
+                    {
+                        <div class="import-progress">
+                            <div class="import-bar" role="progressbar" aria-label="@Strings.Account.ImportAdding"
+                                 aria-valuemin="0" aria-valuemax="@addTotal" aria-valuenow="@addDone">
+                                <span style="@BarStyle"></span>
+                            </div>
+                            <p class="import-progress-text" aria-live="polite">@F(Strings.Account.ImportAddingProgress, addDone, addTotal)</p>
+                        </div>
+                    }
+                    else
+                    {
+                        @if (error is not null)
+                        {
+                            <div class="alert alert-danger" role="alert">@error</div>
+                        }
+                        <button type="button" class="btn btn-primary" disabled="@(ticked.Count == 0)" @onclick="AddAsync">
+                            @(ticked.Count == 0 ? Strings.Account.ImportTickToAdd : Plural.Of(ticked.Count, Strings.Tidy.ImportAdd_One, Strings.Tidy.ImportAdd_Other))
+                        </button>
+                        <button type="button" class="btn btn-link import-back" @onclick="() => GoTo(Step.Columns)">@Strings.Account.ImportBackToColumns</button>
+                    }
+                </div>
+            }
+        </section>
+    </div>
+}
+
+@code {
+    private enum Step { Choose, Columns, Rows, Result }
+
+    private const long MaxBytes = 5L * 1024 * 1024;
+
+    private static readonly Regex NumericDate = new(@"^\s*\d{1,2}[/.\-]\d{1,2}[/.\-]\d{2,4}\s*$", RegexOptions.Compiled);
+
+    private Step step = Step.Choose;
+    private PlantDictionary dictionary = PlantDictionary.Empty;
+    private IReadOnlyList<Plant> plants = [];
+    private IReadOnlyList<Propagation> existing = [];
+    private DateOrder languageOrder = DateOrder.DayFirst;
+
+    private string pasted = "";
+    private string? error;
+    private bool busy;
+
+    private string text = "";
+    private string sourceName = "";
+    private bool firstRowIsHeadings = true;
+    private Stikling.Core.Import.Sheet? sheet;
+    private List<PropagationImportField> matches = [];
+    private DateOrder order = DateOrder.DayFirst;
+    private DateOrder chosenOrder = DateOrder.DayFirst;
+    private bool askOrder;
+    private IReadOnlyList<PropagationImportRow> rows = [];
+    private HashSet<int> ticked = [];
+
+    private bool adding;
+    private int addDone;
+    private int addTotal;
+    private PropagationImportResult? result;
+    private string? addError;
+    private string? undoError;
+    private bool undone;
+    private List<PropagationImportRow> added = [];
+
+    private ElementReference columnsHeading;
+    private ElementReference rowsHeading;
+    private ElementReference resultHeading;
+    private Step? focusStep;
+
+    private DateOnly Today => Time.Today();
+
+    private static string LowerFirst(string text) =>
+        text.Length > 1 && char.IsUpper(text[0]) && !char.IsUpper(text[1]) ? char.ToLowerInvariant(text[0]) + text[1..] : text;
+
+    private bool HasNameColumn => matches.Any(m => m is PropagationImportField.Name or PropagationImportField.Nickname or PropagationImportField.Genus);
+
+    private string? BarStyle => addTotal > 0
+        ? FormattableString.Invariant($"--done:{100.0 * addDone / addTotal:0.#}%")
+        : null;
+
+    // What the row says when its parent column didn't find exactly one plant, or null
+    private static string? ParentIssue(PropagationImportRow row) => row.Parent switch
+    {
+        ParentMatch.NotFound => F(Strings.Tidy.ImportParentNotFound, row.ParentText),
+        ParentMatch.Several => F(Strings.Tidy.ImportParentSeveral, row.ParentText),
+        _ => null
+    };
+
+    // The rows that were added without the parent they named
+    private List<PropagationImportRow> WithoutParent => [.. added.Where(r => r.Parent is ParentMatch.NotFound or ParentMatch.Several)];
+
+    /// <summary>"3 of 12 ticked · 1 looks like one you have · 2 can't be added · 1 without a parent".</summary>
+    private string CountLine
+    {
+        get
+        {
+            var parts = new List<string> { F(Strings.Account.ImportTicked, ticked.Count, rows.Count) };
+            var looksLike = rows.Count(r => r.LooksLikeYours);
+            if (looksLike > 0)
+                parts.Add(Plural.Of(looksLike, Strings.Account.ImportLooksLike_One, Strings.Account.ImportLooksLike_Other));
+            var cantAdd = rows.Count(r => r.CantAdd is not null);
+            if (cantAdd > 0)
+                parts.Add(F(Strings.Account.ImportCantAddCount, cantAdd));
+            var noParent = rows.Count(r => r.Parent is ParentMatch.NotFound or ParentMatch.Several);
+            if (noParent > 0)
+                parts.Add(F(Strings.Tidy.ImportNoParentCount, noParent));
+            return string.Join(" · ", parts);
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        // The step that takes the screen takes the focus too, so it isn't left on a button that is now hidden
+        if (focusStep is not { } next)
+            return;
+        focusStep = null;
+        var heading = next switch
+        {
+            Step.Columns => columnsHeading,
+            Step.Rows => rowsHeading,
+            _ => resultHeading
+        };
+        if (heading.Context is not null)
+            await heading.FocusAsync();
+    }
+
+    private void GoTo(Step next)
+    {
+        step = next;
+        focusStep = next;
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        dictionary = await Names.GetDictionaryAsync();
+        languageOrder = DateOrderGuess.ForLanguages(await Languages.GetAsync());
+        chosenOrder = languageOrder;
+    }
+
+    private async Task LoadExistingAsync()
+    {
+        plants = await PlantRepository.GetAllAsync();
+        existing = await Repository.GetAllAsync();
+    }
+
+    private async Task ChooseFileAsync(InputFileChangeEventArgs e)
+    {
+        error = null;
+        var file = e.File;
+        if (file.Size > MaxBytes)
+        {
+            error = Strings.Account.ImportFileTooBig;
+            return;
+        }
+
+        busy = true;
+        StateHasChanged();
+        try
+        {
+            await LoadExistingAsync();
+            var bytes = new MemoryStream();
+            await using (var stream = file.OpenReadStream(MaxBytes))
+                await stream.CopyToAsync(bytes);
+            Open(SheetReader.Decode(bytes.ToArray()), file.Name, Strings.Tidy.ImportNoRowsInFile);
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Reading the spreadsheet file failed");
+            error = Strings.Account.ImportCantRead;
+        }
+        busy = false;
+    }
+
+    private async Task UsePasted()
+    {
+        error = null;
+        await LoadExistingAsync();
+        Open(pasted, Strings.Account.ImportPastedCells, Strings.Tidy.ImportNoRowsPasted);
+    }
+
+    private void Open(string content, string name, string emptyMessage)
+    {
+        var read = SheetReader.Read(content, firstRowIsHeadings: true);
+        if (read.Rows.Count == 0)
+        {
+            error = emptyMessage;
+            return;
+        }
+
+        text = content;
+        sourceName = name;
+        firstRowIsHeadings = true;
+        sheet = read;
+        chosenOrder = languageOrder;
+        matches = [.. PropagationImportFields.Guess(read.Headings)];
+        GoTo(Step.Columns);
+        Recompute();
+    }
+
+    private void StartAgain()
+    {
+        step = Step.Choose;
+        sheet = null;
+        rows = [];
+        ticked = [];
+        result = null;
+        undone = false;
+        added = [];
+        undoError = null;
+        addError = null;
+        error = null;
+        pasted = "";
+    }
+
+    private void HeadingsChanged(ChangeEventArgs e)
+    {
+        firstRowIsHeadings = e.Value is true;
+        sheet = SheetReader.Read(text, firstRowIsHeadings);
+        matches = [.. PropagationImportFields.Guess(sheet.Headings)];
+        Recompute();
+    }
+
+    private void MatchChanged(int column, ChangeEventArgs e)
+    {
+        var field = Enum.Parse<PropagationImportField>(e.Value?.ToString() ?? nameof(PropagationImportField.Skip));
+        matches[column] = field;
+        if (field is not (PropagationImportField.Skip or PropagationImportField.AboutLine))
+        {
+            // One column per field: the one that had it before goes to About it
+            for (var other = 0; other < matches.Count; other++)
+            {
+                if (other != column && matches[other] == field)
+                    matches[other] = PropagationImportField.AboutLine;
+            }
+        }
+        Recompute();
+    }
+
+    private void OrderChanged(DateOrder value)
+    {
+        chosenOrder = value;
+        Recompute();
+    }
+
+    private void Recompute()
+    {
+        if (sheet is null)
+            return;
+
+        var cells = new List<string>();
+        for (var column = 0; column < matches.Count; column++)
+        {
+            if (matches[column] != PropagationImportField.StartedOn)
+                continue;
+            foreach (var row in sheet.Rows)
+            {
+                if (column < row.Count && row[column].Trim() is { Length: > 0 } cell)
+                    cells.Add(cell);
+            }
+        }
+
+        var found = DateOrderGuess.FromValues(cells);
+        askOrder = found is null && cells.Any(cell => NumericDate.IsMatch(cell));
+        order = found ?? chosenOrder;
+
+        rows = PropagationImport.Preview(sheet, matches, order, dictionary, plants, existing, Today);
+        ticked = [.. rows.Select((r, i) => (r, i)).Where(x => x.r.TickedByDefault).Select(x => x.i)];
+    }
+
+    private string Samples(int column)
+    {
+        var values = sheet!.Rows
+            .Select(r => column < r.Count ? r[column].Trim() : "")
+            .Where(v => v.Length > 0)
+            .Take(2)
+            .ToList();
+        return values.Count == 0 ? Strings.Account.ImportEmpty : string.Join(" · ", values);
+    }
+
+    private static string MetaLine(PropagationImportRow row)
+    {
+        var culture = CultureInfo.CurrentCulture;
+        var parts = new List<string> { string.Format(culture, Strings.Account.ImportRowLine, row.Line), Labels.For(row.Draft.Type), Labels.For(row.Draft.Medium) };
+        if (row.Draft.InitialCount > 1)
+            parts.Add(string.Format(culture, Strings.Tidy.ImportCount, row.Draft.InitialCount));
+        if (!string.IsNullOrWhiteSpace(row.Place))
+            parts.Add(row.Place);
+        parts.Add(Labels.Date(row.Draft.StartedOn));
+        return string.Join(" · ", parts);
+    }
+
+    private void Toggle(int index)
+    {
+        if (!ticked.Remove(index))
+            ticked.Add(index);
+    }
+
+    private void TickAll() =>
+        ticked = [.. rows.Select((r, i) => (r, i)).Where(x => x.r.CantAdd is null).Select(x => x.i)];
+
+    private void UntickAll() => ticked = [];
+
+    private async Task AddAsync()
+    {
+        if (adding || ticked.Count == 0)
+            return;
+
+        var chosen = rows.Where((r, i) => ticked.Contains(i)).ToList();
+        error = null;
+        addError = null;
+        undoError = null;
+        undone = false;
+        adding = true;
+        addDone = 0;
+        addTotal = chosen.Count;
+        try
+        {
+            result = await Importer.ImportAsync(chosen, Labels.For, new Progress<int>(done =>
+            {
+                addDone = done;
+                StateHasChanged();
+            }));
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Importing the propagations failed");
+            // What was added before it failed can still be undone
+            result = Importer.Last;
+            addError = Strings.Account.ImportAddFailedSome;
+        }
+        adding = false;
+        if (result is { Added: > 0 } || (result is not null && addError is null))
+        {
+            var skippedLines = result!.Skipped.Select(s => s.Line).ToHashSet();
+            added = addError is null ? [.. chosen.Where(r => !skippedLines.Contains(r.Line))] : [];
+            GoTo(Step.Result);
+        }
+        else
+        {
+            // Nothing was added, so it stays here with the columns and ticks as they were, ready to try again
+            result = null;
+            addError = null;
+            error = Strings.Tidy.ImportAddFailedNone;
+        }
+    }
+
+    private async Task UndoAsync()
+    {
+        if (result is null || busy)
+            return;
+
+        busy = true;
+        undoError = null;
+        try
+        {
+            await Importer.UndoAsync(result);
+            undone = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Undoing the propagation import failed");
+            undoError = Strings.Account.ImportUndoFailed;
+        }
+        busy = false;
+    }
+}

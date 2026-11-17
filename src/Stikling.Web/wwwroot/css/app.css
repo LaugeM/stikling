@@ -3173,15 +3173,26 @@ main.app-content:has(.form-bar) {
     padding: 0;
 }
 
-/* The hairline runs through the centres of the photos and on down to the focus card */
-.family-chain::before {
+/* A hairline runs from each photo down to the next, and on down to the focus card. It is dotted when the parent is a guess */
+.family-chain li {
+    position: relative;
+}
+
+.family-chain li::before {
     content: "";
     position: absolute;
     left: 1.25rem;
     top: 1.375rem;
+    bottom: -1.375rem; /* down to the centre of the next photo */
+    border-left: 1px solid var(--pa-border);
+}
+
+.family-chain li:last-child::before {
     bottom: -0.75rem; /* across the gap above the focus card */
-    width: 1px;
-    background: var(--pa-border);
+}
+
+.family-chain li.guess::before {
+    border-left: 2px dotted var(--pa-border);
 }
 
 .family-ancestor {
@@ -4341,6 +4352,29 @@ tr.drop-target {
 .species-facts-credits a {
     color: inherit;
     text-decoration: underline;
+}
+
+/* A plant, propagation or pot named with an @ in a note */
+.mention-link {
+    color: var(--pa-green);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    text-underline-offset: 0.15em;
+}
+
+/* The checkbox under a parent picker is tall enough to tap */
+.form-check.parent-guess {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    min-height: 2.75rem;
+    padding-left: 0;
+}
+
+.form-check.parent-guess .form-check-input {
+    float: none;
+    margin: 0;
+    flex: none;
 }
 
 .today-winter-not {

@@ -401,6 +401,9 @@ public sealed class Plant : Entity
     /// <summary>The plant this one was propagated from, if known.</summary>
     public Guid? ParentPlantId { get; set; }
 
+    /// <summary>The parent is a guess, so the page says "Probably from" and the family tree draws the line dotted. False on every older record.</summary>
+    public bool ParentIsGuess { get; set; }
+
     /// <summary>The propagation this plant was promoted from, if any.</summary>
     public Guid? FromPropagationId { get; set; }
 
@@ -527,7 +530,8 @@ public sealed class Plant : Entity
         WaterType = WaterType,
         Tags = [.. Tags],
         OwnFields = new(OwnFields),
-        ParentPlantId = ParentPlantId
+        ParentPlantId = ParentPlantId,
+        ParentIsGuess = ParentIsGuess
     };
 
     /// <summary>

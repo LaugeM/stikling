@@ -1,0 +1,49 @@
+@* The notes that mention this plant or propagation with an @, newest first. Hidden when there are none. *@
+@inject MentionService Lookup
+
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (lines.Count > 0)
+{
+    <section class="detail-card" id="mentioned-in" aria-labelledby="mentioned-in-heading">
+        <h2 id="mentioned-in-heading">@Strings.Tidy.MentionedInHeading</h2>
+        <ul class="mentioned-list">
+            @foreach (var line in lines)
+            {
+                <li>
+                    <a class="mentioned-link" href="@Href(line)">
+                        <span class="text-body-secondary small">@Labels.Date(line.Day) · @Name(line)</span>
+                        <span>@line.Snippet</span>
+                    </a>
+                </li>
+            }
+        </ul>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    private IReadOnlyList<MentionedLine> lines = [];
+    private Guid loadedFor;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != SubjectId)
+        {
+            loadedFor = SubjectId;
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync() => lines = await Lookup.ForAsync(SubjectId);
+
+    private static string Name(MentionedLine line) =>
+        line.Plant?.DisplayName ?? line.Propagation?.DisplayName ?? (line.PestCase is { } pestCase ? F(Strings.Tidy.MentionedInCase, Labels.For(pestCase.Pest)) : "");
+
+    private static string Href(MentionedLine line) =>
+        line.Plant is { } plant ? $"plants/{plant.Id}"
+        : line.Propagation is { } propagation ? $"propagations/{propagation.Id}"
+        : $"pests/{line.PestCase!.Id}";
+}

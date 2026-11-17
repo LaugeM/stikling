@@ -1,0 +1,44 @@
+.mention-box {
+    display: grid;
+    gap: 0.375rem;
+}
+
+/* In the flow under the box rather than floating over it, so a sheet never cuts it off */
+.mention-choices {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    border: 1px solid var(--pa-border);
+    border-radius: 0.5rem;
+    background: var(--pa-surface);
+    max-height: 40dvh;
+    overflow-y: auto;
+}
+
+.mention-choices li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.mention-choice {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.5rem 0.75rem;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    text-align: start;
+}
+
+.mention-choice:hover,
+.mention-choice:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.mention-choice .item-name {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

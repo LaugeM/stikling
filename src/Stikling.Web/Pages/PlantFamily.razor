@@ -23,9 +23,11 @@ else
                 <a class="link-action family-earlier" href="plants/@tree.Ancestors[0].Id/family">@Strings.Plants.FamilyEarlier</a>
             }
             <ul class="family-chain">
-                @foreach (var ancestor in tree.Ancestors)
+                @for (var i = 0; i < tree.Ancestors.Count; i++)
                 {
-                    <li>
+                    var ancestor = tree.Ancestors[i];
+                    @* The line down from an ancestor is dotted when the plant below it is only guessed to come from it *@
+                    <li class="@(GuessBelow(i) ? "guess" : null)">
                         <a class="family-ancestor @(Left(ancestor) ? "faded" : null)" href="plants/@ancestor.Id/family">
                             <span class="family-ancestor-photo potted" aria-hidden="true">
                                 @if (Covers.Shown(ancestor.CoverPhotoId) is { } coverId)
@@ -169,6 +171,9 @@ else
     // "3rd gen" for a plant that has a parent in the family, nothing for the oldest
     private string? GenText(Plant p) =>
         PlantLineage.GenerationOf(p, everyPlant) is { } generation ? F(Strings.Plants.TreeGeneration, Ordinal.Of(generation.Number)) : null;
+
+    private bool GuessBelow(int i) =>
+        (i + 1 < tree!.Ancestors.Count ? tree.Ancestors[i + 1] : plant)?.ParentIsGuess == true;
 
     private static bool Left(Plant p) => !p.InCollection;
 
