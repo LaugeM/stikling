@@ -21,6 +21,7 @@
 @inject WishService WishService
 @inject ShelfService ShelfService
 @inject NavigationManager Navigation
+@inject CameraService Camera
 @using CoreTable = Stikling.Core.Plants.PlantTable
 
 <PageTitle>@Strings.Plants.ListPageTitle</PageTitle>
@@ -40,6 +41,10 @@
             <button type="button" class="btn btn-link btn-sm link-action phone-link" disabled="@(ShareCount == 0)" @onclick="OpenShare">@Strings.Plants.ListShareAsText</button>
             <a class="btn btn-link btn-sm link-action phone-link" href="plants/collection">@Strings.Plants.ListCollection</a>
             <a class="btn btn-link btn-sm link-action phone-link" href="wishlist">@Strings.Plants.ListWishlist</a>
+            @if (scanAvailable)
+            {
+                <a class="btn btn-link btn-sm link-action phone-link" href="scan">@Strings.QrLabels.ScanTitle</a>
+            }
             <button type="button" class="btn btn-link btn-sm link-action phone-link" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
@@ -102,6 +107,13 @@ else
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z" /></svg>
                 @Strings.Plants.ListWishlist
             </a>
+            @if (scanAvailable)
+            {
+                <a class="btn btn-link btn-sm link-action list-side-link" href="scan">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16" /></svg>
+                    @Strings.QrLabels.ScanTitle
+                </a>
+            }
             <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.CheckBox</svg>
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
@@ -749,8 +761,12 @@ else
     private string? bulkMessage;
     private bool busy;
 
+    // Only phones and computers with a camera get the link to the label scanner
+    private bool scanAvailable;
+
     protected override async Task OnInitializedAsync()
     {
+        scanAvailable = await Camera.IsAvailableAsync();
         if (PlantTags.Clean(Tag) is { } tag)
         {
             pickedTags.Add(tag);

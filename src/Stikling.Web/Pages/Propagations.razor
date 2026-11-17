@@ -8,6 +8,7 @@
 @inject TimeProvider Time
 @inject PlantNameService Names
 @inject NavigationManager Navigation
+@inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
 @inject ExperimentCardService Cards
 @inject ShareCardService ShareCard
@@ -24,6 +25,10 @@
         <div class="d-flex align-items-baseline gap-2">
             <span class="text-body-secondary small">@F(Strings.Propagations.ListShownOf, visible.Count, all.Count)</span>
             <a class="btn btn-link btn-sm link-action phone-link" href="swap">@Strings.Propagations.ListSwapLink</a>
+            @if (scanAvailable)
+            {
+                <a class="btn btn-link btn-sm link-action phone-link" href="scan">@Strings.QrLabels.ScanTitle</a>
+            }
             <button type="button" class="btn btn-link btn-sm link-action phone-link" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
             </button>
@@ -77,6 +82,13 @@ else
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 20V12M12 20V5M19 20v-9" /></svg>
                 @Strings.Propagations.ListResultsLink
             </a>
+            @if (scanAvailable)
+            {
+                <a class="btn btn-link btn-sm link-action list-side-link" href="scan">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16M4 12h16" /></svg>
+                    @Strings.QrLabels.ScanTitle
+                </a>
+            }
             <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.CheckBox</svg>
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
@@ -322,7 +334,14 @@ else
     private string? search;
     private ProgressFilter progress = ProgressFilter.Active;
 
-    protected override Task OnInitializedAsync() => LoadAsync();
+    // Only phones and computers with a camera get the link to the label scanner
+    private bool scanAvailable;
+
+    protected override async Task OnInitializedAsync()
+    {
+        scanAvailable = await Camera.IsAvailableAsync();
+        await LoadAsync();
+    }
 
     private EverydayNameBook? everyday;
 

@@ -1,0 +1,119 @@
+/* The scanner stays dark in both themes, like the camera and the photo viewer, so the colours are written
+   here as the camera has them, with the dark values of the green accent. */
+.scan {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    background: #0b0f0c;
+    color: #f1f4f1;
+    outline: none;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+.scan-stage {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+    display: grid;
+    /* The frame in the middle row, with the line under it, so the frame stays centred in the picture */
+    grid-template-rows: minmax(0, 1fr) auto minmax(0, 1fr);
+    grid-template-columns: minmax(0, 1fr);
+    justify-items: center;
+    overflow: hidden;
+    container-type: size;
+}
+
+.scan-video {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: #0b0f0c;
+}
+
+.scan-frame {
+    grid-row: 2;
+    position: relative;
+    width: 65vmin;
+    width: 65cqmin;
+    aspect-ratio: 1;
+    border: 1px solid rgb(255 255 255 / 0.7);
+    border-radius: 1.25rem;
+    pointer-events: none;
+}
+
+.scan-under {
+    grid-row: 3;
+    align-self: start;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.75rem;
+    max-width: 28rem;
+    padding: 1rem 1.25rem 0;
+    text-align: center;
+}
+
+.scan-line {
+    margin: 0;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: #fff;
+    text-shadow: 0 1px 3px rgb(0 0 0 / 0.8);
+}
+
+.scan-btn {
+    min-height: 2.75rem;
+    padding: 0 1rem;
+    border-radius: 0.6rem;
+    border: 1px solid transparent;
+    background: #5fb883;
+    color: #0f1a13;
+    font-weight: 600;
+}
+
+.scan-close {
+    position: absolute;
+    top: 0.5rem;
+    left: 0.5rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    display: grid;
+    place-items: center;
+    border: 0;
+    border-radius: 50%;
+    background: rgb(0 0 0 / 0.45);
+    color: #f1f4f1;
+}
+
+.scan-close svg {
+    width: 1.4rem;
+    height: 1.4rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2.25;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.scan button:focus-visible {
+    outline: 2px solid #86d1a4;
+    outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+    .scan-btn {
+        transition: background-color 0.15s ease, border-color 0.15s ease;
+    }
+}
+
+/* From 64rem the stage is the whole screen, as in the camera, and the line sits a little lower */
+@media (min-width: 64rem) {
+    .scan-under {
+        padding-top: 1.25rem;
+    }
+}
