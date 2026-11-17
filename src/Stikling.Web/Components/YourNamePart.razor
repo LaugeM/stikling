@@ -168,7 +168,11 @@
         editing = true;
     }
 
-    private void Cancel() => editing = false;
+    private void Cancel()
+    {
+        editing = false;
+        note = Yours.Note;
+    }
 
     private async Task SaveAsync()
     {
