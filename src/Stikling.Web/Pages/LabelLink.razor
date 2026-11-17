@@ -1,0 +1,162 @@
+@page "/l/{Code}"
+@* What the QR code on a label opens. The link is the same for a plant and a cutting, so this looks for both,
+   and goes on to whichever is here. Routes match in any case, so the capitals in the QR code work too. *@
+@implements IDisposable
+@using Stikling.Core.Labels
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject AccountService Account
+@inject SyncRunner Sync
+@inject NavigationManager Navigation
+
+<PageTitle>@Strings.QrLabels.LinkPageTitle</PageTitle>
+
+@* Every finished sync looks again, so the page moves on when the plant arrives *@
+<ReloadOnSync Reload="CheckAsync" />
+
+@if (state is { } shown)
+{
+    <div class="empty-state first-run link-state">
+        <svg viewBox="0 0 64 64" aria-hidden="true">
+            <path class="glass" d="M21 26h22v26a6 6 0 0 1-6 6H27a6 6 0 0 1-6-6Z" /><path class="glass" d="M21 37h22" opacity="0.45" />
+            <path class="growth" d="M32 53V14" /><path class="growth" d="M32 25c0-7-5-11-12-11 0 7 5 11 12 11Z" /><path class="growth" d="M32 20c0-6 5-10 12-10 0 6-5 10-12 10Z" />
+            <path class="growth" d="M32 53c-2 0-5-1-6-3M32 53c2 0 5-1 6-3M32 49c-2 0-4-1-5-2M32 49c2 0 4-1 5-2" />
+        </svg>
+
+        @switch (shown)
+        {
+            case LinkState.Bad:
+                <h1>@Strings.QrLabels.LinkBadTitle</h1>
+                <p>@Strings.QrLabels.LinkBadText</p>
+                <div class="first-run-actions">
+                    <a class="btn btn-primary" href="./">@Strings.QrLabels.LinkGoToStikling</a>
+                </div>
+                break;
+
+            case LinkState.Deleted:
+                <h1>@Strings.QrLabels.LinkDeletedTitle</h1>
+                <p>@Strings.QrLabels.LinkDeletedText</p>
+                <div class="first-run-actions">
+                    <a class="btn btn-primary" href="plants">@Strings.QrLabels.LinkGoToPlants</a>
+                </div>
+                break;
+
+            case LinkState.Waiting:
+                <h1>@Strings.QrLabels.LinkWaitingTitle</h1>
+                <p>@Strings.QrLabels.LinkWaitingText</p>
+                <div class="link-bar" role="progressbar" aria-label="@Strings.QrLabels.LinkWaitingProgress"><span></span></div>
+                break;
+
+            case LinkState.SyncFailed:
+                <h1>@Strings.QrLabels.LinkSyncFailedTitle</h1>
+                <p>@Strings.QrLabels.LinkSyncFailedText</p>
+                <div class="first-run-actions">
+                    <button type="button" class="btn btn-primary" @onclick="Sync.SyncNowAsync">@Strings.QrLabels.ScanTryAgain</button>
+                </div>
+                <p class="link-hint">@Strings.QrLabels.LinkAppHint</p>
+                break;
+
+            case LinkState.SignedOut:
+                <h1>@Strings.QrLabels.LinkSignedOutTitle</h1>
+                <p>@Strings.QrLabels.LinkSignedOutText</p>
+                @if (Account.IsAvailable)
+                {
+                    <div class="first-run-actions">
+                        <a class="btn btn-primary" href="@SignInUrl">@Strings.QrLabels.LinkSignIn</a>
+                    </div>
+                }
+                <p class="link-hint">@Strings.QrLabels.LinkAppHint</p>
+                <p class="link-hint">@Strings.QrLabels.LinkAbout <a href="./">@Strings.QrLabels.LinkAboutLink</a></p>
+                break;
+
+            default:
+                <h1>@Strings.QrLabels.LinkNotMineTitle</h1>
+                <p>@Strings.QrLabels.LinkNotMineText</p>
+                <div class="first-run-actions">
+                    <a class="btn btn-primary" href="plants">@Strings.QrLabels.LinkGoToPlants</a>
+                </div>
+                <p class="link-hint">@Strings.QrLabels.LinkAppHint</p>
+                break;
+        }
+    </div>
+}
+
+@code {
+    private enum LinkState { Bad, Deleted, Waiting, SyncFailed, SignedOut, NotMine }
+
+    [Parameter]
+    public string Code { get; set; } = "";
+
+    // How long a signed-in device waits for a first sync that hasn't started, before it stops waiting.
+    // A sync can end without a date or a problem, for example when the session turned out to be signed out.
+    private static readonly TimeSpan WaitForFirstSync = TimeSpan.FromSeconds(20);
+
+    private LinkState? state;
+    private Guid? id;
+    private bool leaving;
+    private readonly DateTime opened = DateTime.UtcNow;
+    private Timer? recheck;
+
+    // Back to this page once signed in, so the plant opens when it has arrived
+    private string SignInUrl => $"sign-in?return={Uri.EscapeDataString($"l/{id:N}")}";
+
+    protected override void OnInitialized()
+    {
+        Sync.StatusChanged += OnSyncStatus;
+        // Looks once more when the wait is over, since nothing else may fire after it
+        recheck = new Timer(_ => OnSyncStatus(), null, WaitForFirstSync + TimeSpan.FromSeconds(1), Timeout.InfiniteTimeSpan);
+    }
+
+    protected override async Task OnParametersSetAsync() => await CheckAsync();
+
+    // The first sync starts and ends after the page is open, and ends with nothing new when the plant isn't there
+    private void OnSyncStatus() => _ = InvokeAsync(CheckAsync);
+
+    private async Task CheckAsync()
+    {
+        // ReloadOnSync and the status event can both call this for one sync
+        if (leaving)
+            return;
+        id = LabelLinks.ParseCode(Code);
+        if (id is not { } code)
+        {
+            state = LinkState.Bad;
+            StateHasChanged();
+            return;
+        }
+
+        // Replaces this page in the history, so going back from the plant doesn't open the label again
+        if (await PlantRepository.GetAsync(code) is not null)
+        {
+            leaving = true;
+            Navigation.NavigateTo($"plants/{code}", replace: true);
+            return;
+        }
+        if (await PropagationRepository.GetAsync(code) is not null)
+        {
+            leaving = true;
+            Navigation.NavigateTo($"propagations/{code}", replace: true);
+            return;
+        }
+
+        if (await PlantRepository.IsDeletedAsync(code) || await PropagationRepository.IsDeletedAsync(code))
+            state = LinkState.Deleted;
+        else if (!Account.IsAvailable || !await Account.WasSignedInAsync())
+            state = LinkState.SignedOut;
+        else if (Sync.Running || (Sync.LastSynced is null && Sync.Problem is null && DateTime.UtcNow - opened < WaitForFirstSync))
+            // Before the first sync is done on this device, the collection may not have arrived yet
+            state = LinkState.Waiting;
+        else if (Sync.Problem is not null)
+            // The last sync failed, so the plant may still be on its way
+            state = LinkState.SyncFailed;
+        else
+            state = LinkState.NotMine;
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        Sync.StatusChanged -= OnSyncStatus;
+        recheck?.Dispose();
+    }
+}

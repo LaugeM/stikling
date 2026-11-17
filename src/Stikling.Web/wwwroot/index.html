@@ -28,9 +28,10 @@
         // Someone who has been here before gets the app from the service worker in a moment, so the
         // page below only shows the icon, and only if starting takes a while
         if (navigator.serviceWorker && navigator.serviceWorker.controller) document.documentElement.classList.add("returning");
-        // Someone opening a link to keep a plant's history comes for that, not for the intro, and may
-        // be starting the app for the first time, so the page says it is opening and shows the progress
-        if (location.pathname.indexOf("/received/") !== -1) document.documentElement.classList.add("returning", "receiving");
+        // Someone opening a link to keep a plant's history, or scanning the QR code on a label (/l/, in any
+        // case since the code is in capitals), comes for that, not for the intro, and may be starting the
+        // app for the first time, so the page says it is opening and shows the progress
+        if (location.pathname.indexOf("/received/") !== -1 || /^\/l\//i.test(location.pathname)) document.documentElement.classList.add("returning", "receiving");
     </script>
     <style>
         /* The page that shows while the app downloads, which is also what search engines and link
