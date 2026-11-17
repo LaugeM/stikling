@@ -1,0 +1,45 @@
+/* The headings on the page a label opens are the page's h1, drawn like the first-run h2 in app.css */
+.link-state h1 {
+    margin: 0 0 0.35rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    color: var(--pa-green-dark);
+}
+
+.link-state .link-hint {
+    margin-top: 1rem;
+    font-size: 0.9rem;
+}
+
+/* A slim bar that keeps moving while the collection arrives, the shape of the one on Received */
+.link-bar {
+    width: min(100%, 16rem);
+    height: 0.4rem;
+    margin: 1rem auto 0;
+    overflow: hidden;
+    border-radius: 999px;
+    background: var(--pa-surface);
+}
+
+.link-bar span {
+    display: block;
+    width: 40%;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--pa-green);
+    animation: link-bar-slide 1.4s ease-in-out infinite;
+}
+
+@keyframes link-bar-slide {
+    from { transform: translateX(-100%); }
+    to { transform: translateX(250%); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .link-bar span {
+        width: 100%;
+        animation: none;
+    }
+}

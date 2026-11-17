@@ -7,8 +7,8 @@ using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Labels;
 
-/// <summary>Which of the four things a label can show are switched on.</summary>
-public sealed record LabelParts(bool Number = true, bool Name = true, bool Botanical = true, bool Date = false);
+/// <summary>Which of the five things a label can show are switched on. Settings saved before the QR code read it as off.</summary>
+public sealed record LabelParts(bool Number = true, bool Name = true, bool Botanical = true, bool Date = false, bool Qr = false);
 
 /// <summary>
 /// What goes on the label of one plant or cutting, before the tick boxes and the size decide how much
@@ -20,6 +20,9 @@ public sealed record LabelParts(bool Number = true, bool Name = true, bool Botan
 /// <param name="DateLine">"Got 3 Mar 2025" or "Started 3 Oct 2026", or null when there is no date.</param>
 public sealed record LabelContent(string? Number, string Name, string? Botanical, string? DateLine)
 {
+    /// <summary>The dark and light modules of the QR code that opens this label's plant or cutting (see <see cref="QrCode.Rows"/>). Filled by the page, not worked out from the record.</summary>
+    public IReadOnlyList<string>? Qr { get; init; }
+
     public static LabelContent For(Plant plant) => new(
         CollectionNumbers.Normalize(plant.CollectionNumber),
         plant.DisplayName,

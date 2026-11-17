@@ -1,0 +1,169 @@
+@page "/scan"
+@* Stikling's own scanner for the QR code on a label, full screen like the Same angle camera. It is there for
+   people who keep Stikling as an app in a browser that isn't the phone's default, where the camera app's
+   link opens a browser that has none of their plants. The camera and the reading are in JavaScript; each
+   code read comes back here, and an address that belongs to Stikling opens the plant or cutting. *@
+@implements IAsyncDisposable
+@using Stikling.Core.Labels
+@inject LabelScanner Scanner
+@inject NavigationManager Navigation
+@inject ILogger<ScanLabel> Logger
+
+<PageTitle>@Strings.QrLabels.ScanPageTitle</PageTitle>
+
+<div class="scan" role="dialog" aria-modal="true" aria-label="@Strings.QrLabels.ScanDialogLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
+    <div class="scan-stage">
+        <video class="scan-video" @ref="video" autoplay muted playsinline></video>
+        <div class="scan-frame" aria-hidden="true"></div>
+        <div class="scan-under">
+            @if (result is CameraStart.Denied or CameraStart.None or CameraStart.Failed)
+            {
+                <p class="scan-line" role="alert">@FailureText</p>
+                @if (result != CameraStart.None)
+                {
+                    <button type="button" class="scan-btn" @onclick="StartAsync">@Strings.QrLabels.ScanTryAgain</button>
+                }
+            }
+            else if (result is null)
+            {
+                <p class="scan-line" role="status">@Strings.QrLabels.ScanStarting</p>
+            }
+            else if (notice)
+            {
+                <p class="scan-line" role="status">@Strings.QrLabels.ScanNotStikling</p>
+            }
+            else
+            {
+                <p class="scan-line">@Strings.QrLabels.ScanFrameHint</p>
+            }
+        </div>
+        <button type="button" class="scan-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close" title="@Strings.Common.Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
+        </button>
+    </div>
+</div>
+
+@code {
+    private static readonly TimeSpan NoticeFor = TimeSpan.FromSeconds(3);
+
+    // Null while the camera is starting
+    private CameraStart? result;
+    private bool notice;
+    private string? lastRejected;
+    private CancellationTokenSource? noticeTimer;
+    private bool running;
+    private bool disposed;
+    private ElementReference video;
+    private ElementReference dialog;
+
+    private string FailureText => result switch
+    {
+        CameraStart.Denied => Strings.QrLabels.ScanDenied,
+        CameraStart.None => Strings.QrLabels.ScanNoCamera,
+        _ => Strings.QrLabels.ScanFailed
+    };
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender)
+            return;
+
+        await dialog.FocusAsync();
+        await StartAsync();
+    }
+
+    private async Task StartAsync()
+    {
+        result = null;
+        running = true;
+        StateHasChanged();
+        try
+        {
+            result = await Scanner.StartAsync(video, OnReadAsync);
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            Logger.LogWarning(ex, "Starting the scanner failed");
+            result = CameraStart.Failed;
+        }
+        if (!disposed)
+            StateHasChanged();
+    }
+
+    // True when the text opened something, which stops the reading
+    private async Task<bool> OnReadAsync(string text)
+    {
+        if (LabelLinks.AppPath(text, Navigation.BaseUri) is { } path)
+        {
+            await StopAsync();
+            // Replaces this page, so Back from the plant goes to where Scan a label was opened
+            Navigation.NavigateTo(path, replace: true);
+            return true;
+        }
+
+        // The same code read again while the line shows doesn't restart the three seconds
+        if (!notice || text != lastRejected)
+        {
+            lastRejected = text;
+            notice = true;
+            noticeTimer?.Cancel();
+            noticeTimer = new CancellationTokenSource();
+            _ = HideNoticeAsync(noticeTimer.Token);
+            StateHasChanged();
+        }
+        return false;
+    }
+
+    private async Task HideNoticeAsync(CancellationToken token)
+    {
+        try
+        {
+            await Task.Delay(NoticeFor, token);
+        }
+        catch (OperationCanceledException)
+        {
+            return;
+        }
+
+        notice = false;
+        lastRejected = null;
+        if (!disposed)
+            await InvokeAsync(StateHasChanged);
+    }
+
+    private async Task StopAsync()
+    {
+        if (!running)
+            return;
+
+        running = false;
+        await Scanner.StopAsync(video);
+    }
+
+    private async Task CloseAsync()
+    {
+        await StopAsync();
+        if (!await Scanner.GoBackAsync())
+            Navigation.NavigateTo("plants", replace: true);
+    }
+
+    private async Task OnKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+            await CloseAsync();
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        noticeTimer?.Cancel();
+        try
+        {
+            await StopAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+            // The page is going away, and the camera with it
+        }
+    }
+}

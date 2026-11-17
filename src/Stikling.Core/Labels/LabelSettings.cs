@@ -22,7 +22,7 @@ public enum LabelTab
 public enum LabelPaper { A4, Letter }
 
 [JsonConverter(typeof(JsonStringEnumConverter))]
-public enum LabelSheetLayout { Pots, Stakes }
+public enum LabelSheetLayout { Pots, Stakes, Stickers }
 
 /// <summary>A size in the Label maker app tab. The width is the way the text runs.</summary>
 public sealed record LabelAppSize(string Id, string Label, double WidthMm, double HeightMm);
@@ -39,6 +39,35 @@ public sealed record LabelShape(double WidthMm, double HeightMm, string Cut = "n
 
     /// <summary>Too low for more than one line: the number, then the name.</summary>
     public bool OneLine => !Stake && HeightMm <= 12;
+
+    /// <summary>The padding round the drawing in millimetres. wwwroot/js/labels.js works it out the same way, so the two must agree.</summary>
+    public double PaddingMm => Math.Max(0.8, Math.Min(2, Math.Min(WidthMm, HeightMm) * 0.08));
+
+    /// <summary>The smallest side of a QR code that scans, 29 modules of about 0.3 mm.</summary>
+    public const double QrMinMm = 9;
+
+    /// <summary>The width a flat or one-line label keeps for its text beside the QR code.</summary>
+    public const double QrTextMinMm = 10;
+
+    /// <summary>
+    /// Whether a QR code fits. On a stake it sits at the top and is as wide as the label inside its padding.
+    /// On the others it is a square as high as the label inside its padding, at the right end, and has to
+    /// leave room for the text beside it. The drawing in labels.js uses the same sizes.
+    /// </summary>
+    public bool QrFits
+    {
+        get
+        {
+            var pad = PaddingMm;
+            var side = (Stake ? WidthMm : HeightMm) - 2 * pad;
+            if (side < QrMinMm)
+                return false;
+            if (Stake)
+                return true;
+            // The gap between the text and the code is two modules
+            return WidthMm - 2 * pad - side - side * 2 / 29 >= QrTextMinMm;
+        }
+    }
 }
 
 /// <summary>
@@ -118,6 +147,11 @@ public sealed class LabelSettings
             case LabelTab.Tape:
                 return new LabelShape(settings.TapeLengthMm, settings.TapeMm);
             case LabelTab.Sheet:
+                if (settings.Layout == LabelSheetLayout.Stickers)
+                {
+                    var sheet = StickerSheet.For(settings.Paper);
+                    return new LabelShape(sheet.LabelWidthMm, sheet.LabelHeightMm);
+                }
                 return settings.Layout == LabelSheetLayout.Stakes
                     ? new LabelShape(15, 120, "point")
                     : new LabelShape(50, 25, "box");
@@ -139,7 +173,8 @@ public sealed class LabelSettings
         return settings.Tab switch
         {
             LabelTab.Tape => string.Create(CultureInfo.InvariantCulture, $"@page {{ size: {settings.TapeLengthMm}mm {settings.TapeMm}mm; margin: 0 }}"),
-            LabelTab.Sheet => $"@page {{ size: {(settings.Paper == LabelPaper.A4 ? "A4" : "letter")}; margin: 10mm }}",
+            // Stickers are placed on the paper by their own measurements, so the page has no margin of its own
+            LabelTab.Sheet => $"@page {{ size: {(settings.Paper == LabelPaper.A4 ? "A4" : "letter")}; margin: {(settings.Layout == LabelSheetLayout.Stickers ? "0" : "10mm")} }}",
             _ => null
         };
     }
@@ -155,5 +190,16 @@ public sealed class LabelSettings
         return settings.Tab == LabelTab.Tape
             ? F(Strings.Shared.LabelNoRoomTape, settings.TapeMm)
             : Strings.Shared.LabelNoRoomLow;
+    }
+
+    /// <summary>Why the QR code can't be ticked, or null when there is room. Said under the tick boxes.</summary>
+    public string? QrNoRoomNote()
+    {
+        var settings = Normalized();
+        if (settings.Shape().QrFits)
+            return null;
+        return settings.Tab == LabelTab.Tape
+            ? F(Strings.Shared.LabelQrNoRoomTape, settings.TapeMm)
+            : Strings.Shared.LabelQrNoRoomSmall;
     }
 }

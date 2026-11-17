@@ -107,6 +107,16 @@
     min-height: 2.75rem;
 }
 
+.labels-start {
+    min-height: 2.75rem;
+    max-width: 8rem;
+}
+
+/* Only printed: the stickers at their places on the sheet. The list above is the preview on screen. */
+.sticker-pages {
+    display: none;
+}
+
 .labels-parts .form-check {
     display: flex;
     align-items: center;
@@ -199,5 +209,35 @@
 
     .labels-sheet.tape .label-item:last-child {
         break-after: auto;
+    }
+
+    /* Stickers print on sheets laid out in millimetres, so the list of labels is left out. Each sheet is
+       a page and its stickers are placed by the sheet's own measurements. */
+    .labels-sheet.stickers {
+        display: none !important;
+    }
+
+    .sticker-pages {
+        display: block;
+    }
+
+    .sticker-page {
+        position: relative;
+        overflow: hidden;
+        break-after: page;
+    }
+
+    .sticker-page:last-child {
+        break-after: auto;
+    }
+
+    .sticker-cell {
+        position: absolute;
+    }
+
+    .sticker-cell canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
     }
 }

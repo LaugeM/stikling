@@ -41,7 +41,7 @@
 
         <div class="labels-layout">
             <section class="labels-preview" aria-label="@Strings.Shared.LabelsPreview">
-                <ul class="labels-sheet @TabClass" @ref="container" style="--zoom: @Num(Zoom(shape))">
+                <ul class="labels-sheet @TabClass @StickersClass" @ref="container" style="--zoom: @Num(Zoom(shape))">
                     @foreach (var item in items)
                     {
                         <li class="label-item" @key="item.Id" style="--w: @Num(shape.WidthMm); --h: @Num(shape.HeightMm)">
@@ -52,6 +52,27 @@
                         </li>
                     }
                 </ul>
+                @if (stickers is { } sheet)
+                {
+                    @* Only for printing: every sticker at its place on the sheet, the way the sheet's own measurements say *@
+                    <div class="sticker-pages" @ref="stickerContainer" aria-hidden="true">
+                        @for (var page = 1; page <= sheet.Sheets(startAt, items.Count); page++)
+                        {
+                            <div class="sticker-page" style="width: @(Num(sheet.PaperWidthMm))mm; height: @(Num(sheet.PaperHeightMm - 1))mm">
+                                @for (var i = 0; i < items.Count; i++)
+                                {
+                                    var place = sheet.Place(startAt, i);
+                                    if (place.Sheet != page)
+                                        continue;
+                                    <div class="sticker-cell" @key="items[i].Id"
+                                         style="left: @(Num(place.XMm))mm; top: @(Num(place.YMm))mm; width: @(Num(sheet.LabelWidthMm))mm; height: @(Num(sheet.LabelHeightMm))mm">
+                                        <canvas data-label></canvas>
+                                    </div>
+                                }
+                            </div>
+                        }
+                    </div>
+                }
             </section>
 
             <section class="labels-settings" aria-label="@Strings.Shared.LabelsSettings">
@@ -153,11 +174,24 @@
                                 }
                             </div>
                             <p class="labels-note">
-                                @(settings.Layout == LabelSheetLayout.Pots
-                                    ? Strings.Shared.LabelsLayoutPotsNote
-                                    : Strings.Shared.LabelsLayoutStakesNote)
+                                @(settings.Layout switch
+                                {
+                                    LabelSheetLayout.Pots => Strings.Shared.LabelsLayoutPotsNote,
+                                    LabelSheetLayout.Stakes => Strings.Shared.LabelsLayoutStakesNote,
+                                    _ => settings.Paper == LabelPaper.A4 ? Strings.QrLabels.LayoutStickersNoteA4 : Strings.QrLabels.LayoutStickersNoteLetter
+                                })
                             </p>
                         </div>
+                        @if (stickers is { } startSheet)
+                        {
+                            var (startRow, startColumn) = startSheet.CellOf(startAt);
+                            <div class="labels-field">
+                                <label class="labels-field-label" for="labels-start">@Strings.QrLabels.StartAt</label>
+                                <input id="labels-start" type="number" class="form-control labels-start" inputmode="numeric" min="1" max="@startSheet.PerSheet"
+                                       @bind="startAt" @bind:event="onchange" @bind:after="StartChanged" />
+                                <p class="labels-note">@F(Strings.QrLabels.StartsAt, startSheet.ClampStart(startAt), startRow, startColumn)</p>
+                            </div>
+                        }
                         break;
                 }
 
@@ -183,9 +217,18 @@
                                @onchange="e => SetPartAsync(p => p with { Date = (bool)e.Value! })" />
                         <label class="form-check-label" for="labels-date">@Strings.Shared.LabelsShowDate</label>
                     </div>
+                    <div class="form-check">
+                        <input class="form-check-input" type="checkbox" id="labels-qr" checked="@(shape.QrFits && parts.Qr)" disabled="@(!shape.QrFits)"
+                               @onchange="e => SetPartAsync(p => p with { Qr = (bool)e.Value! })" />
+                        <label class="form-check-label" for="labels-qr">@Strings.QrLabels.ShowQr</label>
+                    </div>
                     @if (settings.NoRoomNote() is { } note)
                     {
                         <p class="labels-note">@note</p>
+                    }
+                    @if (settings.QrNoRoomNote() is { } qrNote)
+                    {
+                        <p class="labels-note">@qrNote</p>
                     }
                 </fieldset>
 
@@ -206,6 +249,10 @@
                     @if (settings.Tab == LabelTab.Tape)
                     {
                         <p class="labels-note">@Strings.Shared.LabelsPrintNote</p>
+                    }
+                    @if (stickers is not null)
+                    {
+                        <p class="labels-note">@Strings.QrLabels.PrintActualSize</p>
                     }
                 }
 
@@ -238,6 +285,7 @@
     [
         (LabelSheetLayout.Pots, Strings.Shared.LabelsLayoutPots),
         (LabelSheetLayout.Stakes, Strings.Shared.LabelsLayoutStakes),
+        (LabelSheetLayout.Stickers, Strings.QrLabels.LayoutStickers),
     ];
 
     /// <summary>The plants to make labels for, as ids with commas between.</summary>
@@ -251,6 +299,9 @@
     private List<Item>? items;
     private LabelSettings settings = new();
     private ElementReference container;
+    private ElementReference stickerContainer;
+    // Which sticker the first sheet starts at. Not saved, so every visit starts at the first.
+    private int startAt = 1;
     private string? loadedKey;
     private string? drawnKey;
     private bool canShareFiles;
@@ -258,6 +309,11 @@
     private string? message;
 
     private bool OnlyCuttings => string.IsNullOrWhiteSpace(PlantIds) && !string.IsNullOrWhiteSpace(CuttingIds);
+
+    // The sheet of stickers, when that is the layout chosen
+    private StickerSheet? stickers => settings is { Tab: LabelTab.Sheet, Layout: LabelSheetLayout.Stickers } ? StickerSheet.For(settings.Paper) : null;
+
+    private string? StickersClass => stickers is null ? null : "stickers";
 
     private string TabClass => settings.Tab switch
     {
@@ -293,7 +349,7 @@
             var plants = (await PlantRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToDictionary(p => p.Id);
             foreach (var id in plantIds)
                 if (plants.TryGetValue(id, out var plant))
-                    found.Add(new Item(id, false, LabelContent.For(plant)));
+                    found.Add(new Item(id, false, LabelContent.For(plant) with { Qr = QrFor(id) }));
         }
 
         if (cuttingIds.Count > 0)
@@ -301,10 +357,13 @@
             var cuttings = (await PropagationRepository.GetAllAsync()).Where(p => !p.IsDeleted).ToDictionary(p => p.Id);
             foreach (var id in cuttingIds)
                 if (cuttings.TryGetValue(id, out var cutting))
-                    found.Add(new Item(id, true, LabelContent.For(cutting)));
+                    found.Add(new Item(id, true, LabelContent.For(cutting) with { Qr = QrFor(id) }));
         }
         return found;
     }
+
+    // What the QR code on the label holds: a link that opens the plant or cutting
+    private IReadOnlyList<string> QrFor(Guid id) => QrCode.Rows(LabelLinks.For(id, Navigation.BaseUri));
 
     private static List<Guid> ParseIds(string? text)
     {
@@ -325,11 +384,15 @@
         }
 
         var shape = settings.Shape();
-        var key = string.Join(',', items.Select(i => i.Id)) + $"|{settings.Parts}|{shape}";
+        var key = string.Join(',', items.Select(i => i.Id)) + $"|{settings.Parts}|qr:{settings.Parts.Qr && shape.QrFits}|{shape}|{(stickers is null ? "" : startAt)}";
         if (key == drawnKey)
             return;
         drawnKey = key;
-        await Printer.DrawAsync(container, items.Select(i => i.Content).ToList(), settings.Parts, shape);
+        var contents = items.Select(i => i.Content).ToList();
+        await Printer.DrawAsync(container, contents, settings.Parts, shape);
+        // The printed sheets have canvases of their own
+        if (stickers is not null)
+            await Printer.DrawAsync(stickerContainer, contents, settings.Parts, shape);
     }
 
     // Only changes this print: the record isn't touched, and going back still works
@@ -363,12 +426,15 @@
 
     private Task SetPartAsync(Func<LabelParts, LabelParts> change) => Change(() => settings.Parts = change(settings.Parts));
 
+    private void StartChanged() => startAt = StickerSheet.For(settings.Paper).ClampStart(startAt);
+
     private Task SettingsChangedAsync() => Change(() => { });
 
     private async Task Change(Action change)
     {
         change();
         settings = settings.Normalized();
+        startAt = StickerSheet.For(settings.Paper).ClampStart(startAt);
         message = null;
         await Device.SetAsync(LabelSettings.Key, settings.ToJson());
     }
