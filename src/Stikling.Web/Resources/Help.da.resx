@@ -358,7 +358,7 @@
     <value>Hvordan virker rum og pladser?</value>
   </data>
   <data name="RoomsSpotsWorkA1" xml:space="preserve">
-    <value>Et rum er der hvor en plante bor, og en plads er et sted i rummet, fx "Stue / Oven på computeren". Vælg et rum du har brugt før, så det samme rum ikke ender med to navne. Filtrerer du plantelisten efter et rum, kommer dets pladser med. Under Rum og tags i Indstillinger kan du tilføje et rum eller en plads før der står planter i det, omdøbe eller slå dem sammen, fjerne et der er tomt, og markere at der er vækstlys, eller at det er udendørs. Hvert rum og hver plads har også en side med en note og billeder.</value>
+    <value>Et rum er der hvor en plante bor, og en plads er et sted i rummet, fx "Stue / Oven på computeren". Vælg et rum du har brugt før, så det samme rum ikke ender med to navne. Filtrerer du plantelisten efter et rum, kommer dets pladser med. Under Rum og tags i Indstillinger kan du tilføje et rum eller en plads før der står planter i det, omdøbe eller slå dem sammen, fjerne et der er tomt, og markere at der er vækstlys, eller at det er udendørs. Hvert rum og hver plads har også en side med en note og billeder, vækstlys, vinduer og lystjek.</value>
   </data>
   <data name="HappensWhenPlantDiesOrQ" xml:space="preserve">
     <value>Hvad sker der når en plante dør, eller jeg giver den væk?</value>
@@ -1396,7 +1396,7 @@
     <value>Hvad er siden for et rum?</value>
   </data>
   <data name="RoomPageA1" xml:space="preserve">
-    <value>Hvert rum og hver plads har en side med billeder, en note om hvordan stedet er, og de planter og stiklinger der står der. Siden for et rum viser også dets pladser. Du åbner den fra Rum og tags i Indstillinger, fra Placering på en plante eller en stikling, eller fra plantelisten når du har valgt et rum eller en plads. Noten og billederne hører til rummet eller pladsen og ikke til en plante, så de er der stadig når planterne skifter. Du omdøber eller fjerner stadig et rum under Rum og tags.</value>
+    <value>Hvert rum og hver plads har en side med billeder, en note om hvordan stedet er, vækstlys, vinduer og lystjek, og de planter og stiklinger der står der. Siden for et rum viser også dets pladser. Du åbner den fra Rum og tags i Indstillinger, fra Placering på en plante eller en stikling, eller fra plantelisten når du har valgt et rum eller en plads. Noten og billederne hører til rummet eller pladsen og ikke til en plante, så de er der stadig når planterne skifter. Du omdøber eller fjerner stadig et rum under Rum og tags.</value>
   </data>
   <data name="MovingHouseQ" xml:space="preserve">
     <value>Vi er flyttet. Hvad gør jeg?</value>
@@ -1532,6 +1532,30 @@
   </data>
   <data name="BringPropagationsFromSpreadsheetA1" xml:space="preserve">
     <value>Ja. Åbn &lt;em&gt;importér et regneark&lt;/em&gt; på samme måde som for planter og vælg &lt;em&gt;Stiklinger&lt;/em&gt; øverst. Hver af dine kolonner bliver koblet til noget en stikling har: navnet, hvornår den er startet, hvordan (stikling, frø, deling og så videre), vækstmediet, hvor mange, rummet og noter. Har arket en kolonne med den plante hver stikling er taget fra, bliver stiklingen koblet til planten. Planten findes blandt dine aktive planter ud fra kælenavnet og derefter det fulde botaniske navn, uden hensyn til store og små bogstaver. Hvis ingen plante passer, eller flere gør, bliver stiklingen tilføjet uden moderplante. Resultatet viser de rækker som &lt;em&gt;moderplante ikke fundet&lt;/em&gt; eller &lt;em&gt;mere end én plante passede&lt;/em&gt;, og navnet fra filen gemmes i Om den. En række der ligner en stikling du allerede har, bliver udeladt medmindre du sætter kryds ved den, og Fortryd på resultatsiden fjerner alt importen tilføjede, også de nye rum.</value>
+  </data>
+  <data name="GrowLightsQ" xml:space="preserve">
+    <value>Hvordan tilføjer jeg et vækstlys?</value>
+  </data>
+  <data name="GrowLightsA1" xml:space="preserve">
+    <value>Åbn rummet eller pladsen og tryk på &lt;em&gt;Tilføj et vækstlys&lt;/em&gt; under &lt;em&gt;Vækstlys&lt;/em&gt;. Giv det et navn, vælg det rum eller den plads det lyser på, og skriv watt og timer om dagen hvis du vil. Et lys på et rum lyser også på dets pladser, og på siden for en plads står rummets lys markeret som "Rummets". Tryk på et lys for at rette eller fjerne det. Når et lys bliver tilføjet, fjernet eller flyttet til et andet sted, får hver plante og stikling der står der en linje i sin historik med lysets navn. Ændrer du navn, watt eller timer, kommer der ingen linje. Flytter du en plante til et sted med et andet lys, får flytningen en ekstra linje, fx &lt;em&gt;Står nu under vækstlys&lt;/em&gt;. En plante under vækstlys vandes ikke efter årstiderne, og watt og timer er kun en note til dig.</value>
+  </data>
+  <data name="WindowDirectionQ" xml:space="preserve">
+    <value>Kan jeg skrive hvilken vej vinduerne vender?</value>
+  </data>
+  <data name="WindowDirectionA1" xml:space="preserve">
+    <value>Ja. På siden for et rum eller en plads sætter du kryds ved retningerne under &lt;em&gt;Vinduer&lt;/em&gt;: nord, øst, syd, vest eller tag. Du kan sætte flere. En plads uden kryds bruger rummets. På plantens side står det så ved siden af målingerne under &lt;em&gt;Hvad den kan lide&lt;/em&gt;, fx &lt;em&gt;Vinduer mod syd og vest&lt;/em&gt;. Det er kun en note, og det ændrer ikke noget på en plante.</value>
+  </data>
+  <data name="LightCheckQ" xml:space="preserve">
+    <value>Hvad er lystjekket?</value>
+  </data>
+  <data name="LightCheckA1" xml:space="preserve">
+    <value>Det er tre spørgsmål om et rum eller en plads, til når du ikke har en lysmåler: hvor meget direkte sol det får, hvor langt der er til vinduet, og om der står noget i vejen. Du åbner det fra &lt;em&gt;Lystjek&lt;/em&gt; på siden for rummet eller pladsen, eller fra linket under lysfeltet i en plantes formular. Buddet starter ved solen (ingen sol er moderat lys, op til 4 timers sol er lyst uden direkte sol, over 4 timer er direkte sol). Står det 1 til 2 meter (3 til 6 fod) fra vinduet, går det et trin ned, og over 2 meter (6 fod) to trin. Lidt i vejen, fx et tyndt gardin, giver et trin ned, og meget i vejen, fx en bygning tæt på, giver to. Det går aldrig lavere end lidt lys. Det er et groft bud, der gemmes ikke noget på en plante, og plantens formular udfylder kun lysfeltet når du trykker på &lt;em&gt;Brug det&lt;/em&gt;.</value>
+  </data>
+  <data name="WinterLightQ" xml:space="preserve">
+    <value>Hvorfor skriver I dag at de korte dage nærmer sig?</value>
+  </data>
+  <data name="WinterLightA1" xml:space="preserve">
+    <value>Fra 15. oktober til udgangen af februar, eller fra 15. april til 31. august på den sydlige halvkugle, viser I dag de planter i din samling som du har sat til at kunne lide lyst uden direkte sol eller direkte sol, og som hverken har vækstlys eller står udendørs. Det er en påmindelse om at flytte dem tættere på et vindue eller tilføje et vækstlys på rummets side. Det ændrer aldrig en plante. &lt;em&gt;Ikke denne vinter&lt;/em&gt; skjuler påmindelsen til sæsonen er slut.</value>
   </data>
   <data name="LabelQrQ" xml:space="preserve">
     <value>Kan en etiket åbne planten når jeg scanner den?</value>

@@ -424,7 +424,8 @@ public sealed class PlantForm
             var places = await deps.RoomService.GetPlacesAsync();
             try
             {
-                await deps.PlantService.UpdateAsync(Original!, Plant, label, PotName, MixName, id => places.NameOf(id), FindPot, FeedName);
+                await deps.PlantService.UpdateAsync(Original!, Plant, label, PotName, MixName, id => places.NameOf(id), FindPot, FeedName,
+                    Original!.PlaceId != Plant.PlaceId ? await deps.LampLinesAsync() : null);
             }
             catch (PartlySavedException ex)
             {

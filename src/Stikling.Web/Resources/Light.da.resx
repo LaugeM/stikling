@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="LampsHeading" xml:space="preserve">
+    <value>Vækstlys</value>
+  </data>
+  <data name="LampsNone" xml:space="preserve">
+    <value>Intet vækstlys her.</value>
+  </data>
+  <data name="LampAdd" xml:space="preserve">
+    <value>Tilføj et vækstlys</value>
+  </data>
+  <data name="LampWatts" xml:space="preserve">
+    <value>{0} W</value>
+  </data>
+  <data name="LampHours" xml:space="preserve">
+    <value>{0} t om dagen</value>
+  </data>
+  <data name="LampFromRoom" xml:space="preserve">
+    <value>Rummets</value>
+  </data>
+  <data name="LampSheetAdd" xml:space="preserve">
+    <value>Tilføj et vækstlys</value>
+  </data>
+  <data name="LampSheetEdit" xml:space="preserve">
+    <value>Vækstlys</value>
+  </data>
+  <data name="LampName" xml:space="preserve">
+    <value>Navn</value>
+  </data>
+  <data name="LampLights" xml:space="preserve">
+    <value>Lyser på</value>
+  </data>
+  <data name="LampWattsLabel" xml:space="preserve">
+    <value>Watt</value>
+  </data>
+  <data name="LampHoursLabel" xml:space="preserve">
+    <value>Timer om dagen</value>
+  </data>
+  <data name="LampNote" xml:space="preserve">
+    <value>Note</value>
+  </data>
+  <data name="LampRemove" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="LampSaveError" xml:space="preserve">
+    <value>Vækstlyset kunne ikke gemmes: {0}</value>
+  </data>
+  <data name="LampDefaultName" xml:space="preserve">
+    <value>Vækstlys</value>
+  </data>
+  <data name="WindowsHeading" xml:space="preserve">
+    <value>Vinduer</value>
+  </data>
+  <data name="WindowsHint" xml:space="preserve">
+    <value>Hvilken vej de vender. Sæt kryds ved alle der passer.</value>
+  </data>
+  <data name="WindowsNone" xml:space="preserve">
+    <value>Ingen vinduer valgt.</value>
+  </data>
+  <data name="WindowsFromRoom" xml:space="preserve">
+    <value>{0}. Rummets vinduer.</value>
+  </data>
+  <data name="CheckHeading" xml:space="preserve">
+    <value>Lystjek</value>
+  </data>
+  <data name="CheckSummary" xml:space="preserve">
+    <value>Lystjek: nok {0}.</value>
+  </data>
+  <data name="CheckRough" xml:space="preserve">
+    <value>Et groft bud ud fra dine svar.</value>
+  </data>
+  <data name="CheckFromRoom" xml:space="preserve">
+    <value>Fra rummet.</value>
+  </data>
+  <data name="CheckChange" xml:space="preserve">
+    <value>Ret</value>
+  </data>
+  <data name="CheckNone" xml:space="preserve">
+    <value>Svar på tre spørgsmål for at få et groft bud på lyset her.</value>
+  </data>
+  <data name="CheckAnswer" xml:space="preserve">
+    <value>Lav lystjekket</value>
+  </data>
+  <data name="CheckSheetTitle" xml:space="preserve">
+    <value>Lystjek</value>
+  </data>
+  <data name="CheckSheetIntro" xml:space="preserve">
+    <value>Tre spørgsmål om {0}. Svaret er et groft bud, og det ændrer ikke noget på nogen plante.</value>
+  </data>
+  <data name="CheckSun" xml:space="preserve">
+    <value>Hvor meget direkte sol får stedet?</value>
+  </data>
+  <data name="SunNone" xml:space="preserve">
+    <value>Ingen</value>
+  </data>
+  <data name="SunUnderTwo" xml:space="preserve">
+    <value>Under 2 timer</value>
+  </data>
+  <data name="SunTwoToFour" xml:space="preserve">
+    <value>2 til 4 timer</value>
+  </data>
+  <data name="SunOverFour" xml:space="preserve">
+    <value>Over 4 timer</value>
+  </data>
+  <data name="CheckDistance" xml:space="preserve">
+    <value>Hvor langt er der til vinduet?</value>
+  </data>
+  <data name="DistanceAtWindow" xml:space="preserve">
+    <value>Ved vinduet</value>
+  </data>
+  <data name="DistanceUnderOneMetre" xml:space="preserve">
+    <value>Under 1 m</value>
+  </data>
+  <data name="DistanceOneToTwoMetres" xml:space="preserve">
+    <value>1 til 2 m</value>
+  </data>
+  <data name="DistanceOverTwoMetres" xml:space="preserve">
+    <value>Over 2 m</value>
+  </data>
+  <data name="DistanceUnderOneMetreFeet" xml:space="preserve">
+    <value>Under 3 fod</value>
+  </data>
+  <data name="DistanceOneToTwoMetresFeet" xml:space="preserve">
+    <value>3 til 6 fod</value>
+  </data>
+  <data name="DistanceOverTwoMetresFeet" xml:space="preserve">
+    <value>Over 6 fod</value>
+  </data>
+  <data name="CheckShade" xml:space="preserve">
+    <value>Står der noget i vejen for lyset?</value>
+  </data>
+  <data name="ShadeNothing" xml:space="preserve">
+    <value>Ingenting</value>
+  </data>
+  <data name="ShadeSome" xml:space="preserve">
+    <value>Lidt</value>
+  </data>
+  <data name="ShadeLots" xml:space="preserve">
+    <value>Meget</value>
+  </data>
+  <data name="ShadeSomeExample" xml:space="preserve">
+    <value>Et tyndt gardin eller et træ udenfor</value>
+  </data>
+  <data name="ShadeLotsExample" xml:space="preserve">
+    <value>En bygning tæt på eller en altan ovenover</value>
+  </data>
+  <data name="CheckClear" xml:space="preserve">
+    <value>Ryd svarene</value>
+  </data>
+  <data name="CheckSays" xml:space="preserve">
+    <value>Lystjekket for {0} siger: {1}.</value>
+  </data>
+  <data name="CheckUse" xml:space="preserve">
+    <value>Brug det</value>
+  </data>
+  <data name="CheckNotSure" xml:space="preserve">
+    <value>I tvivl? Svar på tre spørgsmål om stedet</value>
+  </data>
+  <data name="FilterGrowLight" xml:space="preserve">
+    <value>Under vækstlys</value>
+  </data>
+  <data name="FilterLight" xml:space="preserve">
+    <value>Lys hvor den står</value>
+  </data>
+  <data name="WinterText" xml:space="preserve">
+    <value>De korte dage nærmer sig. De her kan lide meget lys og har ikke vækstlys.</value>
+  </data>
+  <data name="WinterAdvice" xml:space="preserve">
+    <value>Flyt dem tættere på et vindue, eller tilføj et vækstlys på rummets side.</value>
+  </data>
+  <data name="WinterNot" xml:space="preserve">
+    <value>Ikke denne vinter</value>
+  </data>
+</root>
