@@ -7,6 +7,7 @@ using Azure.Identity;
 using Azure.Storage.Blobs;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Auth;
+using Stikling.Api.Calendar;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.Identification;
@@ -142,6 +143,7 @@ app.MapShareLinks();
 app.MapPublicPageSettings();
 app.MapSharePages();
 app.MapNotifications();
+app.MapCalendar();
 app.MapPlantFacts();
 app.MapIdentification();
 

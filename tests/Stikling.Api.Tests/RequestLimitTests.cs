@@ -57,6 +57,27 @@ public class RequestLimitTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Calendar_links_have_a_bucket_of_their_own_for_each_address()
+    {
+        var server = api.InEnvironment("Testing", new()
+        {
+            ["RequestLimits:CalendarBurst"] = "3",
+            ["RequestLimits:CalendarPerMinute"] = "1",
+        });
+        var client = server.CreateClient();
+        var wrong = $"/calendar/{new string('a', 43)}.ics";
+
+        var responses = new List<HttpResponseMessage>();
+        for (var i = 0; i < 6; i++)
+            responses.Add(await client.GetAsync(wrong));
+
+        Assert.All(responses.Take(3), r => Assert.Equal(HttpStatusCode.NotFound, r.StatusCode));
+        Assert.Contains(responses, r => r.StatusCode == HttpStatusCode.TooManyRequests);
+        // The health check is not in the bucket
+        Assert.NotEqual(HttpStatusCode.TooManyRequests, (await client.GetAsync("/health")).StatusCode);
+    }
+
+    [Fact]
     public async Task The_health_check_is_never_limited()
     {
         var client = Limited().CreateClient();

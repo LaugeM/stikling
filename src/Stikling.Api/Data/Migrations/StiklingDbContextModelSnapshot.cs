@@ -22,6 +22,40 @@ namespace Stikling.Api.Data.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Stikling.Api.Data.CalendarFeed", b =>
+                {
+                    b.Property<Guid>("PersonId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("CollectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTimeOffset>("CreatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.Property<string>("DaysJson")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("FeedId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
+
+                    b.Property<DateTimeOffset>("UpdatedAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("PersonId");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.ToTable("CalendarFeeds");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.Collection", b =>
                 {
                     b.Property<Guid>("Id")
@@ -546,6 +580,15 @@ namespace Stikling.Api.Data.Migrations
                         .IsUnique();
 
                     b.ToTable("Records");
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.CalendarFeed", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Person", null)
+                        .WithOne()
+                        .HasForeignKey("Stikling.Api.Data.CalendarFeed", "PersonId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.Collection", b =>

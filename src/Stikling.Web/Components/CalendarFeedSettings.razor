@@ -1,0 +1,241 @@
+@using Stikling.Core.Calendar
+@using Stikling.Core.Settings
+@inject CalendarFeedService Calendar
+@inject SettingsService SettingsService
+@inject ShareCardService Cards
+@* The inside of the Today in your calendar section in Settings. The section and its heading are in Settings.razor. *@
+
+@if (NeedsAccount)
+{
+    <p class="settings-hint mt-0">@Strings.Calendar.NeedsAccount</p>
+}
+else if (Checking || status is null)
+{
+    <p class="settings-hint mt-0">@Strings.Settings.CheckingAccount</p>
+}
+else if (status == CalendarStatus.Unreachable)
+{
+    <p class="settings-hint mt-0" role="status">@Strings.Calendar.Unreachable</p>
+    <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="RetryAsync">@Strings.Calendar.TryAgain</button>
+}
+else if (status == CalendarStatus.Off)
+{
+    <p class="settings-hint mt-0">@Strings.Calendar.Intro</p>
+    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="MakeLinkAsync">@Strings.Calendar.GetLink</button>
+    @if (message is not null)
+    {
+        <p class="settings-hint" role="status">@message</p>
+    }
+}
+else
+{
+    @if (link is not null)
+    {
+        <label class="theme-label" for="calendar-link">@Strings.Calendar.LinkLabel</label>
+        <input id="calendar-link" class="form-control calendar-link" readonly value="@link" onfocus="this.select()"
+               autocomplete="off" autocapitalize="off" spellcheck="false" />
+        <div class="d-flex flex-wrap gap-2 mt-2">
+            <button type="button" class="btn btn-primary" @onclick="CopyAsync">@Strings.Calendar.Copy</button>
+            <a class="btn btn-outline-primary" href="@GoogleAddress" target="_blank" rel="noopener">@Strings.Calendar.AddToGoogle</a>
+            <a class="btn btn-outline-primary" href="@WebcalAddress">@Strings.Calendar.OtherApps</a>
+        </div>
+        <p class="settings-hint">@Strings.Calendar.LinkHint</p>
+    }
+    else
+    {
+        <p class="settings-hint mt-0">@Strings.Calendar.NoLinkHint</p>
+    }
+
+    @if (confirming is { } asking)
+    {
+        <div class="problem-confirm mb-2" role="alert">
+            <span>@(asking == Confirm.NewLink ? Strings.Calendar.ConfirmNewLink : Strings.Calendar.ConfirmTurnOff)</span>
+            <button type="button" class="btn btn-danger btn-sm" disabled="@busy" @onclick="ConfirmedAsync">@(asking == Confirm.NewLink ? Strings.Calendar.NewLink : Strings.Calendar.TurnOff)</button>
+            <button type="button" class="btn btn-link btn-sm" @onclick="() => confirming = null">@Strings.Common.Cancel</button>
+        </div>
+    }
+    else
+    {
+        <div class="d-flex flex-wrap gap-2">
+            <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => Ask(Confirm.NewLink)">@Strings.Calendar.NewLink</button>
+            <button type="button" class="btn btn-outline-secondary" disabled="@busy" @onclick="() => Ask(Confirm.TurnOff)">@Strings.Calendar.TurnOff</button>
+        </div>
+    }
+
+    @if (message is not null)
+    {
+        <p class="settings-hint" role="status">@message</p>
+    }
+
+    <div class="theme-label mt-4" id="calendar-show-label">@Strings.Calendar.ShowTitle</div>
+    <div role="group" aria-labelledby="calendar-show-label">
+        @foreach (var key in CalendarParts.All)
+        {
+            var id = $"calendar-part-{key}";
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="@id"
+                       checked="@(!leaveOut.Contains(key))" @onchange="e => SetPartAsync(key, (bool)e.Value!)" />
+                <label class="form-check-label" for="@id">@PartLabel(key)</label>
+            </div>
+        }
+    </div>
+    <p class="settings-hint">@Strings.Calendar.ShowHint</p>
+}
+
+@code {
+    private enum Confirm
+    {
+        NewLink,
+        TurnOff
+    }
+
+    /// <summary>No account can be used here, or nobody is signed in.</summary>
+    [Parameter]
+    public bool NeedsAccount { get; set; }
+
+    /// <summary>The page is still finding out whether someone is signed in.</summary>
+    [Parameter]
+    public bool Checking { get; set; }
+
+    [Parameter]
+    public bool SignedIn { get; set; }
+
+    private CalendarStatus? status;
+    private string? link;
+    private string? message;
+    private bool busy;
+    private bool loadStarted;
+    private Confirm? confirming;
+    private HashSet<string> leaveOut = [];
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (!SignedIn || loadStarted)
+            return;
+
+        loadStarted = true;
+        await LoadAsync();
+    }
+
+    private async Task RetryAsync()
+    {
+        busy = true;
+        status = null;
+        try
+        {
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task LoadAsync()
+    {
+        status = await Calendar.StatusAsync();
+        link = await Calendar.LinkOnThisDeviceAsync();
+        leaveOut = [.. (await SettingsService.GetAsync()).CalendarLeaveOut ?? []];
+
+        // Turned off from another device, so what this one kept is no use
+        if (status == CalendarStatus.Off && link is not null)
+        {
+            await Calendar.ForgetDeviceAsync();
+            link = null;
+        }
+    }
+
+    private string WebcalAddress =>
+        link is null ? "" : link.StartsWith("https://", StringComparison.Ordinal) ? "webcal://" + link["https://".Length..]
+        : link.StartsWith("http://", StringComparison.Ordinal) ? "webcal://" + link["http://".Length..] : link;
+
+    private string GoogleAddress => "https://calendar.google.com/calendar/render?cid=" + Uri.EscapeDataString(WebcalAddress);
+
+    private void Ask(Confirm what)
+    {
+        message = null;
+        confirming = what;
+    }
+
+    private async Task MakeLinkAsync()
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            link = await Calendar.MakeLinkAsync();
+            if (link is null)
+                message = Strings.Calendar.Failed;
+            else
+                status = CalendarStatus.On;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ConfirmedAsync()
+    {
+        var what = confirming;
+        confirming = null;
+        busy = true;
+        message = null;
+        try
+        {
+            if (what == Confirm.NewLink)
+            {
+                var made = await Calendar.MakeLinkAsync();
+                if (made is null)
+                    message = Strings.Calendar.Failed;
+                else
+                    link = made;
+            }
+            else if (await Calendar.TurnOffAsync())
+            {
+                link = null;
+                status = CalendarStatus.Off;
+            }
+            else
+            {
+                message = Strings.Calendar.Failed;
+            }
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task CopyAsync()
+    {
+        message = null;
+        if (link is not null && await Cards.CopyTextAsync(link))
+            message = Strings.Calendar.Copied;
+        else
+            message = Strings.Calendar.Failed;
+    }
+
+    private async Task SetPartAsync(string key, bool shown)
+    {
+        if (shown)
+            leaveOut.Remove(key);
+        else
+            leaveOut.Add(key);
+
+        await SettingsService.SetCalendarPartShownAsync(key, shown);
+        await Calendar.UploadAsync(force: true);
+    }
+
+    private static string PartLabel(string key) => key switch
+    {
+        CalendarParts.Round => Strings.Calendar.PartRound,
+        CalendarParts.Soil => Strings.Calendar.PartSoil,
+        CalendarParts.Care => Strings.Calendar.PartCare,
+        CalendarParts.Pests => Strings.Calendar.PartPests,
+        CalendarParts.Plants => Strings.Calendar.PartPlants,
+        CalendarParts.Propagations => Strings.Calendar.PartPropagations,
+        CalendarParts.Photos => Strings.Calendar.PartPhotos,
+        _ => key
+    };
+}

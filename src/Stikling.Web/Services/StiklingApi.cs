@@ -4,6 +4,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.JSInterop;
+using Stikling.Core.Calendar;
 using Stikling.Core.Compare;
 using Stikling.Core.Notifications;
 using Stikling.Core.PlantFacts;
@@ -191,6 +192,51 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         request.Content = JsonContent.Create(new EndpointRequest(endpoint));
         using var response = await http.SendAsync(request);
         return response.StatusCode;
+    }
+
+    // The calendar link. A failure to reach the server or a refusal throws, except where the status
+    // itself is the answer.
+
+    /// <summary>Whether the person has a calendar link on.</summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task<bool> GetCalendarStatusAsync()
+    {
+        using var request = await RequestAsync(HttpMethod.Get, "me/calendar");
+        return (await SendAsync<CalendarStatusResponse>(request)).On;
+    }
+
+    /// <summary>
+    /// Makes a new link, or replaces the old one, and gives back its address. The server shows the
+    /// token only this once. The address is built here, from the API's address.
+    /// </summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task<string> NewCalendarLinkAsync()
+    {
+        using var request = await RequestAsync(HttpMethod.Post, "me/calendar");
+        var token = (await SendAsync<CalendarLinkResponse>(request)).Token;
+        return new Uri(settings.ApiAddress ?? throw new HttpRequestException("There is no API address."), $"calendar/{token}.ics").ToString();
+    }
+
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task TurnOffCalendarAsync()
+    {
+        using var request = await RequestAsync(HttpMethod.Delete, "me/calendar");
+        using var response = await http.SendAsync(request);
+        response.EnsureSuccessStatusCode();
+    }
+
+    /// <summary>Uploads the days for the link. False when the person has no link on, which is 404.</summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task<bool> PutCalendarDaysAsync(Guid collectionId, CalendarDaysRequest days)
+    {
+        using var request = await RequestAsync(HttpMethod.Put, $"collections/{collectionId}/calendar");
+        request.Content = JsonContent.Create(days);
+        using var response = await http.SendAsync(request);
+        if (response.StatusCode == HttpStatusCode.NotFound)
+            return false;
+
+        response.EnsureSuccessStatusCode();
+        return true;
     }
 
     private async Task SendNotificationAsync(HttpMethod method, string path, object body)

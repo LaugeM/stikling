@@ -36,6 +36,19 @@ public class ErrorReportingTests
     }
 
     [Fact]
+    public void A_calendar_links_token_never_reaches_a_report()
+    {
+        var e = new SentryEvent
+        {
+            Request = new SentryRequest { Url = "https://api.stikling.app/calendar/AbC123_-secrettokenvalue.ics?x=1" },
+        };
+
+        var scrubbed = ErrorReporting.Scrub(e, new SentryHint());
+
+        Assert.Equal("https://api.stikling.app/calendar/[token]", scrubbed!.Request.Url);
+    }
+
+    [Fact]
     public void Reports_keep_the_kind_of_error_but_not_its_message()
     {
         var e = new SentryEvent

@@ -179,6 +179,28 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    /// <summary>Sets whether the person has a calendar link on, so their signed-in devices upload the days.</summary>
+    public async Task SetCalendarFeedAsync(bool on)
+    {
+        var current = await GetAsync();
+        current.CalendarFeed = on;
+        await settings.SaveAsync(current);
+    }
+
+    /// <summary>
+    /// Sets whether one kind of thing (a key in <c>CalendarParts</c>) shows in the calendar link. Keys
+    /// this version doesn't know are kept as they are.
+    /// </summary>
+    public async Task SetCalendarPartShownAsync(string key, bool shown)
+    {
+        var current = await GetAsync();
+        var left = (current.CalendarLeaveOut ?? []).Where(k => k != key).ToList();
+        if (!shown)
+            left.Add(key);
+        current.CalendarLeaveOut = left.Count == 0 ? null : left;
+        await settings.SaveAsync(current);
+    }
+
     /// <summary>Sets how many rows the list on the day back shows: 3, 5, 10, or 0 for all of them.</summary>
     public async Task SetBackListLengthAsync(int length)
     {

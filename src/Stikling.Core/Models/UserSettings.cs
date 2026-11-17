@@ -108,6 +108,19 @@ public sealed class UserSettings : Entity
     public bool QuarantineNewPlants { get; set; }
 
     /// <summary>
+    /// Whether the person has a calendar link on, so each of their signed-in devices uploads the
+    /// days. Older settings without it read as off.
+    /// </summary>
+    public bool CalendarFeed { get; set; }
+
+    /// <summary>
+    /// The kinds of things left out of the calendar link, as the keys in <c>CalendarParts</c>. Null
+    /// or empty shows everything, and a key this version doesn't know is ignored. Older settings
+    /// without it read as null.
+    /// </summary>
+    public List<string>? CalendarLeaveOut { get; set; }
+
+    /// <summary>
     /// The time of day the daily notification is sent, on a quarter hour. Null until notifications
     /// are turned on on a device, which sets it to 08:00. Older settings without it read as null.
     /// </summary>

@@ -198,6 +198,14 @@ public static class CollectionEndpoints
             CurrentPerson.AddOwnCollection(db, await db.People.SingleAsync(p => p.Id == personId), now);
 
         await db.SaveChangesAsync();
+
+        // Days uploaded for this collection are no longer theirs to show. The link stays on and fills again on their next upload
+        await db.CalendarFeeds
+            .Where(f => f.PersonId == personId && f.CollectionId == collectionId)
+            .ExecuteUpdateAsync(set => set
+                .SetProperty(f => f.DaysJson, "[]")
+                .SetProperty(f => f.CollectionId, (Guid?)null));
+
         await WithdrawInvitesByAsync(db, collectionId, personId, now);
     }
 
