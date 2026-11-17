@@ -214,6 +214,12 @@ public sealed class TimelineEntry : Entity
     /// <summary>The day the note that came back was ticked Done on Today. Null until then.</summary>
     public DateOnly? CameBackDoneOn { get; set; }
 
+    /// <summary>
+    /// The plants, propagations and pots named with an @ in <see cref="Text"/>. Null when none are, and on every
+    /// entry from before this was kept. Only notes have them. See <see cref="Timeline.Mentions"/>.
+    /// </summary>
+    public List<Mention>? Mentions { get; set; }
+
     /// <summary>Earlier versions of the entry, oldest first. Empty when it was never corrected.</summary>
     public List<TimelineEdit> Edits { get; set; } = [];
 }

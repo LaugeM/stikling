@@ -1965,4 +1965,36 @@
     <value>Yes. Under &lt;em&gt;Supplies&lt;/em&gt;, open &lt;em&gt;Money&lt;/em&gt;, or tap the link on the Orders page. It adds up the prices you typed, year by year: plants (what you paid, and items on an order that have not become plants yet), shipping, supplies you marked as bought and other things ticked off the shopping list. If you sold plants or cuttings and typed the price, what they brought in is shown beside it. Each line opens the plant, order or supply it is from. Prices are plain numbers with no currency, and only what has a price is counted. A plant you got from an order counts once, with its own price, and an item that did not come is left out. Money is never put on a shared page or a printed story.</value>
     <comment>Answer to "Can I see what I have spent?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="LinkToAnotherPlantInNoteQ" xml:space="preserve">
+    <value>Can I link to another plant in a note?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="LinkToAnotherPlantInNoteA1" xml:space="preserve">
+    <value>Yes. Type &lt;em&gt;@&lt;/em&gt; in a note on a plant's or a propagation's history, or in the note on a pest case update, and the plants, propagations and pots that match what you type after it come up. Pick one and its name goes into the note, and on the history it is a link to that plant, propagation or pot. The words stay as you wrote them. If the plant is deleted later, the name is plain text again, and if you take the name out of the note when you edit it, it stops being a link. The plant or propagation that was named has a &lt;em&gt;Mentioned in&lt;/em&gt; card with the notes that name it, newest first. A pot has no page of its own, so a note about a pot links to the Pots page and there is no card.</value>
+    <comment>Answer to "Can I link to another plant in a note?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="TidyUpQ" xml:space="preserve">
+    <value>Can the app point out what needs tidying?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="TidyUpA1" xml:space="preserve">
+    <value>Yes. &lt;em&gt;Tidy up&lt;/em&gt; in Settings, under Your data, lists active plants with no genus, no photo or no room, cuttings whose parent plant is gone, plants that may be the same one entered twice (the same name in the same room, or the same genus, species and cultivar with no names), and tags, products and soil mixes nothing uses. Tap a plant to open it and fix it there. If two plants really are different, tap &lt;em&gt;Not the same&lt;/em&gt; and they stop showing. An unused tag, product or soil mix has a Remove button that asks first. It is always one at a time and nothing changes until you pick it. A part with nothing in it isn't shown, and when nothing is left the page says so.</value>
+    <comment>Answer to "Can the app point out what needs tidying?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="NotSureWhichParentQ" xml:space="preserve">
+    <value>What if I'm not sure which plant a cutting came from?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="NotSureWhichParentA1" xml:space="preserve">
+    <value>Pick your best guess as the parent and tick &lt;em&gt;It's a guess&lt;/em&gt; under it, on the edit page of the plant or the propagation. The page then says &lt;em&gt;probably from&lt;/em&gt; that plant, and the family tree draws the line up to it dotted. Untick it when you find out. A plant that is potted up from a propagation keeps the guess.</value>
+    <comment>Answer to "What if I'm not sure which plant a cutting came from?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="BringPropagationsFromSpreadsheetQ" xml:space="preserve">
+    <value>Can I bring in my cuttings from a spreadsheet?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="BringPropagationsFromSpreadsheetA1" xml:space="preserve">
+    <value>Yes. Open &lt;em&gt;import a spreadsheet&lt;/em&gt; the same way as for plants and choose &lt;em&gt;Propagations&lt;/em&gt; at the top. Each of your columns is matched to what a cutting has: the name, when it was started, how (cutting, seeds, division and so on), the medium, how many, the room and notes. A column with the plant each one was taken from links it to that plant, matched among your active plants by nickname and then by the full botanical name, ignoring capitals. If no plant matches, or more than one does, the cutting is added without a parent. The result lists those rows as &lt;em&gt;parent not found&lt;/em&gt; or &lt;em&gt;more than one plant matched&lt;/em&gt;, and the name from the file is kept in About it. A row that looks like a cutting you already have is left out unless you tick it, and Undo on the result screen removes everything the import added, the new rooms too.</value>
+    <comment>Answer to "Can I bring in my cuttings from a spreadsheet?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
 </root>

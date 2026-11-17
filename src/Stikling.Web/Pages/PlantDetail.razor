@@ -332,7 +332,7 @@ else
                     }
                     else if (ancestors.Count > 0)
                     {
-                        @(Html(Strings.PlantDetail.FamilyFromPlant, Link($"plants/{ancestors[0].Id}", ancestors[0].DisplayName, "link-action"), H(ParentNote(ancestors[0]))))
+                        @(Html(plant.ParentIsGuess && plant.ParentPlantId == ancestors[0].Id ? Strings.Tidy.ProbablyFromPlant : Strings.PlantDetail.FamilyFromPlant, Link($"plants/{ancestors[0].Id}", ancestors[0].DisplayName, "link-action"), H(ParentNote(ancestors[0]))))
                     }
                     else if (fromPropagation is not null)
                     {
@@ -689,6 +689,8 @@ else
                         }
                     </section>
                 }
+
+                <MentionedIn SubjectId="plant.Id" />
 
                 <section class="detail-card" id="plant-family">
                     <h2>@Strings.PlantDetail.FamilyHeading</h2>

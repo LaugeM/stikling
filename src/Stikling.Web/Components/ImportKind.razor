@@ -1,0 +1,12 @@
+@* The choice at the start of the spreadsheet import: plants or propagations. Each has its own page, so this is two links that look like a choice. *@
+
+<nav class="import-kind" aria-label="@Strings.Tidy.ImportKindLabel">
+    <a class="btn @(Propagations ? "btn-outline-primary" : "btn-primary")" href="plants/import" aria-current="@(Propagations ? null : "page")">@Strings.Tidy.ImportKindPlants</a>
+    <a class="btn @(Propagations ? "btn-primary" : "btn-outline-primary")" href="propagations/import" aria-current="@(Propagations ? "page" : null)">@Strings.Tidy.ImportKindPropagations</a>
+</nav>
+
+@code {
+    /// <summary>True on the page for propagations.</summary>
+    [Parameter]
+    public bool Propagations { get; set; }
+}

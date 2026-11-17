@@ -15,7 +15,8 @@ public sealed class TimelineService(
     /// all of them, and they go on one entry.
     /// </summary>
     public async Task<IReadOnlyList<TimelineEntry>> AddPhotosAsync(
-        SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> added, string? note = null, DateOnly? day = null)
+        SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> added, string? note = null, DateOnly? day = null,
+        IReadOnlyList<Mention>? mentions = null)
     {
         if (day is { } d)
         {
@@ -29,7 +30,10 @@ public sealed class TimelineService(
 
         var entries = PhotoEntries.For(subjectType, subjectId, added, time, note);
         foreach (var entry in entries)
+        {
+            entry.Mentions = Mentions.Keep(entry.Text, mentions);
             await timeline.AddAsync(entry);
+        }
         return entries;
     }
 
@@ -111,9 +115,11 @@ public sealed class TimelineService(
     /// entry move to the new day with it. Returns false when nothing changed. An entry of measurements has
     /// no text of its own, so only its day changes. <paramref name="keepsMeasurements"/> says the entry has
     /// measurements after this, so a note without text or photos becomes an entry of measurements (the
-    /// caller then writes them with <see cref="MeasurementService.SetForEntryAsync"/>).
+    /// caller then writes them with <see cref="MeasurementService.SetForEntryAsync"/>). <paramref name="mentions"/>
+    /// are the ones picked while editing, and the entry keeps those, and its earlier ones, whose "@Name" is still in the text.
     /// </summary>
-    public async Task<bool> CorrectAsync(TimelineEntry entry, string? text, DateOnly day, bool keepsMeasurements = false)
+    public async Task<bool> CorrectAsync(
+        TimelineEntry entry, string? text, DateOnly day, bool keepsMeasurements = false, IReadOnlyList<Mention>? mentions = null)
     {
         if (!CanCorrect(entry))
             throw new InvalidOperationException(Strings.Propagations.ErrOnlyNotesCorrected);
@@ -137,7 +143,9 @@ public sealed class TimelineService(
         // The same day keeps the time it was recorded at
         var sameDay = time.LocalDay(entry.OccurredAt) == day;
         var occurredAt = sameDay ? entry.OccurredAt : time.MomentOn(day);
-        if (cleanText == entry.Text && occurredAt == entry.OccurredAt)
+        // Only the names still in the text stay mentions, whether the note was edited by hand or by picking
+        var keptMentions = measured ? null : Mentions.Keep(cleanText, mentions ?? entry.Mentions);
+        if (cleanText == entry.Text && occurredAt == entry.OccurredAt && Mentions.Same(keptMentions, entry.Mentions))
             return false;
 
         // The measurements are not kept as versions, and neither is the line written for them
@@ -151,6 +159,7 @@ public sealed class TimelineService(
             });
         }
         entry.Text = cleanText;
+        entry.Mentions = keptMentions;
         entry.OccurredAt = occurredAt;
         if (becomesMeasured)
         {

@@ -50,6 +50,13 @@ else
                         <option value="@p.Id">@PlantLineage.ParentLabel(p)</option>
                     }
                 </InputSelect>
+                @if (propagation.ParentPlantId is not null)
+                {
+                    <div class="form-check parent-guess">
+                        <InputCheckbox id="parent-guess" class="form-check-input" @bind-Value="propagation.ParentIsGuess" />
+                        <label class="form-check-label" for="parent-guess">@Strings.Tidy.ParentIsGuess</label>
+                    </div>
+                }
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => addParentOpen = true">@Strings.Propagations.EditParentNotMine</button>
             </div>
             @if (propagation.ParentPlantId is null)

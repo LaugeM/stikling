@@ -217,7 +217,7 @@ else
                 }
                 @if (parent is not null)
                 {
-                    <text> · @((MarkupString)F(Strings.Propagations.DetFromParent, $"<a class=\"link-action\" href=\"plants/{parent.Id}\">{System.Net.WebUtility.HtmlEncode(parent.DisplayName)}</a>"))</text>
+                    <text> · @((MarkupString)F(propagation.ParentIsGuess ? Strings.Tidy.ProbablyFromParent : Strings.Propagations.DetFromParent, $"<a class=\"link-action\" href=\"plants/{parent.Id}\">{System.Net.WebUtility.HtmlEncode(parent.DisplayName)}</a>"))</text>
                 }
                 else if (sellers.For(propagation.SellerId, propagation.Source) is { } headerSeller)
                 {
@@ -474,6 +474,8 @@ else
 
                     <ReferencePhotoAdd SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" OnAdded="() => historyVersion++" />
                 </section>
+
+                <MentionedIn SubjectId="propagation.Id" />
 
                 @if (offspring.Count > 0 && propagation.IsActive)
                 {

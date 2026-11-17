@@ -103,6 +103,9 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         if (numberChanged)
             plant.CollectionNumber = CollectionNumbers.Normalize(plant.CollectionNumber);
         CareLikes.Normalize(plant);
+        // A guess needs a parent to be a guess about
+        if (plant.ParentPlantId is null)
+            plant.ParentIsGuess = false;
         // Whose it is only matters while it lives with someone else
         plant.LivesWith = plant.LivesElsewhere ? plant.LivesWithName : null;
         // One is never stored
