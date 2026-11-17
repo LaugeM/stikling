@@ -305,7 +305,7 @@ public sealed class PropagationForm
             containerTextStart = ContainerText;
         }
 
-        Propagation.PlaceId = await deps.RoomService.PlaceIdAsync(Location);
+        Propagation.PlaceId = await deps.RoomService.PlaceIdAsync(Location, Propagation.PlaceId);
 
         var created = false;
         Exception? laterError = null;

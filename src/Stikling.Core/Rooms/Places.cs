@@ -28,6 +28,19 @@ public sealed class Places
     /// </remarks>
     public IEnumerable<Place> Rooms => Live.Where(p => !p.IsSpot || Find(p.RoomId) is null);
 
+    /// <summary>The rooms still in use: every room except the ones left behind in a move house.</summary>
+    public IEnumerable<Place> CurrentRooms => Rooms.Where(r => r.LeftOn is null);
+
+    /// <summary>The rooms left behind in a move house, oldest first.</summary>
+    public IEnumerable<Place> RoomsFromBeforeMove => Rooms.Where(r => r.LeftOn is not null);
+
+    /// <summary>
+    /// True when the place is a room left behind in a move house, or a spot in one. False for no
+    /// place and an unknown one.
+    /// </summary>
+    public bool IsFromBeforeMove(Guid? id) =>
+        Find(id) is { } place && (place.LeftOn is not null || (place.IsSpot && Find(place.RoomId)?.LeftOn is not null));
+
     /// <summary>The spots inside a room, including the ones that came with a room merged into it.</summary>
     public IEnumerable<Place> SpotsIn(Guid roomId) =>
         Live.Where(p => p.IsSpot && Find(p.RoomId)?.Id == roomId);
@@ -123,7 +136,8 @@ public sealed class Places
     }
 
     /// <summary>A room by its name, ignoring case and spacing. The oldest wins if two share it.</summary>
-    public Place? RoomNamed(string? name) => Rooms.FirstOrDefault(r => RoomName.Same(r.Name, name));
+    /// <remarks>Rooms left behind in a move house never match, so a new room with the name is made instead.</remarks>
+    public Place? RoomNamed(string? name) => CurrentRooms.FirstOrDefault(r => RoomName.Same(r.Name, name));
 
     /// <summary>A spot inside the room by its name.</summary>
     public Place? SpotNamed(Guid roomId, string? name) => SpotsIn(roomId).FirstOrDefault(s => RoomName.Same(s.Name, name));
