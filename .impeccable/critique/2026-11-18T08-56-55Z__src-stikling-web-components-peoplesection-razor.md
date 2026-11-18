@@ -5,9 +5,9 @@ max_score: 40
 na_heuristics: 
 p0_count: 1
 p1_count: 2
-target_identity: "file:C:\\Users\\lauge\\Desktop\\Code\\claude\\projects\\stikling\\.claude\\worktrees\\notes-and-tidying-5fed24\\src\\Stikling.Web\\Components\\PeopleSection.razor"
+target_identity: "file:src/Stikling.Web/Components/PeopleSection.razor"
 target_fingerprint: "sha256:450529a096bcdacd883280c6b6cc2787431972d5027f28853ef97f854cd3c3e0"
-target_path: "C:\\Users\\lauge\\Desktop\\Code\\claude\\projects\\stikling\\.claude\\worktrees\\notes-and-tidying-5fed24\\src\\Stikling.Web\\Components\\PeopleSection.razor"
+target_path: "src/Stikling.Web/Components/PeopleSection.razor"
 timestamp: 2026-11-18T08-56-55Z
 slug: src-stikling-web-components-peoplesection-razor
 ---
