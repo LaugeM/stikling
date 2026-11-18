@@ -1035,4 +1035,20 @@
     <value>Open plant</value>
     <comment>Row in the same sheet. Goes to the plant's page.</comment>
   </data>
+  <data name="PaneLabel" xml:space="preserve">
+    <value>{0}, beside the list</value>
+    <comment>Screen reader name of the pane that shows a plant beside the list on a large screen. {0} is the plant's name.</comment>
+  </data>
+  <data name="PaneOpenPage" xml:space="preserve">
+    <value>Open page</value>
+    <comment>Link at the top of the pane beside the list. Goes to the plant's own page.</comment>
+  </data>
+  <data name="PaneFilters" xml:space="preserve">
+    <value>Filters</value>
+    <comment>Button at the top of the list while a plant is open beside it. Brings the filters back.</comment>
+  </data>
+  <data name="PaneFiltersCount" xml:space="preserve">
+    <value>Filters ({0})</value>
+    <comment>Same button while filters narrow the list. {0} is how many.</comment>
+  </data>
 </root>

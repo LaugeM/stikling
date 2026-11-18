@@ -44,7 +44,10 @@
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant?.DisplayName ?? Strings.PlantDetail.PlantFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="plants">@Strings.Plants.ListTitle</a>
+@if (!InPane)
+{
+    <a class="back-link" href="plants">@Strings.Plants.ListTitle</a>
+}
 
 @if (plant is null)
 {
@@ -52,9 +55,10 @@
 }
 else
 {
-    @* On a wide screen these are two columns: who it is on the left, its history on the right *@
-    <div class="profile-layout">
-        <div class="profile-side">
+    @* On a wide screen these are two columns, three on a very wide one: who it is, its history, and the details *@
+    <div class="profile-frame">
+    <div class="profile-layout profile-three">
+        <div class="profile-head">
             @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
@@ -363,6 +367,8 @@ else
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Plants.ListShare</button>
             </div>
 
+        </div>
+        <div class="profile-more">
             <div id="plant-details" class="profile-details @(detailsOpen ? "open" : null)">
                 <section class="detail-card">
                     <dl class="detail-list">
@@ -865,8 +871,9 @@ else
                       EmptyText="@Strings.PlantDetail.TimelineEmpty" OnBeforeAfter="OpenShareBeforeAfter" OnMeasurementsChanged="() => growthVersion++" />
         </div>
     </div>
+    </div>
 
-    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@plant.DisplayName" /></IfCan>
+    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@plant.DisplayName" Area="@(InPane ? ".side-pane" : null)" /></IfCan>
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId" OnPicked="() => { photoChoice = false; more = More.None; }"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 
@@ -1672,6 +1679,10 @@ else
 
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Shown in the pane beside the Plants or Propagations list on a large screen: no back link, and a dropped photo only counts over the pane.</summary>
+    [Parameter]
+    public bool InPane { get; set; }
 
     /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
     [SupplyParameterFromQuery(Name = "arrived")]

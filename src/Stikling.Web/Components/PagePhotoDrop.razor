@@ -10,6 +10,10 @@
     [Parameter, EditorRequired]
     public string Name { get; set; } = "";
 
+    /// <summary>A selector for the part of the page that takes the drop, when it isn't all of it (the pane beside a list).</summary>
+    [Parameter]
+    public string? Area { get; set; }
+
     private IJSObjectReference? module;
     private IJSObjectReference? attached;
 
@@ -18,7 +22,7 @@
         if (!firstRender)
             return;
         module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/drop.js");
-        attached = await module.InvokeAsync<IJSObjectReference>("attachPage", InputId, F(Strings.Shared.PhotoDropLabel, Name));
+        attached = await module.InvokeAsync<IJSObjectReference>("attachPage", InputId, F(Strings.Shared.PhotoDropLabel, Name), Area);
     }
 
     public async ValueTask DisposeAsync()

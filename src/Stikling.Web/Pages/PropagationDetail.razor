@@ -34,7 +34,10 @@
 <PageTitle>@(propagation?.DisplayName ?? Strings.Propagations.DetFallbackTitle) · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+@if (!InPane)
+{
+    <a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+}
 
 @if (propagation is null)
 {
@@ -42,9 +45,10 @@
 }
 else
 {
-    @* On a wide screen these are two columns: who it is on the left, its history on the right *@
-    <div class="profile-layout">
-        <div class="profile-side">
+    @* On a wide screen these are two columns, three on a very wide one: who it is, its history, and the details *@
+    <div class="profile-frame">
+    <div class="profile-layout profile-three">
+        <div class="profile-head">
             @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
@@ -279,6 +283,8 @@ else
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Propagations.DetShare</button>
             </div>
 
+        </div>
+        <div class="profile-more">
             <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
                 <section class="detail-card">
                     <dl class="detail-list">
@@ -592,12 +598,13 @@ else
                       OnMeasurementsChanged="() => growthVersion++" />
         </div>
     </div>
+    </div>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"
                 StartBeforeId="shareBeforeId" StartAfterId="shareAfterId"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
-    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" /></IfCan>
+    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" Area="@(InPane ? ".side-pane" : null)" /></IfCan>
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 
@@ -1115,6 +1122,10 @@ else
 
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Shown in the pane beside the Plants or Propagations list on a large screen: no back link, and a dropped photo only counts over the pane.</summary>
+    [Parameter]
+    public bool InPane { get; set; }
 
     /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
     [SupplyParameterFromQuery(Name = "arrived")]

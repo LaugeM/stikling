@@ -1,0 +1,32 @@
+@* The pane beside a list on a large screen: a small head with a round close button and a link to the full page,
+   and the page of the open plant or propagation below. Goes inside SidePaneScope, next to the list. Close
+   leaves the pane the same way Escape does. *@
+@inject NavigationManager Navigation
+
+<section class="side-pane" aria-label="@Label">
+    <div class="side-pane-head">
+        <button type="button" class="side-pane-close" aria-label="@Strings.Common.Close" title="@Strings.Common.Close" @onclick="Close">
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
+        </button>
+        <a class="side-pane-open btn btn-link btn-sm link-action" href="@Href">@OpenText</a>
+    </div>
+    @ChildContent
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    /// <summary>The page of its own, "plants/{id}".</summary>
+    [Parameter, EditorRequired]
+    public string Href { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string OpenText { get; set; } = "";
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private void Close() =>
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("open", (Guid?)null), replace: true);
+}

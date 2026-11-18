@@ -81,7 +81,8 @@ else if (all.Count == 0)
 }
 else
 {
-    <div class="list-layout">
+    <SidePaneScope Prefix="propagations" Enabled="@PaneEnabled" OpenId="Open">
+    <div class="list-layout @(HasPane ? "has-pane" : null) @(HasPane && filtersShown ? "filters-open" : null)">
     <div class="list-side">
         @* The page's links: a row under the title from 64rem, quiet rows at the top of the filter column from 80rem. A phone has them in the heading above. *@
         <div class="list-side-links">
@@ -128,6 +129,12 @@ else
     </div>
 
     <div class="list-main">
+    @if (HasPane)
+    {
+        @* From 96rem the filters fold away while a propagation is open, and this brings them back *@
+        <button type="button" class="btn btn-outline-primary btn-sm pane-filters" aria-pressed="@(filtersShown ? "true" : "false")"
+                @onclick="() => filtersShown = !filtersShown">@(FilterCount > 0 ? F(Strings.Propagations.PaneFiltersCount, FilterCount) : Strings.Propagations.PaneFilters)</button>
+    }
     @if (selecting)
     {
         <div class="select-all">
@@ -183,7 +190,7 @@ else
                 @foreach (var entry in experiment.Entries)
                 {
                     <li>
-                        <a class="experiment-row" href="propagations/@entry.Propagation.Id"
+                        <a class="experiment-row" href="propagations/@entry.Propagation.Id" aria-current="@(HasPane && entry.Propagation.Id == Open ? "true" : null)"
                            aria-label="@F(Strings.Propagations.ListRowLabel, entry.Propagation.DisplayName, Labels.For(entry.Propagation.Medium))">
                             <span class="experiment-medium">@Labels.For(entry.Propagation.Medium)</span>
                             @if (entry.DaysToRoot is { } days)
@@ -228,7 +235,7 @@ else
             @foreach (var propagation in experiments.SelectMany(e => e.Entries).Select(e => e.Propagation))
             {
                 <li>
-                    <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)"
+                    <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" ShowStage="true" Pace="@Pace(propagation)" Open="@(HasPane && propagation.Id == Open)"
                                      Selectable="true" Selected="selected.Contains(propagation.Id)" OnToggle="Toggle" />
                 </li>
             }
@@ -245,7 +252,7 @@ else
                     @foreach (var propagation in items)
                     {
                         <li>
-                            <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)"
+                            <PropagationCard Propagation="propagation" ParentName="@ParentName(propagation)" Pace="@Pace(propagation)" Open="@(HasPane && propagation.Id == Open)"
                                              Selectable="selecting" Selected="selected.Contains(propagation.Id)" OnToggle="Toggle" />
                         </li>
                     }
@@ -267,7 +274,14 @@ else
     }
     </div>
     </div>
+    @if (HasPane && paneId is { } openId)
+    {
+        <SidePane Label="@F(Strings.Propagations.PaneLabel, OpenName)" Href="@($"propagations/{openId}")" OpenText="@Strings.Propagations.PaneOpenPage">
+            <PropagationDetail @key="openId" Id="openId" InPane="true" />
+        </SidePane>
+    }
     </div>
+    </SidePaneScope>
 }
 
 @if (selecting)
@@ -330,6 +344,32 @@ else
     private string EmptyText => Collections.Open?.OwnerName is { Length: > 0 } owner
         ? F(Strings.People.EmptyPropagations, owner)
         : Strings.People.EmptyPropagationsNoOwner;
+
+    /// <summary>The propagation open beside the list on a large screen. A click on one sets it, and Back or the close button clears it.</summary>
+    [SupplyParameterFromQuery(Name = "open")]
+    public Guid? Open { get; set; }
+
+    // Not while picking: there a click does what it always did
+    private bool PaneEnabled => !selecting;
+    private bool HasPane => Open is not null && PaneEnabled;
+    private bool filtersShown; // the Filters button beside an open propagation brings the folded filter column back
+    private string OpenName => all?.FirstOrDefault(p => p.Id == Open)?.DisplayName ?? Strings.Propagations.DetFallbackTitle;
+    private int FilterCount => (string.IsNullOrWhiteSpace(search) ? 0 : 1) + (progress != ProgressFilter.Active ? 1 : 0);
+
+    // The one the pane shows. It follows Open one render later: the page in the pane reads the address too, and
+    // Blazor fails when something starts or stops listening to the address while a change of it is handed out.
+    private Guid? paneId;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open is null)
+            filtersShown = false;
+        if (Open != paneId)
+        {
+            await Task.Yield();
+            paneId = Open;
+        }
+    }
 
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =
     [

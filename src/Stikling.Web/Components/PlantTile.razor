@@ -13,7 +13,7 @@
 }
 else
 {
-    <a data-drop-subject="plants/@Plant.Id" data-quick-plant="@(QuickActions ? Plant.Id : null)" class="plant-tile @(Faded ? "faded" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
+    <a data-drop-subject="plants/@Plant.Id" data-quick-plant="@(QuickActions ? Plant.Id : null)" class="plant-tile @(Open ? "selected" : null) @(Faded ? "faded" : null)" aria-current="@(Open ? "true" : null)" href="@(Href ?? $"plants/{Plant.Id}")">
         @Content
     </a>
 }
@@ -31,6 +31,10 @@ else
 
     [Parameter]
     public bool Selected { get; set; }
+
+    /// <summary>This plant is the one open in the pane beside the list: marked like a selected one, but still a link.</summary>
+    [Parameter]
+    public bool Open { get; set; }
 
     /// <summary>Press and hold, or right-click, opens the quick actions sheet. Only the Plants list turns it on.</summary>
     [Parameter]
