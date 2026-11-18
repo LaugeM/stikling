@@ -1,0 +1,204 @@
+@* The Yours card on a dictionary page for a genus, species or cultivar: your own note on the name, what you have
+   and had of it, and how its cuttings went in each medium. It is always there, since the note can be written
+   whether or not you have anything of the name. *@
+@inject NameNoteService Notes
+
+<section class="detail-card" aria-labelledby="dict-yours">
+    <h2 id="dict-yours">@Strings.NameNotes.YoursHeading</h2>
+
+    <h3>@Strings.NameNotes.NoteLabel</h3>
+    @if (editing)
+    {
+        <textarea class="form-control" rows="3" maxlength="@NameNote.MaxLength" placeholder="@Strings.NameNotes.NotePlaceholder"
+                  aria-label="@F(Strings.NameNotes.NoteAria, Name)" @bind="text" @bind:event="oninput"></textarea>
+        <p class="your-hint">@Strings.NameNotes.NoteHint</p>
+        @if (error is not null)
+        {
+            <p class="text-danger" role="alert">@error</p>
+        }
+        <div class="your-actions">
+            <button type="button" class="btn btn-primary btn-sm" disabled="@saving" @onclick="SaveAsync">@Strings.Common.Save</button>
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@saving" @onclick="Cancel">@Strings.Common.Cancel</button>
+        </div>
+    }
+    else if (note is not null)
+    {
+        <p class="your-note">@note.Text</p>
+        <button type="button" class="btn btn-link btn-sm link-action your-edit" @onclick="Edit">@Strings.Common.Edit</button>
+    }
+    else
+    {
+        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="Edit">@Strings.NameNotes.NoteAdd</button>
+    }
+
+    @if (!Yours.HasAnything)
+    {
+        <p class="your-empty">@Strings.NameNotes.Empty</p>
+    }
+
+    @if (Yours.Plants.Count + Yours.Propagations.Count + Yours.Wishes.Count > 0)
+    {
+        <h3>@Strings.Dictionary.YouHaveHeading</h3>
+        <ul class="item-list">
+            @foreach (var plant in Yours.Plants)
+            {
+                <li><PlantCard Plant="plant" /></li>
+            }
+            @foreach (var propagation in Yours.Propagations)
+            {
+                <li><PropagationCard Propagation="propagation" /></li>
+            }
+            @foreach (var wish in Yours.Wishes)
+            {
+                <li>
+                    <a class="item-card" href="wishlist/@wish.Id/edit">
+                        <span class="item-text">
+                            <span class="item-name">@wish.DisplayName</span>
+                            <span class="item-meta">@Strings.Dictionary.OnWishlist</span>
+                        </span>
+                    </a>
+                </li>
+            }
+        </ul>
+    }
+
+    @if (Yours.Had.Count + Yours.Past.Count > 0)
+    {
+        <h3>@Strings.NameNotes.HadHeading</h3>
+        <ul class="item-list">
+            @foreach (var plant in Yours.Had)
+            {
+                <li><PlantCard Plant="plant" /></li>
+            }
+            @foreach (var propagation in Yours.Past)
+            {
+                <li><PropagationCard Propagation="propagation" /></li>
+            }
+        </ul>
+    }
+
+    @if (Yours.Results.Count > 0)
+    {
+        <h3>@Strings.NameNotes.ResultsHeading</h3>
+        <ul class="your-results">
+            @foreach (var result in Yours.Results)
+            {
+                <li>
+                    <div class="your-result-head">
+                        <span class="your-result-name">@Labels.For(result.Key)</span>
+                        <span class="your-result-batches">@Plural.Of(result.Batches, Strings.Propagations.ListBatches_One, Strings.Propagations.ListBatches_Other)</span>
+                    </div>
+                    @if (result.SuccessRate is { } rate)
+                    {
+                        <div class="your-result-line">
+                            @if (result.Decided < PropagationResults.SmallSample)
+                            {
+                                @((MarkupString)F(Strings.Propagations.StatsMadeItSmall, result.Succeeded, result.Decided))
+                            }
+                            else
+                            {
+                                @((MarkupString)F(Strings.Propagations.StatsMadeItPercent, Percent(rate), result.Succeeded, result.Decided))
+                            }
+                            @if (result.Growing > 0)
+                            {
+                                <span class="text-body-secondary"> · @F(Strings.Propagations.StatsStillGoing, result.Growing)</span>
+                            }
+                        </div>
+                    }
+                    else
+                    {
+                        <div class="your-result-line text-body-secondary">@F(Strings.Propagations.StatsNothingYet, result.Growing)</div>
+                    }
+                    @if (result.AverageDaysToRoot is { } average)
+                    {
+                        <div class="your-result-line">
+                            @if (result.DaysToRoot.Count == 1)
+                            {
+                                @Plural.Of(result.FastestDaysToRoot!.Value, Strings.Propagations.StatsRooted_One, Strings.Propagations.StatsRooted_Other)
+                            }
+                            else
+                            {
+                                @Plural.Of(Days(average), Strings.Propagations.StatsRootedAvg_One, Strings.Propagations.StatsRootedAvg_Other)
+                            }
+                        </div>
+                    }
+                </li>
+            }
+        </ul>
+        <a class="link-action" href="propagations/results">@Strings.NameNotes.ResultsLink</a>
+    }
+</section>
+
+@code {
+    [Parameter, EditorRequired]
+    public Yours Yours { get; set; } = null!;
+
+    /// <summary>The name as it is read out for the note box.</summary>
+    [Parameter, EditorRequired]
+    public string Name { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Genus { get; set; } = "";
+
+    [Parameter]
+    public string? Species { get; set; }
+
+    [Parameter]
+    public string? Cultivar { get; set; }
+
+    private NameNote? note;
+    private bool editing;
+    private bool saving;
+    private string text = "";
+    private string? error;
+
+    private NameLevel Level => !string.IsNullOrWhiteSpace(Cultivar) ? NameLevel.Cultivar : !string.IsNullOrWhiteSpace(Species) ? NameLevel.Species : NameLevel.Genus;
+
+    // Changes that come in from another device don't touch what is being typed
+    protected override void OnParametersSet()
+    {
+        if (!editing)
+            note = Yours.Note;
+    }
+
+    private void Edit()
+    {
+        text = note?.Text ?? "";
+        error = null;
+        editing = true;
+    }
+
+    private void Cancel()
+    {
+        editing = false;
+        note = Yours.Note;
+    }
+
+    private async Task SaveAsync()
+    {
+        saving = true;
+        error = null;
+        try
+        {
+            note = await Notes.SaveAsync(Level, Genus, Species, Cultivar, text);
+            editing = false;
+        }
+        catch (InvalidOperationException e)
+        {
+            error = e.Message;
+        }
+        catch (Exception)
+        {
+            error = Strings.NameNotes.NoteError;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private static string Percent(double rate) =>
+        $"{Math.Round(rate * 100, MidpointRounding.AwayFromZero):0}%";
+
+    private static int Days(double average) => (int)Math.Round(average, MidpointRounding.AwayFromZero);
+}

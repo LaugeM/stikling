@@ -267,7 +267,7 @@ else
     }
 
     // Below this many units a percentage looks more certain than it is
-    private const int SmallSample = 5;
+    private const int SmallSample = PropagationResults.SmallSample;
 
     private static string Percent(double rate) =>
         $"{Math.Round(rate * 100, MidpointRounding.AwayFromZero):0}%";

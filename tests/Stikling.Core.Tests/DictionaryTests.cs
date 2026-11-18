@@ -36,12 +36,13 @@ public class DictionaryTests
     private readonly FakePlantRepository plants = new();
     private readonly FakePropagationRepository propagations = new();
     private readonly FakeWishRepository wishes = new();
+    private readonly FakeNameNoteRepository notes = new();
 
     private DictionaryService Service()
     {
         var names = new PlantNameService(new FakePlantNameSource(Data), plants, propagations,
             new SettingsService(new FakeSettingsRepository()), new FakeDeviceLanguages("en-GB"));
-        return new DictionaryService(names, plants, propagations, wishes);
+        return new DictionaryService(names, plants, propagations, wishes, new NameNoteService(notes, names));
     }
 
     private static DictionaryBrowser Browser() => new(Data, EverydayNameBook.Empty);
@@ -183,7 +184,7 @@ public class DictionaryTests
     {
         var source = new FakePlantNameSource(Data) { Fail = true };
         var names = new PlantNameService(source, plants, propagations, new SettingsService(new FakeSettingsRepository()), new FakeDeviceLanguages("en-GB"));
-        var service = new DictionaryService(names, plants, propagations, wishes);
+        var service = new DictionaryService(names, plants, propagations, wishes, new NameNoteService(notes, names));
 
         Assert.Empty((await service.GetBrowserAsync()).GeneraIn(DictionaryGroup.Aroids));
         source.Fail = false;

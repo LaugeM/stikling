@@ -1247,6 +1247,20 @@ internal sealed class FakeShoppingItemRepository() : FakeRepository<ShoppingItem
     }
 }
 
+internal sealed class FakeNameNoteRepository() : FakeRepository<NameNote>(stampsDates: true), INameNoteRepository
+{
+    public Dictionary<Guid, NameNote> Notes => Records;
+
+    public Task<IReadOnlyList<NameNote>> GetStoredAsync() =>
+        Task.FromResult<IReadOnlyList<NameNote>>(Records.Values.ToList());
+
+    protected override void Check(NameNote note)
+    {
+        if (note.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}
+
 internal sealed class FakePlaceReadingRepository() : FakeRepository<PlaceReading>(stampsDates: true), IPlaceReadingRepository
 {
     public Dictionary<Guid, PlaceReading> Readings => Records;

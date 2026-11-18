@@ -6,6 +6,7 @@ using Stikling.Core.Flowering;
 using Stikling.Core.Leaves;
 using Stikling.Core.Lights;
 using Stikling.Core.Measurements;
+using Stikling.Core.Names;
 using Stikling.Core.Orders;
 using Stikling.Core.Photos;
 using Stikling.Core.Readings;
@@ -290,4 +291,13 @@ public sealed class IndexedDbPlaceReadingRepository(IndexedDb db, TimeProvider t
     : IndexedDbEntityRepository<PlaceReading>(db, time, RecordKinds.PlaceReadings), IPlaceReadingRepository
 {
     protected override IReadOnlyList<string> Validate(PlaceReading reading) => reading.Validate(Today);
+}
+
+public sealed class IndexedDbNameNoteRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<NameNote>(db, time, RecordKinds.NameNotes), INameNoteRepository
+{
+    // Deleted notes are kept in the list so writing on the name again can bring one back
+    async Task<IReadOnlyList<NameNote>> INameNoteRepository.GetStoredAsync() => await GetStoredAsync();
+
+    protected override IReadOnlyList<string> Validate(NameNote note) => note.Validate();
 }
