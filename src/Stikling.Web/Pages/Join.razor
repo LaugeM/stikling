@@ -36,7 +36,7 @@ else if (preview is { } invite)
 {
     @if (state == JoinState.AlreadyMember)
     {
-        <p>@F(Strings.People.AlreadyMember, invite.CollectionName)</p>
+        <p>@F(Strings.People.AlreadyMember, invite.DisplayName)</p>
         <div class="settings-actions">
             <button type="button" class="btn btn-primary" disabled="@busy" @onclick="OpenAsync">@Strings.People.OpenIt</button>
         </div>
@@ -45,8 +45,8 @@ else if (preview is { } invite)
     {
         <p>
             <strong>@(string.IsNullOrWhiteSpace(invite.InvitedByName)
-                ? F(Strings.People.JoinInvitesNoName, invite.CollectionName)
-                : F(Strings.People.JoinInvites, invite.InvitedByName, invite.CollectionName))</strong>
+                ? F(Strings.People.JoinInvitesNoName, invite.DisplayName)
+                : F(Strings.People.JoinInvites, invite.InvitedByName, invite.DisplayName))</strong>
         </p>
         <p>@F(Strings.People.JoinYouCan, RoleText.Verb(invite.Choice))</p>
 
@@ -133,7 +133,7 @@ else if (preview is { } invite)
         {
             PeopleFailure.NotFound => Strings.People.JoinNotFound,
             PeopleFailure.Gone => Strings.People.JoinGone,
-            PeopleFailure.Full => F(Strings.People.JoinFull, preview?.CollectionName ?? "", PeopleLimits.MaxMembers),
+            PeopleFailure.Full => F(Strings.People.JoinFull, preview?.DisplayName ?? "", PeopleLimits.MaxMembers),
             _ => PeopleText.Problem(failure, field),
         };
         state = failure == PeopleFailure.SignedOut ? JoinState.SignedOut : JoinState.Problem;

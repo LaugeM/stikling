@@ -20,7 +20,8 @@ public static class InviteEndpoints
         Guid Id, string? Token, MemberRole Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName);
 
     public record InvitePreview(
-        Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember);
+        Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember,
+        string? OwnerName = null);
 
     public static IEndpointRouteBuilder MapInvites(this IEndpointRouteBuilder app)
     {
@@ -135,11 +136,13 @@ public static class InviteEndpoints
             if (!invite.IsOpen(clock.GetUtcNow()))
                 return Gone();
 
-            var collectionName = await db.Collections.Where(c => c.Id == invite.CollectionId).Select(c => c.Name).SingleAsync();
+            var collection = await db.Collections.Where(c => c.Id == invite.CollectionId)
+                .Select(c => new { c.Name, OwnerName = db.People.Where(p => p.Id == c.OwnerPersonId).Select(p => p.Name).FirstOrDefault() })
+                .SingleAsync();
             var invitedBy = await db.People.Where(p => p.Id == invite.CreatedBy).Select(p => p.Name).SingleOrDefaultAsync();
             var already = await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
 
-            return Results.Ok(new InvitePreview(invite.CollectionId, collectionName, invitedBy, invite.Role, invite.ManagesPeople, already));
+            return Results.Ok(new InvitePreview(invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName));
         })
         .RequireAuthorization();
 

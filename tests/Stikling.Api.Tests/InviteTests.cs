@@ -229,7 +229,7 @@ public class InviteTests(ApiFactory api)
         var preview = await (await _people.Preview(guest, invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
         var ownPreview = await (await _people.Preview(owner, invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
 
-        Assert.Equal(new InvitePreview(owner.CollectionId, "Balcony", "Anna", MemberRole.Editor, true, AlreadyMember: false), preview);
+        Assert.Equal(new InvitePreview(owner.CollectionId, "Balcony", "Anna", MemberRole.Editor, true, AlreadyMember: false, OwnerName: "Anna"), preview);
         Assert.True(ownPreview!.AlreadyMember);
     }
 

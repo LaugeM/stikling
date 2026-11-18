@@ -43,8 +43,12 @@ public sealed record InviteInfo(
 
 /// <summary>What the person who opened an invite link is told before they join.</summary>
 public sealed record InvitePreviewInfo(
-    Guid CollectionId, string CollectionName, string? InvitedByName, string Role, bool ManagesPeople, bool AlreadyMember)
+    Guid CollectionId, string CollectionName, string? InvitedByName, string Role, bool ManagesPeople, bool AlreadyMember,
+    string? OwnerName = null)
 {
+    /// <summary>The collection's name as the app writes it, so the server's English default isn't shown.</summary>
+    public string DisplayName => CollectionText.Name(CollectionNames.Label(CollectionName, isOwner: false, OwnerName));
+
     public RoleChoice Choice => RoleChoice.Of(CollectionRoles.Parse(Role), ManagesPeople);
 }
 
