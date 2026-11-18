@@ -42,9 +42,10 @@
 }
 else
 {
-    @* On a wide screen these are two columns: who it is on the left, its history on the right *@
-    <div class="profile-layout">
-        <div class="profile-side">
+    @* On a wide screen these are two columns, three on a very wide one: who it is, its history, and the details *@
+    <div class="profile-frame">
+    <div class="profile-layout profile-three">
+        <div class="profile-head">
             @if (ShownCover is { } coverId)
             {
                 <div class="detail-hero">
@@ -279,6 +280,8 @@ else
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Propagations.DetShare</button>
             </div>
 
+        </div>
+        <div class="profile-more">
             <div id="propagation-details" class="profile-details @(detailsOpen ? "open" : null)">
                 <section class="detail-card">
                     <dl class="detail-list">
@@ -591,6 +594,7 @@ else
                       OnSubjectChanged="HistoryChangedDatesAsync" EmptyText="@Strings.Propagations.DetEmptyTimeline" OnBeforeAfter="OpenShareBeforeAfter"
                       OnMeasurementsChanged="() => growthVersion++" />
         </div>
+    </div>
     </div>
 
     <ShareSheet Open="shareOpen" OpenChanged="open => shareOpen = open" Tone="propagation" SubjectId="propagation.Id" StartOnLink="shareOnLink"

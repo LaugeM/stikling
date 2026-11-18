@@ -81,6 +81,13 @@
         --pa-column: 72rem;
     }
 
+    /* Plant and propagation pages get a third column on a large screen, so only they widen */
+    @media (min-width: 96rem) {
+        :root:has(.profile-three) {
+            --pa-column: 96rem;
+        }
+    }
+
     /* The plant table is read across, so it takes the whole width beside the menu */
     :root:has(.page-full) {
         --pa-column: 100vw;
@@ -2981,6 +2988,65 @@ main.app-content:has(.form-bar) {
         grid-template-columns: clamp(16rem, 32%, 22rem) minmax(0, 1fr);
         gap: clamp(1.5rem, 3%, 2.5rem);
         align-items: start;
+    }
+
+    /* The plant and propagation pages count their columns by the width of their own container, not the
+       screen, so they fit wherever they are shown. Under 44rem the blocks stack in markup order.
+       From 44rem it is two columns, as above, with the history spanning the head and the details.
+       From 78rem the details move to a third column. */
+    .profile-frame {
+        container-type: inline-size;
+    }
+
+    .profile-layout.profile-three {
+        grid-template-columns: minmax(0, 1fr);
+        row-gap: 0;
+    }
+
+    .profile-three > * {
+        min-width: 0;
+    }
+
+    @container (min-width: 44rem) {
+        .profile-layout.profile-three {
+            grid-template-columns: clamp(16rem, 32%, 22rem) minmax(0, 1fr);
+            /* The flexible row takes the height a long history needs, so the details stay under the head */
+            grid-template-rows: auto 1fr;
+        }
+
+        .profile-three > .profile-head,
+        .profile-three > .profile-more {
+            grid-column: 1;
+        }
+
+        .profile-three > .profile-history {
+            grid-column: 2;
+            grid-row: 1 / -1;
+        }
+    }
+
+    @container (min-width: 78rem) {
+        .profile-layout.profile-three {
+            grid-template-columns: clamp(16rem, 22%, 22rem) minmax(0, 1fr) clamp(18rem, 26%, 26rem);
+            grid-template-rows: auto;
+            column-gap: clamp(1.5rem, 3%, 2.5rem);
+            align-items: start;
+        }
+
+        .profile-three > .profile-head {
+            grid-column: 1;
+            grid-row: 1;
+        }
+
+        .profile-three > .profile-history {
+            grid-column: 2;
+            grid-row: 1;
+        }
+
+        .profile-three > .profile-more {
+            grid-column: 3;
+            grid-row: 1;
+        }
     }
 
     .profile-details:not(.open) {
