@@ -33,7 +33,7 @@ public static class InviteEndpoints
 
         invites.MapPost("", async (
             Guid collectionId, CreateInviteRequest request, HttpContext http, CurrentPerson current,
-            StiklingDbContext db, TimeProvider clock) =>
+            StiklingDbContext db, TimeProvider clock, InviteTokens tokens) =>
         {
             if (request.Role is not { } role || !Enum.IsDefined(role))
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["role"] = ["Choose a role."] });
@@ -84,9 +84,13 @@ public static class InviteEndpoints
                     statusCode: StatusCodes.Status429TooManyRequests);
             }
 
+            var token = NewToken();
+            var id = Guid.NewGuid();
             var invite = new Invite
             {
-                Token = NewToken(),
+                Id = id,
+                TokenHash = InviteTokens.Hash(token),
+                TokenCiphertext = tokens.Encrypt(id, token),
                 CollectionId = collectionId,
                 Role = role,
                 ManagesPeople = request.ManagesPeople,
@@ -99,24 +103,29 @@ public static class InviteEndpoints
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return Results.Created($"/collections/{collectionId}/invites/{invite.Id}", Respond(invite, person.Name));
+            return Results.Created($"/collections/{collectionId}/invites/{invite.Id}", Respond(invite, token, person.Name));
         })
         .RequireAuthorization(CollectionPolicies.Manage);
 
-        invites.MapGet("", async (Guid collectionId, HttpContext http, StiklingDbContext db, TimeProvider clock) =>
+        invites.MapGet("", async (Guid collectionId, HttpContext http, StiklingDbContext db, TimeProvider clock, InviteTokens tokens) =>
         {
             var now = clock.GetUtcNow();
 
-            // Only the owner gets the link of an invite that lets someone manage people, since only the owner can make one
+            // Only the owner gets the link of an invite that lets someone manage people, since only the owner can make one.
+            // The token of one they don't get is never decrypted
             var isOwner = http.Rights().IsOwner;
-            return await db.Invites.AsNoTracking()
+            var open = await db.Invites.AsNoTracking()
                 .Where(i => i.CollectionId == collectionId && i.UsedAt == null && i.RevokedAt == null && i.ExpiresAt > now)
                 .OrderByDescending(i => i.CreatedAt).ThenBy(i => i.Id)
-                .Select(i => new InviteResponse(
-                    i.Id, i.ManagesPeople && !isOwner ? null : i.Token, i.Role, i.ManagesPeople, i.CreatedAt, i.ExpiresAt,
-                    db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault(),
-                    i.ForName))
+                .Select(i => new
+                {
+                    Invite = i,
+                    CreatedByName = db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault(),
+                })
                 .ToListAsync();
+
+            return open.Select(o => Respond(
+                o.Invite, o.Invite.ManagesPeople && !isOwner ? null : tokens.Decrypt(o.Invite.Id, o.Invite.TokenCiphertext), o.CreatedByName));
         })
         .RequireAuthorization(CollectionPolicies.Manage);
 
@@ -151,8 +160,9 @@ public static class InviteEndpoints
                 return Results.NotFound();
 
             var person = http.User.Identity?.IsAuthenticated == true ? await current.FindOrCreateAsync() : null;
-            var invite = await db.Invites.AsNoTracking().SingleOrDefaultAsync(i => i.Token == token);
-            if (invite is null)
+            var hash = InviteTokens.Hash(token);
+            var invite = await db.Invites.AsNoTracking().SingleOrDefaultAsync(i => i.TokenHash == hash);
+            if (invite is null || !InviteTokens.HashMatches(invite.TokenHash, hash))
                 return Results.NotFound();
             if (!invite.IsOpen(clock.GetUtcNow()))
                 return Gone();
@@ -181,18 +191,23 @@ public static class InviteEndpoints
 
         app.MapPost("/invites/{token}/accept", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
         {
+            if (!LooksLikeToken(token))
+                return Results.NotFound();
+
             var person = await current.FindOrCreateAsync();
             var now = clock.GetUtcNow();
 
-            var found = await db.Invites.AsNoTracking().Where(i => i.Token == token).Select(i => new { i.CollectionId }).SingleOrDefaultAsync();
-            if (found is null)
+            var hash = InviteTokens.Hash(token);
+            var found = await db.Invites.AsNoTracking().Where(i => i.TokenHash == hash)
+                .Select(i => new { i.CollectionId, i.TokenHash }).SingleOrDefaultAsync();
+            if (found is null || !InviteTokens.HashMatches(found.TokenHash, hash))
                 return Results.NotFound();
 
             await using var transaction = await db.Database.BeginTransactionAsync();
             await db.LockCollectionAsync(found.CollectionId);
 
             // Read again with the collection locked, since someone else may have just used it
-            var invite = await db.Invites.SingleAsync(i => i.Token == token);
+            var invite = await db.Invites.SingleAsync(i => i.TokenHash == hash);
             var collection = await db.Collections.SingleAsync(c => c.Id == invite.CollectionId);
             var members = await db.Memberships.Where(m => m.CollectionId == invite.CollectionId).ToListAsync();
 
@@ -258,8 +273,8 @@ public static class InviteEndpoints
         return rows.Select(SharePageEndpoints.Read<T>).OfType<T>().ToList();
     }
 
-    private static InviteResponse Respond(Invite invite, string? createdByName) =>
-        new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName, invite.ForName);
+    private static InviteResponse Respond(Invite invite, string? token, string? createdByName) =>
+        new(invite.Id, token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName, invite.ForName);
 
     /// <summary>Whether it could be a token at all, so an address that can't be one never reaches the database.</summary>
     private static bool LooksLikeToken(string token) =>

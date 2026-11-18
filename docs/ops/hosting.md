@@ -6,7 +6,7 @@ The app is static files on GitHub Pages at https://stikling.app. The sync API ru
 - **Azure SQL** on the Basic tier, about $5 a month, which is always on and holds up to 2 GB. It used to be on the free serverless offer, but that paused after about 20 minutes without use and took close to a minute to wake, so a sync after a break waited that long. Each time the API started it woke the database too, so bots hitting the API used most of the month's free amount in the first four days of October.
 - **Log Analytics** for the API's logs, capped at 0.15 GB a day so it stays inside the free 5 GB a month.
 - **Blob Storage** for the photo images.
-- **Key Vault** (`kvstikling` and a part that is fixed per resource group) holds the private key for push notifications, which is the only secret. Its name is the `keyVaultName` output of the deploy. It uses Azure role-based access, and the API's identity may read secrets from it. The secret is read when a revision of the API or a run of the job starts, so the Standard tier, which charges per 10,000 operations, costs next to nothing.
+- **Key Vault** (`kvstikling` and a part that is fixed per resource group) holds the secrets: the key invite links are encrypted with, the private key for push notifications, and the tokens for Trefle and Pl@ntNet. Its name is the `keyVaultName` output of the deploy. It uses Azure role-based access, and the API's identity may read secrets from it. The secret is read when a revision of the API or a run of the job starts, so the Standard tier, which charges per 10,000 operations, costs next to nothing.
 - **A Container Apps job**, `stikling-notify`, sends the daily notifications. It is the API's image started every 15 minutes with the argument `send-notifications`, and it runs for a few seconds and exits. That is about 2,900 runs a month, well inside Container Apps' free grant. It only exists once notifications are turned on, see below.
 - **A budget** of 50 kr. a month on the subscription. The subscription bills in Danish kroner, so the budget's amount is in kroner too, and an amount written as dollars would be read as kroner. 50 kr. is about $8 a month, or $96 a year, against the $100 a year from Azure for Students. It emails support@stikling.app at half and all of the monthly amount, and runs the cost stop below.
 
@@ -50,6 +50,7 @@ This is also the way to move it to another subscription or region. For another r
    `az provider register --namespace Microsoft.App`, and the same for `Microsoft.Sql`, `Microsoft.Storage`, `Microsoft.OperationalInsights`, `Microsoft.ManagedIdentity`, `Microsoft.Logic`, `Microsoft.Insights` and `Microsoft.KeyVault`.
 2. Deploy without the API's domain, and with a sample image, since the workflow hasn't pushed one yet:
    add `--parameters apiDomain='' shareDomain='' apiImage=mcr.microsoft.com/dotnet/samples:aspnetapp` to the command above. The outputs have the values for the next two steps.
+   The API's part of this first deploy fails, since the container app points at the `invite-token-key` secret and the vault was only just made. Put the key in the vault as described under "The invite key" below, and run the same deploy again.
 3. At the DNS host for stikling.app, add a CNAME record `api` pointing at `apiDnsTarget`, and a TXT record `asuid.api` with `apiDomainVerificationId`. For the share domain, add a CNAME record `share` pointing at the same target, and a TXT record `asuid.share` with the same verification id (`shareDnsTarget` and `shareDomainVerificationId` are the same values as the API's, since it is the same container app).
 4. Deploy again with `apiCertificateIssued=false shareCertificateIssued=false` and the sample image, which adds the domains and asks for their certificates. When both certificates show as succeeded under the Container Apps environment in the portal, deploy once more with only the sample image, which uses them. Set `shareCertificateIssued` to `true` in `infra/main.bicepparam` as well, as it is `false` there until then.
 
@@ -60,6 +61,26 @@ This is also the way to move it to another subscription or region. For another r
 From then on the command above works with the defaults.
 
 For the app itself, the domain is set under Pages in the repository settings, with the four A records GitHub lists for an apex domain.
+
+## The invite key
+
+Invite links are kept as the SHA-256 of the token, which is how an invite is found, and the token encrypted with AES-GCM under a key of 32 random bytes, so people who manage the collection can be shown the link again. The key is the `invite-token-key` secret in the Key Vault, which the API gets as `Invites__TokenKey`. Unlike the other secrets it can't be turned off: the API doesn't start without it, before it touches the database. Locally the key is in `appsettings.Development.json`, and the tests set their own in `ApiFactory`.
+
+`<vault>` is the vault's name, found the way it is under notifications below.
+
+1. Give yourself the right to write secrets, if you haven't (step 2 under notifications).
+2. Make the key and store it, in PowerShell:
+   `az keyvault secret set --vault-name <vault> --name invite-token-key --value ([Convert]::ToBase64String([Security.Cryptography.RandomNumberGenerator]::GetBytes(32)))`
+3. Deploy the Bicep. That adds the secret and `Invites__TokenKey` to the API that is running. The API from before this ignores the setting.
+4. Only then merge the change that encrypts the tokens, so the workflow moves the API to an image that needs the key.
+
+The secret has to be in the vault before the deploy in step 3, since the container can't start a revision that points at a secret that isn't there. If the image with the change were deployed without the key, its revision would stop at start with an error naming `Invites:TokenKey`, before it migrates anything.
+
+On its first start with the change, the API moves the invites that are there. One migration adds the hash and the column for the encrypted token, and works out the hash in SQL. Encrypting needs the key, which SQL doesn't have, so the API then encrypts each token itself, and a second migration drops the plain column. That migration refuses to run while any token is still in plain text, so a step that went wrong stops the start instead of losing a link.
+
+While the new revision starts, the old one still answers. From the first migration until traffic moves, the old revision can't make invites, and after the second it can't open them either. That lasts a minute or so, and nothing is lost, since what fails is a request and not stored data.
+
+Never change the key while there are open invites. Each time it starts, the API reads the newest open invite with the key, and with another key it stops with an error saying the key doesn't fit. That is on purpose, so a wrong key is found at once and not when someone presses Show link. Closed invites are never shown, so they aren't checked. If the key is lost, the open invites can still be used, but their links can't be shown again and the API won't start with a new key. The way out is to withdraw the open invites in the database (`UPDATE Invites SET RevokedAt = SYSUTCDATETIME() WHERE UsedAt IS NULL AND RevokedAt IS NULL`, see "Looking at the database"), store a new key and restart the API. That ends the links people were sent, so it is only for when the key is gone.
 
 ## Turning on notifications
 

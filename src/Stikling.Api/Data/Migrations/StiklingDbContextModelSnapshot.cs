@@ -167,11 +167,15 @@ namespace Stikling.Api.Data.Migrations
                         .HasMaxLength(20)
                         .HasColumnType("nvarchar(20)");
 
-                    b.Property<string>("Token")
+                    b.Property<byte[]>("TokenCiphertext")
                         .IsRequired()
-                        .HasMaxLength(40)
-                        .HasColumnType("nvarchar(40)")
-                        .UseCollation("Latin1_General_100_BIN2");
+                        .HasMaxLength(64)
+                        .HasColumnType("varbinary(64)");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasColumnType("char(64)")
+                        .IsFixedLength();
 
                     b.Property<DateTimeOffset?>("UsedAt")
                         .HasColumnType("datetimeoffset");
@@ -183,7 +187,7 @@ namespace Stikling.Api.Data.Migrations
 
                     b.HasIndex("CollectionId");
 
-                    b.HasIndex("Token")
+                    b.HasIndex("TokenHash")
                         .IsUnique();
 
                     b.HasIndex("CreatedBy", "CreatedAt");

@@ -12,4 +12,10 @@ regexes = [
   '''Eby8vdM02xNOcqFlqUwJPLlmEtlCDXJ1OUzFT50uSRZ6IFsuFq2UVErCz4I6tq/K1SZFPTOtr/KBHBeksoGMGw==''',
   # The key for signing in as a test person, which only the API in Development accepts
   '''3kQI9o2T/\+4V83cUTMQ7rKHNhT/VWEc1xV5VwrG8jiM=''',
+  # The invite key the API uses in Development and the one the tests use
+  '''c3Rpa2xpbmctbG9jYWwtaW52aXRlLWtleS0xMjM0NTY=''',
+  '''dGVzdC1pbnZpdGUtdG9rZW4ta2V5LXN0aWtsaW5nLTE=''',
+  # Made-up invite tokens in the migration tests
+  '''Abc-def_ghiJKLmno12345''',
+  '''zyxWVU-987_tsrqpONML00''',
 ]

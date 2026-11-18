@@ -8,8 +8,14 @@ public class Invite
 {
     public Guid Id { get; set; } = Guid.NewGuid();
 
-    /// <summary>The secret in the address: 16 random bytes, as base64url without padding.</summary>
-    public required string Token { get; set; }
+    /// <summary>
+    /// SHA-256 of the secret in the address, as 64 lowercase hex characters, which is how an invite is found.
+    /// The token is 16 random bytes as base64url without padding.
+    /// </summary>
+    public required string TokenHash { get; set; }
+
+    /// <summary>The token encrypted with <c>Invites:TokenKey</c> (<see cref="Collections.InviteTokens"/>), so the link can be shown again.</summary>
+    public required byte[] TokenCiphertext { get; set; }
 
     public Guid CollectionId { get; set; }
 

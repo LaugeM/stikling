@@ -100,9 +100,9 @@ resource apiCanUseStorage 'Microsoft.Authorization/roleAssignments@2022-04-01' =
 
 // Push notifications
 
-// The private key of the VAPID pair is the only secret. It is put in by hand (docs/ops/hosting.md),
-// so it never passes through the Bicep, and the API and the notification job read it through their
-// identity. The name is kv plus the same part the storage and SQL names use, since "kv-stikling-"
+// The secrets, like the private key of the VAPID pair and the invite key, are put in by hand
+// (docs/ops/hosting.md), so they never pass through the Bicep, and the API and the notification job
+// read them through their identity. The name is kv plus the same part the storage and SQL names use, since "kv-stikling-"
 // with it would be longer than the 24 characters a vault name may have.
 resource vault 'Microsoft.KeyVault/vaults@2024-11-01' = {
   name: 'kvstikling${suffix}'
@@ -307,6 +307,24 @@ var apiEnv = [
   }
 ]
 
+// The key invite tokens are encrypted with. Unlike the secrets below it is always there, since the API
+// doesn't start without it. It is put in the vault by hand before the first deploy that has this, see
+// docs/ops/hosting.md, and must never change while there are open invites.
+var inviteEnv = [
+  {
+    name: 'Invites__TokenKey'
+    secretRef: 'invite-token-key'
+  }
+]
+
+var inviteSecrets = [
+  {
+    name: 'invite-token-key'
+    keyVaultUrl: '${vault.properties.vaultUri}secrets/invite-token-key'
+    identity: apiIdentity.id
+  }
+]
+
 // Push notifications are off until the public key is set, which is after the private one is in the vault
 var notificationsOn = !empty(vapidPublicKey)
 
@@ -391,7 +409,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
     workloadProfileName: 'Consumption'
     configuration: {
       activeRevisionsMode: 'Single'
-      secrets: concat(notificationSecrets, plantFactsSecrets, identificationSecrets)
+      secrets: concat(inviteSecrets, notificationSecrets, plantFactsSecrets, identificationSecrets)
       ingress: {
         external: true
         targetPort: 8080
@@ -408,7 +426,7 @@ resource api 'Microsoft.App/containerApps@2024-03-01' = {
             cpu: json('0.25')
             memory: '0.5Gi'
           }
-          env: concat(sharedEnv, apiEnv, notificationEnv, plantFactsEnv, identificationEnv)
+          env: concat(sharedEnv, apiEnv, inviteEnv, notificationEnv, plantFactsEnv, identificationEnv)
         }
       ]
       scale: {

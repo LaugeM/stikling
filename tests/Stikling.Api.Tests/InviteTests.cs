@@ -1,6 +1,12 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text;
 using System.Text.Json;
+using Microsoft.Data.SqlClient;
+using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Stikling.Core.Sync;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Collections;
@@ -559,4 +565,170 @@ public class InviteTests(ApiFactory api)
         Assert.True(collection.IsOwner);
         Assert.NotEqual(person.OwnCollectionId, collection.Id);
     }
+    [Fact]
+    public async Task An_invite_is_stored_as_a_hash_and_an_encrypted_token_never_in_plain_text()
+    {
+        var owner = await SignIn("Anna");
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+
+        await api.WithDbAsync(async db =>
+        {
+            var stored = await db.Invites.AsNoTracking().SingleAsync(i => i.Id == invite.Id);
+            Assert.Equal(InviteTokens.Hash(invite.Token!), stored.TokenHash);
+            Assert.DoesNotContain(invite.Token!, Encoding.ASCII.GetString(stored.TokenCiphertext));
+            Assert.Equal(0, await PlainColumnsAsync(db));
+        });
+    }
+
+    [Fact]
+    public async Task An_invite_is_found_by_the_hash_of_its_token()
+    {
+        var owner = await SignIn("Anna");
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+        var other = $"x{Guid.NewGuid():N}"[..22];
+
+        // Point the row at another token's hash. The old token no longer finds it and the other one does
+        await api.WithDbAsync(async db =>
+            await db.Invites.Where(i => i.Id == invite.Id)
+                .ExecuteUpdateAsync(set => set.SetProperty(i => i.TokenHash, InviteTokens.Hash(other))));
+
+        Assert.Equal(HttpStatusCode.NotFound, (await _people.Preview(await SignIn(), invite.Token!)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await _people.Preview(await SignIn(), other)).StatusCode);
+        Assert.Equal(HttpStatusCode.OK, (await _people.Accept(await SignIn("Bo"), other)).StatusCode);
+    }
+
+    [Fact]
+    public async Task The_list_of_open_invites_gives_back_the_token_it_was_made_with()
+    {
+        var owner = await SignIn("Anna");
+        var one = await _people.InviteOk(owner, MemberRole.Viewer);
+        var two = await _people.InviteOk(owner, MemberRole.Editor);
+
+        var open = await OpenInvites(owner);
+
+        Assert.Equal(one.Token, open.Single(i => i.Id == one.Id).Token);
+        Assert.Equal(two.Token, open.Single(i => i.Id == two.Id).Token);
+        Assert.NotEqual(one.Token, two.Token);
+    }
+
+    [Fact]
+    public void The_api_does_not_start_without_an_invite_key()
+    {
+        using var factory = api.InEnvironment("Testing", new() { [InviteTokens.KeySetting] = "" });
+
+        var error = Assert.Throws<InvalidOperationException>(() => factory.CreateClient());
+        Assert.Contains(InviteTokens.KeySetting, error.Message);
+    }
+
+    [Theory]
+    [InlineData("not base64!")]
+    [InlineData("c2hvcnQ=")]
+    public void An_invite_key_that_is_not_32_bytes_of_base64_is_refused(string key)
+    {
+        Assert.Throws<InvalidOperationException>(() => TokensWithKey(key));
+    }
+
+    [Fact]
+    public async Task Another_key_than_the_one_the_open_invites_were_made_with_stops_the_start()
+    {
+        var owner = await SignIn("Anna");
+        await _people.InviteOk(owner, MemberRole.Viewer);
+        var otherKey = TokensWithKey(Convert.ToBase64String(new byte[32]));
+
+        await api.WithDbAsync(async db =>
+        {
+            var error = await Assert.ThrowsAsync<InvalidOperationException>(() => DatabaseStartup.CheckKeyAsync(db, otherKey, TimeProvider.System));
+            Assert.Contains("doesn't fit", error.Message);
+
+            // The right key passes
+            await DatabaseStartup.CheckKeyAsync(db, Tokens, TimeProvider.System);
+        });
+    }
+
+    [Fact]
+    public Task Invites_stored_in_plain_text_keep_their_links_after_the_migration() => InEmptyDatabaseAsync(async db =>
+    {
+        await db.GetService<IMigrator>().MigrateAsync("AddStoredFiles");
+
+        var open = (Id: Guid.NewGuid(), Token: "Abc-def_ghiJKLmno12345");
+        var used = (Id: Guid.NewGuid(), Token: "zyxWVU-987_tsrqpONML00");
+        var now = DateTimeOffset.UtcNow;
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Invites NOCHECK CONSTRAINT ALL");
+        await InsertPlainInviteAsync(db, open.Id, open.Token, now.AddDays(6), usedAt: null);
+        await InsertPlainInviteAsync(db, used.Id, used.Token, now.AddDays(6), usedAt: now);
+
+        // The first migration computes the hash in SQL, and it has to be the one the API computes
+        await db.GetService<IMigrator>().MigrateAsync("EncryptInviteTokens");
+        var sqlHashes = await db.Database
+            .SqlQuery<HashRow>($"SELECT Id, TokenHash FROM Invites")
+            .ToDictionaryAsync(r => r.Id, r => r.TokenHash);
+        Assert.Equal(InviteTokens.Hash(open.Token), sqlHashes[open.Id]);
+        Assert.Equal(InviteTokens.Hash(used.Token), sqlHashes[used.Id]);
+
+        await DatabaseStartup.MigrateAsync(db, Tokens, TimeProvider.System);
+
+        foreach (var (id, token) in new[] { open, used })
+        {
+            var stored = await db.Invites.AsNoTracking().SingleAsync(i => i.Id == id);
+            Assert.Equal(InviteTokens.Hash(token), stored.TokenHash);
+            Assert.Equal(token, Tokens.Decrypt(id, stored.TokenCiphertext));
+        }
+
+        Assert.Equal(0, await PlainColumnsAsync(db));
+
+        // Starting again finds nothing left to do
+        await DatabaseStartup.MigrateAsync(db, Tokens, TimeProvider.System);
+    });
+
+    [Fact]
+    public Task The_plain_column_is_not_dropped_while_a_token_in_it_is_not_encrypted() => InEmptyDatabaseAsync(async db =>
+    {
+        await db.GetService<IMigrator>().MigrateAsync("AddStoredFiles");
+        await db.Database.ExecuteSqlRawAsync("ALTER TABLE Invites NOCHECK CONSTRAINT ALL");
+        var id = Guid.NewGuid();
+        await InsertPlainInviteAsync(db, id, "Abc-def_ghiJKLmno12345", DateTimeOffset.UtcNow.AddDays(6), usedAt: null);
+
+        // Every migration at once, without the step that encrypts
+        var error = await Assert.ThrowsAsync<SqlException>(() => db.Database.MigrateAsync());
+        Assert.Contains("not encrypted", error.Message);
+
+        var token = await db.Database.SqlQuery<string>($"SELECT Token AS Value FROM Invites WHERE Id = {id}").SingleAsync();
+        Assert.Equal("Abc-def_ghiJKLmno12345", token);
+    });
+
+    private sealed record HashRow(Guid Id, string TokenHash);
+
+    private InviteTokens Tokens => api.Services.GetRequiredService<InviteTokens>();
+
+    private static InviteTokens TokensWithKey(string key) =>
+        new(new ConfigurationBuilder().AddInMemoryCollection(new Dictionary<string, string?> { [InviteTokens.KeySetting] = key }).Build());
+
+    private static Task<int> PlainColumnsAsync(StiklingDbContext db) =>
+        db.Database
+            .SqlQuery<int>($"SELECT COUNT(*) AS Value FROM INFORMATION_SCHEMA.COLUMNS WHERE TABLE_NAME = 'Invites' AND COLUMN_NAME = 'Token'")
+            .SingleAsync();
+
+    /// <summary>Runs the test in a database of its own on the same server, which is dropped afterwards.</summary>
+    private async Task InEmptyDatabaseAsync(Func<StiklingDbContext, Task> test)
+    {
+        var connection = new SqlConnectionStringBuilder(api.Services.GetRequiredService<IConfiguration>().GetConnectionString("Stikling"))
+        {
+            InitialCatalog = $"migration_{Guid.NewGuid():N}",
+        };
+        await using var db = new StiklingDbContext(new DbContextOptionsBuilder<StiklingDbContext>().UseSqlServer(connection.ConnectionString).Options);
+        try
+        {
+            await test(db);
+        }
+        finally
+        {
+            await db.Database.EnsureDeletedAsync();
+        }
+    }
+
+    private static Task InsertPlainInviteAsync(StiklingDbContext db, Guid id, string token, DateTimeOffset expiresAt, DateTimeOffset? usedAt) =>
+        db.Database.ExecuteSqlAsync($"""
+            INSERT INTO Invites (Id, Token, CollectionId, Role, ManagesPeople, CreatedAt, ExpiresAt, UsedAt)
+            VALUES ({id}, {token}, {Guid.NewGuid()}, 'Viewer', 0, {expiresAt.AddDays(-7)}, {expiresAt}, {usedAt})
+            """);
 }

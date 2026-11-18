@@ -57,6 +57,7 @@ builder.Services.Configure<PhotoOptions>(builder.Configuration.GetSection("Photo
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<CurrentPerson>();
+builder.Services.AddSingleton<InviteTokens>();
 
 builder.Services.AddClerkAuthentication();
 builder.Services.AddTestSignIn();
@@ -101,13 +102,17 @@ var app = builder.Build();
 if (app.Environment.IsDevelopment())
     app.MapOpenApi();
 
+// The invite key is read first, so the API stops here when it is missing, before the database is touched
+var inviteTokens = app.Services.GetRequiredService<InviteTokens>();
+
 // The database is created and kept up to date on start, locally and hosted. The hosted API runs
 // as one copy at most, and EF Core holds a lock while it migrates in any case. The tests migrate
 // on their own.
 if (app.Configuration.GetValue("Database:MigrateOnStart", true))
 {
     await using var scope = app.Services.CreateAsyncScope();
-    await scope.ServiceProvider.GetRequiredService<StiklingDbContext>().Database.MigrateAsync();
+    await DatabaseStartup.MigrateAsync(
+        scope.ServiceProvider.GetRequiredService<StiklingDbContext>(), inviteTokens, app.Services.GetRequiredService<TimeProvider>());
 }
 
 // The client's address is in X-Forwarded-For, added by the Container Apps ingress, which is the only
