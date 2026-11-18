@@ -1,0 +1,92 @@
+@* Wraps a list that opens plants beside it on a large screen (Plants and Propagations). A click on a link to a
+   plant or propagation inside it opens that one in the pane, as ?open={id} on the same page; sidepane.js does
+   the clicking and Escape. The first open pushes a history entry and the next ones replace it, so Back closes
+   the pane. A link with ?open on a window too narrow for the pane goes to the page of its own. Put the pane
+   (SidePane) inside, next to the list. *@
+@inject IJSRuntime JS
+@inject NavigationManager Navigation
+@implements IAsyncDisposable
+
+<div class="side-scope" @ref="root">@ChildContent</div>
+
+@code {
+    /// <summary>"plants" or "propagations": the start of the address of one.</summary>
+    [Parameter, EditorRequired]
+    public string Prefix { get; set; } = "";
+
+    /// <summary>False in Select mode and in the table view, where a click does what it always did.</summary>
+    [Parameter]
+    public bool Enabled { get; set; }
+
+    /// <summary>The one open in the pane, from the query.</summary>
+    [Parameter]
+    public Guid? OpenId { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private ElementReference root;
+    private IJSObjectReference? module;
+    private IJSObjectReference? attached;
+    private DotNetObjectReference<SidePaneScope>? self;
+    private Guid? shownId;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sidepane.js");
+            self = DotNetObjectReference.Create(this);
+            attached = await module.InvokeAsync<IJSObjectReference>("attach", root, self, Prefix);
+            shownId = OpenId;
+            // A shared link, or a window made narrower since: no pane here, so it is the page of its own
+            if (OpenId is { } id && !await module.InvokeAsync<bool>("isWide"))
+                Navigation.NavigateTo($"{Prefix}/{id}", replace: true);
+        }
+        if (attached is null)
+            return;
+        await attached.InvokeVoidAsync("setEnabled", Enabled);
+        if (OpenId != shownId)
+        {
+            var switched = shownId is not null && OpenId is not null;
+            shownId = OpenId;
+            if (switched)
+                await attached.InvokeVoidAsync("showPane");
+        }
+    }
+
+    /// <summary>Called from sidepane.js. Opening from a closed pane adds a history entry, switching replaces it.</summary>
+    [JSInvokable]
+    public Task Open(Guid id)
+    {
+        if (id != OpenId)
+            Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("open", id), replace: OpenId is not null);
+        return Task.CompletedTask;
+    }
+
+    /// <summary>Called from sidepane.js on Escape.</summary>
+    [JSInvokable]
+    public Task Close()
+    {
+        Navigation.NavigateTo(Navigation.GetUriWithQueryParameter("open", (Guid?)null), replace: true);
+        return Task.CompletedTask;
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        try
+        {
+            if (attached is not null)
+            {
+                await attached.InvokeVoidAsync("dispose");
+                await attached.DisposeAsync();
+            }
+            if (module is not null)
+                await module.DisposeAsync();
+        }
+        catch (JSDisconnectedException)
+        {
+        }
+        self?.Dispose();
+    }
+}

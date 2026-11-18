@@ -81,9 +81,10 @@
         --pa-column: 72rem;
     }
 
-    /* Plant and propagation pages get a third column on a large screen, so only they widen */
+    /* Plant and propagation pages get a third column on a large screen, so only they widen. The
+       Plants and Propagations lists show one in a pane and keep the width they have (page-full). */
     @media (min-width: 96rem) {
-        :root:has(.profile-three) {
+        :root:has(.profile-three):not(:has(.page-full)) {
             --pa-column: 96rem;
         }
     }
@@ -4305,6 +4306,100 @@ main.app-content.with-tour.tour-closing {
 
     .list-side .list-side-clear {
         display: inline-block;
+    }
+}
+
+/* A plant or propagation opens in a pane beside the Plants and Propagations lists from 96rem (sidepane.js).
+   The list is a column of about 24rem that stays in place and scrolls on its own, like the filter column, and
+   the page of the plant fills the rest with the columns its own width allows. The filters fold away behind a
+   Filters button at the top of the list; shown again they are the first column. Below 96rem the pane and the
+   button are never shown, so a window made narrower is the plain list. */
+.side-pane,
+.pane-filters {
+    display: none;
+}
+
+@media (min-width: 96rem) {
+    .list-layout.has-pane {
+        grid-template-columns: clamp(22rem, 24%, 26rem) minmax(0, 1fr);
+        column-gap: clamp(1.5rem, 2.5%, 2.5rem);
+    }
+
+    .list-layout.has-pane.filters-open {
+        grid-template-columns: 17rem clamp(22rem, 24%, 26rem) minmax(0, 1fr);
+    }
+
+    .list-layout.has-pane:not(.filters-open) > .list-side {
+        display: none;
+    }
+
+    .list-layout.has-pane > .list-main {
+        position: sticky;
+        top: 1.75rem;
+        max-height: calc(100dvh - 1.75rem);
+        overflow-y: auto;
+        /* Room for focus outlines that would be cut off at the edge of the scrolling area */
+        padding: 0.2rem;
+        margin: -0.2rem;
+    }
+
+    /* One row wide. The grid view's tiles keep flowing into as many columns as fit. */
+    .list-layout.has-pane ul.list-grid {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .pane-filters {
+        display: block;
+        width: 100%;
+        margin-bottom: 0.75rem;
+    }
+
+    .experiment-row[aria-current="true"] {
+        background: var(--pa-green-soft);
+        border-color: var(--pa-green);
+    }
+
+    .side-pane {
+        display: block;
+        min-width: 0;
+        scroll-margin-top: 1.75rem;
+    }
+
+    .side-pane-head {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 0.75rem;
+        margin-bottom: 0.5rem;
+    }
+
+    .side-pane-close {
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 2.75rem;
+        height: 2.75rem;
+        padding: 0;
+        border: 0;
+        border-radius: 50%;
+        background: transparent;
+        color: var(--pa-muted);
+    }
+
+    .side-pane-close:hover,
+    .side-pane-close:focus-visible {
+        background: color-mix(in srgb, var(--pa-green) 18%, transparent);
+    }
+
+    .side-pane-close svg {
+        width: 1.1rem;
+        height: 1.1rem;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.75;
+        stroke-linecap: round;
+        stroke-linejoin: round;
     }
 }
 

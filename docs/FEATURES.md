@@ -391,7 +391,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | **Drop photos onto a plant on a computer**: drag one or more photo files onto a plant or propagation page, or onto its row in a list, to add them, the same as picking them with Photo | 5 | S | v1.x |
 | ✅ | **Keyboard shortcuts**: `/` for Search, N for a new plant, W to open the care form on watering where one plant is meant, Esc to close a sheet, arrow keys through lists and `?` for a sheet that lists them all | 6 | S | v1.x |
 | ✅ | **Shift-click to select a range** of plants or propagations in Select and in the table, instead of picking them one at a time | 6 | S | v1.x |
-| ☐ | **The list and a plant side by side**: on a wide screen, clicking a plant opens it in a pane next to the list, so you can go through plants without going back each time. Has to fit with the plant page's own two columns | 7 | M | v1.x |
+| ✅ | **The list and a plant side by side**: on a wide screen (from 1536px) a click on a plant or propagation in the list or grid view opens it in a pane beside the list, so you can go through them without going back each time. The filters fold into a Filters button meanwhile, Ctrl-click opens the full page and Back closes the pane. Not in the table view | 7 | M | v1.x |
 | ✅ | **Settings in two panes on a wide screen**: the sections down the left and the open one on the right. The App section is split into Look, Today and care, and Plants, on the phone too | 7 | S | v1.x |
 | ✅ | **Contents down the side of the Help page** on a wide screen, so you can jump to a part of the app | 7 | S | v1.x |
 | ✅ | CSV export of plants and propagations for spreadsheets | 6 | S | v1.x |

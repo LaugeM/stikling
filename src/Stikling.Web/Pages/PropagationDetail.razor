@@ -34,7 +34,10 @@
 <PageTitle>@(propagation?.DisplayName ?? Strings.Propagations.DetFallbackTitle) · Stikling</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
 
-<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+@if (!InPane)
+{
+    <a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+}
 
 @if (propagation is null)
 {
@@ -601,7 +604,7 @@ else
                 StartBeforeId="shareBeforeId" StartAfterId="shareAfterId"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
-    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" /></IfCan>
+    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" Area="@(InPane ? ".side-pane" : null)" /></IfCan>
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 
@@ -1119,6 +1122,10 @@ else
 
     [Parameter]
     public Guid Id { get; set; }
+
+    /// <summary>Shown in the pane beside the Plants or Propagations list on a large screen: no back link, and a dropped photo only counts over the pane.</summary>
+    [Parameter]
+    public bool InPane { get; set; }
 
     /// <summary>Set by the page that keeps a received history, so the first visit says where it went.</summary>
     [SupplyParameterFromQuery(Name = "arrived")]

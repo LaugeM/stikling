@@ -31,8 +31,12 @@ function keepInPage() {
 }
 
 // The whole page takes the files for one subject. Returns something to call dispose() on.
-// label is the text shown over the page, already in the app's language
-export function attachPage(inputId, label) {
+// label is the text shown over the page, already in the app's language. area is an optional selector for the
+// part of the page that takes the files, for a plant shown in a pane beside a list: only drags over that part
+// count, and the overlay covers only it, since the rows of the list take files of their own.
+export function attachPage(inputId, label, area) {
+    const zone = area ? document.querySelector(area) : null;
+    const scope = zone ?? document;
     const overlay = document.createElement("div");
     overlay.className = "drop-overlay";
     overlay.hidden = true;
@@ -50,6 +54,15 @@ export function attachPage(inputId, label) {
         if (!isFileDrag(event))
             return;
         depth++;
+        if (zone) {
+            // Over the visible part of the area
+            const box = zone.getBoundingClientRect();
+            const top = Math.max(box.top, 8);
+            const left = Math.max(box.left, 8);
+            const bottom = Math.min(box.bottom, window.innerHeight - 8);
+            const right = Math.min(box.right, window.innerWidth - 8);
+            overlay.style.inset = `${top}px ${window.innerWidth - right}px ${window.innerHeight - bottom}px ${left}px`;
+        }
         overlay.hidden = false;
     };
     const onLeave = event => {
@@ -71,16 +84,16 @@ export function attachPage(inputId, label) {
     };
 
     const release = keepInPage();
-    document.addEventListener("dragenter", onEnter);
-    document.addEventListener("dragleave", onLeave);
-    document.addEventListener("drop", onDrop);
+    scope.addEventListener("dragenter", onEnter);
+    scope.addEventListener("dragleave", onLeave);
+    scope.addEventListener("drop", onDrop);
     document.addEventListener("keydown", onKey);
     return {
         dispose: () => {
             release();
-            document.removeEventListener("dragenter", onEnter);
-            document.removeEventListener("dragleave", onLeave);
-            document.removeEventListener("drop", onDrop);
+            scope.removeEventListener("dragenter", onEnter);
+            scope.removeEventListener("dragleave", onLeave);
+            scope.removeEventListener("drop", onDrop);
             document.removeEventListener("keydown", onKey);
             overlay.remove();
         }
@@ -92,6 +105,9 @@ const subjectPattern = /^(plants|propagations)\/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f
 // The row under an element, with what it is for: rows carry data-drop-subject ("plants/{id}"), and a link to
 // the plant or propagation is accepted too.
 function rowOf(element) {
+    // A plant in the pane beside the list takes its own files, through the page drop
+    if (element?.closest?.(".side-pane"))
+        return null;
     const row = element?.closest?.("li, tr");
     if (!row)
         return null;

@@ -12,7 +12,7 @@
 }
 else
 {
-    <a data-drop-subject="propagations/@Propagation.Id" class="item-card" href="propagations/@Propagation.Id">
+    <a data-drop-subject="propagations/@Propagation.Id" class="item-card @(Open ? "selected" : null)" aria-current="@(Open ? "true" : null)" href="propagations/@Propagation.Id">
         @Content
     </a>
 }
@@ -45,6 +45,10 @@ else
 
     [Parameter]
     public bool Selected { get; set; }
+
+    /// <summary>This propagation is the one open in the pane beside the list: marked like a selected one, but still a link.</summary>
+    [Parameter]
+    public bool Open { get; set; }
 
     [Parameter]
     public EventCallback<SelectClick> OnToggle { get; set; }

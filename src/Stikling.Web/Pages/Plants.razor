@@ -104,7 +104,8 @@ else if (all.Count == 0)
 }
 else
 {
-    <div class="list-layout">
+    <SidePaneScope Prefix="plants" Enabled="@PaneEnabled" OpenId="Open">
+    <div class="list-layout @(HasPane ? "has-pane" : null) @(HasPane && filtersShown ? "filters-open" : null)">
     <div class="list-side">
         @* The page's links: a row under the title from 64rem, quiet rows at the top of the filter column from 80rem. A phone has them in the heading above. *@
         <div class="list-side-links">
@@ -356,6 +357,12 @@ else
     </div>
 
     <div class="list-main">
+    @if (HasPane)
+    {
+        @* From 96rem the filters fold away while a plant is open, and this brings them back *@
+        <button type="button" class="btn btn-outline-primary btn-sm pane-filters" aria-pressed="@(filtersShown ? "true" : "false")"
+                @onclick="() => filtersShown = !filtersShown">@(FilterCount > 0 ? F(Strings.Plants.PaneFiltersCount, FilterCount) : Strings.Plants.PaneFilters)</button>
+    }
     @if (selecting)
     {
         <div class="select-all">
@@ -450,9 +457,16 @@ else
         </ul>
     }
     </div>
+    @if (HasPane && Open is { } openId)
+    {
+        <SidePane Label="@F(Strings.Plants.PaneLabel, OpenName)" Href="@($"plants/{openId}")" OpenText="@Strings.Plants.PaneOpenPage">
+            <PlantDetail @key="openId" Id="openId" InPane="true" />
+        </SidePane>
+    }
     </div>
+    </SidePaneScope>
 
-    @if (ShowLetters)
+    @if (ShowLetters && !HasPane)
     {
         <LetterJump Letters="letters" />
     }
@@ -726,6 +740,22 @@ else
     /// <summary>Starts the list on one genus, from the collection page. "none" is the plants with no genus.</summary>
     [SupplyParameterFromQuery(Name = "genus")]
     public string? GenusFilter { get; set; }
+
+    /// <summary>The plant open beside the list on a large screen. A click on a plant sets it, and Back or the close button clears it.</summary>
+    [SupplyParameterFromQuery(Name = "open")]
+    public Guid? Open { get; set; }
+
+    // Only in the list and the grid, and not while picking: there a click does what it always did
+    private bool PaneEnabled => !selecting && view != PlantView.Table;
+    private bool HasPane => Open is not null && PaneEnabled;
+    private bool filtersShown; // the Filters button beside an open plant brings the folded filter column back
+    private string OpenName => all?.FirstOrDefault(p => p.Id == Open)?.DisplayName ?? Strings.PlantDetail.PlantFallback;
+
+    protected override void OnParametersSet()
+    {
+        if (Open is null)
+            filtersShown = false;
+    }
 
     private static (StatusFilter Value, string Label)[] statusOptions =>
     [
@@ -1063,6 +1093,11 @@ else
     private bool Narrowed =>
         !string.IsNullOrWhiteSpace(search) || !string.IsNullOrEmpty(room) || genus is not null || noGenus || likes is not null || pickedTags.Count > 0 || picks.Count > 0 || quarantine || dormant || problem || underGrowLight || lightAt is not null;
 
+    /// <summary>How many of the filters in Narrowed are on, for the Filters button.</summary>
+    private int FilterCount =>
+        (string.IsNullOrWhiteSpace(search) ? 0 : 1) + (string.IsNullOrEmpty(room) ? 0 : 1) + (genus is not null || noGenus ? 1 : 0) + (likes is not null ? 1 : 0)
+        + pickedTags.Count + picks.Count + (quarantine ? 1 : 0) + (dormant ? 1 : 0) + (problem ? 1 : 0) + (underGrowLight ? 1 : 0) + (lightAt is not null ? 1 : 0);
+
     // Leaves the status alone, since its buttons are always in view
     private void ClearFilters()
     {
@@ -1145,12 +1180,12 @@ else
 
     private RenderFragment<Plant> ListRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
         <PlantCard Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
-                   OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
+                   Open="@(HasPane && plant.Id == Open)" OnToggle="Toggle" Moisture="@MoistureFor(plant)" LastWater="@LastWaterFor(plant)" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)"
                    OpenProblem="@problemPlants.Contains(plant.Id)" Location="@places.NameOf(plant.PlaceId)" PottedWith="@PottedWithName(plant)" QuickActions="true" />
     </li>;
 
     private RenderFragment<Plant> GridRow => plant => @<li id="@(ShowLetters ? letterAnchors.GetValueOrDefault(plant.Id) : null)">
-        <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)"
+        <PlantTile Plant="plant" Selectable="selecting" Selected="selected.Contains(plant.Id)" Open="@(HasPane && plant.Id == Open)"
                    OnToggle="Toggle" Pests="@PestsFor(plant)" Flowering="@FloweringFor(plant)" OpenProblem="@problemPlants.Contains(plant.Id)" PottedWith="@PottedWithName(plant)" QuickActions="true" />
     </li>;
 

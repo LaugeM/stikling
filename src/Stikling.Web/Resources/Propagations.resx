@@ -2059,4 +2059,20 @@
     <value>A number, so it can be added up under Money.</value>
     <comment>Hint under the price on the Gave some away sheet. Money is the name of the page that adds up prices.</comment>
   </data>
+  <data name="PaneLabel" xml:space="preserve">
+    <value>{0}, beside the list</value>
+    <comment>Screen reader name of the pane that shows a propagation beside the list on a large screen. {0} is its name.</comment>
+  </data>
+  <data name="PaneOpenPage" xml:space="preserve">
+    <value>Open page</value>
+    <comment>Link at the top of the pane beside the list. Goes to the propagation's own page.</comment>
+  </data>
+  <data name="PaneFilters" xml:space="preserve">
+    <value>Filters</value>
+    <comment>Button at the top of the list while a propagation is open beside it. Brings the filters back.</comment>
+  </data>
+  <data name="PaneFiltersCount" xml:space="preserve">
+    <value>Filters ({0})</value>
+    <comment>Same button while a search or a progress choice other than the default narrows the list. {0} is how many.</comment>
+  </data>
 </root>
