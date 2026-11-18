@@ -668,6 +668,8 @@ internal sealed class FakeSyncStore : ISyncStore
         return Task.CompletedTask;
     }
 
+    public Task DropPendingAsync(IReadOnlyList<PendingRecord> dropped) => MarkSentAsync(dropped);
+
     public Task QueueAllAsync()
     {
         foreach (var (key, data) in Records)
@@ -707,7 +709,7 @@ internal sealed class FakeSyncStore : ISyncStore
 internal sealed class FakeSyncServer : ISyncServer
 {
     private long lastVersion;
-    private readonly Dictionary<(Guid Collection, string Kind, Guid Id), (long Version, JsonElement Data)> records = [];
+    private readonly Dictionary<(Guid Collection, string Kind, Guid Id), (long Version, JsonElement Data, Guid? CreatedBy)> records = [];
     private JsonElement? settings;
 
     public int PageSize { get; set; } = SyncRules.BatchSize;
@@ -717,12 +719,18 @@ internal sealed class FakeSyncServer : ISyncServer
 
     public List<SyncRecord> Pushed { get; } = [];
 
+    /// <summary>The person who is syncing, who a new record is noted as added by.</summary>
+    public Guid? Caller { get; set; }
+
+    /// <summary>Gives a reason to refuse a record, or null to keep it, for the helper rules the real server follows.</summary>
+    public Func<SyncRecord, string?>? Refuse { get; set; }
+
     /// <summary>Runs as an upload arrives, for another device's change landing mid-sync.</summary>
     public Action? BeforePush { get; set; }
 
     /// <summary>A record sent by some other device.</summary>
-    public void Add(Guid collectionId, string kind, JsonElement data) =>
-        records[(collectionId, kind, data.GetProperty("id").GetGuid())] = (++lastVersion, data);
+    public void Add(Guid collectionId, string kind, JsonElement data, Guid? createdBy = null) =>
+        records[(collectionId, kind, data.GetProperty("id").GetGuid())] = (++lastVersion, data, createdBy);
 
     public JsonElement? Find(Guid collectionId, string kind, Guid id) =>
         records.TryGetValue((collectionId, kind, id), out var record) ? record.Data : null;
@@ -749,7 +757,7 @@ internal sealed class FakeSyncServer : ISyncServer
             page.RemoveAt(page.Count - 1);
 
         return Task.FromResult(new PullResponse(
-            page.Select(r => new SyncRecord(r.Key.Kind, r.Value.Data)).ToList(),
+            page.Select(r => new SyncRecord(r.Key.Kind, r.Value.Data, r.Value.CreatedBy)).ToList(),
             page.Count > 0 ? page[^1].Value.Version : after,
             more));
     }
@@ -770,19 +778,25 @@ internal sealed class FakeSyncServer : ISyncServer
                 continue;
             }
 
+            if (Refuse?.Invoke(record) is { } reason)
+            {
+                refused.Add(new RefusedRecord(i, reason));
+                continue;
+            }
+
             Pushed.Add(record);
             RecordStamp.TryRead(record.Data, out var stamp);
             var stored = JsonSerializer.Deserialize<JsonElement>(SyncRules.AsStored(record.Data));
             var key = (collectionId, record.Kind, stamp.Id);
             if (!records.TryGetValue(key, out var current))
-                records[key] = (++lastVersion, stored);
+                records[key] = (++lastVersion, stored, Caller);
             else
             {
                 RecordStamp.TryRead(current.Data, out var here);
                 if (SyncRules.Replaces(stamp, stored.GetRawText(), here, current.Data.GetRawText()))
-                    records[key] = (++lastVersion, stored);
+                    records[key] = (++lastVersion, stored, current.CreatedBy);
                 else if (SyncRules.Replaces(here, current.Data.GetRawText(), stamp, stored.GetRawText()))
-                    newer.Add(new SyncRecord(record.Kind, current.Data));
+                    newer.Add(new SyncRecord(record.Kind, current.Data, current.CreatedBy));
             }
         }
         return Task.FromResult(new PushResponse(newer, refused));
@@ -815,10 +829,14 @@ internal sealed class FakePhotoSyncStore : IPhotoSyncStore
     public SortedSet<Guid> Downloads { get; } = new(ByText);
     public HashSet<(Guid Id, PhotoSize Size)> Images { get; } = [];
 
+    /// <summary>Who added each photo, by what its record here says.</summary>
+    public Dictionary<Guid, Guid?> CreatedBy { get; } = [];
+
     /// <summary>A photo taken on this device: both images, and on the list to send.</summary>
-    public Guid Take(Guid? id = null)
+    public Guid Take(Guid? id = null, Guid? by = null)
     {
         var photo = id ?? Guid.NewGuid();
+        CreatedBy[photo] = by;
         Images.Add((photo, PhotoSize.Full));
         Images.Add((photo, PhotoSize.Thumbnail));
         Uploads.Add(photo);
@@ -840,6 +858,9 @@ internal sealed class FakePhotoSyncStore : IPhotoSyncStore
         Downloads.ExceptWith(ids);
         return Task.CompletedTask;
     }
+
+    public Task<IReadOnlyDictionary<Guid, Guid?>> GetCreatedByAsync(IReadOnlyCollection<Guid> photoIds) =>
+        Task.FromResult<IReadOnlyDictionary<Guid, Guid?>>(photoIds.Where(CreatedBy.ContainsKey).ToDictionary(id => id, id => CreatedBy[id]));
 
     private static IReadOnlyList<Guid> Page(SortedSet<Guid> list, Guid? after, int max) =>
         list.Where(id => after is null || ByText.Compare(id, after.Value) > 0).Take(max).ToList();

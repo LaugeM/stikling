@@ -33,7 +33,11 @@
                         }
                     </optgroup>
                 }
-                <option value="@AddChoice">@Strings.Care.SheetAddYourOwn</option>
+                @* A kind of care of your own is a record that a helper can't send *@
+                @if (Access.CanEdit)
+                {
+                    <option value="@AddChoice">@Strings.Care.SheetAddYourOwn</option>
+                }
             </select>
         </div>
         <div class="col-5">
@@ -207,6 +211,9 @@
 </div>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     /// <summary>The plants this entry is for. One from a plant page, several from the list.</summary>
     [Parameter, EditorRequired]
     public required IReadOnlyList<Guid> PlantIds { get; set; }

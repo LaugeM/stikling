@@ -537,6 +537,36 @@ public class RecordTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task What_is_fetched_says_who_added_each_record()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var plant = Guid.NewGuid();
+        var careLog = Guid.NewGuid();
+        await _people.PushOk(owner, PeopleSupport.Plant(plant, Monday));
+        await _people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday));
+
+        var pulled = (await Pull(helper.Client, helper.CollectionId)).Records;
+
+        Assert.Equal(owner.PersonId, pulled.Single(r => r.Kind == "plants").CreatedBy);
+        Assert.Equal(helper.PersonId, pulled.Single(r => r.Kind == "careLogs").CreatedBy);
+    }
+
+    [Fact]
+    public async Task A_newer_copy_sent_back_says_who_added_it()
+    {
+        var owner = await _people.SignIn();
+        var helper = await _people.Join(owner, MemberRole.Helper);
+        var careLog = Guid.NewGuid();
+        await _people.PushOk(helper, PeopleSupport.CareLog(careLog, Monday.AddHours(2)));
+
+        var response = await _people.PushOk(owner, PeopleSupport.CareLog(careLog, Monday));
+
+        var newer = Assert.Single(response.Newer);
+        Assert.Equal(helper.PersonId, newer.CreatedBy);
+    }
+
+    [Fact]
     public async Task A_helper_can_send_propagation_care_logs_photos_and_notes()
     {
         var owner = await _people.SignIn();

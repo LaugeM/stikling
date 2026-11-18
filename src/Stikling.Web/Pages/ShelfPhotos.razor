@@ -26,10 +26,12 @@ else
             <a class="btn btn-link btn-sm link-action" href="shelf">@Strings.Shelf.ShowAll</a>
         }
         @* Takes over from the round add button on a wide screen *@
+        <IfCan Edit>
         <button type="button" class="btn btn-primary btn-sm icon-btn heading-add" @onclick="OpenAdd">
             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
             @Strings.Shelf.AddPhoto
         </button>
+        </IfCan>
     </div>
 </div>
 
@@ -43,7 +45,7 @@ else if (Shown.Count == 0)
 {
     <div class="empty-state">
         <p>@(PlaceFilter is null ? Strings.Shelf.EmptyAll : Strings.Shelf.EmptyPlace)</p>
-        <button type="button" class="btn btn-primary mt-3 shelf-empty-add" @onclick="OpenAdd">@Strings.Shelf.AddPhoto</button>
+        <IfCan Edit><button type="button" class="btn btn-primary mt-3 shelf-empty-add" @onclick="OpenAdd">@Strings.Shelf.AddPhoto</button></IfCan>
     </div>
 }
 else
@@ -71,9 +73,11 @@ else
     }
 }
 
+<IfCan Edit>
 <button type="button" class="fab" @onclick="OpenAdd" aria-label="@Strings.Shelf.AddPhoto" title="@Strings.Shelf.AddPhoto">
     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
 </button>
+</IfCan>
 
 <Sheet Title="@Strings.Shelf.AddTitle" @bind-Open="addOpen">
     <RoomPicker @bind-Value="placeValue" Rooms="rooms" Label="@Strings.Shelf.AddPlaceLabel" />

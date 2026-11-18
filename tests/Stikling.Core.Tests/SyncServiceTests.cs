@@ -1,5 +1,6 @@
 using System.Text.Json;
 using Stikling.Core.Models;
+using Stikling.Core.People;
 using Stikling.Core.Sync;
 
 namespace Stikling.Core.Tests;
@@ -14,8 +15,11 @@ public class SyncServiceTests
     private readonly FakeSyncStore phone = new();
     private readonly FakeSyncStore computer = new();
 
+    private static readonly MemberAccess Editor = MemberAccess.Full(Guid.NewGuid());
+    private static readonly MemberAccess Viewer = new(Guid.NewGuid(), CollectionRole.Viewer, false, false);
+
     private Task<SyncResult> Sync(FakeSyncStore device, bool canEdit = true) =>
-        new SyncService(device, server).SyncAsync(collectionId, canEdit);
+        new SyncService(device, server).SyncAsync(collectionId, canEdit ? Editor : Viewer);
 
     private static Plant Plant(string nickname, DateTimeOffset updatedAt, Guid? id = null) =>
         new() { Id = id ?? Guid.NewGuid(), Nickname = nickname, CreatedAt = Monday, UpdatedAt = updatedAt };
@@ -286,7 +290,10 @@ public class SyncServiceTests
         Assert.Equal(1, result.Sent);
         Assert.NotNull(await server.GetSettingsAsync());
         Assert.Equal("Monstera", server.Find(collectionId, Plants, plant.Id)?.GetProperty("nickname").GetString());
-        Assert.Single(phone.Pending);
+
+        // What a viewer can't send comes off the list, and stays here as it is
+        Assert.Empty(phone.Pending);
+        Assert.Equal("Edited by the sitter", phone.Get<Plant>(Plants, plant.Id)?.Nickname);
     }
 
     [Fact]
@@ -349,7 +356,7 @@ public class SyncServiceTests
         await Sync(phone);
 
         var other = Guid.NewGuid();
-        await new SyncService(phone, server).SyncAsync(other, canEdit: true);
+        await new SyncService(phone, server).SyncAsync(other, Editor);
 
         Assert.NotNull(server.Find(other, Plants, plant.Id));
         Assert.Equal(other, phone.State?.CollectionId);

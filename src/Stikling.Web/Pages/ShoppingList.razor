@@ -9,6 +9,7 @@
 <a class="back-link" href="supplies">@Strings.Supplies.BackToSupplies</a>
 <h1>@Strings.Stock.ShoppingTitle</h1>
 
+<IfCan Edit>
 <form class="shop-add" @onsubmit="AddAsync">
     <label class="form-label" for="shop-add">@Strings.Stock.ShoppingAddLabel</label>
     <div class="shop-add-row">
@@ -17,6 +18,7 @@
         <button type="submit" class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(newText))">@Strings.Stock.ShoppingAddButton</button>
     </div>
 </form>
+</IfCan>
 
 @if (loading)
 {
@@ -38,8 +40,10 @@ else
                 @foreach (var row in view.ToBuy)
                 {
                     <li>
+                        <IfCan Edit>
                         <button type="button" class="shop-tick" role="checkbox" aria-checked="false" disabled="@busy"
                                 aria-label="@F(Strings.Stock.ShoppingTick, row.Name)" title="@F(Strings.Stock.ShoppingTick, row.Name)" @onclick="() => TickAsync(row)"></button>
+                        </IfCan>
                         <div class="shop-main">
                             <span class="shop-name">@row.Name</span>
                             @if (row.Level is { } rowLevel && Labels.For(rowLevel) is { } levelText)
@@ -51,7 +55,7 @@ else
                                 <span class="shop-sub">@F(Strings.Stock.ShoppingLastFrom, seller)</span>
                             }
                         </div>
-                        @if (row.Item is { } line)
+                        @if (row.Item is { } line && Access.CanEdit)
                         {
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="() => RemoveAsync(line)">@Strings.Stock.ShoppingRemove</button>
@@ -71,12 +75,14 @@ else
                 {
                     <li class="bought">
                         <span class="shop-tick ticked" aria-hidden="true"><svg viewBox="0 0 24 24">@Icons.Check</svg></span>
-                        <button type="button" class="shop-main shop-edit" @onclick="() => OpenDetails(row)">
+                        <button type="button" class="shop-main shop-edit" @onclick="() => OpenDetailsIfAllowed(row)">
                             <span class="shop-name">@row.Name</span>
                             <span class="shop-sub">@(Details(row) ?? Strings.Stock.ShoppingAddDetails)</span>
                         </button>
+                        <IfCan Edit>
                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                 @onclick="() => UndoAsync(row)">@Strings.Stock.ShoppingUndo</button>
+                        </IfCan>
                     </li>
                 }
             </ul>
@@ -96,6 +102,16 @@ else
 </Sheet>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // Opening a bought line is for adding details to it, so someone who can't only reads it
+    private void OpenDetailsIfAllowed(ShoppingRow row)
+    {
+        if (Access.CanEdit)
+            OpenDetails(row);
+    }
+
     private StockView view = default!;
     private SellerList sellers = SellerList.None;
     private bool loading = true;

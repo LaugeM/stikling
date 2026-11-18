@@ -1,4 +1,5 @@
 @page "/plants/quick-add"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject IPlantRepository Repository
 @inject ILogger<QuickAdd> Logger
 @inject PlantService PlantService

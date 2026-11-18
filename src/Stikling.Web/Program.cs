@@ -189,6 +189,7 @@ builder.Services.AddScoped<PlantStoryActions>();
 builder.Services.AddScoped<BackupService>();
 builder.Services.AddSingleton(AccountSettings.From(builder.Configuration, builder.HostEnvironment.IsDevelopment()));
 builder.Services.AddScoped<AccountService>();
+builder.Services.AddScoped<CollectionsService>();
 builder.Services.AddScoped<StiklingApi>();
 builder.Services.AddScoped<IShareLinkServer>(services => services.GetRequiredService<StiklingApi>());
 builder.Services.AddScoped<ShareLinkService>();
@@ -223,6 +224,16 @@ try
 catch (Exception)
 {
     // Without it the app is in English
+}
+
+// Which collection's database is open is known before anything reads one, and is the main one when nobody is signed in
+try
+{
+    await host.Services.GetRequiredService<CollectionsService>().LoadAsync();
+}
+catch (Exception)
+{
+    // Without it the main database is the one that opens
 }
 
 // Lengths, dates and the clock come from the saved settings, so the first screen is written the right way

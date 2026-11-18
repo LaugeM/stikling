@@ -4,23 +4,27 @@
 <li class="today-row">
     <div class="today-row-main">
         @ChildContent
-        @if (OnDone.HasDelegate)
+        @if (OnDone.HasDelegate && CanDone)
         {
             <button type="button" class="row-btn" title="@DoneLabel" aria-label="@DoneLabel" disabled="@busy" @onclick="DoneAsync">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
             </button>
         }
-        @if (AnswerLabel is not null && OnAnswer.HasDelegate)
+        @if (AnswerLabel is not null && OnAnswer.HasDelegate && Access.CanEdit)
         {
             <button type="button" class="row-btn @(answering ? "open" : null)" title="@AnswerLabel" aria-label="@AnswerLabel"
                     aria-expanded="@(AnswerChoices is null ? null : answering ? "true" : "false")" disabled="@busy" @onclick="AnswerClickedAsync">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4c3 3.5 5.5 6.3 5.5 9.5a5.5 5.5 0 0 1-11 0C6.5 10.3 9 7.5 12 4Z" /></svg>
             </button>
         }
-        <button type="button" class="row-btn @(choosing ? "open" : null)" title="@Strings.Care.TodayRowPutOff" aria-label="@Strings.Care.TodayRowPutOff"
-                aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="TogglePutOff">
-            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Clock</svg>
-        </button>
+        @* Putting off is a record of its own, which only someone who can change the collection can send *@
+        @if (Access.CanEdit)
+        {
+            <button type="button" class="row-btn @(choosing ? "open" : null)" title="@Strings.Care.TodayRowPutOff" aria-label="@Strings.Care.TodayRowPutOff"
+                    aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="TogglePutOff">
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Clock</svg>
+            </button>
+        }
     </div>
     @if (answering && AnswerChoices is not null)
     {
@@ -56,8 +60,17 @@
 </li>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter, EditorRequired]
     public required RenderFragment ChildContent { get; set; }
+
+    /// <summary>The tick logs care, which a helper can do. Otherwise it changes something only an editor can.</summary>
+    [Parameter]
+    public bool DoneIsCare { get; set; }
+
+    private bool CanDone => Access.CanEdit || (DoneIsCare && Access.CanLog);
 
     /// <summary>Puts it off for this many days.</summary>
     [Parameter]

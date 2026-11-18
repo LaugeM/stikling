@@ -35,6 +35,13 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.M
             await (await Module).InvokeVoidAsync("markSent", sent.Select(p => new { p.Kind, p.Id, p.Mark }));
     }
 
+    public async Task DropPendingAsync(IReadOnlyList<PendingRecord> dropped)
+    {
+        // The same as after sending: it comes off the list unless it changed again since it was read
+        if (dropped.Count > 0)
+            await (await Module).InvokeVoidAsync("markSent", dropped.Select(p => new { p.Kind, p.Id, p.Mark }));
+    }
+
     public async Task QueueAllAsync() =>
         await (await Module).InvokeVoidAsync("queueAll", SyncKinds.All);
 
@@ -79,7 +86,25 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.M
         }
     }
 
-    /// <summary>Empties the database, for signing out and removing everything from this device.</summary>
+    public async Task<IReadOnlyDictionary<Guid, Guid?>> GetCreatedByAsync(IReadOnlyCollection<Guid> photoIds)
+    {
+        var found = new Dictionary<Guid, Guid?>();
+        foreach (var photo in await GetAsync(SyncKinds.Photos, photoIds))
+        {
+            if (RecordStamp.TryRead(photo, out var stamp))
+            {
+                found[stamp.Id] = photo.TryGetProperty("createdBy", out var by) && by.ValueKind == JsonValueKind.String && by.TryGetGuid(out var who)
+                    ? who
+                    : null;
+            }
+        }
+        return found;
+    }
+
+    /// <summary>
+    /// Empties the main database, for signing out and removing everything from this device. The databases
+    /// of shared collections are deleted by <see cref="CollectionsService"/>.
+    /// </summary>
     public async Task ClearAllAsync() =>
         await (await Module).InvokeVoidAsync("clearAll");
 }

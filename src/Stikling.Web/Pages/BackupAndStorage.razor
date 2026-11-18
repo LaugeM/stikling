@@ -30,8 +30,11 @@
 
     <div class="settings-actions">
         <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">@Strings.Account.BackupSave</button>
-        <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">@Strings.Account.BackupRestore</label>
-        <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
+        @* Restoring writes into the collection, which a helper or a viewer can't change *@
+        <IfCan Edit>
+            <label class="btn btn-outline-primary @(busy ? "disabled" : null)" for="restore-file">@Strings.Account.BackupRestore</label>
+            <InputFile id="restore-file" class="visually-hidden" accept=".zip" OnChange="ChooseFileAsync" disabled="@busy" />
+        </IfCan>
     </div>
 
     <p class="settings-hint">

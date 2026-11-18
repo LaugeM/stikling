@@ -11,7 +11,7 @@ namespace Stikling.Api.People;
 /// </summary>
 public class CurrentPerson(IHttpContextAccessor http, StiklingDbContext db, TimeProvider clock)
 {
-    public const string FirstCollectionName = "My plants";
+    public const string FirstCollectionName = Stikling.Core.People.CollectionNames.ServerDefault;
 
     private Person? _person;
 

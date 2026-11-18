@@ -305,7 +305,7 @@
     <comment>Question in the "Your data and backups" part of the Help page.</comment>
   </data>
   <data name="HappensWhenSignOutA1" xml:space="preserve">
-    <value>You choose whether to keep a copy on this device or remove it. What has synced stays with your account either way and comes back when you sign in again.</value>
+    <value>You choose whether to keep a copy on this device or remove it. What has synced stays with your account either way and comes back when you sign in again. Collections shared with you are removed from this device when you remove the data, and come back when you sign in again.</value>
     <comment>Answer to "What happens when I sign out?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="HappensWhenSignOutA2" xml:space="preserve">
@@ -329,7 +329,7 @@
     <comment>Question in the "Your data and backups" part of the Help page.</comment>
   </data>
   <data name="DeleteAccountA1" xml:space="preserve">
-    <value>On the Account page in Settings, tap &lt;em&gt;Delete account&lt;/em&gt; at the bottom. It erases everything your account has on the Stikling server, photos included, and deletes your sign-in. It can't be undone.</value>
+    <value>On the Account page in Settings, tap &lt;em&gt;Delete account&lt;/em&gt; at the bottom. It erases everything your account has on the Stikling server, photos included, and deletes your sign-in. It can't be undone. A collection other people are in stays with them.</value>
     <comment>Answer to "How do I delete my account?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="DeleteAccountA2" xml:space="preserve">
@@ -341,7 +341,7 @@
     <comment>Question in the "Your data and backups" part of the Help page.</comment>
   </data>
   <data name="WhoSeePlantsA1Variant" xml:space="preserve">
-    <value>Without an account, nobody but you, since nothing leaves the device. With one, only the people in your collection, and for now that is only you.</value>
+    <value>Without an account, nobody but you, since nothing leaves the device. With one, only you and the people you invite to your collection.</value>
     <comment>Answer to "Who can see my plants?" on the Help page. Keep the HTML tags where they are. Replaces {0} in the answer it belongs to.</comment>
   </data>
   <data name="WhoSeePlantsA1Variant2" xml:space="preserve">
@@ -2082,5 +2082,49 @@
   <data name="LabelQrA3" xml:space="preserve">
     <value>Scan it with the phone's camera and the plant or cutting opens. If the camera opens a browser that doesn't have your plants, tap &lt;em&gt;Scan a label&lt;/em&gt; on Plants or Propagations in the app instead, or sign in in that browser. On a phone that doesn't have the plant, the label just says it is from Stikling.</value>
     <comment>Answer to "Can a label open the plant when I scan it?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="ShareCollectionQ" xml:space="preserve">
+    <value>How do I share my plants with someone?</value>
+    <comment>Question in the "Your data and backups" part of the Help page.</comment>
+  </data>
+  <data name="ShareCollectionA1" xml:space="preserve">
+    <value>Open Settings, then &lt;em&gt;Account&lt;/em&gt;, and find &lt;em&gt;People&lt;/em&gt;. Tap &lt;em&gt;Invite someone&lt;/em&gt;, choose what they can do, and send them the link by message, copy it or show the QR code. The link works once and for 7 days, so make a new one for each person. Until they open it you can see it under open invites, show its link and QR code again with &lt;em&gt;Show link&lt;/em&gt;, and withdraw it. You can write who an invite is for, so you can tell open invites apart. Only people who manage the collection see it. You need to be signed in.</value>
+    <comment>Answer to "How do I share my plants with someone?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="CollectionRolesQ" xml:space="preserve">
+    <value>What can the people I invite do?</value>
+    <comment>Question in the "Your data and backups" part of the Help page.</comment>
+  </data>
+  <data name="CollectionRolesA1" xml:space="preserve">
+    <value>&lt;em&gt;Can view&lt;/em&gt; looks at everything and changes nothing. &lt;em&gt;Can log care&lt;/em&gt; logs care on plants and cuttings and adds notes and photos, but can only change or remove what they added themselves, which suits a plant-sitter. &lt;em&gt;Can edit&lt;/em&gt; changes anything, like you. &lt;em&gt;Can edit and add people&lt;/em&gt; can also invite others and change who can do what, and only the owner can give it. The owner can hand the collection over to someone else.</value>
+    <comment>Answer to "What can the people I invite do?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="OpenSharedCollectionQ" xml:space="preserve">
+    <value>How do I open a collection someone shared with me?</value>
+    <comment>Question in the "Your data and backups" part of the Help page.</comment>
+  </data>
+  <data name="OpenSharedCollectionA1" xml:space="preserve">
+    <value>Open the link you were sent. It shows who invited you, what you can do and how many plants and cuttings there are, even before you sign in. Then sign in or make an account, and tap &lt;em&gt;Join&lt;/em&gt;. Your own plants stay as they are. To go between your own collection and the shared one, tap the line at the top of Today, Plants or Cuttings that says whose collection is open, or tap &lt;em&gt;Open&lt;/em&gt; next to it under &lt;em&gt;People&lt;/em&gt; on the Account page. Only the one that is open is kept in step with the server, and each collection keeps its own plants on this device.</value>
+    <comment>Answer to "How do I open a collection someone shared with me?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LeaveCollectionQ" xml:space="preserve">
+    <value>What happens when I leave a collection, or someone removes me?</value>
+    <comment>Question in the "Your data and backups" part of the Help page.</comment>
+  </data>
+  <data name="LeaveCollectionA1" xml:space="preserve">
+    <value>When you leave, you can save a backup first if you want a copy. The collection then goes from this device, and what you logged stays in it for the others. You can join again with a new invite.</value>
+    <comment>Answer to "What happens when I leave a collection, or someone removes me?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LeaveCollectionA2" xml:space="preserve">
+    <value>If someone removes you, the collection stays on this device to look at, but nothing in it is synced or changed, until you remove it yourself. The owner can't leave without handing the collection over first.</value>
+    <comment>Answer to "What happens when I leave a collection, or someone removes me?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WhoSeesNameQ" xml:space="preserve">
+    <value>Who can see my name?</value>
+    <comment>Question in the "Your data and backups" part of the Help page.</comment>
+  </data>
+  <data name="WhoSeesNameA1" xml:space="preserve">
+    <value>The people you share a collection with, next to what you log, like &lt;em&gt;by Sam&lt;/em&gt;. You're asked for a name before you invite someone or join a collection, and you can change it under &lt;em&gt;People&lt;/em&gt; on the Account page.</value>
+    <comment>Answer to "Who can see my name?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
 </root>

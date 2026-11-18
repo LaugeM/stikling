@@ -4,6 +4,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Names;
+using Stikling.Core.People;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
 using static Stikling.Core.Text.Format;
@@ -18,6 +19,7 @@ namespace Stikling.Web.Services;
 /// </summary>
 public sealed class SyncRunner(
     AccountService account,
+    CollectionsService collections,
     StiklingApi api,
     IndexedDbSyncStore store,
     IndexedDb db,
@@ -36,6 +38,7 @@ public sealed class SyncRunner(
     TimeProvider time) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/sync.js";
+    /// <summary>When the open database last synced. A shared collection's database has its id added, see <see cref="DeviceFiles.KeyForOpenAsync"/>.</summary>
     internal const string LastSyncKey = "last-sync";
 
     /// <summary>How long to wait after a change, so a few changes in a row go in one sync.</summary>
@@ -107,7 +110,7 @@ public sealed class SyncRunner(
         started = true;
         db.Changed += OnLocalChange;
         account.Changed += OnAccountChanged;
-        LastSynced = DateTimeOffset.TryParse(await files.GetAsync(LastSyncKey), out var at) ? at : null;
+        LastSynced = DateTimeOffset.TryParse(await files.GetAsync(await files.KeyForOpenAsync(LastSyncKey)), out var at) ? at : null;
 
         self = DotNetObjectReference.Create(this);
         await (await Module).InvokeVoidAsync("watch", self);
@@ -246,8 +249,7 @@ public sealed class SyncRunner(
         }
 
         await ForgetAsync();
-        if (!keepData)
-            await store.ClearAllAsync();
+        await LeaveSharedAsync(keepData);
     }
 
     /// <summary>
@@ -279,8 +281,31 @@ public sealed class SyncRunner(
         await notifications.TurnOffAsync(fromServer: false);
         await calendar.ForgetDeviceAsync();
         await ForgetAsync();
+        await LeaveSharedAsync(keepData, accountDeleted: true);
+    }
+
+    /// <summary>
+    /// After signing out or deleting the account. Removing the data takes every shared collection's database
+    /// with it, and the main database is emptied. A deleted account is in no shared collection any more, so
+    /// their databases go even when the person keeps their own data. Signed out, the main database is the one that opens, so
+    /// when a shared one was open the app is reloaded to it.
+    /// </summary>
+    private async Task LeaveSharedAsync(bool keepData, bool accountDeleted = false)
+    {
+        var wasShared = collections.IsSharedOpen;
+
+        // The checks before this only looked at the open database, so with a shared one open the main
+        // database, which may hold unsent changes, is never emptied. The screens don't offer it either
+        if (wasShared)
+            keepData = true;
+
+        if (!keepData || accountDeleted)
+            await collections.ForgetAllSharedAsync();
         if (!keepData)
             await store.ClearAllAsync();
+
+        if (wasShared)
+            await collections.SwitchToAsync(null);
     }
 
     // Before the first sync since the app opened, the one this device synced with last time
@@ -340,19 +365,48 @@ public sealed class SyncRunner(
                 return;
             }
 
-            // Everyone has their own collection, the first they joined. Picking between
-            // collections comes with inviting people
             var me = await api.GetMeAsync();
-            if (me.Collections.FirstOrDefault() is not { } collection)
+            if (me.Collections.Count == 0)
+                return;
+
+            // Which collection this device syncs, and what the person may do in it. The main database holds
+            // one collection and every other collection has a database of its own, of which one is open
+            var openId = collections.OpenId;
+            var registry = await collections.ApplyMeAsync(me);
+            if (openId is not null && collections.OpenId is null)
+            {
+                await collections.SwitchToAsync(null);
+                return;
+            }
+
+            RegisteredCollection? collection;
+            if (openId is null)
+                collection = registry.MainCollectionId is { } main ? registry.Find(main) : null;
+            else if ((collection = registry.Find(openId.Value)) is null)
+            {
+                await collections.SwitchToAsync(null);
+                return;
+            }
+
+            if (collection is null)
                 return;
 
             CollectionId = collection.Id;
-            var canEdit = collection.Role == "Editor";
-            var result = await new SyncService(store, api).SyncAsync(collection.Id, canEdit);
+
+            // Removed by someone else. What is on the device stays for the person to look at or save,
+            // and nothing syncs
+            if (collection.Gone)
+            {
+                Refused = 0;
+                return;
+            }
+
+            var access = collection.AccessFor(me.PersonId);
+            var result = await new SyncService(store, api).SyncAsync(collection.Id, access);
             Refused = result.Refused;
 
             LastSynced = time.GetUtcNow();
-            await files.SetAsync(LastSyncKey, LastSynced.Value.ToString("O"));
+            await files.SetAsync(await files.KeyForOpenAsync(LastSyncKey), LastSynced.Value.ToString("O"));
 
             // Never throws, so a problem with the links can't stop the photos
             await shares.RefreshAsync(collection.Id);
@@ -373,11 +427,14 @@ public sealed class SyncRunner(
 
             // After the records, since the server only takes a photo's images once it has its record.
             // If this fails, the records have still synced, and the problem shows on its own.
-            var photos = await new PhotoSyncService(store, api).SyncAsync(collection.Id, canEdit);
+            var photos = await new PhotoSyncService(store, api).SyncAsync(collection.Id, access);
             PhotosFull = photos.CollectionFull;
             notOnServer.Clear();
             if (photos.Downloaded > 0)
                 PhotosArrived?.Invoke();
+
+            // Last, and it never throws, so the names can't hold up anything else
+            await RefreshPeopleAsync(registry, collection.Id);
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Gone)
         {
@@ -400,6 +457,36 @@ public sealed class SyncRunner(
             if (e is HttpRequestException { StatusCode: >= HttpStatusCode.InternalServerError })
                 logger.LogError(e, "The server answered a sync with an error");
             Problem = Strings.Account.SyncUnreachable;
+        }
+    }
+
+    /// <summary>
+    /// Keeps the names of the people in the open collection, and of those who left it, so the names next to
+    /// entries show offline. If it fails the names from before stay. Never throws.
+    /// </summary>
+    private async Task RefreshPeopleAsync(CollectionRegistry registry, Guid collectionId)
+    {
+        try
+        {
+            var details = await api.GetCollectionAsync(collectionId);
+            var people = new Dictionary<Guid, string>();
+            foreach (var former in details.FormerMembers.Where(f => !string.IsNullOrWhiteSpace(f.Name)))
+                people[former.PersonId] = former.Name!;
+            foreach (var member in details.Members.Where(m => !string.IsNullOrWhiteSpace(m.Name)))
+                people[member.PersonId] = member.Name!;
+
+            var ownerName = details.Members.FirstOrDefault(m => m.IsOwner)?.Name;
+            await collections.SaveRegistryAsync(registry with
+            {
+                Collections = [.. registry.Collections.Select(c => c.Id != collectionId
+                    ? c
+                    : c with { People = people, OwnerName = string.IsNullOrWhiteSpace(ownerName) ? c.OwnerName : ownerName, Name = details.Name })],
+            });
+        }
+        catch (Exception e) when (e is not OperationCanceledException)
+        {
+            // An outage, or anything else, keeps the names from last time. Nothing waits for them
+            logger.LogWarning(e, "Fetching the people of the collection failed");
         }
     }
 
@@ -442,6 +529,10 @@ public sealed class SyncRunner(
             await notifications.TurnOffAsync(fromServer: false);
             await calendar.ForgetDeviceAsync();
             await ForgetAsync();
+
+            // Signed out, the main database is the one that opens
+            if (collections.IsSharedOpen)
+                await collections.SwitchToAsync(null);
         }
         catch (JSException)
         {
@@ -452,7 +543,7 @@ public sealed class SyncRunner(
     private async Task ForgetAsync()
     {
         await store.ForgetStateAsync();
-        await files.SetAsync(LastSyncKey, null);
+        await files.SetAsync(await files.KeyForOpenAsync(LastSyncKey), null);
         LastSynced = null;
         firstSyncFailed = false;
         Problem = null;

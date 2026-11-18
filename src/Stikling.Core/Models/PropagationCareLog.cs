@@ -7,8 +7,14 @@ namespace Stikling.Core.Models;
 /// Kept apart from <see cref="CareLog"/>, which belongs to plants. When the propagation is
 /// potted up, its last watering is copied to the new plants as a plant care entry.
 /// </summary>
-public sealed class PropagationCareLog : Entity
+public sealed class PropagationCareLog : Entity, IHasCreatedBy
 {
+    /// <summary>
+    /// Who added it, when they were signed in. Null when nobody was, and on everything from before this was
+    /// kept. A helper can only change what they added themselves.
+    /// </summary>
+    public Guid? CreatedBy { get; set; }
+
     public Guid PropagationId { get; set; }
 
     /// <summary>The day it was done, which can be earlier than when it was written down.</summary>

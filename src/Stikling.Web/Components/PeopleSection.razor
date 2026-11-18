@@ -1,0 +1,1016 @@
+@using System.Net
+@using Stikling.Core.People
+@inject CollectionsService Collections
+@inject StiklingApi Api
+@inject SyncRunner Sync
+@inject BackupService Backup
+@inject ShareCardService Cards
+@inject NavigationManager Nav
+@implements IDisposable
+@* The inside of the People section on the Account page: the collections on this device, who is in the open
+   one, inviting, handing over and leaving. The heading is on the page. Everything is fetched when the section
+   loads and after each action, and again when a sync brings in changes. *@
+
+<ReloadOnSync Reload="() => LoadAsync(refresh: false)" />
+
+@if (!loaded)
+{
+    <p class="settings-hint" role="status">@Strings.Account.Loading</p>
+}
+else
+{
+    @if (loadProblem is not null)
+    {
+        <p class="settings-message" role="alert">@loadProblem</p>
+    }
+
+    @if (registry is not null && ShownCollections.Count > 0)
+    {
+        <h3 class="section-label mt-4">@(ManyCollections ? Strings.People.OnDeviceTitle : Strings.People.CollectionTitle)</h3>
+        <ul class="settings-rows">
+            @foreach (var collection in ShownCollections)
+            {
+                var isOpen = collection.Id == openId;
+                <li class="people-row">
+                    @if (isOpen && renaming && !collection.Gone && access.CanEdit)
+                    {
+                        <RoomRenameRow Name="@collection.Name" Label="@Strings.People.CollectionName" Busy="busy"
+                                       OnSave="RenameAsync" OnCancel="@(() => renaming = false)" />
+                    }
+                    else
+                    {
+                        <div class="people-line">
+                            <span class="people-name">@CollectionText.Name(collection)</span>
+                            <span class="people-actions">
+                                @if (isOpen)
+                                {
+                                    <span class="settings-hint my-0">@Strings.People.OpenNow</span>
+                                    @if (access.CanEdit && !collection.Gone)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="() => renaming = true">@Strings.People.Rename</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                            @onclick="() => Collections.SwitchToAsync(collection.Id)">@Strings.People.Open</button>
+                                }
+                            </span>
+                        </div>
+                        @* "Yours" under "Your plants" adds nothing, so it is only there to tell several apart *@
+                        @if (ManyCollections || collection.Gone)
+                        {
+                            <p class="people-sub">@CollectionText.Hint(collection)</p>
+                        }
+                    }
+                </li>
+            }
+        </ul>
+    }
+
+    @if (current is { Gone: true } gone)
+    {
+        <p class="settings-hint">@Strings.People.GoneText</p>
+        <div class="settings-actions">
+            <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                    @onclick="SaveBackupAsync">@Strings.People.SaveBackup</button>
+            <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                    @onclick="() => removingFromDevice = true">@Strings.People.RemoveFromDevice</button>
+        </div>
+        @if (backupMessage is not null)
+        {
+            <p class="settings-message" role="status">@backupMessage</p>
+        }
+        @if (removingFromDevice)
+        {
+            <div class="confirm-card confirm-card-danger">
+                <p>@F(Strings.People.RemoveFromDeviceExplain, CollectionText.Name(gone))</p>
+                <div class="settings-actions">
+                    <button type="button" class="btn btn-danger" disabled="@busy"
+                            @onclick="() => RemoveFromDeviceAsync(gone.Id)">@Strings.Common.Remove</button>
+                    <button type="button" class="btn btn-link" disabled="@busy"
+                            @onclick="() => removingFromDevice = false">@Strings.Common.Cancel</button>
+                </div>
+            </div>
+        }
+    }
+    else if (registry is not null && current is { } here)
+    {
+        @if (details is { } found)
+        {
+            <h3 class="section-label mt-4">@Strings.People.MembersTitle</h3>
+            <ul class="settings-rows">
+                @foreach (var member in found.Members)
+                {
+                    var target = new MemberAccess(member.PersonId, member.RoleKind, member.ManagesPeople, member.IsOwner);
+                    var choice = RoleChoice.Of(member.RoleKind, member.ManagesPeople);
+                    var name = MemberName(member);
+                    var options = RoleChoice.ForChange(access, target);
+                    var isYou = member.PersonId == registry.PersonId;
+                    var hasName = !string.IsNullOrWhiteSpace(registry.PersonName);
+                    <li class="people-row">
+                        @if (isYou && showNameDialog && !inviteAfterName)
+                        {
+                            <NameDialog Name="@registry.PersonName" OnSaved="NameSavedAsync" OnCancel="CancelNameDialog" />
+                        }
+                        else
+                        {
+                            <div class="people-line">
+                                <span class="people-name">@name</span>
+                                @if (isYou)
+                                {
+                                    <span class="settings-hint my-0">@Strings.People.You</span>
+                                }
+                                <span class="people-actions">
+                                    @if (isYou)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @ref="nameButton"
+                                                @onclick="OpenNameDialog">@(hasName ? Strings.People.ChangeName : Strings.People.SetName)</button>
+                                    }
+                                    @if (access.CanRemove(target))
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="() => removingMember = member.PersonId">@Strings.Common.Remove</button>
+                                    }
+                                </span>
+                            </div>
+                            @* With a select the role is shown by the select, and this line is for screen readers *@
+                            <p class="people-sub @(options.Count > 0 ? "visually-hidden" : null)">
+                                @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Verb(choice)) : RoleText.Label(choice))
+                            </p>
+                            @if (isYou && !hasName)
+                            {
+                                <p class="people-sub">@Strings.People.YourNameHint</p>
+                            }
+                            @if (options.Count > 0)
+                            {
+                                <div class="member-role">
+                                    <select class="form-select w-auto" aria-label="@F(Strings.People.ChangeRoleFor, name)"
+                                            @ref="roleSelects[member.PersonId]"
+                                            @key="(member.PersonId, roleEpoch)"
+                                            disabled="@busy" @onchange="e => RolePickedAsync(member, choice, e.Value?.ToString())">
+                                        @foreach (var option in options)
+                                        {
+                                            <option value="@IndexOf(option)" selected="@(option == choice)">@RoleText.Label(option)</option>
+                                        }
+                                    </select>
+                                    @if (savingRole == member.PersonId)
+                                    {
+                                        <span class="settings-hint my-0" role="status">@Strings.People.Saving</span>
+                                    }
+                                </div>
+                            }
+                            @if (raisingMember == member.PersonId)
+                            {
+                                <div class="confirm-card">
+                                    <p>@F(Strings.People.RaiseConfirm, name)</p>
+                                    <div class="settings-actions">
+                                        <button type="button" class="btn btn-primary" disabled="@busy"
+                                                @onclick="() => ConfirmRaiseAsync(member)">@Strings.People.RaiseConfirmButton</button>
+                                        <button type="button" class="btn btn-link" disabled="@busy"
+                                                @onclick="() => CancelRaise(member.PersonId)">@Strings.Common.Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                            @if (removingMember == member.PersonId)
+                            {
+                                <div class="confirm-card confirm-card-danger">
+                                    <p>@F(Strings.People.RemoveMemberExplain, name)</p>
+                                    <div class="settings-actions">
+                                        <button type="button" class="btn btn-danger" disabled="@busy"
+                                                @onclick="() => RemoveMemberAsync(member)">@Strings.Common.Remove</button>
+                                        <button type="button" class="btn btn-link" disabled="@busy"
+                                                @onclick="() => removingMember = null">@Strings.Common.Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                        }
+                    </li>
+                }
+            </ul>
+
+            @if (access.CanManage)
+            {
+                @if (showNameDialog && inviteAfterName)
+                {
+                    <NameDialog Name="@registry.PersonName" OnSaved="NameSavedAsync" OnCancel="CancelNameDialog" />
+                }
+                else if (inviteStep == InviteStep.None)
+                {
+                    <div class="settings-actions">
+                        <button type="button" class="btn btn-outline-primary" disabled="@busy" @ref="inviteButton"
+                                @onclick="StartInvite">@Strings.People.InviteSomeone</button>
+                    </div>
+                }
+                else if (inviteStep == InviteStep.Choosing)
+                {
+                    <div class="confirm-card">
+                        <div class="mb-3">
+                            <label class="form-label" for="invite-for">@Strings.People.InviteForLabel</label>
+                            <input id="invite-for" class="form-control" maxlength="@PeopleLimits.MaxInviteForNameLength" autocomplete="off"
+                                   @bind="inviteFor" @bind:event="oninput" />
+                            <p class="settings-hint">@Strings.People.InviteForHint</p>
+                        </div>
+                        <fieldset>
+                            <legend class="h6">@Strings.People.InviteChoose</legend>
+                            <div class="role-choices">
+                                @foreach (var option in RoleChoice.ForInvite(access))
+                                {
+                                    <label class="role-choice @(option == inviteChoice ? "picked" : null)">
+                                        <input class="visually-hidden" type="radio" name="invite-role"
+                                               checked="@(option == inviteChoice)" @onchange="() => inviteChoice = option" />
+                                        <span class="role-choice-label">@RoleText.Label(option)</span>
+                                        <span class="role-choice-meaning">@RoleText.Meaning(option)</span>
+                                    </label>
+                                }
+                            </div>
+                        </fieldset>
+                        <div class="settings-actions">
+                            <button type="button" class="btn btn-primary" disabled="@busy"
+                                    @onclick="MakeInviteAsync">@Strings.People.MakeLink</button>
+                            <button type="button" class="btn btn-link" disabled="@busy"
+                                    @onclick="() => inviteStep = InviteStep.None">@Strings.Common.Cancel</button>
+                        </div>
+                    </div>
+                }
+                else if (made is { } invite && link is not null)
+                {
+                    <div class="confirm-card">
+                        @if (!string.IsNullOrWhiteSpace(invite.ForName))
+                        {
+                            <p><strong>@invite.ForName</strong></p>
+                        }
+                        <label class="form-label" for="invite-link">@Strings.People.InviteLinkLabel</label>
+                        <input id="invite-link" class="form-control invite-link" readonly value="@link" onfocus="this.select()"
+                               @ref="linkField" autocomplete="off" autocapitalize="off" spellcheck="false" />
+                        @if (copyFailed)
+                        {
+                            <p class="settings-message" role="status">@Strings.People.CopyFailed</p>
+                        }
+                        <p class="settings-hint">@F(Strings.People.InviteLinkHint, RoleText.Verb(invite.Choice), PeopleLimits.InviteDays)</p>
+                        <div class="settings-actions">
+                            @if (canShare)
+                            {
+                                <button type="button" class="btn btn-primary" @onclick="ShareAsync">@Strings.People.Share</button>
+                            }
+                            <button type="button" class="btn @(canShare ? "btn-outline-primary" : "btn-primary")" @onclick="CopyAsync">
+                                @(copied ? Strings.People.Copied : Strings.People.Copy)
+                            </button>
+                            <button type="button" class="btn btn-outline-primary" aria-expanded="@showQr"
+                                    @onclick="() => showQr = !showQr">@(showQr ? Strings.People.HideQr : Strings.People.ShowQr)</button>
+                            <button type="button" class="btn btn-link" @onclick="CloseInvite">@Strings.Common.Done</button>
+                        </div>
+                        @if (showQr)
+                        {
+                            <svg class="invite-qr" viewBox="0 0 @(qrSize + 8) @(qrSize + 8)" role="img"
+                                 aria-label="@Strings.People.QrDescription" shape-rendering="crispEdges">
+                                <rect width="@(qrSize + 8)" height="@(qrSize + 8)" fill="#fff" />
+                                <path d="@qrPath" transform="translate(4 4)" fill="#000" />
+                            </svg>
+                        }
+                    </div>
+                }
+
+                @if (invites.Where(i => i.Id != made?.Id).ToList() is { Count: > 0 } open)
+                {
+                    <h3 class="section-label mt-4">@Strings.People.OpenInvites</h3>
+                    <ul class="settings-rows">
+                        @foreach (var invite in open)
+                        {
+                            var expires = Labels.Date(DateOnly.FromDateTime(invite.ExpiresAt.ToLocalTime().DateTime));
+                            var hasFor = !string.IsNullOrWhiteSpace(invite.ForName);
+                            var rowName = hasFor ? invite.ForName! : RoleText.Label(invite.Choice);
+                            var madeOn = Labels.Date(DateOnly.FromDateTime(invite.CreatedAt.ToLocalTime().DateTime));
+                            var hasMaker = !string.IsNullOrWhiteSpace(invite.CreatedByName);
+                            var rowSub = hasFor
+                                ? (hasMaker
+                                    ? F(Strings.People.InviteNamedMadeRunsOut, RoleText.Label(invite.Choice), madeOn, invite.CreatedByName!, expires)
+                                    : F(Strings.People.InviteNamedRunsOut, RoleText.Label(invite.Choice), expires))
+                                : (hasMaker
+                                    ? F(Strings.People.InviteMadeRunsOut, madeOn, invite.CreatedByName!, expires)
+                                    : F(Strings.People.InviteRunsOut, expires));
+                            <li class="people-row">
+                                <div class="people-line">
+                                    <span class="people-name">@rowName</span>
+                                    <span class="people-actions">
+                                        @if (invite.Token is not null)
+                                        {
+                                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                    aria-label="@F(Strings.People.ShowLinkFor, rowName, rowSub)"
+                                                    @onclick="() => ShowInvite(invite)">@Strings.People.ShowLink</button>
+                                        }
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                aria-label="@F(Strings.People.WithdrawFor, rowName, rowSub)"
+                                                @onclick="() => WithdrawAsync(invite)">@Strings.People.Withdraw</button>
+                                    </span>
+                                </div>
+                                <p class="people-sub">@rowSub</p>
+                            </li>
+                        }
+                    </ul>
+                }
+            }
+        }
+        else if (showNameDialog && !inviteAfterName)
+        {
+            @* The people couldn't be listed, so the name is set here instead of in a row *@
+            <NameDialog Name="@registry.PersonName" OnSaved="NameSavedAsync" OnCancel="CancelNameDialog" />
+        }
+        else
+        {
+            <div class="room-row mt-4">
+                <span>@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.YourNameNone : F(Strings.People.YourName, registry.PersonName))</span>
+                <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy" @ref="nameButton"
+                        @onclick="OpenNameDialog">@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.SetName : Strings.People.ChangeName)</button>
+            </div>
+            <p class="settings-hint mt-0">@Strings.People.YourNameHint</p>
+        }
+
+        @if (CanHandOverNow || (access.CanLeave && Collections.IsSharedOpen) || (access.IsOwner && Collections.IsSharedOpen))
+        {
+            <div class="people-end">
+                @if (CanHandOverNow)
+                {
+                    @if (handingOver)
+                    {
+                        <div class="confirm-card">
+                            <p><strong>@Strings.People.HandOverTitle</strong></p>
+                            <p class="settings-hint">@Strings.People.HandOverHint</p>
+                            <label class="form-label" for="hand-over-to">@Strings.People.HandOverChoose</label>
+                            <select id="hand-over-to" class="form-select" disabled="@busy"
+                                    @onchange="e => handOverTo = Guid.TryParse(e.Value?.ToString(), out var picked) ? picked : null">
+                                <option value="" selected="@(handOverTo is null)"></option>
+                                @foreach (var member in OtherMembers)
+                                {
+                                    <option value="@member.PersonId" selected="@(handOverTo == member.PersonId)">@MemberName(member)</option>
+                                }
+                            </select>
+                            @if (OtherMembers.FirstOrDefault(m => m.PersonId == handOverTo) is { } next)
+                            {
+                                <p class="mt-2">@F(Strings.People.HandOverConfirm, MemberName(next))</p>
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-danger" disabled="@(busy || handOverTo is null)"
+                                        @onclick="HandOverAsync">@Strings.People.HandOverButton</button>
+                                <button type="button" class="btn btn-link" disabled="@busy"
+                                        @onclick="() => handingOver = false">@Strings.Common.Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <button type="button" class="btn btn-link link-action" disabled="@busy"
+                                    @onclick="() => handingOver = true">@Strings.People.HandOverTitle</button>
+                            <p class="settings-hint">@Strings.People.HandOverHint</p>
+                        </div>
+                    }
+                }
+
+                @if (access.CanLeave && Collections.IsSharedOpen)
+                {
+                    @if (leaving)
+                    {
+                        <div class="confirm-card confirm-card-danger">
+                            <p>@F(Strings.People.LeaveConfirm, CollectionText.Name(here))</p>
+                            @if (checkingUnsent)
+                            {
+                                <p class="settings-hint" role="status">@Strings.Account.AccountSendingLatest</p>
+                            }
+                            else
+                            {
+                                @if (unsentPhotos > 0)
+                                {
+                                    <p class="settings-hint">
+                                        @Plural.Of(unsentPhotos, Strings.Account.AccountUnsentPhotos_One, Strings.Account.AccountUnsentPhotos_Other)
+                                    </p>
+                                }
+                                @if (unsentChanges > 0)
+                                {
+                                    <p class="settings-hint">
+                                        @Plural.Of(unsentChanges, Strings.Account.AccountUnsentChanges_One, Strings.Account.AccountUnsentChanges_Other)
+                                    </p>
+                                }
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                                        @onclick="SaveBackupAsync">@Strings.People.LeaveSaveFirst</button>
+                            </div>
+                            @if (backupMessage is not null)
+                            {
+                                <p class="settings-message" role="status">@backupMessage</p>
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-danger" disabled="@busy"
+                                        @onclick="LeaveAsync">@Strings.People.Leave</button>
+                                <button type="button" class="btn btn-link" disabled="@busy"
+                                        @onclick="() => leaving = false">@Strings.Common.Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" disabled="@busy"
+                                    @onclick="StartLeaveAsync">@Strings.People.LeaveButton</button>
+                            <p class="settings-hint">@Strings.People.LeaveHint</p>
+                        </div>
+                    }
+                }
+                else if (access.IsOwner && Collections.IsSharedOpen)
+                {
+                    <p class="settings-hint">@Strings.People.OwnerCantLeave</p>
+                }
+            </div>
+        }
+    }
+
+    @if (message is not null)
+    {
+        <p class="settings-message" role="alert">@message</p>
+    }
+}
+
+@code {
+    private enum InviteStep { None, Choosing, Made }
+
+    private bool loaded;
+    private bool disposed;
+    private bool busy;
+    private string? loadProblem;
+    private string? message;
+    private string? backupMessage;
+
+    private CollectionRegistry? registry;
+    private RegisteredCollection? current;
+    private Guid? openId;
+    private MemberAccess access = MemberAccess.Full(Guid.Empty);
+    private CollectionDetails? details;
+    private List<InviteInfo> invites = [];
+
+    private bool renaming;
+    private Guid? removingMember;
+    private Guid? raisingMember;
+    private RoleChoice? raisingChoice;
+    private int roleEpoch;
+    private Guid? savingRole;
+    private bool removingFromDevice;
+    private bool leaving;
+    private bool checkingUnsent;
+    private int unsentChanges;
+    private int unsentPhotos;
+    private bool handingOver;
+    private Guid? handOverTo;
+
+    private bool showNameDialog;
+    private bool inviteAfterName;
+    private InviteStep inviteStep = InviteStep.None;
+    private RoleChoice inviteChoice = RoleChoice.CanView;
+    private InviteInfo? made;
+    private string inviteFor = "";
+    private string? link;
+    private bool canShare;
+    private bool copied;
+    private bool copyFailed;
+    private ElementReference linkField;
+    private ElementReference inviteButton;
+    private ElementReference nameButton;
+    private readonly Dictionary<Guid, ElementReference> roleSelects = [];
+
+    // Where focus goes after the next render, so it isn't left on a button that is gone
+    private enum FocusTarget { None, Link, Invite, Name, RoleSelect }
+    private FocusTarget pendingFocus;
+    private Guid pendingFocusMember;
+    private int focusTries;
+    private bool showQr;
+    private int qrSize;
+    private string qrPath = "";
+
+    private bool ManyCollections => registry is not null && (registry.Collections.Count > 1 || Collections.IsSharedOpen);
+
+    // Just the open one while it is the only one, since it is then the collection
+    private IReadOnlyList<RegisteredCollection> ShownCollections =>
+        registry is null ? [] : ManyCollections ? registry.Collections : current is null ? [] : [current];
+
+    private bool CanHandOverNow => access.CanHandOver && OtherMembers.Count > 0;
+
+    private IReadOnlyList<CollectionMember> OtherMembers =>
+        details is null || registry is null ? [] : [.. details.Members.Where(m => m.PersonId != registry.PersonId)];
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadAsync(refresh: true);
+        try
+        {
+            canShare = await Cards.CanShareLinkAsync();
+        }
+        catch (JSException)
+        {
+            canShare = false;
+        }
+    }
+
+    private void FocusAfterRender(FocusTarget target, Guid member = default)
+    {
+        pendingFocus = target;
+        pendingFocusMember = member;
+        focusTries = 0;
+    }
+
+    // The element may not be there until a later render, so it is tried a few times
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (pendingFocus == FocusTarget.None || disposed)
+            return;
+
+        var target = pendingFocus switch
+        {
+            FocusTarget.Link => linkField,
+            FocusTarget.Invite => inviteButton,
+            FocusTarget.Name => nameButton,
+            _ => roleSelects.GetValueOrDefault(pendingFocusMember),
+        };
+
+        try
+        {
+            await target.FocusAsync();
+            pendingFocus = FocusTarget.None;
+        }
+        catch (Exception e) when (e is JSException or InvalidOperationException)
+        {
+            // Not rendered yet, or not at all, e.g. the box was closed
+            if (++focusTries >= 3)
+                pendingFocus = FocusTarget.None;
+        }
+    }
+
+    private static int IndexOf(RoleChoice choice)
+    {
+        for (var i = 0; i < RoleChoice.All.Count; i++)
+        {
+            if (RoleChoice.All[i] == choice)
+                return i;
+        }
+        return -1;
+    }
+
+    private static string MemberName(CollectionMember member) =>
+        string.IsNullOrWhiteSpace(member.Name) ? Strings.People.NoNameYet : member.Name!;
+
+    /// <summary>Reads the list of collections and the open one's people. With <paramref name="refresh"/> the server is asked who the person is first.</summary>
+    private async Task LoadAsync(bool refresh)
+    {
+        if (disposed)
+            return;
+
+        loadProblem = null;
+        if (refresh)
+        {
+            try
+            {
+                await Collections.RefreshAsync();
+            }
+            catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                loadProblem = Strings.Account.ShareSignInRanOut;
+            }
+            catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+            {
+                loadProblem = Strings.Account.ShareUnreachable;
+            }
+        }
+
+        registry = await Collections.GetRegistryAsync();
+        current = Collections.Current;
+        openId = current?.Id;
+        access = await Collections.GetAccessAsync();
+        details = null;
+        invites = [];
+
+        if (registry is not null && current is { Gone: false } here && loadProblem is null)
+        {
+            try
+            {
+                details = await Api.GetCollectionAsync(here.Id);
+                if (access.CanManage)
+                {
+                    var listed = await Api.GetInvitesAsync(here.Id);
+                    if (listed.Ok)
+                        invites = listed.Value!;
+                }
+            }
+            catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Forbidden)
+            {
+                loadProblem = Strings.People.NotAllowed;
+            }
+            catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+            {
+                loadProblem = Strings.Account.ShareUnreachable;
+            }
+        }
+
+        loaded = true;
+        StateHasChanged();
+    }
+
+    /// <summary>Runs a call, and says in plain words why it failed. After a success, or a failure that may mean the person's place changed, it reads everything again.</summary>
+    private async Task<bool> RunAsync<T>(Func<Task<PeopleOutcome<T>>> call, int nameMax = PeopleLimits.MaxPersonNameLength)
+    {
+        busy = true;
+        message = null;
+        try
+        {
+            var result = await call();
+            if (!result.Ok)
+            {
+                message = PeopleText.Problem(result.Failure!.Value, result.Field, nameMax);
+                if (result.Failure is PeopleFailure.Forbidden or PeopleFailure.NotFound)
+                    await LoadAsync(refresh: true);
+                return false;
+            }
+
+            await LoadAsync(refresh: true);
+            return true;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RenameAsync(string name)
+    {
+        if (current is null)
+            return;
+
+        if (await RunAsync(() => Api.RenameCollectionAsync(current.Id, name), PeopleLimits.MaxCollectionNameLength))
+            renaming = false;
+    }
+
+    // Raising someone to "edit and add people" asks first. Anything else saves at once
+    private async Task RolePickedAsync(CollectionMember member, RoleChoice now, string? picked)
+    {
+        if (!int.TryParse(picked, out var index) || index < 0 || index >= RoleChoice.All.Count)
+            return;
+
+        var choice = RoleChoice.All[index];
+        if (choice.ManagesPeople && !now.ManagesPeople)
+        {
+            raisingMember = member.PersonId;
+            raisingChoice = choice;
+            return;
+        }
+
+        raisingMember = null;
+        await ChangeRoleAsync(member, choice);
+    }
+
+    private async Task ConfirmRaiseAsync(CollectionMember member)
+    {
+        if (raisingChoice is not { } choice)
+            return;
+
+        raisingMember = null;
+        await ChangeRoleAsync(member, choice);
+    }
+
+    // The select is made again, since Blazor leaves a select showing what was picked when nothing it renders has changed
+    private void CancelRaise(Guid memberId)
+    {
+        raisingMember = null;
+        roleEpoch++;
+        FocusAfterRender(FocusTarget.RoleSelect, memberId);
+    }
+
+    private async Task ChangeRoleAsync(CollectionMember member, RoleChoice choice)
+    {
+        if (current is null)
+            return;
+
+        savingRole = member.PersonId;
+        try
+        {
+            // A change that wasn't saved puts the select back on the role that is saved
+            if (!await RunAsync(() => Api.ChangeMemberAsync(current.Id, member.PersonId, choice.Role, choice.ManagesPeople)))
+                roleEpoch++;
+        }
+        finally
+        {
+            savingRole = null;
+        }
+    }
+
+    private async Task RemoveMemberAsync(CollectionMember member)
+    {
+        if (current is null)
+            return;
+
+        if (await RunAsync(() => Api.RemoveMemberAsync(current.Id, member.PersonId)))
+            removingMember = null;
+    }
+
+    // Inviting needs a name, since it is what the invited person sees. It is asked for first when there is none
+    private void StartInvite()
+    {
+        message = null;
+        if (string.IsNullOrWhiteSpace(registry?.PersonName))
+        {
+            inviteAfterName = true;
+            showNameDialog = true;
+            return;
+        }
+
+        BeginChoosing();
+    }
+
+    private void BeginChoosing()
+    {
+        var offered = RoleChoice.ForInvite(access);
+        inviteChoice = offered.Count > 0 ? offered[0] : RoleChoice.CanView;
+        inviteFor = "";
+        inviteStep = InviteStep.Choosing;
+    }
+
+    private async Task MakeInviteAsync()
+    {
+        if (current is null)
+            return;
+
+        busy = true;
+        message = null;
+        try
+        {
+            var result = await Api.CreateInviteAsync(current.Id, inviteChoice.Role, inviteChoice.ManagesPeople, inviteFor);
+            if (result is { Failure: PeopleFailure.Invalid, Field: "name" })
+            {
+                // The server has no name for the person, though the device thought it did
+                inviteAfterName = true;
+                showNameDialog = true;
+                inviteStep = InviteStep.None;
+                return;
+            }
+
+            if (!result.Ok)
+            {
+                message = PeopleText.Problem(result.Failure!.Value, result.Field);
+                return;
+            }
+
+            if (!ShowInvite(result.Value!))
+            {
+                inviteStep = InviteStep.None;
+                return;
+            }
+
+            var listed = await Api.GetInvitesAsync(current.Id);
+            if (listed.Ok)
+                invites = listed.Value!;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>Shows an invite's link and QR code. False when the invite has no token to build a link from.</summary>
+    private bool ShowInvite(InviteInfo invite)
+    {
+        made = invite;
+        link = invite.Token is null ? null : $"{Nav.BaseUri}join/{invite.Token}";
+        if (link is null)
+            return false;
+
+        copied = false;
+        copyFailed = false;
+        showQr = false;
+        BuildQr(link);
+        inviteStep = InviteStep.Made;
+        FocusAfterRender(FocusTarget.Link);
+        return true;
+    }
+
+    private void BuildQr(string text)
+    {
+        var rows = Stikling.Core.Labels.QrCode.Rows(text);
+        qrSize = rows.Count;
+
+        // One run of dark modules per piece of the path
+        var path = new System.Text.StringBuilder();
+        for (var y = 0; y < rows.Count; y++)
+        {
+            var x = 0;
+            while (x < rows[y].Length)
+            {
+                if (rows[y][x] != '1')
+                {
+                    x++;
+                    continue;
+                }
+
+                var start = x;
+                while (x < rows[y].Length && rows[y][x] == '1')
+                    x++;
+                path.Append(System.Globalization.CultureInfo.InvariantCulture, $"M{start} {y}h{x - start}v1h-{x - start}z");
+            }
+        }
+        qrPath = path.ToString();
+    }
+
+    private void CloseInvite()
+    {
+        inviteStep = InviteStep.None;
+        made = null;
+        link = null;
+        showQr = false;
+    }
+
+    private async Task ShareAsync()
+    {
+        if (link is null || current is null)
+            return;
+
+        string outcome;
+        try
+        {
+            outcome = await Cards.ShareLinkAsync(F(Strings.People.ShareTitle, CollectionText.Name(current)), link);
+        }
+        catch (JSException)
+        {
+            outcome = "failed";
+        }
+
+        // The share menu failed, so the link is copied instead, which always works
+        if (outcome == "failed")
+            await CopyAsync();
+    }
+
+    private async Task CopyAsync()
+    {
+        if (link is null)
+            return;
+
+        copyFailed = false;
+        try
+        {
+            copied = await Cards.CopyTextAsync(link);
+        }
+        catch (JSException)
+        {
+            copied = false;
+        }
+
+        if (!copied)
+        {
+            // The browser wouldn't give the page the clipboard. The link is in the field, so it is selected for copying by hand
+            copyFailed = true;
+            StateHasChanged();
+            try
+            {
+                await linkField.FocusAsync();
+            }
+            catch (Exception e) when (e is JSException or InvalidOperationException)
+            {
+                // The field is gone, e.g. the box was closed
+            }
+            return;
+        }
+
+        StateHasChanged();
+        await Task.Delay(TimeSpan.FromSeconds(2));
+        if (disposed)
+            return;
+
+        copied = false;
+        StateHasChanged();
+    }
+
+    private async Task WithdrawAsync(InviteInfo invite)
+    {
+        // The invite button is only there while no invite card is open
+        if (current is not null && await RunAsync(() => Api.WithdrawInviteAsync(current.Id, invite.Id)) && inviteStep == InviteStep.None)
+            FocusAfterRender(FocusTarget.Invite);
+    }
+
+    private async Task HandOverAsync()
+    {
+        if (current is null || handOverTo is not { } next)
+            return;
+
+        if (await RunAsync(() => Api.HandOverAsync(current.Id, next)))
+        {
+            handingOver = false;
+            handOverTo = null;
+        }
+    }
+
+    private async Task SaveBackupAsync()
+    {
+        busy = true;
+        backupMessage = null;
+        try
+        {
+            await Backup.ExportAsync();
+            backupMessage = Strings.People.BackupSaved;
+        }
+        catch (Exception e) when (e is JSException or InvalidOperationException or IOException)
+        {
+            backupMessage = Strings.People.BackupFailed;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>Opens the question, after one last sync so as little as possible is left unsent: what is still waiting is lost with the collection's database.</summary>
+    private async Task StartLeaveAsync()
+    {
+        message = null;
+        backupMessage = null;
+        unsentPhotos = unsentChanges = 0;
+        leaving = true;
+        checkingUnsent = true;
+        StateHasChanged();
+        try
+        {
+            await Sync.SyncNowAsync();
+            (unsentChanges, unsentPhotos) = await Sync.CountUnsentAsync();
+        }
+        finally
+        {
+            checkingUnsent = false;
+        }
+    }
+
+    private async Task LeaveAsync()
+    {
+        if (current is not { } here)
+            return;
+
+        busy = true;
+        message = null;
+        try
+        {
+            var result = await Api.LeaveAsync(here.Id);
+            if (!result.Ok)
+            {
+                message = PeopleText.Problem(result.Failure!.Value, result.Field);
+                if (result.Failure is PeopleFailure.Owner or PeopleFailure.Forbidden)
+                    await LoadAsync(refresh: true);
+                return;
+            }
+
+            // Takes the database off the device and opens the person's own collection, reloading the app
+            leaving = false;
+            await Collections.RemoveFromDeviceAsync(here.Id);
+            await LoadAsync(refresh: true);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task RemoveFromDeviceAsync(Guid id)
+    {
+        busy = true;
+        try
+        {
+            await Collections.RemoveFromDeviceAsync(id);
+            removingFromDevice = false;
+            await LoadAsync(refresh: false);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private void OpenNameDialog()
+    {
+        inviteAfterName = false;
+        showNameDialog = true;
+    }
+
+    private void CancelNameDialog()
+    {
+        showNameDialog = false;
+        FocusAfterRender(inviteAfterName ? FocusTarget.Invite : FocusTarget.Name);
+        inviteAfterName = false;
+    }
+
+    private async Task NameSavedAsync()
+    {
+        showNameDialog = false;
+        await LoadAsync(refresh: false);
+        // After loading, so the button is there to take it
+        if (inviteAfterName)
+            BeginChoosing();
+        else
+            FocusAfterRender(FocusTarget.Name);
+        inviteAfterName = false;
+    }
+
+    public void Dispose() => disposed = true;
+}

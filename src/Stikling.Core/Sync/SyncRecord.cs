@@ -6,7 +6,11 @@ namespace Stikling.Core.Sync;
 /// One record on its way to or from the server: its kind, and the record itself as the device
 /// stores it. The server keeps the record as it is and only reads its <see cref="RecordStamp"/>.
 /// </summary>
-public sealed record SyncRecord(string Kind, JsonElement Data);
+/// <param name="CreatedBy">
+/// Who first sent the record, as the server knows it. The server fills it in on what it sends back,
+/// and ignores it on what a device sends.
+/// </param>
+public sealed record SyncRecord(string Kind, JsonElement Data, Guid? CreatedBy = null);
 
 /// <summary>The parts of a record that sync looks at.</summary>
 public readonly record struct RecordStamp(Guid Id, DateTimeOffset UpdatedAt, DateTimeOffset? DeletedAt)

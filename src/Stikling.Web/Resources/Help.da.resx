@@ -232,7 +232,7 @@
     <value>Hvad sker der når jeg logger ud?</value>
   </data>
   <data name="HappensWhenSignOutA1" xml:space="preserve">
-    <value>Du vælger selv om du vil beholde en kopi på denne enhed eller fjerne den. Det der er synkroniseret, bliver på din konto uanset hvad og kommer tilbage når du logger ind igen.</value>
+    <value>Du vælger selv om du vil beholde en kopi på denne enhed eller fjerne den. Det der er synkroniseret, bliver på din konto uanset hvad og kommer tilbage når du logger ind igen. Samlinger der er delt med dig, bliver fjernet fra denne enhed når du fjerner dataene, og kommer tilbage når du logger ind igen.</value>
   </data>
   <data name="HappensWhenSignOutA2" xml:space="preserve">
     <value>Når du logger ud, bliver dine seneste ændringer sendt først, og du får besked hvis nogle ændringer eller billeder ikke er nået op på serveren endnu. Fjerner du dataene, bliver de slettet, så gem en sikkerhedskopi først hvis du vil beholde dem.</value>
@@ -250,7 +250,7 @@
     <value>Hvordan sletter jeg min konto?</value>
   </data>
   <data name="DeleteAccountA1" xml:space="preserve">
-    <value>Tryk på &lt;em&gt;Slet konto&lt;/em&gt; nederst på siden Konto i Indstillinger. Det sletter alt hvad din konto har på Stiklings server, også billederne, og dit login. Det kan ikke fortrydes.</value>
+    <value>Tryk på &lt;em&gt;Slet konto&lt;/em&gt; nederst på siden Konto i Indstillinger. Det sletter alt hvad din konto har på Stiklings server, også billederne, og dit login. Det kan ikke fortrydes. En samling som andre er med i, bliver hos dem.</value>
   </data>
   <data name="DeleteAccountA2" xml:space="preserve">
     <value>Du vælger om denne enhed skal beholde det den har. Gør den det, fortsætter appen uden konto, ligesom før du loggede ind. Dine andre enheder holder op med at synkronisere og beholder det der er på dem.</value>
@@ -259,7 +259,7 @@
     <value>Hvem kan se mine planter?</value>
   </data>
   <data name="WhoSeePlantsA1Variant" xml:space="preserve">
-    <value>Uden en konto er det kun dig, for intet forlader enheden. Med en konto er det kun dem der er med i din samling, og indtil videre er det kun dig.</value>
+    <value>Uden en konto er det kun dig, for intet forlader enheden. Med en konto er det kun dig og dem du inviterer ind i din samling.</value>
   </data>
   <data name="WhoSeePlantsA1Variant2" xml:space="preserve">
     <value>Kun dig, for intet forlader enheden.</value>
@@ -1580,5 +1580,38 @@
   </data>
   <data name="LabelQrA3" xml:space="preserve">
     <value>Scan den med telefonens kamera, så åbner Stikling planten eller stiklingen. Åbner kameraet en browser der ikke har dine planter, kan du i stedet trykke på &lt;em&gt;Scan en etiket&lt;/em&gt; på Planter eller Stiklinger i appen eller logge ind i den browser. På en telefon der ikke har planten, står der bare at etiketten er fra Stikling.</value>
+  </data>
+  <data name="ShareCollectionQ" xml:space="preserve">
+    <value>Hvordan deler jeg mine planter med en anden?</value>
+  </data>
+  <data name="ShareCollectionA1" xml:space="preserve">
+    <value>Find &lt;em&gt;Personer&lt;/em&gt; på siden &lt;em&gt;Konto&lt;/em&gt; i Indstillinger. Tryk på &lt;em&gt;Inviter nogen&lt;/em&gt;, vælg hvad personen må, og send linket i en besked, kopiér det eller vis QR-koden. Linket kan bruges én gang og virker i 7 dage, så lav et nyt til hver person. Indtil personen har åbnet det, kan du se det under "Åbne invitationer", vise linket og QR-koden igen med &lt;em&gt;Vis link&lt;/em&gt; og trække det tilbage. Du kan skrive hvem en invitation er til, så du kan kende de åbne invitationer fra hinanden. Kun dem der kan tilføje personer, kan se det. Du skal være logget ind.</value>
+  </data>
+  <data name="CollectionRolesQ" xml:space="preserve">
+    <value>Hvad må de personer jeg inviterer?</value>
+  </data>
+  <data name="CollectionRolesA1" xml:space="preserve">
+    <value>&lt;em&gt;Kan se&lt;/em&gt; ser det hele og ændrer ingenting. &lt;em&gt;Kan logge pleje&lt;/em&gt; logger pleje på planter og stiklinger og tilføjer noter og billeder, men kan kun ændre eller fjerne det personen selv har tilføjet. Det passer til en plantesitter. &lt;em&gt;Kan redigere&lt;/em&gt; kan ændre alt, ligesom dig. &lt;em&gt;Kan redigere og tilføje personer&lt;/em&gt; kan også invitere andre og bestemme hvem der må hvad, og det er kun ejeren der kan give den rolle. Ejeren kan give samlingen videre til en anden.</value>
+  </data>
+  <data name="OpenSharedCollectionQ" xml:space="preserve">
+    <value>Hvordan åbner jeg en samling som en anden har delt med mig?</value>
+  </data>
+  <data name="OpenSharedCollectionA1" xml:space="preserve">
+    <value>Åbn linket du har fået. Det viser hvem der har inviteret dig, hvad du må og hvor mange planter og stiklinger der er, også før du er logget ind. Log så ind eller opret en konto, og tryk på &lt;em&gt;Deltag&lt;/em&gt;. Dine egne planter bliver som de er. Øverst på I dag, Planter og Stiklinger står der hvis samling der er åben. Tryk på den linje for at skifte mellem din egen samling og den delte, eller tryk på &lt;em&gt;Åbn&lt;/em&gt; ud for samlingen under &lt;em&gt;Personer&lt;/em&gt; på siden Konto. Det er kun den åbne samling der bliver synkroniseret, og hver samling har sine egne planter på denne enhed.</value>
+  </data>
+  <data name="LeaveCollectionQ" xml:space="preserve">
+    <value>Hvad sker der når jeg forlader en samling, eller en anden fjerner mig?</value>
+  </data>
+  <data name="LeaveCollectionA1" xml:space="preserve">
+    <value>Når du forlader en samling, kan du først gemme en sikkerhedskopi hvis du vil have en kopi. Samlingen forsvinder så fra denne enhed, og det du har logget, bliver i samlingen hos de andre. Du kan være med igen hvis du får en ny invitation.</value>
+  </data>
+  <data name="LeaveCollectionA2" xml:space="preserve">
+    <value>Fjerner en anden dig, bliver samlingen liggende på denne enhed til du selv fjerner den, og du kan stadig se den. Men der bliver ikke synkroniseret eller ændret noget i den. Ejeren kan ikke forlade samlingen uden først at give den videre.</value>
+  </data>
+  <data name="WhoSeesNameQ" xml:space="preserve">
+    <value>Hvem kan se mit navn?</value>
+  </data>
+  <data name="WhoSeesNameA1" xml:space="preserve">
+    <value>Dem du deler en samling med. Det står ved siden af det du logger, fx &lt;em&gt;af Sam&lt;/em&gt;. Du bliver bedt om et navn før du inviterer nogen eller deltager i en samling, og du kan ændre det under &lt;em&gt;Personer&lt;/em&gt; på siden Konto.</value>
   </data>
 </root>

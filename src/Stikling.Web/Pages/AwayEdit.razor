@@ -1,5 +1,6 @@
 @page "/away/new"
 @page "/away/{Id:guid}"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject AwayService AwayService
 @inject ILogger<AwayEdit> Logger
 @inject NavigationManager Navigation

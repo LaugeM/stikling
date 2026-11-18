@@ -9,10 +9,12 @@ public static class PhotoEntries
     /// <summary>
     /// Photos on their own get one entry per day they were taken, so old photos picked from the
     /// gallery land on their own days. With a note they stay together as one entry, because the
-    /// note is about one moment. An entry is dated by its newest photo.
+    /// note is about one moment. An entry is dated by its newest photo. With <paramref name="asNotes"/>,
+    /// photos on their own go on Note entries without text, for a helper, who can send notes but not
+    /// entries of the kind Photo.
     /// </summary>
     public static IReadOnlyList<TimelineEntry> For(
-        SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> photos, TimeProvider time, string? note = null)
+        SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> photos, TimeProvider time, string? note = null, bool asNotes = false)
     {
         if (photos.Count == 0)
             return [];
@@ -27,7 +29,7 @@ public static class PhotoEntries
             {
                 SubjectType = subjectType,
                 SubjectId = subjectId,
-                Kind = text is null ? TimelineKind.Photo : TimelineKind.Note,
+                Kind = text is null && !asNotes ? TimelineKind.Photo : TimelineKind.Note,
                 OccurredAt = group.Max(p => p.TakenAt),
                 Text = text,
                 PhotoIds = group.Select(p => p.Id).ToList()

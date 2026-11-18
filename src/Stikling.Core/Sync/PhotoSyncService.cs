@@ -1,3 +1,5 @@
+using Stikling.Core.People;
+
 namespace Stikling.Core.Sync;
 
 /// <summary>
@@ -14,6 +16,9 @@ public interface IPhotoSyncStore
     Task<IReadOnlyList<Guid>> GetDownloadsAsync(Guid? after, int max);
 
     Task RemoveDownloadsAsync(IReadOnlyCollection<Guid> ids);
+
+    /// <summary>Who added each of these photos, by what its record on this device says. A photo with no record here, or no one noted, is null.</summary>
+    Task<IReadOnlyDictionary<Guid, Guid?>> GetCreatedByAsync(IReadOnlyCollection<Guid> photoIds);
 }
 
 /// <summary>What happened to one image sent to the server.</summary>
@@ -68,15 +73,18 @@ public sealed class PhotoSyncService(IPhotoSyncStore store, IPhotoServer server)
     /// <summary>How many thumbnails are fetched at the same time.</summary>
     internal const int DownloadsAtOnce = 6;
 
-    /// <param name="canEdit">False for someone who can only view the collection. They only fetch.</param>
-    public async Task<PhotoSyncResult> SyncAsync(Guid collectionId, bool canEdit)
+    /// <param name="me">
+    /// The person's place in the collection. An editor sends every photo's images, a helper only those of the
+    /// photos they added, and a viewer none. They all fetch.
+    /// </param>
+    public async Task<PhotoSyncResult> SyncAsync(Guid collectionId, MemberAccess me)
     {
-        var (uploaded, full) = canEdit ? await UploadAsync(collectionId) : (0, false);
+        var (uploaded, full) = me.CanLog ? await UploadAsync(collectionId, me) : (0, false);
         var downloaded = await DownloadAsync(collectionId);
         return new PhotoSyncResult(uploaded, downloaded, full);
     }
 
-    private async Task<(int Uploaded, bool Full)> UploadAsync(Guid collectionId)
+    private async Task<(int Uploaded, bool Full)> UploadAsync(Guid collectionId, MemberAccess me)
     {
         var uploaded = 0;
         Guid? after = null;
@@ -87,10 +95,20 @@ public sealed class PhotoSyncService(IPhotoSyncStore store, IPhotoServer server)
                 break;
             after = batch[^1];
 
-            // A photo whose images are already there only comes off the list
-            var stored = (await server.GetStoredAsync(collectionId, batch)).ToDictionary(p => p.Id);
+            // A helper only sends the images of what they added. The server would turn the rest away,
+            // so those come off the list
             var done = new List<Guid>();
-            foreach (var id in batch)
+            var ours = batch;
+            if (!me.CanEdit)
+            {
+                var by = await store.GetCreatedByAsync(batch);
+                ours = [.. batch.Where(id => by.TryGetValue(id, out var who) && who == me.PersonId)];
+                done.AddRange(batch.Except(ours));
+            }
+
+            // A photo whose images are already there only comes off the list
+            var stored = ours.Count == 0 ? new Dictionary<Guid, StoredPhoto>() : (await server.GetStoredAsync(collectionId, ours)).ToDictionary(p => p.Id);
+            foreach (var id in ours)
             {
                 stored.TryGetValue(id, out var there);
                 var keep = false;

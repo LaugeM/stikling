@@ -1,0 +1,19 @@
+@* "by Sam" after an entry someone else made, in a shared collection. Nothing when it was the person, or when no
+   name is known, and nothing in a collection that was never shared. *@
+@inject CollectionsService Collections
+
+@if (Name is { } name)
+{
+    <span class="by-name @Class">@F(Strings.People.ByName, name)</span>
+}
+
+@code {
+    [Parameter]
+    public Guid? CreatedBy { get; set; }
+
+    /// <summary>The style the line around it uses for its secondary text.</summary>
+    [Parameter]
+    public string? Class { get; set; }
+
+    private string? Name => Collections.LoggedBy(CreatedBy);
+}

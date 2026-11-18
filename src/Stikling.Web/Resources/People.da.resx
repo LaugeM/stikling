@@ -1,0 +1,402 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Heading" xml:space="preserve">
+    <value>Personer</value>
+  </data>
+  <data name="OnDeviceTitle" xml:space="preserve">
+    <value>Samlinger på denne enhed</value>
+  </data>
+  <data name="CollectionYours" xml:space="preserve">
+    <value>Din</value>
+  </data>
+  <data name="CollectionShared" xml:space="preserve">
+    <value>Ejes af {0}, du kan {1}</value>
+  </data>
+  <data name="CollectionSharedNoOwner" xml:space="preserve">
+    <value>Du kan {0}</value>
+  </data>
+  <data name="CollectionGone" xml:space="preserve">
+    <value>Du er ikke med i den mere</value>
+  </data>
+  <data name="OpenNow" xml:space="preserve">
+    <value>Åben nu</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Åbn</value>
+  </data>
+  <data name="RoleCanView" xml:space="preserve">
+    <value>Kan se</value>
+  </data>
+  <data name="RoleCanLog" xml:space="preserve">
+    <value>Kan logge pleje</value>
+  </data>
+  <data name="RoleCanEdit" xml:space="preserve">
+    <value>Kan redigere</value>
+  </data>
+  <data name="RoleCanEditAndManage" xml:space="preserve">
+    <value>Kan redigere og tilføje personer</value>
+  </data>
+  <data name="VerbView" xml:space="preserve">
+    <value>se</value>
+  </data>
+  <data name="VerbLog" xml:space="preserve">
+    <value>logge pleje</value>
+  </data>
+  <data name="VerbEdit" xml:space="preserve">
+    <value>redigere</value>
+  </data>
+  <data name="VerbEditAndManage" xml:space="preserve">
+    <value>redigere og tilføje personer</value>
+  </data>
+  <data name="CollectionName" xml:space="preserve">
+    <value>Samlingens navn</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Omdøb</value>
+  </data>
+  <data name="GoneText" xml:space="preserve">
+    <value>Du er ikke med i denne samling mere. Det der ligger på denne enhed, bliver her til du fjerner det.</value>
+  </data>
+  <data name="SaveBackup" xml:space="preserve">
+    <value>Gem en sikkerhedskopi</value>
+  </data>
+  <data name="BackupSaved" xml:space="preserve">
+    <value>Sikkerhedskopien er gemt.</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Sikkerhedskopien kunne ikke gemmes. Prøv igen.</value>
+  </data>
+  <data name="RemoveFromDevice" xml:space="preserve">
+    <value>Fjern fra denne enhed</value>
+  </data>
+  <data name="RemoveFromDeviceExplain" xml:space="preserve">
+    <value>Fjerner {0} og dens billeder fra denne enhed. Din egen samling bliver som den er.</value>
+  </data>
+  <data name="MembersTitle" xml:space="preserve">
+    <value>Medlemmer</value>
+  </data>
+  <data name="NoNameYet" xml:space="preserve">
+    <value>Har ikke et navn endnu</value>
+  </data>
+  <data name="You" xml:space="preserve">
+    <value>(dig)</value>
+  </data>
+  <data name="MemberOwner" xml:space="preserve">
+    <value>Ejer, kan {0}</value>
+  </data>
+  <data name="ChangeRoleFor" xml:space="preserve">
+    <value>Rolle for {0}</value>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Gemmer…</value>
+  </data>
+  <data name="RemoveMemberExplain" xml:space="preserve">
+    <value>Fjern {0}? Personen beholder ikke noget af samlingen på serveren, men det {0} har logget, bliver i den.</value>
+  </data>
+  <data name="InviteSomeone" xml:space="preserve">
+    <value>Inviter nogen</value>
+  </data>
+  <data name="InviteChoose" xml:space="preserve">
+    <value>Hvad skal personen kunne?</value>
+  </data>
+  <data name="MakeLink" xml:space="preserve">
+    <value>Lav invitationslink</value>
+  </data>
+  <data name="InviteLinkLabel" xml:space="preserve">
+    <value>Invitationslink</value>
+  </data>
+  <data name="InviteLinkHint" xml:space="preserve">
+    <value>Alle der har linket, kan være med og {0}. Det virker én gang og udløber om {1} dage.</value>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Del</value>
+  </data>
+  <data name="ShareTitle" xml:space="preserve">
+    <value>Vær med i {0} på Stikling</value>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Kopiér</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Kopieret</value>
+  </data>
+  <data name="ShowQr" xml:space="preserve">
+    <value>QR-kode</value>
+  </data>
+  <data name="HideQr" xml:space="preserve">
+    <value>Skjul QR-koden</value>
+  </data>
+  <data name="QrDescription" xml:space="preserve">
+    <value>QR-kode til invitationslinket</value>
+  </data>
+  <data name="OpenInvites" xml:space="preserve">
+    <value>Åbne invitationer</value>
+  </data>
+  <data name="InviteRunsOut" xml:space="preserve">
+    <value>Udløber {0}</value>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>Træk tilbage</value>
+  </data>
+  <data name="HandOverTitle" xml:space="preserve">
+    <value>Giv samlingen videre</value>
+  </data>
+  <data name="HandOverHint" xml:space="preserve">
+    <value>Alle i samlingen kan overtage den. Den der overtager, bliver ejer og kan redigere og tilføje personer.</value>
+  </data>
+  <data name="HandOverChoose" xml:space="preserve">
+    <value>Hvem overtager?</value>
+  </data>
+  <data name="HandOverButton" xml:space="preserve">
+    <value>Giv videre</value>
+  </data>
+  <data name="HandOverConfirm" xml:space="preserve">
+    <value>{0} bliver ejer. Du er stadig med og kan redigere og tilføje personer.</value>
+  </data>
+  <data name="LeaveButton" xml:space="preserve">
+    <value>Forlad samlingen</value>
+  </data>
+  <data name="LeaveConfirm" xml:space="preserve">
+    <value>Forlad {0}? Den bliver fjernet fra denne enhed. Du kan være med igen hvis du får en ny invitation.</value>
+  </data>
+  <data name="LeaveSaveFirst" xml:space="preserve">
+    <value>Gem en sikkerhedskopi først</value>
+  </data>
+  <data name="Leave" xml:space="preserve">
+    <value>Forlad</value>
+  </data>
+  <data name="OwnerCantLeave" xml:space="preserve">
+    <value>Du ejer denne samling, så du kan ikke forlade den. Giv den videre først.</value>
+  </data>
+  <data name="YourName" xml:space="preserve">
+    <value>Dit navn: {0}</value>
+  </data>
+  <data name="YourNameNone" xml:space="preserve">
+    <value>Du har ikke valgt et navn.</value>
+  </data>
+  <data name="ChangeName" xml:space="preserve">
+    <value>Skift navn</value>
+  </data>
+  <data name="SetName" xml:space="preserve">
+    <value>Vælg et navn</value>
+  </data>
+  <data name="YourNameHint" xml:space="preserve">
+    <value>Vises for dem du deler med, og ved siden af det du logger.</value>
+  </data>
+  <data name="NameDialogHeading" xml:space="preserve">
+    <value>Hvad skal folk kalde dig?</value>
+  </data>
+  <data name="NameDialogHint" xml:space="preserve">
+    <value>Vises for dem du deler med.</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Dit navn</value>
+  </data>
+  <data name="JoinTitle" xml:space="preserve">
+    <value>Deltag i en samling</value>
+  </data>
+  <data name="JoinSignIn" xml:space="preserve">
+    <value>På næste side logger du ind eller opretter en konto på et minut, og så kommer du tilbage hertil.</value>
+  </data>
+  <data name="JoinInvites" xml:space="preserve">
+    <value>{0} har inviteret dig til {1}</value>
+  </data>
+  <data name="JoinInvitesNoName" xml:space="preserve">
+    <value>Du er inviteret til {0}</value>
+  </data>
+  <data name="JoinButton" xml:space="preserve">
+    <value>Deltag</value>
+  </data>
+  <data name="NotNow" xml:space="preserve">
+    <value>Ikke nu</value>
+  </data>
+  <data name="AlreadyMember" xml:space="preserve">
+    <value>Du er allerede med i {0}.</value>
+  </data>
+  <data name="OpenIt" xml:space="preserve">
+    <value>Åbn den</value>
+  </data>
+  <data name="JoinNotFound" xml:space="preserve">
+    <value>Invitationslinket virker ikke. Tjek at hele linket kom med, eller bed om et nyt.</value>
+  </data>
+  <data name="JoinGone" xml:space="preserve">
+    <value>Invitationen er udløbet eller trukket tilbage. Bed om en ny.</value>
+  </data>
+  <data name="JoinFull" xml:space="preserve">
+    <value>Der er ikke plads til flere i {0}. Der kan højst være {1}.</value>
+  </data>
+  <data name="TooManyInvites" xml:space="preserve">
+    <value>Du har lavet mange invitationer i dag. Prøv igen i morgen, eller træk nogle af de åbne tilbage.</value>
+  </data>
+  <data name="OwnerCantLeaveProblem" xml:space="preserve">
+    <value>Du ejer samlingen. Giv den videre før du forlader den.</value>
+  </data>
+  <data name="NotAllowed" xml:space="preserve">
+    <value>Det kan du ikke længere gøre her. Din rolle i samlingen er måske blevet ændret.</value>
+  </data>
+  <data name="NeedsLength" xml:space="preserve">
+    <value>Et navn skal være mellem 1 og {0} tegn.</value>
+  </data>
+  <data name="CantChangeHere" xml:space="preserve">
+    <value>Du kan ikke ændre det her i {0}. {1} kan give dig flere rettigheder.</value>
+  </data>
+  <data name="CantChangeHereNoOwner" xml:space="preserve">
+    <value>Du kan ikke ændre det her i {0}. Ejeren kan give dig flere rettigheder.</value>
+  </data>
+  <data name="ByName" xml:space="preserve">
+    <value>af {0}</value>
+  </data>
+  <data name="OpenLineNoOwner" xml:space="preserve">
+    <value>{0}, du kan {1}</value>
+  </data>
+  <data name="OpenLineGone" xml:space="preserve">
+    <value>Du er ikke længere med i {0}. Der bliver ikke synkroniseret noget her.</value>
+  </data>
+  <data name="EmptyPlants" xml:space="preserve">
+    <value>Der er ikke noget her endnu. {0} har ikke tilføjet nogen planter.</value>
+  </data>
+  <data name="EmptyPlantsNoOwner" xml:space="preserve">
+    <value>Der er ikke noget her endnu. Ingen har tilføjet nogen planter.</value>
+  </data>
+  <data name="EmptyPropagations" xml:space="preserve">
+    <value>Der er ikke noget her endnu. {0} har ikke tilføjet nogen stiklinger.</value>
+  </data>
+  <data name="EmptyPropagationsNoOwner" xml:space="preserve">
+    <value>Der er ikke noget her endnu. Ingen har tilføjet nogen stiklinger.</value>
+  </data>
+  <data name="EmptyToday" xml:space="preserve">
+    <value>Der er ikke noget her endnu. {0} har ikke tilføjet nogen planter.</value>
+  </data>
+  <data name="EmptyTodayNoOwner" xml:space="preserve">
+    <value>Der er ikke noget her endnu. Ingen har tilføjet nogen planter.</value>
+  </data>
+  <data name="CantChangeTitle" xml:space="preserve">
+    <value>Ikke tilgængelig her</value>
+  </data>
+  <data name="NameYours" xml:space="preserve">
+    <value>Dine planter</value>
+  </data>
+  <data name="NameOwners" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="RemoveNeedsOwnCollection" xml:space="preserve">
+    <value>Vil du fjerne dataene fra denne enhed, skal du først åbne din egen samling, så appen kan tjekke at alt er sendt.</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Linket kunne ikke kopieres automatisk. Det er markeret, så du kan kopiere det selv.</value>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Samling</value>
+  </data>
+  <data name="RoleMeaningView" xml:space="preserve">
+    <value>Ser alt, ændrer ingenting.</value>
+  </data>
+  <data name="RoleMeaningLog" xml:space="preserve">
+    <value>Logger pleje og tilføjer noter og billeder. Ændrer kun det personen selv har tilføjet. Passer til en plantesitter.</value>
+  </data>
+  <data name="RoleMeaningEdit" xml:space="preserve">
+    <value>Ændrer alt, ligesom dig.</value>
+  </data>
+  <data name="RoleMeaningEditAndManage" xml:space="preserve">
+    <value>Ændrer alt, inviterer andre og bestemmer hvem der må hvad.</value>
+  </data>
+  <data name="JoinRoleView" xml:space="preserve">
+    <value>Du kan se alt i den, men ikke ændre noget.</value>
+  </data>
+  <data name="JoinRoleLog" xml:space="preserve">
+    <value>Du kan logge pleje på planter og stiklinger, tilføje noter og billeder og ændre det du selv har tilføjet.</value>
+  </data>
+  <data name="JoinRoleEdit" xml:space="preserve">
+    <value>Du kan ændre alt i den, ligesom ejeren.</value>
+  </data>
+  <data name="JoinRoleEditAndManage" xml:space="preserve">
+    <value>Du kan ændre alt i den, invitere andre og bestemme hvem der må hvad.</value>
+  </data>
+  <data name="JoinOwnStay" xml:space="preserve">
+    <value>Dine egne planter bliver som de er.</value>
+  </data>
+  <data name="JoinAboutStikling" xml:space="preserve">
+    <value>Stikling er en gratis app til at holde styr på dine planter og de stiklinger du tager af dem, med billeder og noter til hver enkelt.</value>
+  </data>
+  <data name="JoinSignInButton" xml:space="preserve">
+    <value>Deltag med en gratis konto</value>
+  </data>
+  <data name="RaiseConfirm" xml:space="preserve">
+    <value>Skal {0} kunne redigere og tilføje personer? Så kan {0} også invitere andre og bestemme hvem der må hvad.</value>
+  </data>
+  <data name="RaiseConfirmButton" xml:space="preserve">
+    <value>Ja, giv lov</value>
+  </data>
+  <data name="InviteMadeRunsOut" xml:space="preserve">
+    <value>Lavet {0} af {1}, udløber {2}</value>
+  </data>
+  <data name="ShowLink" xml:space="preserve">
+    <value>Vis link</value>
+  </data>
+  <data name="LeaveHint" xml:space="preserve">
+    <value>Samlingen bliver fjernet fra denne enhed. Du kan være med igen hvis du får en ny invitation.</value>
+  </data>
+  <data name="SwitcherTitle" xml:space="preserve">
+    <value>Samlinger på denne enhed</value>
+  </data>
+  <data name="SwitcherManage" xml:space="preserve">
+    <value>Personer og invitationer</value>
+  </data>
+  <data name="InviteForLabel" xml:space="preserve">
+    <value>Hvem er den til?</value>
+  </data>
+  <data name="InviteForHint" xml:space="preserve">
+    <value>Valgfrit. Kun dem der kan tilføje personer, kan se det.</value>
+  </data>
+  <data name="InviteForTooLong" xml:space="preserve">
+    <value>Der må højst stå {0} tegn i "Hvem er den til?".</value>
+  </data>
+  <data name="InviteNamedMadeRunsOut" xml:space="preserve">
+    <value>{0}. Lavet {1} af {2}, udløber {3}</value>
+  </data>
+  <data name="InviteNamedRunsOut" xml:space="preserve">
+    <value>{0}. Udløber {1}</value>
+  </data>
+  <data name="ShowLinkFor" xml:space="preserve">
+    <value>Vis link: {0}, {1}</value>
+  </data>
+  <data name="WithdrawFor" xml:space="preserve">
+    <value>Træk tilbage: {0}, {1}</value>
+  </data>
+  <data name="JoinCountPlants_One" xml:space="preserve">
+    <value>{0} plante</value>
+  </data>
+  <data name="JoinCountPlants_Other" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="JoinCountCuttings_One" xml:space="preserve">
+    <value>{0} stikling</value>
+  </data>
+  <data name="JoinCountCuttings_Other" xml:space="preserve">
+    <value>{0} stiklinger</value>
+  </data>
+  <data name="JoinCounts" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="JoinRolesHelp" xml:space="preserve">
+    <value>Hvad hver rolle må</value>
+  </data>
+  <data name="JoinLookAround" xml:space="preserve">
+    <value>Se dig omkring i Stikling</value>
+  </data>
+  <data name="JoinGoToday" xml:space="preserve">
+    <value>Gå til I dag</value>
+  </data>
+</root>

@@ -92,7 +92,7 @@
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ @Strings.Pests.RecipesAdd</button>
+        <IfCan Edit><button type="button" class="btn btn-primary" @onclick="StartNew">+ @Strings.Pests.RecipesAdd</button></IfCan>
     </div>
 }
 
@@ -179,10 +179,12 @@ else
                                 <button type="button" class="btn btn-link btn-sm link-action"
                                         @onclick="() => ToggleMixing(use.Recipe)">@(measuring ? Strings.Common.Done : Strings.Pests.RecipesMixBatch)</button>
                             }
+                            <IfCan Edit>
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => StartEdit(use.Recipe)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => { confirming = use.Recipe.Id; mixing = null; }">@Strings.Common.Delete</button>
+                            </IfCan>
                         </div>
                     }
                 </li>

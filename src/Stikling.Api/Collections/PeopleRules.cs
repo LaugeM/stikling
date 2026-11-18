@@ -1,6 +1,6 @@
 using System.Text.Json;
 using Stikling.Api.Data;
-using Stikling.Core.Sync;
+using Stikling.Core.People;
 
 namespace Stikling.Api.Collections;
 
@@ -85,12 +85,11 @@ public static class PeopleRules
         return caller.Allows(CollectionRight.Manage) && target.Role != MemberRole.Editor;
     }
 
-    /// <summary>The kinds of record a helper may send.</summary>
-    public static readonly IReadOnlyList<string> HelperKinds =
-        [RecordKinds.CareLogs.Name, RecordKinds.PropagationCareLogs.Name, SyncKinds.Photos, RecordKinds.Timeline.Name];
+    /// <summary>The kinds of record a helper may send. They are in Core, so the device follows the same rules.</summary>
+    public static IReadOnlyList<string> HelperKinds => HelperSync.Kinds;
 
-    public const string HelperKindProblem = "A helper can't change this kind of record.";
-    public const string HelperOwnershipProblem = "Only the person who added it can change it.";
+    public const string HelperKindProblem = HelperSync.HelperKindProblem;
+    public const string HelperOwnershipProblem = HelperSync.HelperOwnershipProblem;
 
     /// <summary>
     /// Why a helper's record is refused, or null when it is kept. Only some kinds are allowed, a
@@ -101,20 +100,8 @@ public static class PeopleRules
     /// <param name="exists">Whether a record with this kind and id is stored.</param>
     public static string? HelperProblem(string kind, JsonElement data, bool exists, Guid? existingCreatedBy, Guid caller)
     {
-        if (!HelperKinds.Contains(kind, StringComparer.Ordinal))
-            return HelperKindProblem;
-
-        // A deletion may arrive as only an id and dates, with no kind left to look at
-        var deleted = data.TryGetProperty("deletedAt", out var at) && at.ValueKind != JsonValueKind.Null;
-        var hasKind = data.TryGetProperty("kind", out var entryKind);
-        if (kind == RecordKinds.Timeline.Name && (hasKind || !deleted)
-            && !(hasKind && entryKind.ValueKind == JsonValueKind.String && entryKind.GetString() == nameof(Stikling.Core.Models.TimelineKind.Note)))
-            return HelperKindProblem;
-
-        // The app reads names without looking at case, so a second "Kind" could say something else than the one checked
-        if (kind == RecordKinds.Timeline.Name
-            && data.EnumerateObject().Count(p => string.Equals(p.Name, "kind", StringComparison.OrdinalIgnoreCase)) > 1)
-            return HelperKindProblem;
+        if (HelperSync.KindProblem(kind, data) is { } problem)
+            return problem;
 
         if (exists && existingCreatedBy != caller)
             return HelperOwnershipProblem;

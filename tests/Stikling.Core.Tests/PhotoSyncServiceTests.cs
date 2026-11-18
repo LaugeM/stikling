@@ -1,3 +1,4 @@
+using Stikling.Core.People;
 using Stikling.Core.Sync;
 
 namespace Stikling.Core.Tests;
@@ -10,8 +11,13 @@ public class PhotoSyncServiceTests
 
     public PhotoSyncServiceTests() => server = new FakePhotoServer(phone);
 
-    private Task<PhotoSyncResult> Sync(bool canEdit = true) =>
-        new PhotoSyncService(phone, server).SyncAsync(collectionId, canEdit);
+    private static readonly MemberAccess Editor = MemberAccess.Full(Guid.NewGuid());
+    private static readonly MemberAccess Viewer = new(Guid.NewGuid(), CollectionRole.Viewer, false, false);
+
+    private Task<PhotoSyncResult> Sync(bool canEdit = true) => Sync(canEdit ? Editor : Viewer);
+
+    private Task<PhotoSyncResult> Sync(MemberAccess me) =>
+        new PhotoSyncService(phone, server).SyncAsync(collectionId, me);
 
     /// <summary>A photo taken on the phone whose record has already reached the server.</summary>
     private Guid Take()
@@ -174,5 +180,44 @@ public class PhotoSyncServiceTests
 
         Assert.Equal(ready.Count, result.Uploaded);
         Assert.Equal(waiting.Count, phone.Uploads.Count);
+    }
+
+    [Fact]
+    public async Task A_helper_only_sends_the_images_of_photos_they_added_and_the_others_come_off_the_list()
+    {
+        var helper = new MemberAccess(Guid.NewGuid(), CollectionRole.Helper, false, false);
+        var mine = phone.Take(by: helper.PersonId);
+        var theirs = phone.Take(by: Guid.NewGuid());
+        var unknown = phone.Take();
+        server.Records.UnionWith([mine, theirs, unknown]);
+
+        var result = await Sync(helper);
+
+        Assert.Equal([(mine, PhotoSize.Thumbnail), (mine, PhotoSize.Full)], server.Sent);
+        Assert.Equal(1, result.Uploaded);
+        Assert.Empty(phone.Uploads);
+    }
+
+    [Fact]
+    public async Task A_helper_still_fetches_thumbnails()
+    {
+        var helper = new MemberAccess(Guid.NewGuid(), CollectionRole.Helper, false, false);
+        var theirs = server.Add();
+        phone.Downloads.Add(theirs);
+
+        var result = await Sync(helper);
+
+        Assert.Equal(1, result.Downloaded);
+    }
+
+    [Fact]
+    public async Task An_editor_sends_photos_whoever_added_them()
+    {
+        var other = phone.Take(by: Guid.NewGuid());
+        server.Records.Add(other);
+
+        var result = await Sync(Editor);
+
+        Assert.Equal(1, result.Uploaded);
     }
 }

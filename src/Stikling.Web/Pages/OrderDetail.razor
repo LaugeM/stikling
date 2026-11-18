@@ -24,7 +24,7 @@ else
     <div class="case-layout">
     <div class="page-heading">
         <h1>@Around(Strings.Orders.DetailTitle, SellerLink)</h1>
-        @if (view.IsOnTheWay)
+        @if (view.IsOnTheWay && Access.CanEdit)
         {
             @* On a phone the button is in the bar at the bottom *@
             <button type="button" class="btn btn-primary btn-sm heading-add" @onclick="() => unpackOpen = true">@Strings.Orders.Unpack</button>
@@ -32,7 +32,7 @@ else
     </div>
 
     <p class="order-meta">@Meta</p>
-    <p><a class="btn btn-outline-primary btn-sm" href="orders/@view.Order.Id/edit">@Strings.Common.Edit</a></p>
+    <IfCan Edit><p><a class="btn btn-outline-primary btn-sm" href="orders/@view.Order.Id/edit">@Strings.Common.Edit</a></p></IfCan>
 
     @if (view.Items.Count > 0)
     {
@@ -80,7 +80,7 @@ else
         <p class="detail-notes">@view.Order.Notes</p>
     }
 
-    @if (view.IsOnTheWay)
+    @if (view.IsOnTheWay && Access.CanEdit)
     {
         <div class="page-dock unpack-dock" role="group" aria-label="@Strings.Orders.Unpack">
             <button type="button" class="btn btn-primary" @onclick="() => unpackOpen = true">@Strings.Orders.Unpack</button>
@@ -92,6 +92,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter]
     public Guid Id { get; set; }
 

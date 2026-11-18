@@ -28,5 +28,8 @@ public class Invite
 
     public DateTimeOffset? RevokedAt { get; set; }
 
+    /// <summary>Who the invite is for, as the person who made it wrote it. Only shown to people who manage the collection. Null when nothing was written, and on invites made before it existed.</summary>
+    public string? ForName { get; set; }
+
     public bool IsOpen(DateTimeOffset now) => UsedAt is null && RevokedAt is null && ExpiresAt > now;
 }

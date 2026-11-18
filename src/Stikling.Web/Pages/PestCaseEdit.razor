@@ -1,5 +1,6 @@
 @page "/pests/new"
 @page "/pests/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject IPestCaseRepository PestCases
 @inject PestFoundService PestFound
 @inject PestPhotoService PestPhotos

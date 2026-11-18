@@ -1,0 +1,32 @@
+@* Draws its content only when the person's role in the open collection allows it. A control they can't use is
+   left out rather than disabled. Set Edit for what changes the collection, Log for logging care, notes and photos. *@
+@if (Allowed)
+{
+    @ChildContent
+}
+else if (NotAllowed is not null)
+{
+    @NotAllowed
+}
+
+@code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    /// <summary>Only for someone who can change everything.</summary>
+    [Parameter]
+    public bool Edit { get; set; }
+
+    /// <summary>For someone who can log care, add notes and photos, which an editor can too.</summary>
+    [Parameter]
+    public bool Log { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    /// <summary>What to draw instead, when something is needed in its place.</summary>
+    [Parameter]
+    public RenderFragment? NotAllowed { get; set; }
+
+    private bool Allowed => Edit ? Access.CanEdit : !Log || Access.CanLog;
+}

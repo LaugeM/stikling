@@ -11,7 +11,7 @@
     @if (loaded && !conditions.Any)
     {
         <p class="settings-hint mt-0">@F(Strings.Shared.ReadingsHint, PlaceName)</p>
-        <button type="button" class="btn btn-link btn-sm link-action readings-add" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+        <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action readings-add" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button></IfCan>
     }
     else if (loaded)
     {
@@ -45,7 +45,7 @@
         }
 
         <div class="readings-links">
-            <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+            <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button></IfCan>
             @if (ownCount > 0)
             {
                 <a class="btn btn-link btn-sm link-action" href="rooms/@PlaceId/readings">@Strings.Shared.ReadingAll</a>
@@ -57,6 +57,9 @@
 <ReadingSheet @bind-Open="sheetOpen" PlaceId="PlaceId" PlaceName="@PlaceName" Reading="editing" OnSaved="SavedAsync" />
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter, EditorRequired]
     public Guid PlaceId { get; set; }
 
@@ -151,7 +154,7 @@
 
     private async Task OpenReadingAsync(ChartPoint point)
     {
-        if (point.Key is not { } id || await Readings.GetAsync(id) is not { } reading)
+        if (!Access.CanEdit || point.Key is not { } id || await Readings.GetAsync(id) is not { } reading)
             return;
 
         editing = reading;

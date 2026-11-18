@@ -1,0 +1,486 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Heading" xml:space="preserve">
+    <value>People</value>
+    <comment>Heading above the people section on the Account page.</comment>
+  </data>
+  <data name="OnDeviceTitle" xml:space="preserve">
+    <value>Collections on this device</value>
+  </data>
+  <data name="CollectionYours" xml:space="preserve">
+    <value>Yours</value>
+    <comment>Under a collection in the list on this device: the person's own.</comment>
+  </data>
+  <data name="CollectionShared" xml:space="preserve">
+    <value>Owned by {0}, you can {1}</value>
+    <comment>Under a shared collection in the list. {0} is the owner's name, {1} what the person can do, like 'edit'.</comment>
+  </data>
+  <data name="CollectionSharedNoOwner" xml:space="preserve">
+    <value>You can {0}</value>
+    <comment>Under a shared collection whose owner's name isn't known yet. {0} is what the person can do, like 'edit'.</comment>
+  </data>
+  <data name="CollectionGone" xml:space="preserve">
+    <value>You're no longer in it</value>
+    <comment>Under a collection the person was removed from.</comment>
+  </data>
+  <data name="OpenNow" xml:space="preserve">
+    <value>Open now</value>
+  </data>
+  <data name="Open" xml:space="preserve">
+    <value>Open</value>
+    <comment>Button that opens another collection.</comment>
+  </data>
+  <data name="RoleCanView" xml:space="preserve">
+    <value>Can view</value>
+    <comment>A role in a shared collection. Used in lists and choices.</comment>
+  </data>
+  <data name="RoleCanLog" xml:space="preserve">
+    <value>Can log care</value>
+    <comment>A role in a shared collection. Can add care entries, notes and photos.</comment>
+  </data>
+  <data name="RoleCanEdit" xml:space="preserve">
+    <value>Can edit</value>
+    <comment>A role in a shared collection. Can change everything.</comment>
+  </data>
+  <data name="RoleCanEditAndManage" xml:space="preserve">
+    <value>Can edit and add people</value>
+    <comment>A role in a shared collection. Can change everything and invite and manage people.</comment>
+  </data>
+  <data name="VerbView" xml:space="preserve">
+    <value>view</value>
+    <comment>What a role lets the person do, after 'You can'. Matches RoleCanView.</comment>
+  </data>
+  <data name="VerbLog" xml:space="preserve">
+    <value>log care</value>
+    <comment>What a role lets the person do, after 'You can'. Matches RoleCanLog.</comment>
+  </data>
+  <data name="VerbEdit" xml:space="preserve">
+    <value>edit</value>
+    <comment>What a role lets the person do, after 'You can'. Matches RoleCanEdit.</comment>
+  </data>
+  <data name="VerbEditAndManage" xml:space="preserve">
+    <value>edit and add people</value>
+    <comment>What a role lets the person do, after 'You can'. Matches RoleCanEditAndManage.</comment>
+  </data>
+  <data name="CollectionName" xml:space="preserve">
+    <value>Collection name</value>
+    <comment>Label for the box that renames the open collection.</comment>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+  </data>
+  <data name="GoneText" xml:space="preserve">
+    <value>You're no longer in this collection. What's on this device stays until you remove it.</value>
+  </data>
+  <data name="SaveBackup" xml:space="preserve">
+    <value>Save a backup</value>
+  </data>
+  <data name="BackupSaved" xml:space="preserve">
+    <value>The backup is saved.</value>
+  </data>
+  <data name="BackupFailed" xml:space="preserve">
+    <value>Couldn't save the backup. Try again.</value>
+  </data>
+  <data name="RemoveFromDevice" xml:space="preserve">
+    <value>Remove from this device</value>
+  </data>
+  <data name="RemoveFromDeviceExplain" xml:space="preserve">
+    <value>Removes {0} and its photos from this device. Your own collection isn't touched.</value>
+    <comment>{0} is the name of the collection.</comment>
+  </data>
+  <data name="MembersTitle" xml:space="preserve">
+    <value>Members</value>
+  </data>
+  <data name="NoNameYet" xml:space="preserve">
+    <value>No name yet</value>
+    <comment>Shown for a member who hasn't set a name.</comment>
+  </data>
+  <data name="You" xml:space="preserve">
+    <value>(you)</value>
+    <comment>After the person's own name in the list of members.</comment>
+  </data>
+  <data name="MemberOwner" xml:space="preserve">
+    <value>Owner, can {0}</value>
+    <comment>Under the owner in the list of members. {0} is what they can do, like 'edit and add people'.</comment>
+  </data>
+  <data name="ChangeRoleFor" xml:space="preserve">
+    <value>Role for {0}</value>
+    <comment>Read out for the choice of a member's role. {0} is the member's name.</comment>
+  </data>
+  <data name="Saving" xml:space="preserve">
+    <value>Saving…</value>
+  </data>
+  <data name="RemoveMemberExplain" xml:space="preserve">
+    <value>Remove {0}? They keep nothing of this collection on the server. What they logged stays.</value>
+    <comment>{0} is the member's name.</comment>
+  </data>
+  <data name="InviteSomeone" xml:space="preserve">
+    <value>Invite someone</value>
+  </data>
+  <data name="InviteChoose" xml:space="preserve">
+    <value>What can they do?</value>
+    <comment>Heading over the choice of role for an invite.</comment>
+  </data>
+  <data name="MakeLink" xml:space="preserve">
+    <value>Make invite link</value>
+  </data>
+  <data name="InviteLinkLabel" xml:space="preserve">
+    <value>Invite link</value>
+  </data>
+  <data name="InviteLinkHint" xml:space="preserve">
+    <value>Anyone with this link can join and {0}. It works once and runs out in {1} days.</value>
+    <comment>{0} is what the invited person can do, like 'edit'. {1} is the number of days.</comment>
+  </data>
+  <data name="Share" xml:space="preserve">
+    <value>Share</value>
+  </data>
+  <data name="ShareTitle" xml:space="preserve">
+    <value>Join {0} on Stikling</value>
+    <comment>Title sent along when the invite link is shared. {0} is the collection's name.</comment>
+  </data>
+  <data name="Copy" xml:space="preserve">
+    <value>Copy</value>
+  </data>
+  <data name="Copied" xml:space="preserve">
+    <value>Copied</value>
+  </data>
+  <data name="ShowQr" xml:space="preserve">
+    <value>QR code</value>
+    <comment>Button that shows the invite link as a QR code.</comment>
+  </data>
+  <data name="HideQr" xml:space="preserve">
+    <value>Hide QR code</value>
+  </data>
+  <data name="QrDescription" xml:space="preserve">
+    <value>QR code for the invite link</value>
+    <comment>Read out for the picture of the QR code.</comment>
+  </data>
+  <data name="OpenInvites" xml:space="preserve">
+    <value>Open invites</value>
+  </data>
+  <data name="InviteRunsOut" xml:space="preserve">
+    <value>Runs out {0}</value>
+    <comment>{0} is a date.</comment>
+  </data>
+  <data name="Withdraw" xml:space="preserve">
+    <value>Withdraw</value>
+    <comment>Button that cancels an invite link.</comment>
+  </data>
+  <data name="HandOverTitle" xml:space="preserve">
+    <value>Hand over the collection</value>
+  </data>
+  <data name="HandOverHint" xml:space="preserve">
+    <value>Anyone in the collection can take over. They become the owner and an editor who adds people.</value>
+  </data>
+  <data name="HandOverChoose" xml:space="preserve">
+    <value>Who takes over?</value>
+  </data>
+  <data name="HandOverButton" xml:space="preserve">
+    <value>Hand over</value>
+  </data>
+  <data name="HandOverConfirm" xml:space="preserve">
+    <value>{0} becomes the owner. You stay as an editor who adds people.</value>
+    <comment>{0} is the new owner's name.</comment>
+  </data>
+  <data name="LeaveButton" xml:space="preserve">
+    <value>Leave this collection</value>
+  </data>
+  <data name="LeaveConfirm" xml:space="preserve">
+    <value>Leave {0}? It is taken off this device. You can join again with a new invite.</value>
+    <comment>{0} is the name of the collection.</comment>
+  </data>
+  <data name="LeaveSaveFirst" xml:space="preserve">
+    <value>Save a backup first</value>
+  </data>
+  <data name="Leave" xml:space="preserve">
+    <value>Leave</value>
+  </data>
+  <data name="OwnerCantLeave" xml:space="preserve">
+    <value>You own this collection, so you can't leave it. Hand it over first.</value>
+  </data>
+  <data name="YourName" xml:space="preserve">
+    <value>Your name: {0}</value>
+  </data>
+  <data name="YourNameNone" xml:space="preserve">
+    <value>You haven't set a name.</value>
+  </data>
+  <data name="ChangeName" xml:space="preserve">
+    <value>Change name</value>
+  </data>
+  <data name="SetName" xml:space="preserve">
+    <value>Set a name</value>
+  </data>
+  <data name="YourNameHint" xml:space="preserve">
+    <value>Shown to the people you share with, and next to what you log.</value>
+  </data>
+  <data name="NameDialogHeading" xml:space="preserve">
+    <value>What should people call you?</value>
+  </data>
+  <data name="NameDialogHint" xml:space="preserve">
+    <value>Shown to the people you share with.</value>
+  </data>
+  <data name="NameLabel" xml:space="preserve">
+    <value>Your name</value>
+  </data>
+  <data name="JoinTitle" xml:space="preserve">
+    <value>Join a collection</value>
+    <comment>Title of the page an invite link opens.</comment>
+  </data>
+  <data name="JoinSignIn" xml:space="preserve">
+    <value>On the next page you sign in, or make an account in a minute, and then come back here.</value>
+    <comment>On the page an invite link opens, under the button, when the person isn't signed in.</comment>
+  </data>
+  <data name="JoinInvites" xml:space="preserve">
+    <value>{0} invites you to {1}</value>
+    <comment>{0} is the name of the person, {1} the name of the collection.</comment>
+  </data>
+  <data name="JoinInvitesNoName" xml:space="preserve">
+    <value>You're invited to {0}</value>
+    <comment>{0} is the name of the collection. Used when the person who invited hasn't set a name.</comment>
+  </data>
+  <data name="JoinButton" xml:space="preserve">
+    <value>Join</value>
+  </data>
+  <data name="NotNow" xml:space="preserve">
+    <value>Not now</value>
+  </data>
+  <data name="AlreadyMember" xml:space="preserve">
+    <value>You're already in {0}.</value>
+    <comment>{0} is the name of the collection.</comment>
+  </data>
+  <data name="OpenIt" xml:space="preserve">
+    <value>Open it</value>
+  </data>
+  <data name="JoinNotFound" xml:space="preserve">
+    <value>This invite link doesn't work. Check that the whole link came through, or ask for a new one.</value>
+  </data>
+  <data name="JoinGone" xml:space="preserve">
+    <value>This invite has run out or was withdrawn. Ask for a new one.</value>
+  </data>
+  <data name="JoinFull" xml:space="preserve">
+    <value>{0} already has as many people as it can have ({1}).</value>
+    <comment>{0} is the name of the collection, {1} the most people it can hold.</comment>
+  </data>
+  <data name="TooManyInvites" xml:space="preserve">
+    <value>You've made a lot of invites today. Try again tomorrow, or withdraw some open ones.</value>
+  </data>
+  <data name="OwnerCantLeaveProblem" xml:space="preserve">
+    <value>You own this collection. Hand it over before you leave.</value>
+  </data>
+  <data name="NotAllowed" xml:space="preserve">
+    <value>You can't do that here any more. Your place in this collection may have changed.</value>
+  </data>
+  <data name="NeedsLength" xml:space="preserve">
+    <value>A name needs between 1 and {0} characters.</value>
+    <comment>{0} is the most characters a name can have.</comment>
+  </data>
+  <data name="CantChangeHere" xml:space="preserve">
+    <value>You can't change this in {0}. {1} can give you more rights.</value>
+    <comment>Shown instead of a page that only changes things, for someone who can't. {0} is the collection's name, {1} the owner's name.</comment>
+  </data>
+  <data name="CantChangeHereNoOwner" xml:space="preserve">
+    <value>You can't change this in {0}. The owner can give you more rights.</value>
+    <comment>Same, when the owner's name isn't known yet.</comment>
+  </data>
+  <data name="ByName" xml:space="preserve">
+    <value>by {0}</value>
+    <comment>After an entry in a shared collection that someone else made. {0} is their name.</comment>
+  </data>
+  <data name="OpenLineNoOwner" xml:space="preserve">
+    <value>{0}, you can {1}</value>
+    <comment>A quiet line on the main pages while a shared collection is open. {0} is the collection's name, {1} what the person can do, like 'edit'.</comment>
+  </data>
+  <data name="OpenLineGone" xml:space="preserve">
+    <value>You're no longer in {0}. Nothing here syncs.</value>
+    <comment>The same line when the person was removed from the collection. {0} is its name.</comment>
+  </data>
+  <data name="EmptyPlants" xml:space="preserve">
+    <value>Nothing here yet. {0} hasn't added any plants.</value>
+    <comment>Empty plant list for someone who can't add plants. {0} is the owner's name.</comment>
+  </data>
+  <data name="EmptyPlantsNoOwner" xml:space="preserve">
+    <value>Nothing here yet. Nobody has added any plants.</value>
+  </data>
+  <data name="EmptyPropagations" xml:space="preserve">
+    <value>Nothing here yet. {0} hasn't added any propagations.</value>
+    <comment>Empty propagation list for someone who can't add. {0} is the owner's name.</comment>
+  </data>
+  <data name="EmptyPropagationsNoOwner" xml:space="preserve">
+    <value>Nothing here yet. Nobody has added any propagations.</value>
+  </data>
+  <data name="EmptyToday" xml:space="preserve">
+    <value>Nothing here yet. {0} hasn't added any plants.</value>
+    <comment>Empty Today page for someone who can't add plants. {0} is the owner's name.</comment>
+  </data>
+  <data name="EmptyTodayNoOwner" xml:space="preserve">
+    <value>Nothing here yet. Nobody has added any plants.</value>
+  </data>
+  <data name="CantChangeTitle" xml:space="preserve">
+    <value>Not available here</value>
+    <comment>Page title and hidden heading of the notice shown instead of a page the person can't use in the open collection.</comment>
+  </data>
+  <data name="NameYours" xml:space="preserve">
+    <value>Your plants</value>
+    <comment>What a collection is called when it still has the name the server gave it and it is the person's own.</comment>
+  </data>
+  <data name="NameOwners" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>What someone else's collection is called when it still has the name the server gave it. {0} is the owner's name with its possessive ending (Alma's).</comment>
+  </data>
+  <data name="RemoveNeedsOwnCollection" xml:space="preserve">
+    <value>To remove the data from this device, open your own collection first, so it can check that everything has been sent.</value>
+    <comment>Shown instead of the option to remove the data when signing out or deleting the account while a shared collection is open.</comment>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>The link couldn't be copied automatically. It's selected, so you can copy it yourself.</value>
+    <comment>Shown under the invite link when the browser wouldn't let the app copy it.</comment>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Collection</value>
+    <comment>Label above the collection's name in the People section on the Account page, when there is only one collection on the device.</comment>
+  </data>
+  <data name="RoleMeaningView" xml:space="preserve">
+    <value>Sees everything, changes nothing.</value>
+    <comment>Under 'Can view' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningLog" xml:space="preserve">
+    <value>Logs care and adds notes and photos. Changes only what they added. Suits a plant-sitter.</value>
+    <comment>Under 'Can log care' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningEdit" xml:space="preserve">
+    <value>Changes anything, like you.</value>
+    <comment>Under 'Can edit' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningEditAndManage" xml:space="preserve">
+    <value>Changes anything, and also invites others and decides who can do what.</value>
+    <comment>Under 'Can edit and add people' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="JoinRoleView" xml:space="preserve">
+    <value>You can see everything in it, but not change anything.</value>
+    <comment>On the page an invite link opens, under who invited the person. For an invite that can view.</comment>
+  </data>
+  <data name="JoinRoleLog" xml:space="preserve">
+    <value>You can log care on plants and cuttings and add notes and photos, and change what you added yourself.</value>
+    <comment>On the page an invite link opens. For an invite that can log care.</comment>
+  </data>
+  <data name="JoinRoleEdit" xml:space="preserve">
+    <value>You can change anything in it, like the owner.</value>
+    <comment>On the page an invite link opens. For an invite that can edit.</comment>
+  </data>
+  <data name="JoinRoleEditAndManage" xml:space="preserve">
+    <value>You can change anything in it, invite others and change who can do what.</value>
+    <comment>On the page an invite link opens. For an invite that can edit and add people.</comment>
+  </data>
+  <data name="JoinOwnStay" xml:space="preserve">
+    <value>Your own plants stay as they are.</value>
+    <comment>On the page an invite link opens, under what the invite allows.</comment>
+  </data>
+  <data name="JoinAboutStikling" xml:space="preserve">
+    <value>Stikling is a free app to keep track of your plants and the cuttings you take from them, with photos and notes for each one.</value>
+    <comment>On the page an invite link opens, when the person isn't signed in. Says what the app is.</comment>
+  </data>
+  <data name="JoinSignInButton" xml:space="preserve">
+    <value>Join with a free account</value>
+    <comment>Button on the page an invite link opens, when the person isn't signed in.</comment>
+  </data>
+  <data name="RaiseConfirm" xml:space="preserve">
+    <value>Let {0} edit and add people? They can invite others and change who can do what.</value>
+    <comment>Question under a member when the owner picks 'Can edit and add people' for them. {0} is the member's name.</comment>
+  </data>
+  <data name="RaiseConfirmButton" xml:space="preserve">
+    <value>Yes, let them</value>
+    <comment>Button on the question about letting a member edit and add people.</comment>
+  </data>
+  <data name="InviteMadeRunsOut" xml:space="preserve">
+    <value>Made {0} by {1}, runs out {2}</value>
+    <comment>Under an open invite in the People section. {0} is the date it was made, {1} the name of who made it, {2} the date it runs out.</comment>
+  </data>
+  <data name="ShowLink" xml:space="preserve">
+    <value>Show link</value>
+    <comment>Button next to an open invite in the People section. Shows its link and QR code again.</comment>
+  </data>
+  <data name="LeaveHint" xml:space="preserve">
+    <value>The collection goes from this device. You can join again with a new invite.</value>
+    <comment>Under the Leave button in the People section.</comment>
+  </data>
+  <data name="SwitcherTitle" xml:space="preserve">
+    <value>Collections on this device</value>
+    <comment>Title of the small sheet that opens from the line at the top of Today, Plants and Cuttings saying whose collection is open.</comment>
+  </data>
+  <data name="SwitcherManage" xml:space="preserve">
+    <value>People and invites</value>
+    <comment>Link at the bottom of the collection switcher, to the People section on the Account page.</comment>
+  </data>
+  <data name="InviteForLabel" xml:space="preserve">
+    <value>Who is it for?</value>
+    <comment>Label of the optional text field when choosing what an invite lets someone do, in the People section.</comment>
+  </data>
+  <data name="InviteForHint" xml:space="preserve">
+    <value>Optional. Only people who manage the collection see it.</value>
+    <comment>Under the Who is it for? field. Says the note is private to the people who manage the collection.</comment>
+  </data>
+  <data name="InviteForTooLong" xml:space="preserve">
+    <value>Who it is for can have at most {0} characters.</value>
+    <comment>Shown when the server turns down the Who is it for? note as too long. {0} is the most characters.</comment>
+  </data>
+  <data name="InviteNamedMadeRunsOut" xml:space="preserve">
+    <value>{0}. Made {1} by {2}, runs out {3}</value>
+    <comment>Under an open invite that has a Who is it for? note, in the People section. {0} is the role, {1} the date it was made, {2} the name of who made it, {3} the date it runs out.</comment>
+  </data>
+  <data name="InviteNamedRunsOut" xml:space="preserve">
+    <value>{0}. Runs out {1}</value>
+    <comment>Under an open invite that has a Who is it for? note, when the maker is not known. {0} is the role, {1} the date it runs out.</comment>
+  </data>
+  <data name="ShowLinkFor" xml:space="preserve">
+    <value>Show link: {0}, {1}</value>
+    <comment>Spoken name of the Show link button on an open invite, so a screen reader can tell the rows apart. {0} is the invite name, {1} the line under it.</comment>
+  </data>
+  <data name="WithdrawFor" xml:space="preserve">
+    <value>Withdraw: {0}, {1}</value>
+    <comment>Spoken name of the Withdraw button on an open invite, so a screen reader can tell the rows apart. {0} is the invite name, {1} the line under it.</comment>
+  </data>
+  <data name="JoinCountPlants_One" xml:space="preserve">
+    <value>{0} plant</value>
+    <comment>On the page an invite link opens, in the line of counts under the headline. {0} is how many.</comment>
+  </data>
+  <data name="JoinCountPlants_Other" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>Same, for more than one plant.</comment>
+  </data>
+  <data name="JoinCountCuttings_One" xml:space="preserve">
+    <value>{0} cutting</value>
+    <comment>On the page an invite link opens, in the line of counts under the headline. {0} is how many.</comment>
+  </data>
+  <data name="JoinCountCuttings_Other" xml:space="preserve">
+    <value>{0} cuttings</value>
+    <comment>Same, for more than one cutting.</comment>
+  </data>
+  <data name="JoinCounts" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>On the page an invite link opens. Puts the number of plants and the number of cuttings in one line, like "24 plants · 6 cuttings".</comment>
+  </data>
+  <data name="JoinRolesHelp" xml:space="preserve">
+    <value>What each role can do</value>
+    <comment>Link on the page an invite link opens, under what the invite allows. Goes to the answer about roles on the Help page.</comment>
+  </data>
+  <data name="JoinLookAround" xml:space="preserve">
+    <value>Look around Stikling</value>
+    <comment>Button on the page an invite link opens when the link doesn't work (not found, run out or full). Goes to the front of the app.</comment>
+  </data>
+  <data name="JoinGoToday" xml:space="preserve">
+    <value>Go to Today</value>
+    <comment>Button on the page an invite link opens when the person is already in the collection that is open now.</comment>
+  </data>
+</root>

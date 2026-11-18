@@ -2,12 +2,13 @@
 
 @using Stikling.Core.Photos
 @inject PhotoMarkupService Markups
+@inject CollectionsService Collections
 
 @if (Current is { } photo)
 {
     <div class="viewer" role="dialog" aria-modal="true" aria-label="@Strings.Shared.PhotoViewerLabel" @onkeydown="OnKeyDown" tabindex="-1" @ref="dialog">
         <div class="viewer-bar">
-            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))@(Caption?.Invoke(photo) is { Length: > 0 } caption ? $" · {caption}" : null)</span>
+            <span class="viewer-count">@(Index + 1) / @PhotoList.Count · @Labels.Date(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime))@PhotoDayCount.Suffix(PhotoAge?.Invoke(DateOnly.FromDateTime(photo.TakenAt.LocalDateTime)))@(Caption?.Invoke(photo) is { Length: > 0 } caption ? $" · {caption}" : null)@(Collections.LoggedBy(photo.CreatedBy) is { } by ? $" · {F(Strings.People.ByName, by)}" : null)</span>
             <button type="button" class="viewer-close" @onclick="CloseAsync" aria-label="@Strings.Common.Close" title="@Strings.Common.Close"><svg class="x-icon" viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg></button>
         </div>
 
@@ -38,7 +39,7 @@
                 }
             </div>
 
-            @if (HasActions)
+            @if (HasActions && AnyActionFor(photo))
             {
                 <div class="viewer-actions @(CanMarkUp ? "markable" : null)">
                     @if (confirmDelete)
@@ -49,7 +50,7 @@
                     }
                     else
                     {
-                        @if (OnSetCover.HasDelegate && !photo.IsReference)
+                        @if (OnSetCover.HasDelegate && !photo.IsReference && Access.CanEdit)
                         {
                             @if (photo.Id == CoverPhotoId)
                             {
@@ -60,7 +61,7 @@
                                 <button type="button" class="btn btn-light btn-sm" @onclick="() => OnSetCover.InvokeAsync(photo)">@Strings.Shared.PhotoViewerSetCover</button>
                             }
                         }
-                        @if (OnFrame.HasDelegate)
+                        @if (OnFrame.HasDelegate && Access.CanChangeEntry(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">@Strings.Shared.PhotoViewerFrame</button>
                         }
@@ -70,16 +71,16 @@
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnCompare.InvokeAsync(photo)">@Strings.Shared.PhotoViewerCompare</button>
                         }
                         @* The photo isn't changed, so it can be marked up wherever it came from *@
-                        @if (CanMarkUp)
+                        @if (CanMarkUp && Access.CanEdit)
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => marking = true">@Strings.Shared.PhotoViewerMarkUp</button>
                         }
-                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
+                        @if (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo) && Access.CanChangeEntry(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => OnSetReference.InvokeAsync(photo)">@(photo.IsReference ? Strings.Shared.PhotoViewerMoveToHistory : Strings.Shared.PhotoViewerMoveToReference)</button>
                         }
                         @* A photo copied from the history it had before stays as it was given *@
-                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo))
+                        @if (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo) && Access.CanChangeEntry(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => confirmDelete = true">@Strings.Common.Delete</button>
                         }
@@ -91,6 +92,9 @@
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter, EditorRequired]
     public IReadOnlyList<Photo> PhotoList { get; set; } = [];
 
@@ -151,6 +155,15 @@
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
     private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate || CanMarkUp;
+
+    // What is left of the actions once the person's role has taken its share, so a viewer isn't shown an empty bar
+    private bool AnyActionFor(Photo photo) =>
+        (OnSetCover.HasDelegate && !photo.IsReference && Access.CanEdit)
+        || (OnFrame.HasDelegate && Access.CanChangeEntry(photo))
+        || CanCompare(photo)
+        || (CanMarkUp && Access.CanEdit)
+        || (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo) && Access.CanChangeEntry(photo))
+        || (OnDelete.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo) && Access.CanChangeEntry(photo));
 
     private bool CanCompare(Photo photo) =>
         OnCompare.HasDelegate && !photo.IsReference && PhotoList.Count(p => !p.IsReference) >= 2;

@@ -87,10 +87,12 @@ else
                                 @plant.DisplayName
                             }
                         </h1>
+                        <IfCan Edit>
                         <button type="button" class="favourite-toggle @(plant.Favourite ? "on" : null)" aria-pressed="@(plant.Favourite ? "true" : "false")"
                                 aria-label="@Strings.PlantDetail.Favourite" title="@(plant.Favourite ? Strings.PlantDetail.FavouriteRemove : Strings.PlantDetail.FavouriteMark)" @onclick="ToggleFavouriteAsync">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Star</svg>
                         </button>
+                        </IfCan>
                     </div>
                     @if (!string.IsNullOrWhiteSpace(plant.Nickname) && plant.BotanicalName is not null)
                     {
@@ -101,7 +103,7 @@ else
                         <p class="detail-sub everyday-name">@called</p>
                     }
                     <NameNoteLines Genus="@plant.Genus" Species="@plant.KnownSpecies" Cultivar="@plant.Cultivar" />
-                    @if (identifyOffered && IdentifyWanted)
+                    @if (identifyOffered && IdentifyWanted && Access.CanEdit)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
@@ -177,7 +179,7 @@ else
                 <MomentCard Title="@justNow.Title" Line="@justNow.Line" OnShare="OpenShare" OnClose="() => moment = null" />
             }
 
-                @if (floweringNow is { Stale: true } stale && plant.InCollection)
+                @if (floweringNow is { Stale: true } stale && plant.InCollection && Access.CanEdit)
                 {
                     <div class="still-card">
                         <p>@F(stale.Stage == FloweringStage.Buds ? Strings.PlantDetail.StillInBud : Strings.PlantDetail.StillInFlower, Labels.Date(stale.Period.LastMarked))</p>
@@ -214,7 +216,7 @@ else
                         }
                     </p>
                     <div class="problem-card-actions">
-                        @if (plant.InCollection)
+                        @if (plant.InCollection && Access.CanEdit)
                         {
                             <button type="button" class="btn btn-outline-primary" @onclick="() => OpenProblemUpdate(problem)">@Strings.PlantDetail.HowDoesItLook</button>
                         }
@@ -243,7 +245,7 @@ else
                         {
                             <li class="transition-row">
                                 <button type="button" class="transition-step @(done is null ? null : "is-done")" aria-pressed="@(done is not null ? "true" : "false")"
-                                        disabled="@busy" @onclick="() => TapTransitionStepAsync(step, name, done)">
+                                        disabled="@(busy || !Access.CanEdit)" @onclick="() => TapTransitionStepAsync(step, name, done)">
                                     <span class="transition-box" aria-hidden="true">
                                         @if (done is not null)
                                         {
@@ -252,7 +254,7 @@ else
                                     </span>
                                     <span class="transition-step-name">@name</span>
                                 </button>
-                                @if (done is { } doneOn)
+                                @if (done is { } doneOn && Access.CanEdit)
                                 {
                                     <button type="button" class="transition-step-date" aria-label="@F(Strings.PlantDetail.TransitionChangeDay, name)" title="@F(Strings.PlantDetail.TransitionChangeDay, name)" disabled="@busy"
                                             @onclick="() => OpenTransitionStep(step, name, doneOn)">@Labels.Date(doneOn)</button>
@@ -261,9 +263,9 @@ else
                         }
                     </ul>
                     <div class="mb-2"><GuideLink Guide="@GuideBook.SemiHydro" From="@GuideLinks.FromPlant(plant.Id)" /></div>
-                    @if (settled)
+                    @if (settled || !Access.CanEdit)
                     {
-                        // Nothing to stop once it has settled
+                        // Nothing to stop once it has settled, and not for someone who can't change it
                     }
                     else if (confirmStopTransition)
                     {
@@ -357,7 +359,7 @@ else
                     @Strings.PlantDetail.Details
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                 </button>
-                <a class="btn btn-link btn-sm link-action" href="plants/@plant.Id/edit">@Strings.Common.Edit</a>
+                <IfCan Edit><a class="btn btn-link btn-sm link-action" href="plants/@plant.Id/edit">@Strings.Common.Edit</a></IfCan>
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Plants.ListShare</button>
             </div>
 
@@ -651,15 +653,25 @@ else
                             {
                                 var shown = period;
                                 <li>
-                                    <button type="button" class="flowering-row" @onclick="() => OpenPeriod(shown)">
-                                        <b>@shown.Start.Year</b>
-                                        <span>@FloweringText.Describe(shown)</span>
-                                    </button>
+                                    @if (Access.CanEdit)
+                                    {
+                                        <button type="button" class="flowering-row" @onclick="() => OpenPeriod(shown)">
+                                            <b>@shown.Start.Year</b>
+                                            <span>@FloweringText.Describe(shown)</span>
+                                        </button>
+                                    }
+                                    else
+                                    {
+                                        <div class="flowering-row">
+                                            <b>@shown.Start.Year</b>
+                                            <span>@FloweringText.Describe(shown)</span>
+                                        </div>
+                                    }
                                 </li>
                             }
                         </ul>
                         <p class="family-hint">
-                            <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenPastFlowering">@Strings.PlantDetail.AddPastFlowering</button>
+                            <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenPastFlowering">@Strings.PlantDetail.AddPastFlowering</button></IfCan>
                             <a class="btn btn-link btn-sm link-action" href="plants/flowering">@Strings.PlantDetail.SeeFloweringCalendar</a>
                         </p>
                     </section>
@@ -756,10 +768,12 @@ else
                             }
                         </ul>
                     }
-                    <p class="family-hint">
-                        @Html(Strings.PlantDetail.FamilyHintCutting, Link($"propagations/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintCuttingLink))
-                        @Html(Strings.PlantDetail.FamilyHintRooted, Link($"plants/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintRootedLink))
-                    </p>
+                    <IfCan Edit>
+                        <p class="family-hint">
+                            @Html(Strings.PlantDetail.FamilyHintCutting, Link($"propagations/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintCuttingLink))
+                            @Html(Strings.PlantDetail.FamilyHintRooted, Link($"plants/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintRootedLink))
+                        </p>
+                    </IfCan>
                 </section>
 
             </div>
@@ -768,10 +782,13 @@ else
                          EarlierSubjectId="earlierId" EarlierUntil="earlierUntil" />
 
             <div class="profile-details @(detailsOpen ? "open" : null)">
+                <IfCan Edit>
                 <p class="family-hint">
                     @Html(Strings.PlantDetail.CopyHint, Link($"plants/new?copy={plant.Id}", Strings.PlantDetail.CopyHintLink))
                 </p>
+                </IfCan>
 
+                <IfCan Edit>
                 <section class="danger-zone">
                     @if (confirmDelete)
                     {
@@ -788,12 +805,17 @@ else
                         <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.PlantDetail.DeletePlant</button>
                     }
                 </section>
+                </IfCan>
             </div>
         </div>
 
         <div class="profile-history">
             <div class="page-dock" role="group" aria-label="@F(Strings.PlantDetail.DockLabel, plant.DisplayName)" data-tour="dock">
-                @if (googleOn)
+                @if (!Access.CanLog)
+                {
+                    // Looking only: no photo, note or care here
+                }
+                else if (googleOn)
                 {
                     <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
@@ -807,17 +829,19 @@ else
                         @Strings.PlantDetail.DockPhoto
                     </label>
                 }
-                @if (cameraAvailable && hasGhostPhotos)
+                @if (cameraAvailable && hasGhostPhotos && Access.CanLog)
                 {
                     <button type="button" class="btn btn-outline-primary icon-btn dock-angle" aria-label="@Strings.Camera.SameAngle" title="@Strings.Camera.SameAngle" @onclick="() => cameraOpen = true">
                         <SameAngleIcon />
                     </button>
                 }
+                <IfCan Log>
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
                     @Strings.PlantDetail.DockNote
                 </button>
-                @if (plant.InCollection)
+                </IfCan>
+                @if (plant.InCollection && Access.CanLog)
                 {
                     <button type="button" class="btn btn-outline-primary icon-btn" data-shortcut="water" @onclick="() => careOpen = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Drop</svg>
@@ -841,7 +865,7 @@ else
         </div>
     </div>
 
-    <PagePhotoDrop InputId="@photoInputId" Name="@plant.DisplayName" />
+    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@plant.DisplayName" /></IfCan>
     <EntryComposer @key="plant.Id" @ref="composer" SubjectType="SubjectType.Plant" SubjectId="plant.Id" PhotoInputId="@photoInputId" OnPicked="() => { photoChoice = false; more = More.None; }"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 
@@ -923,7 +947,7 @@ else
             }
         </div>
 
-        @if (plant.InCollection)
+        @if (plant.InCollection && Access.CanEdit)
         {
             <div class="sheet-section">
                 @if (comesBack.Count > 0)
@@ -950,9 +974,11 @@ else
             </div>
         }
 
+        <IfCan Log>
         <div class="sheet-section">
             <CareSheet PlantIds="@(new[] { plant.Id })" Form="WateringForms.Of(plant, id => pots.FirstOrDefault(p => p.Id == id))" OnLogged="CareLoggedAsync" />
         </div>
+        </IfCan>
 
         @if (careCalendar is { IsEmpty: false })
         {
@@ -970,12 +996,22 @@ else
                     @foreach (var entry in care)
                     {
                         <li id="entry-@entry.Id">
-                            <button type="button" class="care-entry care-editable" title="@Strings.PlantDetail.FixOrDeleteShort" @onclick="() => careEditing = entry"
-                                    aria-label="@F(Strings.PlantDetail.FixOrDelete, CareService.Describe(entry, Labels.For, ownKindLookup), Labels.Date(entry.OccurredOn))">
-                                <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)</span>
-                                <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
-                                <svg class="care-edit-hint" viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
-                            </button>
+                            @if (Access.CanChangeEntry(entry))
+                            {
+                                <button type="button" class="care-entry care-editable" title="@Strings.PlantDetail.FixOrDeleteShort" @onclick="() => careEditing = entry"
+                                        aria-label="@F(Strings.PlantDetail.FixOrDelete, CareService.Describe(entry, Labels.For, ownKindLookup), Labels.Date(entry.OccurredOn))">
+                                    <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)<ByName CreatedBy="entry.CreatedBy" /></span>
+                                    <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
+                                    <svg class="care-edit-hint" viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
+                                </button>
+                            }
+                            else
+                            {
+                                <div class="care-entry">
+                                    <span class="care-what">@CareService.Describe(entry, Labels.For, ownKindLookup)<ByName CreatedBy="entry.CreatedBy" /></span>
+                                    <span class="care-when">@Labels.Date(entry.OccurredOn)</span>
+                                </div>
+                            }
                         </li>
                     }
                 </ul>
@@ -992,6 +1028,25 @@ else
         @switch (more)
         {
             case More.Menu:
+                @if (!Access.CanEdit)
+                {
+                    <ul class="sheet-actions">
+                        <li>
+                            <a class="sheet-action" href="labels?plants=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Tag</svg>
+                                <span class="sheet-action-text"><b>@Strings.PlantDetail.PrintLabel</b><small>@Strings.PlantDetail.PrintLabelHint</small></span>
+                            </a>
+                        </li>
+                        @CopyLinkAction
+                        <li>
+                            <a class="sheet-action" href="plants/@plant.Id/story">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
+                                <span class="sheet-action-text"><b>@Strings.PlantStory.MenuTitle</b><small>@Strings.PlantStory.MenuHint</small></span>
+                            </a>
+                        </li>
+                    </ul>
+                    break;
+                }
                 <ul class="sheet-actions">
                     @if (plant.InCollection)
                     {
@@ -1605,6 +1660,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter]
     public Guid Id { get; set; }
 

@@ -148,8 +148,14 @@ public sealed class TolerantFailReasonConverter : JsonConverter<FailReason?>
 /// afterwards, but the version they replace is kept in <see cref="Edits"/>, so the history
 /// still shows what was written at the time.
 /// </summary>
-public sealed class TimelineEntry : Entity
+public sealed class TimelineEntry : Entity, IHasCreatedBy
 {
+    /// <summary>
+    /// Who added it, when they were signed in. Null when nobody was, and on everything from before this was
+    /// kept. A helper can only change what they added themselves.
+    /// </summary>
+    public Guid? CreatedBy { get; set; }
+
     public SubjectType SubjectType { get; set; }
     public Guid SubjectId { get; set; }
 

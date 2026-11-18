@@ -1,26 +1,31 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Api.Sharing;
+using Stikling.Core.Models;
+using Stikling.Core.People;
 using static Stikling.Api.Collections.CollectionEndpoints;
 using static Stikling.Api.People.MeEndpoints;
 
 namespace Stikling.Api.Collections;
 
 /// <summary>
-/// Invites to a collection. Someone with the right to manage people makes a link with a role, and
-/// whoever opens it while signed in can join. The table is only kept on the server.
+/// Invites to a collection. Someone with the right to manage people makes a link with a role. Anyone
+/// with the link can see what it is for, and whoever opens it while signed in can join. The table is only kept on the server.
 /// </summary>
 public static class InviteEndpoints
 {
-    public record CreateInviteRequest(MemberRole? Role, bool ManagesPeople);
+    public record CreateInviteRequest(MemberRole? Role, bool ManagesPeople, string? ForName = null);
 
     public record InviteResponse(
-        Guid Id, string? Token, MemberRole Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName);
+        Guid Id, string? Token, MemberRole Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName, string? ForName = null);
 
     public record InvitePreview(
-        Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember);
+        Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember,
+        string? OwnerName = null, int Plants = 0, int Cuttings = 0);
 
     public static IEndpointRouteBuilder MapInvites(this IEndpointRouteBuilder app)
     {
@@ -34,6 +39,15 @@ public static class InviteEndpoints
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["role"] = ["Choose a role."] });
             if (!PeopleRules.IsValidCombination(role, request.ManagesPeople))
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["managesPeople"] = ["Only an editor can manage people."] });
+
+            var forName = string.IsNullOrWhiteSpace(request.ForName) ? null : request.ForName.Trim();
+            if (forName is not null && forName.Length > PeopleLimits.MaxInviteForNameLength)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    ["forName"] = [$"Who it is for can have at most {PeopleLimits.MaxInviteForNameLength} characters."],
+                });
+            }
 
             if (await current.FindAsync() is not { } person)
                 return Results.NotFound();
@@ -76,6 +90,7 @@ public static class InviteEndpoints
                 CollectionId = collectionId,
                 Role = role,
                 ManagesPeople = request.ManagesPeople,
+                ForName = forName,
                 CreatedBy = person.Id,
                 CreatedAt = now,
                 ExpiresAt = now + PeopleRules.InviteLifetime,
@@ -99,7 +114,8 @@ public static class InviteEndpoints
                 .OrderByDescending(i => i.CreatedAt).ThenBy(i => i.Id)
                 .Select(i => new InviteResponse(
                     i.Id, i.ManagesPeople && !isOwner ? null : i.Token, i.Role, i.ManagesPeople, i.CreatedAt, i.ExpiresAt,
-                    db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault()))
+                    db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault(),
+                    i.ForName))
                 .ToListAsync();
         })
         .RequireAuthorization(CollectionPolicies.Manage);
@@ -125,23 +141,43 @@ public static class InviteEndpoints
         })
         .RequireAuthorization(CollectionPolicies.Manage);
 
-        // What the person who opened the link is told before they decide to join
-        app.MapGet("/invites/{token}", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
+        // What the person who opened the link is told before they decide to join. The token is the secret, so it
+        // answers without a sign-in too, and the page can say what the invite is before asking someone to sign in.
+        // Signed in, it also says whether they are in already.
+        app.MapGet("/invites/{token}", async (
+            string token, HttpContext http, CurrentPerson current, StiklingDbContext db, TimeProvider clock, IMemoryCache cache) =>
         {
-            var person = await current.FindOrCreateAsync();
+            if (!LooksLikeToken(token))
+                return Results.NotFound();
+
+            var person = http.User.Identity?.IsAuthenticated == true ? await current.FindOrCreateAsync() : null;
             var invite = await db.Invites.AsNoTracking().SingleOrDefaultAsync(i => i.Token == token);
             if (invite is null)
                 return Results.NotFound();
             if (!invite.IsOpen(clock.GetUtcNow()))
                 return Gone();
 
-            var collectionName = await db.Collections.Where(c => c.Id == invite.CollectionId).Select(c => c.Name).SingleAsync();
+            var collection = await db.Collections.Where(c => c.Id == invite.CollectionId)
+                .Select(c => new { c.Name, OwnerName = db.People.Where(p => p.Id == c.OwnerPersonId).Select(p => p.Name).FirstOrDefault() })
+                .SingleAsync();
             var invitedBy = await db.People.Where(p => p.Id == invite.CreatedBy).Select(p => p.Name).SingleOrDefaultAsync();
-            var already = await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
+            var already = person is not null
+                && await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
 
-            return Results.Ok(new InvitePreview(invite.CollectionId, collectionName, invitedBy, invite.Role, invite.ManagesPeople, already));
-        })
-        .RequireAuthorization();
+            // Only how many there are, never names or photos. Counting reads every plant and cutting, and anyone with
+            // the link can ask, so the counts are kept for a couple of minutes
+            var (plantCount, cuttingCount) = await cache.GetOrCreateAsync($"invite-counts:{invite.CollectionId}", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = CountsKeptFor;
+                var plants = await LiveAsync<Plant>(db, invite.CollectionId, "plants");
+                var propagations = await LiveAsync<Propagation>(db, invite.CollectionId, "propagations");
+                return CollectionCounts.Of(plants, propagations);
+            });
+
+            return Results.Ok(new InvitePreview(
+                invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName,
+                plantCount, cuttingCount));
+        });
 
         app.MapPost("/invites/{token}/accept", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
         {
@@ -162,7 +198,7 @@ public static class InviteEndpoints
 
             // Someone who is in already isn't changed, and the invite stays open for the one it was meant for
             if (members.SingleOrDefault(m => m.PersonId == person.Id) is { } existing)
-                return Results.Ok(Summary(collection, existing));
+                return Results.Ok(await SummaryAsync(db, collection, existing));
 
             if (!invite.IsOpen(now))
                 return Gone();
@@ -196,21 +232,38 @@ public static class InviteEndpoints
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return Results.Ok(Summary(collection, membership));
+            return Results.Ok(await SummaryAsync(db, collection, membership));
         })
         .RequireAuthorization();
 
         return app;
     }
 
+    private static readonly TimeSpan CountsKeptFor = TimeSpan.FromMinutes(2);
+
     private static IResult Gone() =>
         Results.Problem("This invite has been used, withdrawn or has run out.", statusCode: StatusCodes.Status410Gone);
 
-    private static CollectionSummary Summary(Collection collection, Membership membership) =>
-        new(collection.Id, collection.Name, membership.Role, membership.ManagesPeople, collection.OwnerPersonId == membership.PersonId);
+    private static async Task<CollectionSummary> SummaryAsync(StiklingDbContext db, Collection collection, Membership membership) =>
+        new(collection.Id, collection.Name, membership.Role, membership.ManagesPeople, collection.OwnerPersonId == membership.PersonId,
+            await db.People.Where(p => p.Id == collection.OwnerPersonId).Select(p => p.Name).FirstOrDefaultAsync());
+
+    // The collection's records of one kind that aren't deleted, read as the public collection page reads them
+    private static async Task<List<T>> LiveAsync<T>(StiklingDbContext db, Guid collectionId, string kind) where T : Entity
+    {
+        var rows = await db.Records.AsNoTracking()
+            .Where(r => r.CollectionId == collectionId && r.Kind == kind && r.DeletedAt == null)
+            .Select(r => r.Data)
+            .ToListAsync();
+        return rows.Select(SharePageEndpoints.Read<T>).OfType<T>().ToList();
+    }
 
     private static InviteResponse Respond(Invite invite, string? createdByName) =>
-        new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName);
+        new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName, invite.ForName);
+
+    /// <summary>Whether it could be a token at all, so an address that can't be one never reaches the database.</summary>
+    private static bool LooksLikeToken(string token) =>
+        token.Length == 22 && token.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
 
     /// <summary>16 random bytes as base64url without padding, 22 characters that can't be guessed.</summary>
     private static string NewToken() => WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(16));

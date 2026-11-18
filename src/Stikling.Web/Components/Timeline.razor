@@ -10,6 +10,7 @@
 @inject TimeProvider Time
 @inject PropagationService PropagationService
 @inject MeasurementService MeasureService
+@inject CollectionsService Collections
 @using System.Globalization
 @using Stikling.Core.Sharing
 @using Stikling.Core.Propagations
@@ -78,6 +79,7 @@ else
                                 @if (entry.Kind != TimelineKind.Created)
                                 {
                                     <time datetime="@entry.OccurredAt.ToString("o")">@Labels.Time(entry.OccurredAt)</time>
+                                    <ByName CreatedBy="entry.CreatedBy" />
                                     @if (entry.Kind == TimelineKind.Photo && PhotoAge?.Invoke(LocalDay(entry.OccurredAt)) is { } photoAge)
                                     {
                                         <span class="entry-day">@photoAge</span>
@@ -91,7 +93,7 @@ else
                                     {
                                         <span class="entry-day">@Strings.Propagations.TlAsCutting</span>
                                     }
-                                    else
+                                    else if (Access.CanChangeEntry(entry))
                                     {
                                     <span class="entry-actions">
                                         @if (TimelineService.CanCorrect(entry) && editId != entry.Id)
@@ -117,7 +119,7 @@ else
                                     {
                                         <MentionBox @bind-Text="editText" @bind-Picked="editPicked" Rows="2" AriaLabel="@Strings.Propagations.TlCorrectedNote" Own="SubjectId" />
                                     }
-                                    <MeasureFields Draft="editMeasure" Changed="() => { }" Disabled="busy" />
+                                    <IfCan Edit><MeasureFields Draft="editMeasure" Changed="() => { }" Disabled="busy" /></IfCan>
                                     <div class="entry-editor-row">
                                         <label for="@editDateId">@Strings.Propagations.TlHappenedOn</label>
                                         <input id="@editDateId" type="date" class="form-control form-control-sm" @bind="editDay"
@@ -293,6 +295,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter, EditorRequired]
     public SubjectType SubjectType { get; set; }
 
@@ -669,6 +674,8 @@ else
 
     private static string KindLabel(TimelineEntry entry) => TimelineEvents.Of(entry) switch
     {
+        // Photos a helper added are notes without text, since a helper can't send entries of the kind Photo
+        _ when entry.Kind == TimelineKind.Note && string.IsNullOrWhiteSpace(entry.Text) && entry.PhotoIds.Count > 0 => Strings.Propagations.TlKindPhoto,
         TimelineEvent.PottedUp => Strings.Propagations.TlKindPottedUp,
         TimelineEvent.Failed => Strings.Propagations.TlKindFailed,
         TimelineEvent.GaveAway => Strings.Propagations.TlKindGaveAway,

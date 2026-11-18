@@ -3,6 +3,7 @@
 @using System.Globalization
 @using Stikling.Core.Selection
 @inject IPropagationRepository Repository
+@inject CollectionsService Collections
 @inject RoomService RoomService
 @inject IPlantRepository PlantRepository
 @inject TimeProvider Time
@@ -16,7 +17,7 @@
 
 <PageTitle>@Strings.Propagations.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
-<RowPhotoDrop />
+<IfCan Log><RowPhotoDrop /></IfCan>
 
 <div class="page-heading page-full">
     <h1>@Strings.Propagations.ListTitle</h1>
@@ -33,13 +34,16 @@
                 @(selecting ? Strings.Common.Done : Strings.Propagations.ListSelect)
             </button>
             @* Takes over from the round add button on a wide screen *@
+            <IfCan Edit>
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="propagations/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
                 @Strings.Propagations.ListStart
             </a>
+            </IfCan>
         </div>
     }
 </div>
+<OpenCollectionLine />
 
 @if (all is { Count: > 0 })
 {
@@ -49,6 +53,13 @@
 @if (all is null)
 {
     <p class="text-body-secondary">@Strings.Propagations.ListLoading</p>
+}
+else if (all.Count == 0 && !Access.CanEdit)
+{
+    @* Someone who can't start propagations isn't told to. The collection is just empty so far. *@
+    <div class="empty-state">
+        <p>@EmptyText</p>
+    </div>
 }
 else if (all.Count == 0)
 {
@@ -140,7 +151,7 @@ else
             else if (progress == ProgressFilter.Active)
             {
                 <p>@Strings.Propagations.ListNothingInProgress</p>
-                <a class="btn btn-primary mt-3" href="propagations/new">@Strings.Propagations.ListStart</a>
+                <IfCan Edit><a class="btn btn-primary mt-3" href="propagations/new">@Strings.Propagations.ListStart</a></IfCan>
             }
             else
             {
@@ -271,9 +282,11 @@ else
 }
 else
 {
+    <IfCan Edit>
     <a class="fab" href="propagations/new" aria-label="@Strings.Propagations.ListStart" title="@Strings.Propagations.ListStart">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
+    </IfCan>
 }
 
 <Sheet Title="@Strings.Shared.SwapShareTitle" Open="shareOpen" OpenChanged="ShareOpenChangedAsync">
@@ -310,6 +323,14 @@ else
 <canvas @ref="canvas" hidden aria-hidden="true"></canvas>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // For someone who can't start propagations, an empty collection is only empty so far
+    private string EmptyText => Collections.Open?.OwnerName is { Length: > 0 } owner
+        ? F(Strings.People.EmptyPropagations, owner)
+        : Strings.People.EmptyPropagationsNoOwner;
+
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =
     [
         (ProgressFilter.Active, Strings.Propagations.ListProgressActive),

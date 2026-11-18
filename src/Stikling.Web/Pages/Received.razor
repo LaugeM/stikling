@@ -135,7 +135,7 @@ else if (copy is not null && check is not null)
             <div class="alert alert-danger mt-3" role="alert">@error</div>
         }
     }
-    else
+    else if (Access.CanEdit)
     {
         <h2 class="received-heading">@Strings.Plants.ReceivedAddHeading</h2>
         <p class="received-line">@(check.State == ReceivedState.Deleted
@@ -185,6 +185,9 @@ else if (copy is not null && check is not null)
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     private const int StripTiles = 6;
 
     [Parameter]

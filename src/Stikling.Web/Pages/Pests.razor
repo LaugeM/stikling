@@ -21,7 +21,7 @@
             <span class="text-body-secondary small">@Plural.Of(open.Count, Strings.Pests.OpenCase_One, Strings.Pests.OpenCase_Other)</span>
         }
         @* Takes over from the round add button on a wide screen *@
-        @if (views.Count > 0)
+        @if (views.Count > 0 && Access.CanEdit)
         {
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="pests/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
@@ -40,7 +40,7 @@ else if (views.Count == 0 && problems.Count == 0)
 {
     <div class="empty-state">
         <p>@Strings.Pests.PestsEmpty</p>
-        <a class="btn btn-primary mt-3" href="pests/new">@Strings.Pests.OpenACase</a>
+        <IfCan Edit><a class="btn btn-primary mt-3" href="pests/new">@Strings.Pests.OpenACase</a></IfCan>
     </div>
 }
 else
@@ -108,11 +108,16 @@ else
     </div>
 }
 
+<IfCan Edit>
 <a class="fab" href="pests/new" aria-label="@Strings.Pests.OpenPestCase" title="@Strings.Pests.OpenPestCase">
     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
 </a>
+</IfCan>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     private IReadOnlyList<PestCaseView> views = [];
     private List<PestCaseView> open = [];
     private List<PestCaseView> due = [];

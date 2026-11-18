@@ -12,10 +12,12 @@
 <div class="page-heading">
     <h1>@Strings.Care.AwayTitle</h1>
     @* Takes over from the round add button on a wide screen *@
+    <IfCan Edit>
     <a class="btn btn-primary btn-sm icon-btn heading-add" href="away/new" title="@Strings.Care.AwayAddLabel">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
         @Strings.Common.Add
     </a>
+    </IfCan>
 </div>
 
 <p class="text-body-secondary">
@@ -102,9 +104,11 @@ else
         </p>
     </section>
 
+    <IfCan Edit>
     <a class="fab" href="away/new" aria-label="@Strings.Care.AwayAddLabel" title="@Strings.Care.AwayAddLabel">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
+    </IfCan>
 }
 
 @code {

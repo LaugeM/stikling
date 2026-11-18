@@ -12,10 +12,12 @@
 <div class="page-heading">
     <h1>@Strings.Orders.ListTitle</h1>
     @* Takes over from the round add button on a wide screen *@
+    <IfCan Edit>
     <a class="btn btn-primary btn-sm icon-btn heading-add" href="orders/new">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
         @Strings.Orders.ListNew
     </a>
+    </IfCan>
 </div>
 
 <p class="settings-hint">@Strings.Orders.ListIntro <a href="money">@Strings.Money.OrdersLink</a></p>
@@ -28,7 +30,7 @@ else if (orders.Count == 0)
 {
     <div class="empty-state">
         <p>@Strings.Orders.ListEmpty</p>
-        <a class="btn btn-primary mt-3" href="orders/new">@Strings.Orders.ListNew</a>
+        <IfCan Edit><a class="btn btn-primary mt-3" href="orders/new">@Strings.Orders.ListNew</a></IfCan>
     </div>
 }
 else
@@ -59,9 +61,11 @@ else
         </section>
     }
 
+    <IfCan Edit>
     <a class="fab" href="orders/new" aria-label="@Strings.Orders.ListNew" title="@Strings.Orders.ListNew">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
+    </IfCan>
 }
 
 @code {

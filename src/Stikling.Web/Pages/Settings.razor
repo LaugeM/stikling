@@ -70,7 +70,7 @@
                     {
                         <SettingsRow Href="sign-in" Title="@Strings.Settings.SignIn" Detail="@Strings.Settings.SignInDetail" />
                     }
-                    <SettingsRow Href="settings/public-page" Title="@Strings.PublicPage.RowTitle" Detail="@PublicPageLine" />
+                    <IfCan Edit><SettingsRow Href="settings/public-page" Title="@Strings.PublicPage.RowTitle" Detail="@PublicPageLine" /></IfCan>
                 </div>
             </section>
         }
@@ -170,10 +170,10 @@
                 @Strings.Settings.EmptyOuterPotHint
             </p>
             <div class="settings-rows mt-4">
-                <SettingsRow Href="kinds-of-care" Title="@Strings.Settings.KindsOfCare" Detail="@KindsOfCareLine" />
-                <SettingsRow Href="settings/measurements" Title="@Strings.Settings.Measurements" Detail="@MeasurementsLine" />
-                <SettingsRow Href="care-intervals" Title="@Strings.Settings.CareIntervals" Detail="@CareIntervalsLine" />
-                <SettingsRow Href="away" Title="@Strings.Settings.Away" Detail="@Strings.Settings.AwayDetail" />
+                <IfCan Edit><SettingsRow Href="kinds-of-care" Title="@Strings.Settings.KindsOfCare" Detail="@KindsOfCareLine" /></IfCan>
+                <IfCan Edit><SettingsRow Href="settings/measurements" Title="@Strings.Settings.Measurements" Detail="@MeasurementsLine" /></IfCan>
+                <IfCan Edit><SettingsRow Href="care-intervals" Title="@Strings.Settings.CareIntervals" Detail="@CareIntervalsLine" /></IfCan>
+                <IfCan Edit><SettingsRow Href="away" Title="@Strings.Settings.Away" Detail="@Strings.Settings.AwayDetail" /></IfCan>
             </div>
             <div class="form-check form-switch mt-4">
                 <input class="form-check-input" type="checkbox" role="switch" id="daily-round"
@@ -230,7 +230,7 @@
                 @Strings.Settings.PlantNetKeyHint
             </p>
             <div class="settings-rows mt-4">
-                <SettingsRow Href="fields" Title="@Strings.Settings.YourFields" Detail="@OwnFieldsLine" />
+                <IfCan Edit><SettingsRow Href="fields" Title="@Strings.Settings.YourFields" Detail="@OwnFieldsLine" /></IfCan>
             </div>
             <div class="theme-label mt-4" id="recent-changes-label">@Strings.Settings.RecentChanges</div>
             <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="recent-changes-label">
@@ -399,9 +399,9 @@
         <section class="settings-group @Closed("data")" id="data">
             <h2>@Strings.Settings.SectionData</h2>
             <div class="settings-rows">
-                <SettingsRow Href="rooms-and-tags" Title="@Strings.Settings.RoomsAndTags" Detail="@RoomsAndTagsLine" />
-                <SettingsRow Href="settings/tidy-up" Title="@Strings.Tidy.SettingsRow" Detail="@Strings.Tidy.SettingsRowDetail" />
-                <SettingsRow Href="#" Title="@Strings.Settings.CollectionNumbers" Detail="@Strings.Settings.CollectionNumbersDetail" OnClick="OpenNumberingAsync" />
+                <IfCan Edit><SettingsRow Href="rooms-and-tags" Title="@Strings.Settings.RoomsAndTags" Detail="@RoomsAndTagsLine" /></IfCan>
+                <IfCan Edit><SettingsRow Href="settings/tidy-up" Title="@Strings.Tidy.SettingsRow" Detail="@Strings.Tidy.SettingsRowDetail" /></IfCan>
+                <IfCan Edit><SettingsRow Href="#" Title="@Strings.Settings.CollectionNumbers" Detail="@Strings.Settings.CollectionNumbersDetail" OnClick="OpenNumberingAsync" /></IfCan>
                 <SettingsRow Href="backup" Title="@Strings.Settings.BackupAndStorage" Detail="@BackupLine" />
             </div>
             @if (numberingMessage is not null)
@@ -421,7 +421,7 @@
         <section class="settings-group @Closed("about")" id="about">
             <h2>@Strings.Settings.SectionAbout</h2>
             <div class="settings-rows">
-                <SettingsRow Href="#" Title="@Strings.Settings.ShowMeAround" Detail="@Strings.Settings.ShowMeAroundDetail" OnClick="StartTourAsync" />
+                <IfCan Edit><SettingsRow Href="#" Title="@Strings.Settings.ShowMeAround" Detail="@Strings.Settings.ShowMeAroundDetail" OnClick="StartTourAsync" /></IfCan>
                 <SettingsRow Href="@DictionaryLinks.Index" Title="@Strings.Dictionary.Title" Detail="@Strings.Dictionary.SettingsRowDetail" />
                 <SettingsRow Href="help" Title="@Strings.Settings.Help" Detail="@Strings.Settings.HelpDetail" />
                 <SettingsRow Href="privacy" Title="@Strings.Settings.Privacy" Detail="@Strings.Settings.PrivacyDetail" />

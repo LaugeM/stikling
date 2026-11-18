@@ -1,5 +1,6 @@
 @using System.Globalization
 @page "/products"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @layout WideLayout
 @inject IProductRepository Repository
 @inject ProductService ProductService

@@ -61,10 +61,12 @@ export async function currentSubscription() {
     }
 }
 
+// serviceWorker.ready never settles when no service worker is registered, as when registering it failed,
+// and signing out waits on this. getRegistration answers at once, with nothing when there is none
 async function current() {
     if (!("serviceWorker" in navigator) || !("PushManager" in window)) return null;
-    const registration = await navigator.serviceWorker.ready;
-    return await registration.pushManager.getSubscription();
+    const registration = await navigator.serviceWorker.getRegistration();
+    return registration ? await registration.pushManager.getSubscription() : null;
 }
 
 function describe(subscription) {

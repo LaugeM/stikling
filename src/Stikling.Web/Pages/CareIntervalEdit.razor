@@ -1,5 +1,6 @@
 @page "/care-intervals/new"
 @page "/care-intervals/{Id:guid}"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject ICareIntervalRepository Repository
 @inject ILogger<CareIntervalEdit> Logger
 @inject IPlantRepository PlantRepository

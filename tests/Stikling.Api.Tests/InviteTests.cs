@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Stikling.Core.Sync;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
@@ -197,6 +199,61 @@ public class InviteTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task An_invite_can_say_who_it_is_for_and_the_list_returns_it_trimmed()
+    {
+        var owner = await SignIn();
+
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "  Plant-sitter in July ");
+
+        Assert.Equal("Plant-sitter in July", invite.ForName);
+        Assert.Equal("Plant-sitter in July", Assert.Single(await OpenInvites(owner)).ForName);
+    }
+
+    [Fact]
+    public async Task A_blank_for_name_is_stored_as_null()
+    {
+        var owner = await SignIn();
+
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "   ");
+
+        Assert.Null(invite.ForName);
+        Assert.Null(Assert.Single(await OpenInvites(owner)).ForName);
+        string? stored = "not read";
+        await api.WithDbAsync(async db => stored = await db.Invites.Where(i => i.Id == invite.Id).Select(i => i.ForName).SingleAsync());
+        Assert.Null(stored);
+    }
+
+    [Fact]
+    public async Task A_for_name_over_60_characters_is_400_and_makes_no_invite()
+    {
+        var owner = await SignIn();
+
+        var tooLong = await _people.CreateInvite(owner, MemberRole.Viewer, forName: new string('a', 61));
+        var longest = await _people.CreateInvite(owner, MemberRole.Viewer, forName: new string('a', 60));
+
+        Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
+        Assert.Contains("forName", await tooLong.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.Created, longest.StatusCode);
+        Assert.Single(await OpenInvites(owner));
+    }
+
+    [Fact]
+    public async Task The_preview_never_contains_who_the_invite_is_for()
+    {
+        var owner = await SignIn();
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "Zebediah Quux");
+        var other = await SignIn();
+
+        var signedIn = await (await _people.Preview(other, invite.Token!)).Content.ReadAsStringAsync();
+        var anonymous = await (await api.CreateClient().GetAsync($"/invites/{invite.Token!}")).Content.ReadAsStringAsync();
+
+        Assert.Contains("collectionName", signedIn, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Zebediah", signedIn);
+        Assert.DoesNotContain("Zebediah", anonymous);
+        Assert.DoesNotContain("forName", anonymous, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task An_unknown_token_is_404()
     {
         var who = await SignIn();
@@ -206,16 +263,88 @@ public class InviteTests(ApiFactory api)
     }
 
     [Fact]
-    public async Task An_invite_needs_a_sign_in()
+    public async Task Anyone_with_the_link_sees_what_it_is_for_but_joining_needs_a_sign_in()
+    {
+        var owner = await SignIn("Anna");
+        var invite = await _people.InviteOk(owner, MemberRole.Helper);
+        var anonymous = api.CreateClient();
+
+        var preview = await anonymous.GetAsync($"/invites/{invite.Token!}");
+        var accept = await anonymous.PostAsync($"/invites/{invite.Token!}/accept", null);
+
+        Assert.Equal(HttpStatusCode.OK, preview.StatusCode);
+        Assert.Equal(
+            new InvitePreview(owner.CollectionId, Stikling.Api.People.CurrentPerson.FirstCollectionName, "Anna", MemberRole.Helper, false, AlreadyMember: false, OwnerName: "Anna", Plants: 0, Cuttings: 0),
+            await preview.Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json));
+        Assert.Equal(HttpStatusCode.Unauthorized, accept.StatusCode);
+        Assert.Single((await _people.Collection(owner)).Members);
+    }
+
+    private static SyncRecord PropagationRecord(Guid id, DateTimeOffset updatedAt, DateTimeOffset? deletedAt = null) =>
+        new("propagations", JsonSerializer.SerializeToElement(new { id, createdAt = PeopleSupport.Monday, updatedAt, deletedAt }, ApiFactory.Json));
+
+    [Fact]
+    public async Task The_preview_counts_plants_and_cuttings_and_leaves_out_a_deleted_one()
+    {
+        var owner = await SignIn();
+        var at = PeopleSupport.Monday;
+        await _people.PushOk(
+            owner,
+            PeopleSupport.Plant(Guid.NewGuid(), at), PeopleSupport.Plant(Guid.NewGuid(), at), PeopleSupport.Plant(Guid.NewGuid(), at),
+            PropagationRecord(Guid.NewGuid(), at), PropagationRecord(Guid.NewGuid(), at));
+        var gonePlant = Guid.NewGuid();
+        var goneCutting = Guid.NewGuid();
+        await _people.PushOk(owner, PeopleSupport.Plant(gonePlant, at), PropagationRecord(goneCutting, at));
+        await _people.PushOk(owner, PlantDeleted(gonePlant, at.AddHours(1)), PropagationRecord(goneCutting, at.AddHours(1), at.AddHours(1)));
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+
+        var preview = await (await _people.Preview(await SignIn(), invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
+
+        Assert.Equal(3, preview!.Plants);
+        Assert.Equal(2, preview.Cuttings);
+    }
+
+    private static SyncRecord PlantDeleted(Guid id, DateTimeOffset at) =>
+        new("plants", JsonSerializer.SerializeToElement(new { id, createdAt = PeopleSupport.Monday, updatedAt = at, deletedAt = at }, ApiFactory.Json));
+
+    [Fact]
+    public async Task The_preview_gives_the_same_counts_without_a_sign_in()
+    {
+        var owner = await SignIn();
+        await _people.PushOk(owner, PeopleSupport.Plant(Guid.NewGuid(), PeopleSupport.Monday), PropagationRecord(Guid.NewGuid(), PeopleSupport.Monday));
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+
+        var preview = await api.CreateClient().GetFromJsonAsync<InvitePreview>($"/invites/{invite.Token!}", ApiFactory.Json);
+
+        Assert.Equal(1, preview!.Plants);
+        Assert.Equal(1, preview.Cuttings);
+    }
+
+    [Fact]
+    public async Task Without_a_sign_in_an_unknown_or_closed_invite_answers_as_it_does_signed_in()
+    {
+        var owner = await SignIn();
+        var withdrawn = await _people.InviteOk(owner, MemberRole.Viewer);
+        await Withdraw(owner, withdrawn.Id);
+        var anonymous = api.CreateClient();
+
+        Assert.Equal(HttpStatusCode.NotFound, (await anonymous.GetAsync("/invites/nosuchtoken")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await anonymous.GetAsync($"/invites/{new string('a', 22)}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Gone, (await anonymous.GetAsync($"/invites/{withdrawn.Token!}")).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_sign_in_that_has_run_out_gets_the_preview_without_being_counted_as_in()
     {
         var owner = await SignIn();
         var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+        var client = api.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", "not-a-real-token");
 
-        var preview = await api.CreateClient().GetAsync($"/invites/{invite.Token!}");
-        var accept = await api.CreateClient().PostAsync($"/invites/{invite.Token!}/accept", null);
+        var preview = await client.GetAsync($"/invites/{invite.Token!}");
 
-        Assert.Equal(HttpStatusCode.Unauthorized, preview.StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, accept.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, preview.StatusCode);
+        Assert.False((await preview.Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json))!.AlreadyMember);
     }
 
     [Fact]
@@ -229,7 +358,7 @@ public class InviteTests(ApiFactory api)
         var preview = await (await _people.Preview(guest, invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
         var ownPreview = await (await _people.Preview(owner, invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
 
-        Assert.Equal(new InvitePreview(owner.CollectionId, "Balcony", "Anna", MemberRole.Editor, true, AlreadyMember: false), preview);
+        Assert.Equal(new InvitePreview(owner.CollectionId, "Balcony", "Anna", MemberRole.Editor, true, AlreadyMember: false, OwnerName: "Anna"), preview);
         Assert.True(ownPreview!.AlreadyMember);
     }
 
@@ -283,7 +412,7 @@ public class InviteTests(ApiFactory api)
         var summary = await response.Content.ReadFromJsonAsync<CollectionSummary>(ApiFactory.Json);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(new CollectionSummary(owner.CollectionId, "My plants", role, managesPeople, IsOwner: false), summary);
+        Assert.Equal(new CollectionSummary(owner.CollectionId, "My plants", role, managesPeople, IsOwner: false, owner.Name), summary);
         var member = await _people.MemberOf(owner, guest with { CollectionId = owner.CollectionId });
         Assert.Equal(role, member.Role);
         Assert.Equal(managesPeople, member.ManagesPeople);

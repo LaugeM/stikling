@@ -227,15 +227,21 @@ public sealed class IndexedDbPhotoMarkupRepository(IndexedDb db, TimeProvider ti
     protected override IReadOnlyList<string> Validate(PhotoMarkup markup) => markup.Validate();
 }
 
-public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time)
+public sealed class IndexedDbPropagationCareLogRepository(IndexedDb db, TimeProvider time, CollectionsService people)
     : IndexedDbEntityRepository<PropagationCareLog>(db, time, RecordKinds.PropagationCareLogs), IPropagationCareLogRepository
 {
+    protected override async Task BeforeFirstSaveAsync(PropagationCareLog entry) =>
+        entry.CreatedBy ??= await people.GetPersonIdAsync();
+
     protected override IReadOnlyList<string> Validate(PropagationCareLog entry) => entry.Validate();
 }
 
-public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time)
+public sealed class IndexedDbCareLogRepository(IndexedDb db, TimeProvider time, CollectionsService people)
     : IndexedDbEntityRepository<CareLog>(db, time, RecordKinds.CareLogs), ICareLogRepository
 {
+    protected override async Task BeforeFirstSaveAsync(CareLog entry) =>
+        entry.CreatedBy ??= await people.GetPersonIdAsync();
+
     protected override IReadOnlyList<string> Validate(CareLog entry) => entry.Validate(Today);
 }
 

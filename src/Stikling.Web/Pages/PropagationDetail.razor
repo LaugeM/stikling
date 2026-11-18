@@ -93,7 +93,7 @@ else
                     {
                         <p class="detail-sub everyday-name">@called</p>
                     }
-                    @if (identifyOffered && IdentifyWanted)
+                    @if (identifyOffered && IdentifyWanted && Access.CanEdit)
                     {
                         <button type="button" class="btn btn-link btn-sm link-action identify-link" @onclick="() => identifyOpen = true">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
@@ -275,7 +275,7 @@ else
                     @Strings.Propagations.DetDetails
                     <svg class="link-chevron" viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                 </button>
-                <a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">@Strings.Common.Edit</a>
+                <IfCan Edit><a class="btn btn-link btn-sm link-action" href="propagations/@propagation.Id/edit">@Strings.Common.Edit</a></IfCan>
                 <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenShare">@Strings.Propagations.DetShare</button>
             </div>
 
@@ -420,14 +420,14 @@ else
                             {
                                 <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
                                 <dd>
-                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Plural.Of(every, Strings.Propagations.DetWaterChangeEvery_One, Strings.Propagations.DetWaterChangeEvery_Other)</a>
+                                    <a class="@(Access.CanEdit ? "link-action" : null)" href="@(Access.CanEdit ? $"propagations/{propagation.Id}/edit?field=water-change-days" : null)">@Plural.Of(every, Strings.Propagations.DetWaterChangeEvery_One, Strings.Propagations.DetWaterChangeEvery_Other)</a>
                                 </dd>
                             }
-                            else if (propagation.IsActive)
+                            else if (propagation.IsActive && Access.CanEdit)
                             {
                                 <dt>@Strings.Propagations.DetWaterChangeReminder</dt>
                                 <dd>
-                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=water-change-days">@Strings.Propagations.DetRemindWaterChange</a>
+                                    <a class="@(Access.CanEdit ? "link-action" : null)" href="@(Access.CanEdit ? $"propagations/{propagation.Id}/edit?field=water-change-days" : null)">@Strings.Propagations.DetRemindWaterChange</a>
                                 </dd>
                             }
                         }
@@ -502,6 +502,7 @@ else
             <GrowthBlock @key="@($"{historyVersion}-{growthVersion}")" SubjectId="propagation.Id" StartDay="PhotoDayCount.StartOf(propagation)" />
 
             <div class="profile-details @(detailsOpen ? "open" : null)">
+                <IfCan Edit>
                 <section class="danger-zone">
                     @if (confirmDelete)
                     {
@@ -516,12 +517,17 @@ else
                         <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Propagations.DetDelete</button>
                     }
                 </section>
+                </IfCan>
             </div>
         </div>
 
         <div class="profile-history">
             <div class="page-dock" role="group" aria-label="@F(Strings.Propagations.DetAddTo, propagation.DisplayName)">
-                @if (googleOn)
+                @if (!Access.CanLog)
+                {
+                    // Looking only: no photo, note or care here
+                }
+                else if (googleOn)
                 {
                     <button type="button" class="btn btn-primary icon-btn" @onclick="() => photoChoice = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
@@ -535,22 +541,27 @@ else
                         @Strings.Propagations.TlKindPhoto
                     </label>
                 }
-                @if (cameraAvailable && hasGhostPhotos)
+                @if (cameraAvailable && hasGhostPhotos && Access.CanLog)
                 {
                     <button type="button" class="btn btn-outline-primary icon-btn dock-angle" aria-label="@Strings.Camera.SameAngle" title="@Strings.Camera.SameAngle" @onclick="() => cameraOpen = true">
                         <SameAngleIcon />
                     </button>
                 }
+                <IfCan Log>
                 <button type="button" class="btn btn-outline-primary icon-btn" @onclick="() => composer?.OpenNote()">
                     <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
                     @Strings.Propagations.TlKindNote
                 </button>
+                </IfCan>
                 @if (propagation.IsActive)
                 {
+                    <IfCan Log>
                     <button type="button" class="btn btn-outline-primary icon-btn dock-care" aria-label="@Strings.Propagations.DetCare" title="@Strings.Propagations.DetCare" @onclick="() => careOpen = true">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Drop</svg>
                         <span class="dock-label">@Strings.Propagations.DetCare</span>
                     </button>
+                    </IfCan>
+                    <IfCan Edit>
                     <button type="button" class="btn btn-outline-primary icon-btn dock-stage" data-tour="stage" aria-label="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" title="@F(Strings.Propagations.DetStageButtonLabel, Labels.Stage(propagation.Stage, propagation.Type))" @onclick="OpenStage">
                         <span class="stage-steps" data-step="@StageStep" aria-hidden="true"><i></i><i></i><i></i></span>
                         @Labels.Stage(propagation.Stage, propagation.Type)
@@ -558,6 +569,7 @@ else
                     <button type="button" class="btn btn-outline-primary dock-more" aria-label="@Strings.Propagations.DetMoreLabel" title="@Strings.Propagations.DetMoreLabel" @onclick="() => more = More.Menu">
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.More</svg>
                     </button>
+                    </IfCan>
                 }
             </div>
 
@@ -583,7 +595,7 @@ else
                 StartBeforeId="shareBeforeId" StartAfterId="shareAfterId"
                 CoverPhotoId="ShownCover" PhotoAge="day => PhotoDayCount.DayLabel(PhotoDayCount.StartOf(propagation), day)" Text="ShareCardText.ForPropagation(propagation, parent, Today)" />
 
-    <PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" />
+    <IfCan Log><PagePhotoDrop InputId="@photoInputId" Name="@propagation.DisplayName" /></IfCan>
     <EntryComposer @key="propagation.Id" @ref="composer" SubjectType="SubjectType.Propagation" SubjectId="propagation.Id" PhotoInputId="@photoInputId" OnPicked="() => photoChoice = false"
                    CoverPhotoId="ShownCover" OnCoverChanged="SetCoverAsync" OnAdded="AddedAsync" OnRetake="() => cameraOpen = true" />
 
@@ -673,7 +685,7 @@ else
                             <dd>
                                 @if (propagation.FirstRootOn is { } root)
                                 {
-                                    <a class="link-action" href="propagations/@propagation.Id/edit?field=first-root">@F(Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)</a>
+                                    <a class="@(Access.CanEdit ? "link-action" : null)" href="@(Access.CanEdit ? $"propagations/{propagation.Id}/edit?field=first-root" : null)">@F(Strings.Propagations.DetDateDay, Labels.Date(root), propagation.DaysToFirstRoot)</a>
                                 }
                                 else
                                 {
@@ -686,7 +698,7 @@ else
                         <dd>
                             @if (propagation.FirstLeafOn is { } leaf)
                             {
-                                <a class="link-action" href="propagations/@propagation.Id/edit?field=first-leaf">@F(Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)</a>
+                                <a class="@(Access.CanEdit ? "link-action" : null)" href="@(Access.CanEdit ? $"propagations/{propagation.Id}/edit?field=first-leaf" : null)">@F(Strings.Propagations.DetDateDay, Labels.Date(leaf), propagation.DaysToFirstLeaf)</a>
                             }
                             else if (askLeafDay)
                             {
@@ -1087,6 +1099,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter]
     public Guid Id { get; set; }
 
@@ -1281,7 +1296,7 @@ else
         <dd>
             @if (date is { } on)
             {
-                <a class="link-action" href="propagations/@propagation!.Id/edit?field=@field">@F(Strings.Propagations.DetDateDay, Labels.Date(on), days)</a>
+                <a class="@(Access.CanEdit ? "link-action" : null)" href="@(Access.CanEdit ? $"propagations/{propagation!.Id}/edit?field={field}" : null)">@F(Strings.Propagations.DetDateDay, Labels.Date(on), days)</a>
             }
             else
             {

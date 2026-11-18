@@ -45,8 +45,10 @@ else
                 {
                     <div class="empty-state room-no-photo">
                         <p>@F(Strings.Shared.RoomPageNoPhotos, name)</p>
-                        <p class="text-body-secondary">@Strings.Shared.RoomPageNoPhotosHint</p>
-                        <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button>
+                        <IfCan Edit>
+                            <p class="text-body-secondary">@Strings.Shared.RoomPageNoPhotosHint</p>
+                            <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button>
+                        </IfCan>
                     </div>
                 }
                 else
@@ -70,7 +72,7 @@ else
                         </ul>
                     }
                     <div class="room-photo-links">
-                        <button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button>
+                        <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action" @onclick="OpenAdd">@Strings.Shared.RoomPageAddPhoto</button></IfCan>
                         @if (photos.Count > 6)
                         {
                             <a class="btn btn-link btn-sm link-action" href="shelf?place=@placeId">@Strings.Shared.RoomPageAllPhotos</a>
@@ -87,8 +89,10 @@ else
             @if (leftOn is { } left)
             {
                 <p class="room-meta">@F(Strings.Moving.FromBeforeTheMove, Labels.Date(left))</p>
+                <IfCan Edit>
                 <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
                         @onclick="UseAgainAsync">@Strings.Moving.UseAgain</button>
+                </IfCan>
             }
 
             <section class="room-section" aria-labelledby="room-note-heading">
@@ -105,12 +109,14 @@ else
                 else if (!string.IsNullOrWhiteSpace(here.Place.Notes))
                 {
                     <p class="detail-notes">@here.Place.Notes</p>
-                    <button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Common.Edit</button>
+                    <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Common.Edit</button></IfCan>
                 }
                 else
                 {
-                    <button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Shared.RoomPageAddNote</button>
-                    <p class="settings-hint">@Strings.Shared.RoomPageNoteHint</p>
+                    <IfCan Edit>
+                        <button type="button" class="btn btn-link btn-sm link-action room-edit" disabled="@busy" @onclick="StartEditingNote">@Strings.Shared.RoomPageAddNote</button>
+                        <p class="settings-hint">@Strings.Shared.RoomPageNoteHint</p>
+                    </IfCan>
                 }
                 @if (message is not null)
                 {
@@ -189,8 +195,10 @@ else
                         }
                         else
                         {
+                            <IfCan Edit>
                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
                                     @onclick="StartAddingSpot">@Strings.Shared.RoomsAddSpot</button>
+                            </IfCan>
                         }
                     </div>
                 </section>

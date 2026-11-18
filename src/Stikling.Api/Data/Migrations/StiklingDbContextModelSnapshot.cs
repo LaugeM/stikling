@@ -152,6 +152,10 @@ namespace Stikling.Api.Data.Migrations
                     b.Property<DateTimeOffset>("ExpiresAt")
                         .HasColumnType("datetimeoffset");
 
+                    b.Property<string>("ForName")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
                     b.Property<bool>("ManagesPeople")
                         .HasColumnType("bit");
 
