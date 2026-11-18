@@ -10,7 +10,7 @@ namespace Stikling.Web.Services;
 /// change list is kept in the same transaction as each write, and the photo lists in the same
 /// transaction as the images.
 /// </summary>
-public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.ModulePath), ISyncStore, IPhotoSyncStore
+public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.ModulePath), ISyncStore, IPhotoSyncStore, IFileSyncStore
 {
     public async Task<SyncState?> GetStateAsync() =>
         await (await Module).InvokeAsync<SyncState?>("getSyncState");
@@ -63,9 +63,18 @@ public sealed class IndexedDbSyncStore(IJSRuntime js) : JsModule(js, IndexedDb.M
     public async Task RemoveDownloadsAsync(IReadOnlyCollection<Guid> ids) =>
         await (await Module).InvokeVoidAsync("removePhotoDownloads", ids);
 
+    public async Task<IReadOnlyList<Guid>> GetFileUploadsAsync(Guid? after, int max) =>
+        await (await Module).InvokeAsync<List<Guid>>("getFileUploads", after, max);
+
+    public async Task RemoveFileUploadsAsync(IReadOnlyCollection<Guid> ids) =>
+        await (await Module).InvokeVoidAsync("removeFileUploads", ids);
+
     /// <summary>How many photos taken or restored here haven't reached the server yet.</summary>
     public async Task<int> CountPhotoUploadsAsync() =>
         await (await Module).InvokeAsync<int>("countPhotoUploads");
+
+    public async Task<int> CountFileUploadsAsync() =>
+        await (await Module).InvokeAsync<int>("countFileUploads");
 
     /// <summary>How many of these photos are still waiting to be sent to the server.</summary>
     public async Task<int> CountUploadsAmongAsync(IReadOnlyCollection<Guid> ids)

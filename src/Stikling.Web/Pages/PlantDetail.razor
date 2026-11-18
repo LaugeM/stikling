@@ -776,6 +776,7 @@ else
                     </IfCan>
                 </section>
 
+                <FilesCard SubjectType="FileSubject.Plant" SubjectId="plant.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => more = More.None" />
             </div>
 
             <GrowthBlock @key="@($"{historyVersion}-{growthVersion}-{earlierId}")" SubjectId="plant.Id"
@@ -1048,6 +1049,12 @@ else
                     break;
                 }
                 <ul class="sheet-actions">
+                    <li>
+                        <label class="sheet-action" for="@filesInputId">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
+                            <span class="sheet-action-text"><b>@Strings.Files.Add</b><small>@Strings.Files.AddHint</small></span>
+                        </label>
+                    </li>
                     @if (plant.InCollection)
                     {
                         <li>
@@ -1738,6 +1745,7 @@ else
     private bool photoChoice;
     private Timeline? timeline;
     private readonly string photoInputId = $"plant-photo-{Guid.NewGuid():N}";
+    private readonly string filesInputId = $"plant-files-{Guid.NewGuid():N}";
 
     // The Same angle button needs a camera and an earlier photo to line up with
     private bool cameraAvailable;

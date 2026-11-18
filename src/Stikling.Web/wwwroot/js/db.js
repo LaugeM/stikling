@@ -9,7 +9,7 @@
 const MAIN_DB = "stikling";
 const OPEN_KEY = "stikling-open-collection";
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const DB_VERSION = 32;
+const DB_VERSION = 33;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -17,7 +17,7 @@ const STORES_V1 = ["plants", "propagations", "timeline", "photos", "photoBlobs"]
 
 // Stores that don't hold records. Every other store is synced, so a write to it also goes on
 // the change list, the "changes" store, in the same step.
-const NOT_RECORDS = new Set(["photoBlobs", "changes", "syncState", "photoUploads", "photoDownloads"]);
+const NOT_RECORDS = new Set(["photoBlobs", "changes", "syncState", "photoUploads", "photoDownloads", "fileBlobs", "fileUploads"]);
 
 let dbPromise;
 let openName;
@@ -184,6 +184,14 @@ function openNamed(name) {
                 // The person's own notes on a genus, species or cultivar, one record per name
                 db.createObjectStore("nameNotes", { keyPath: "id" });
             }
+            if (event.oldVersion < 33) {
+                // Receipts, plant tags and care cards attached to a plant, cutting or order. The record is
+                // synced. Its bytes are in fileBlobs by the file's id, and the ones that may not have
+                // reached the server yet are listed in fileUploads
+                db.createObjectStore("files", { keyPath: "id" });
+                db.createObjectStore("fileBlobs"); // key given on put
+                db.createObjectStore("fileUploads", { keyPath: "id" });
+            }
         };
 
         request.onsuccess = () => {
@@ -238,7 +246,9 @@ export async function put(storeName, value) {
         return;
     }
 
-    await transact([storeName, "changes"], "readwrite", tx => {
+    // A file written deleted frees its bytes in the same step
+    const files = storeName === "files";
+    await transact(files ? [storeName, "changes", "fileBlobs", "fileUploads"] : [storeName, "changes"], "readwrite", tx => {
         const store = tx.objectStore(storeName);
         const request = store.get(value.id);
         request.onsuccess = () => {
@@ -252,6 +262,7 @@ export async function put(storeName, value) {
 
             store.put(value);
             noteChange(tx, storeName, value.id);
+            if (files && value.deletedAt) forgetFile(tx, value.id);
         };
     });
 }
@@ -309,6 +320,44 @@ function forgetPhoto(tx, id) {
     tx.objectStore("photoBlobs").delete(`${id}:thumb`);
     tx.objectStore("photoUploads").delete(id);
     tx.objectStore("photoDownloads").delete(id);
+}
+
+// Attached files. The bytes are in fileBlobs by the file's id, and a file added or restored here is listed in
+// fileUploads in the same transaction, until the server has it. There is no list to download: a file from
+// another device is fetched when it is opened.
+export async function getFileBlob(id) {
+    return (await run("fileBlobs", "readonly", store => store.get(id))) ?? null;
+}
+
+export async function hasFileBlob(id) {
+    return (await run("fileBlobs", "readonly", store => store.count(id))) > 0;
+}
+
+export async function putFileBytes(id, blob) {
+    await transact(["fileBlobs", "fileUploads"], "readwrite", tx => {
+        tx.objectStore("fileBlobs").put(blob, id);
+        tx.objectStore("fileUploads").put({ id });
+    });
+}
+
+// Bytes fetched from the server, kept only if the file's record is still here and not deleted, since it may
+// have been deleted while they were on their way. They aren't listed to send back.
+export async function putFetchedFile(id, blob) {
+    await transact(["files", "fileBlobs"], "readwrite", tx => {
+        const request = tx.objectStore("files").get(id);
+        request.onsuccess = () => {
+            if (request.result && !request.result.deletedAt) tx.objectStore("fileBlobs").put(blob, id);
+        };
+    });
+}
+
+export async function removeFileBytes(id) {
+    await transact(["fileBlobs", "fileUploads"], "readwrite", tx => forgetFile(tx, id));
+}
+
+function forgetFile(tx, id) {
+    tx.objectStore("fileBlobs").delete(id);
+    tx.objectStore("fileUploads").delete(id);
 }
 
 // Asks the browser not to clear our data when the device is low on space.
@@ -385,7 +434,10 @@ export async function markSent(sent) {
 // Puts every record of these kinds on the change list, and the photos on their lists
 export async function queueAll(kinds) {
     const photos = kinds.includes("photos");
-    const stores = photos ? ["changes", "photoBlobs", "photoUploads", "photoDownloads", ...kinds] : ["changes", ...kinds];
+    const files = kinds.includes("files");
+    const stores = ["changes", ...kinds];
+    if (photos) stores.push("photoBlobs", "photoUploads", "photoDownloads");
+    if (files) stores.push("fileBlobs", "fileUploads");
     await transact(stores, "readwrite", tx => {
         for (const kind of kinds) {
             const request = tx.objectStore(kind).getAllKeys();
@@ -394,6 +446,7 @@ export async function queueAll(kinds) {
             };
         }
         if (photos) queuePhotos(tx);
+        if (files) queueFiles(tx);
     });
 }
 
@@ -412,11 +465,14 @@ export function getMany(kind, ids) {
 
 // Saves records from the server, each only if the copy here still has the updatedAt it was
 // compared with (or is still missing, when replaces is null). They don't go on the change list,
-// and a change here that lost to them comes off it. A photo deleted on another device frees its
-// images here too, and one with no thumbnail here goes on the list to fetch.
+// and a change here that lost to them comes off it. A photo or a file deleted on another device frees its
+// images or bytes here too, and a photo with no thumbnail here goes on the list to fetch.
 export async function saveFromServer(kind, copies) {
     const photos = kind === "photos";
-    const stores = photos ? [kind, "changes", "photoBlobs", "photoUploads", "photoDownloads"] : [kind, "changes"];
+    const files = kind === "files";
+    const stores = photos ? [kind, "changes", "photoBlobs", "photoUploads", "photoDownloads"]
+        : files ? [kind, "changes", "fileBlobs", "fileUploads"]
+        : [kind, "changes"];
     await transact(stores, "readwrite", tx => {
         const store = tx.objectStore(kind);
         for (const { data, replaces } of copies) {
@@ -428,6 +484,7 @@ export async function saveFromServer(kind, copies) {
                 tx.objectStore("changes").delete(`${kind}/${data.id}`);
                 if (photos && data.deletedAt) forgetPhoto(tx, data.id);
                 else if (photos) queueDownloadIfMissing(tx, data.id);
+                else if (files && data.deletedAt) forgetFile(tx, data.id);
             };
         }
     });
@@ -456,6 +513,14 @@ function queuePhotos(tx) {
     };
 }
 
+// Puts every file with bytes here on the list to send, for when the device starts over with a collection
+function queueFiles(tx) {
+    const keys = tx.objectStore("fileBlobs").getAllKeys();
+    keys.onsuccess = () => {
+        for (const key of keys.result) tx.objectStore("fileUploads").put({ id: key });
+    };
+}
+
 // Up to max ids from one of the photo lists, in key order, after the given id
 function listPhotos(storeName, after, max) {
     return transact(storeName, "readonly", tx => {
@@ -477,9 +542,17 @@ export const removePhotoUploads = ids => unlistPhotos("photoUploads", ids);
 export const getPhotoDownloads = (after, max) => listPhotos("photoDownloads", after, max);
 export const removePhotoDownloads = ids => unlistPhotos("photoDownloads", ids);
 
+export const getFileUploads = (after, max) => listPhotos("fileUploads", after, max);
+export const removeFileUploads = ids => unlistPhotos("fileUploads", ids);
+
 // How many photos taken or restored here haven't reached the server yet
 export async function countPhotoUploads() {
     return await run("photoUploads", "readonly", store => store.count());
+}
+
+// How many attached files taken or restored here haven't reached the server yet
+export async function countFileUploads() {
+    return await run("fileUploads", "readonly", store => store.count());
 }
 
 // Empties every store of the main database, for signing out and removing the data from this device.

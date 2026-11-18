@@ -5,6 +5,7 @@ using System.Text.Json;
 using Microsoft.AspNetCore.Http.Features;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
+using Stikling.Api.Files;
 using Stikling.Api.Photos;
 using Stikling.Core.Sync;
 
@@ -30,7 +31,7 @@ public static class ExportEndpoints
     /// </summary>
     public static IEndpointRouteBuilder MapExport(this IEndpointRouteBuilder app)
     {
-        app.MapPost("/me/export", async (HttpContext http, CurrentPerson current, StiklingDbContext db, PhotoStorage photos, TimeProvider clock) =>
+        app.MapPost("/me/export", async (HttpContext http, CurrentPerson current, StiklingDbContext db, PhotoStorage photos, FileStorage fileStorage, TimeProvider clock) =>
         {
             if (await ReadAccountAsync(http.Request) is not { } body)
             {
@@ -53,7 +54,7 @@ public static class ExportEndpoints
             http.Response.Headers.ContentDisposition =
                 new ContentDisposition { FileName = $"stikling-data-{now:yyyy-MM-dd}.zip" }.ToString();
 
-            await WriteZipAsync(http.Response.Body, person, body.Account, db, photos, now, http.RequestAborted);
+            await WriteZipAsync(http.Response.Body, person, body.Account, db, photos, fileStorage, now, http.RequestAborted);
             return Results.Empty;
         })
         .RequireAuthorization();
@@ -94,7 +95,7 @@ public static class ExportEndpoints
     }
 
     private static async Task WriteZipAsync(
-        Stream output, Person person, JsonElement? account, StiklingDbContext db, PhotoStorage photos, DateTimeOffset now, CancellationToken cancel)
+        Stream output, Person person, JsonElement? account, StiklingDbContext db, PhotoStorage photos, FileStorage fileStorage, DateTimeOffset now, CancellationToken cancel)
     {
         var memberships = await db.Memberships.AsNoTracking()
             .Where(m => m.PersonId == person.Id)
@@ -145,6 +146,14 @@ public static class ExportEndpoints
 
             foreach (var image in images)
                 await WriteImageAsync(zip, photos, image, cancel);
+
+            var storedFiles = await db.StoredFiles.AsNoTracking()
+                .Where(f => f.CollectionId == collectionId)
+                .OrderBy(f => f.FileId)
+                .ToListAsync(cancel);
+
+            foreach (var file in storedFiles)
+                await WriteFileAsync(zip, fileStorage, file, cancel);
 
             // Whether the plant's or propagation's page is shared, and with what settings
             var shares = await db.ShareLinks.AsNoTracking()
@@ -255,6 +264,25 @@ public static class ExportEndpoints
         await stream.WriteAsync(content, cancel);
     }
 
+    private static async Task WriteFileAsync(ZipArchive zip, FileStorage files, StoredFile file, CancellationToken cancel)
+    {
+        await using var blob = await files.OpenAsync(file.CollectionId, file.FileId);
+        if (blob is null)
+            return;
+
+        // A file is at most FileRules.MaxFileBytes, so one at a time can be held in memory
+        using var bytes = new MemoryStream();
+        await blob.CopyToAsync(bytes, cancel);
+        var content = bytes.GetBuffer().AsMemory(0, (int)bytes.Length);
+
+        var extension = FileRules.FormatOf(content.Span)?.Extension ?? "bin";
+
+        // Images and PDFs are compressed already
+        var entry = zip.CreateEntry($"collections/{file.CollectionId}/files/{file.FileId}.{extension}", CompressionLevel.NoCompression);
+        await using var stream = await entry.OpenAsync(cancel);
+        await stream.WriteAsync(content, cancel);
+    }
+
     private static async Task WriteJsonAsync<T>(ZipArchive zip, string name, T value, CancellationToken cancel)
     {
         var entry = zip.CreateEntry(name);
@@ -302,6 +330,8 @@ public static class ExportEndpoints
                           if you never turned it on.
           photos/         Your photos. The file name is the photo's id. A file ending in -small
                           is the thumbnail.
+          files/          The receipts, plant tags and other files you attached. The file name is
+                          the id of the record in files.json, which has the name you gave it.
 
         The .json files are plain text and open in any text editor.
         """;

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Heading" xml:space="preserve">
+    <value>Files</value>
+    <comment>Heading of the card on a plant, cutting or order that lists its attached files. The number of files is shown next to it.</comment>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Add file</value>
+    <comment>Button and menu item that opens the file picker.</comment>
+  </data>
+  <data name="AddHint" xml:space="preserve">
+    <value>A receipt, a plant tag or a care card</value>
+    <comment>Small text under Add file in the menu of a plant or cutting.</comment>
+  </data>
+  <data name="TypePdf" xml:space="preserve">
+    <value>PDF</value>
+    <comment>Type shown under a file's name when it is a PDF.</comment>
+  </data>
+  <data name="TypeImage" xml:space="preserve">
+    <value>Image</value>
+    <comment>Type shown under a file's name when it is an image.</comment>
+  </data>
+  <data name="RowMeta" xml:space="preserve">
+    <value>{0} · {1} · {2}</value>
+    <comment>Second line of a file: type, size and the day it was added, like PDF · 1.2 MB · 3 Nov 2026.</comment>
+  </data>
+  <data name="RowOpen" xml:space="preserve">
+    <value>Open {0}</value>
+    <comment>Hidden label of a file's row. {0} is the file's name.</comment>
+  </data>
+  <data name="RowOptions" xml:space="preserve">
+    <value>Options for {0}</value>
+    <comment>Hidden label of the button with the menu of one file. {0} is the file's name.</comment>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Rename</value>
+    <comment>Menu item that renames a file.</comment>
+  </data>
+  <data name="SaveToDevice" xml:space="preserve">
+    <value>Save to device</value>
+    <comment>Menu item that saves a copy of the file on this device.</comment>
+  </data>
+  <data name="RenameLabel" xml:space="preserve">
+    <value>File name</value>
+    <comment>Label of the box a file is renamed in.</comment>
+  </data>
+  <data name="RenameEmpty" xml:space="preserve">
+    <value>Give the file a name.</value>
+    <comment>Shown when the name of a file is left empty.</comment>
+  </data>
+  <data name="DeleteAsk" xml:space="preserve">
+    <value>Delete this file? It goes from every device where you're signed in.</value>
+    <comment>Asked before a file is deleted.</comment>
+  </data>
+  <data name="Added_One" xml:space="preserve">
+    <value>Added {0} file</value>
+    <comment>Shown after one file was added.</comment>
+  </data>
+  <data name="Added_Other" xml:space="preserve">
+    <value>Added {0} files</value>
+    <comment>Shown after files were added.</comment>
+  </data>
+  <data name="Unsupported_One" xml:space="preserve">
+    <value>{0} file wasn't an image or a PDF, so it wasn't added</value>
+    <comment>Shown when one chosen file can't be kept.</comment>
+  </data>
+  <data name="Unsupported_Other" xml:space="preserve">
+    <value>{0} files weren't images or PDFs, so they weren't added</value>
+    <comment>Shown when chosen files can't be kept.</comment>
+  </data>
+  <data name="TooLarge_One" xml:space="preserve">
+    <value>{0} file was over 10 MB, so it wasn't added</value>
+    <comment>Shown when one chosen file is too big.</comment>
+  </data>
+  <data name="TooLarge_Other" xml:space="preserve">
+    <value>{0} files were over 10 MB, so they weren't added</value>
+    <comment>Shown when chosen files are too big.</comment>
+  </data>
+  <data name="NoRoom_One" xml:space="preserve">
+    <value>Only 20 files fit on one record, so {0} wasn't added</value>
+    <comment>Shown when a plant, cutting or order is full and one file was left out.</comment>
+  </data>
+  <data name="NoRoom_Other" xml:space="preserve">
+    <value>Only 20 files fit on one record, so {0} weren't added</value>
+    <comment>Shown when a plant, cutting or order is full and files were left out.</comment>
+  </data>
+  <data name="AddFailed" xml:space="preserve">
+    <value>Couldn't add the file. Try again.</value>
+    <comment>Shown when adding a file went wrong.</comment>
+  </data>
+  <data name="NotHere" xml:space="preserve">
+    <value>This file hasn't reached this device yet. It comes when you're online and signed in.</value>
+    <comment>Shown when a file was added on another device and can't be fetched now.</comment>
+  </data>
+</root>

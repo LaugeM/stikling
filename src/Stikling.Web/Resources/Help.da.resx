@@ -226,7 +226,7 @@
     <value>Er der en grænse for billeder?</value>
   </data>
   <data name="ThereLimitOnPhotosA1" xml:space="preserve">
-    <value>Hver konto har 1 GB til billeder på serveren, hvilket er omkring 2.500 billeder. Når den er ved at være fuld, viser siden Konto i Indstillinger hvor meget der er brugt. Bliver den fuld, bliver nye billeder på den enhed de blev tilføjet på, og du kan få plads ved at slette billeder du ikke har brug for. Billederne på din enhed er ikke omfattet af grænsen.</value>
+    <value>Hver konto har 1 GB til billeder på serveren, hvilket er omkring 2.500 billeder. Når den er ved at være fuld, viser siden Konto i Indstillinger hvor meget der er brugt. Bliver den fuld, bliver nye billeder på den enhed de blev tilføjet på, og du kan få plads ved at slette billeder du ikke har brug for. Billederne på din enhed er ikke omfattet af grænsen. Filer du knytter til en plante, stikling eller bestilling, bruger af den samme plads.</value>
   </data>
   <data name="HappensWhenSignOutQ" xml:space="preserve">
     <value>Hvad sker der når jeg logger ud?</value>
@@ -894,6 +894,15 @@
   <data name="AddOldPhotosFromBeforeA3" xml:space="preserve">
     <value>Det samme gælder når du starter en stikling: tilføj dens billeder med &lt;em&gt;Kamera&lt;/em&gt; eller &lt;em&gt;Galleri&lt;/em&gt; i formularen. Det nyeste bliver profilbillede, og &lt;em&gt;Startet den&lt;/em&gt; rykker tilbage til dagen for det ældste billede.</value>
   </data>
+  <data name="AttachFileQ" xml:space="preserve">
+    <value>Kan jeg gemme en kvittering eller et plantetag sammen med en plante?</value>
+  </data>
+  <data name="AttachFileA1" xml:space="preserve">
+    <value>Ja. Åbn planten, stiklingen eller bestillingen og vælg &lt;em&gt;Tilføj fil&lt;/em&gt; i menuen (på en bestilling er det knappen under titlen). Det kan være en kvittering, et plantetag eller et plejekort, som billede eller PDF. Hver fil kan være op til 10 MB, og hver plante, stikling eller bestilling har plads til 20. Filerne står i et kort der hedder &lt;em&gt;Filer&lt;/em&gt; på siden. Tryk på en for at åbne den, eller brug menuen på dens række til at omdøbe den, gemme en kopi på enheden eller slette den.</value>
+  </data>
+  <data name="AttachFileA2" xml:space="preserve">
+    <value>Billeder bliver gjort mindre, men kan stadig læses. Filerne synkroniseres til dine andre enheder og bruger af de samme 1 GB som dine billeder. De er med i sikkerhedskopier og vises aldrig på delte sider, delelinks eller din offentlige side.</value>
+  </data>
   <data name="SharePlantOrCuttingQ" xml:space="preserve">
     <value>Hvordan deler jeg en plante eller en stikling?</value>
   </data>
@@ -919,7 +928,7 @@
     <value>Ja, hvis du er logget ind. Tryk på &lt;em&gt;Del&lt;/em&gt; på dens side, så &lt;em&gt;Link&lt;/em&gt; og så &lt;em&gt;Lav link&lt;/em&gt;. Du får et link til en side alle kan åbne, uden appen eller en konto, med dens billeder, milepæle og noter fra første dag til nu. Læg linket op sammen med en stiklings fremgang, eller send det til vennen der gav dig den. Siden følger planten, så nye billeder og noter kommer med efter næste synkronisering.</value>
   </data>
   <data name="ShareLinkPlantSPageA2" xml:space="preserve">
-    <value>Du bestemmer hvad der står på den. Slå &lt;em&gt;Vis mine noter&lt;/em&gt; fra hvis du vil beholde dine noter for dig selv, tryk på et billede for at tage det ud, og ret navnet og linjen under det. Linjen starter som den på delekortet, fx "Stikling af min Monstera", så ret den hvis den siger mere end du vil. Siden viser aldrig rummet, prisen, butikken eller personen den kom fra, hvem den gik videre til, dens tags, potter eller pleje. Så længe noterne vises, står det i notefeltet på den plante.</value>
+    <value>Du bestemmer hvad der står på den. Slå &lt;em&gt;Vis mine noter&lt;/em&gt; fra hvis du vil beholde dine noter for dig selv, tryk på et billede for at tage det ud, og ret navnet og linjen under det. Linjen starter som den på delekortet, fx "Stikling af min Monstera", så ret den hvis den siger mere end du vil. Siden viser aldrig rummet, prisen, butikken eller personen den kom fra, hvem den gik videre til, dens tags, potter, pleje eller vedhæftede filer. Så længe noterne vises, står det i notefeltet på den plante.</value>
   </data>
   <data name="ShareLinkPlantSPageA3" xml:space="preserve">
     <value>&lt;em&gt;Slå linket fra&lt;/em&gt; lukker siden inden for få minutter, og det samme sker hvis du sletter planten. Alle der åbner linket, kan så se at den er væk. Slår du det til igen, får du et nyt link. Et link kræver en konto, fordi siden vises fra Stiklings server med de billeder din enhed har sendt op.</value>

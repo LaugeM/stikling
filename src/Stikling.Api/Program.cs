@@ -14,6 +14,7 @@ using Stikling.Api.Identification;
 using Stikling.Api.Notifications;
 using Stikling.Api.People;
 using Stikling.Api.PlantFacts;
+using Stikling.Api.Files;
 using Stikling.Api.Photos;
 using Stikling.Api.Reports;
 using Stikling.Api.Sharing;
@@ -50,6 +51,7 @@ builder.Services.AddSingleton(services =>
         : new BlobServiceClient(photos);
 });
 builder.Services.AddSingleton<PhotoStorage>();
+builder.Services.AddSingleton<FileStorage>();
 builder.Services.Configure<PhotoOptions>(builder.Configuration.GetSection("Photos"));
 
 builder.Services.AddSingleton(TimeProvider.System);
@@ -140,6 +142,7 @@ app.MapCollections();
 app.MapInvites();
 app.MapRecords();
 app.MapPhotos();
+app.MapFiles();
 app.MapShareLinks();
 app.MapPublicPageSettings();
 app.MapSharePages();

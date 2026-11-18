@@ -497,6 +497,8 @@ else
                 }
 
                 <LeafCard Leaves="leaves" PhotoOf="LeafPhoto" OnOpen="OpenLeaf" />
+
+                <FilesCard SubjectType="FileSubject.Propagation" SubjectId="propagation.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => more = More.None" />
             </div>
 
             <GrowthBlock @key="@($"{historyVersion}-{growthVersion}")" SubjectId="propagation.Id" StartDay="PhotoDayCount.StartOf(propagation)" />
@@ -1005,6 +1007,15 @@ else
             {
                 case More.Menu:
                     <ul class="sheet-actions">
+                        @if (Access.CanEdit)
+                        {
+                            <li>
+                                <label class="sheet-action" for="@filesInputId">
+                                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
+                                    <span class="sheet-action-text"><b>@Strings.Files.Add</b><small>@Strings.Files.AddHint</small></span>
+                                </label>
+                            </li>
+                        }
                         <li>
                             <button type="button" class="sheet-action" @onclick="() => more = More.Flag">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Flag</svg>
@@ -1207,6 +1218,7 @@ else
     private bool photoChoice;
     private Timeline? timeline;
     private readonly string photoInputId = $"propagation-photo-{Guid.NewGuid():N}";
+    private readonly string filesInputId = $"propagation-files-{Guid.NewGuid():N}";
 
     private bool careOpen;
     private IReadOnlyList<PropagationCareLog> careLogs = [];

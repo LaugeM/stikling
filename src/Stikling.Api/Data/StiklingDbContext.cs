@@ -15,6 +15,7 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
     public DbSet<SyncedRecord> Records => Set<SyncedRecord>();
     public DbSet<PersonSettings> PersonSettings => Set<PersonSettings>();
     public DbSet<PhotoImage> PhotoImages => Set<PhotoImage>();
+    public DbSet<StoredFile> StoredFiles => Set<StoredFile>();
     public DbSet<DeletedAccount> DeletedAccounts => Set<DeletedAccount>();
     public DbSet<ShareLink> ShareLinks => Set<ShareLink>();
     public DbSet<PublicPage> PublicPages => Set<PublicPage>();
@@ -104,6 +105,13 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             image.HasKey(i => new { i.CollectionId, i.PhotoId, i.Size });
             image.Property(i => i.Size).HasConversion<string>().HasMaxLength(20);
             image.HasOne<Collection>().WithMany().HasForeignKey(i => i.CollectionId);
+        });
+
+        model.Entity<StoredFile>(file =>
+        {
+            file.HasKey(f => new { f.CollectionId, f.FileId });
+            file.Property(f => f.ContentType).HasMaxLength(50);
+            file.HasOne<Collection>().WithMany().HasForeignKey(f => f.CollectionId);
         });
 
         model.Entity<ShareLink>(link =>

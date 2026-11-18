@@ -32,7 +32,12 @@ else
     </div>
 
     <p class="order-meta">@Meta</p>
-    <IfCan Edit><p><a class="btn btn-outline-primary btn-sm" href="orders/@view.Order.Id/edit">@Strings.Common.Edit</a></p></IfCan>
+    <IfCan Edit>
+        <p class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-primary btn-sm" href="orders/@view.Order.Id/edit">@Strings.Common.Edit</a>
+            <label class="btn btn-outline-primary btn-sm" for="@filesInputId">@Strings.Files.Add</label>
+        </p>
+    </IfCan>
 
     @if (view.Items.Count > 0)
     {
@@ -80,6 +85,8 @@ else
         <p class="detail-notes">@view.Order.Notes</p>
     }
 
+    <FilesCard SubjectType="FileSubject.Order" SubjectId="view.Order.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" />
+
     @if (view.IsOnTheWay && Access.CanEdit)
     {
         <div class="page-dock unpack-dock" role="group" aria-label="@Strings.Orders.Unpack">
@@ -107,6 +114,7 @@ else
     private IReadOnlyDictionary<Guid, Propagation> propagations = new Dictionary<Guid, Propagation>();
     private bool loading = true;
     private bool unpackOpen;
+    private readonly string filesInputId = $"order-files-{Guid.NewGuid():N}";
     private Guid? openedFor;
 
     protected override async Task OnParametersSetAsync()

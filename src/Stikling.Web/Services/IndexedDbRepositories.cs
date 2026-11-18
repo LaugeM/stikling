@@ -1,6 +1,7 @@
 using Stikling.Core.Away;
 using Stikling.Core.Care;
 using Stikling.Core.Feeds;
+using Stikling.Core.Files;
 using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
 using Stikling.Core.Leaves;
@@ -306,4 +307,10 @@ public sealed class IndexedDbNameNoteRepository(IndexedDb db, TimeProvider time)
     async Task<IReadOnlyList<NameNote>> INameNoteRepository.GetStoredAsync() => await GetStoredAsync();
 
     protected override IReadOnlyList<string> Validate(NameNote note) => note.Validate();
+}
+
+public sealed class IndexedDbFileRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<AttachedFile>(db, time, RecordKinds.Files), IFileRepository
+{
+    protected override IReadOnlyList<string> Validate(AttachedFile file) => file.Validate();
 }

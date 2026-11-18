@@ -7,7 +7,7 @@ using Stikling.Core.Sync;
 namespace Stikling.Api.Photos;
 
 /// <summary>
-/// The images of a collection's photos. A photo's record syncs through the records endpoints
+/// The images of a collection's photos, and how much space they and the attached files use. A photo's record syncs through the records endpoints
 /// first, and its images can only be sent once the server has it.
 /// </summary>
 public static class PhotoEndpoints
@@ -156,8 +156,10 @@ public static class PhotoEndpoints
         return Results.Bytes(bytes, (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).ContentType);
     }
 
-    private static Task<long> UsedAsync(StiklingDbContext db, Guid collectionId) =>
-        db.PhotoImages.Where(i => i.CollectionId == collectionId).SumAsync(i => i.Bytes);
+    /// <summary>The space the collection's photo images and attached files take together. They share one limit.</summary>
+    internal static async Task<long> UsedAsync(StiklingDbContext db, Guid collectionId) =>
+        await db.PhotoImages.Where(i => i.CollectionId == collectionId).SumAsync(i => i.Bytes)
+        + await db.StoredFiles.Where(f => f.CollectionId == collectionId).SumAsync(f => f.Bytes);
 
     /// <summary>What the collection would use with this image, counting a replaced one only once.</summary>
     private static async Task<long> UsedAfterAsync(StiklingDbContext db, Guid collectionId, Guid photoId, PhotoSize size, long bytes)

@@ -297,7 +297,7 @@
     <comment>Question in the "Your data and backups" part of the Help page.</comment>
   </data>
   <data name="ThereLimitOnPhotosA1" xml:space="preserve">
-    <value>Each account has 1 GB for photos on the server, which is roughly 2,500 photos. When it is nearly full, the Account page in Settings says how much is used. If it fills up, new photos stay on the device they were added on, and deleting photos you don't need makes room. The photos on your device aren't limited by this.</value>
+    <value>Each account has 1 GB for photos on the server, which is roughly 2,500 photos. When it is nearly full, the Account page in Settings says how much is used. If it fills up, new photos stay on the device they were added on, and deleting photos you don't need makes room. The photos on your device aren't limited by this. Files you attach to a plant, cutting or order count toward the same space.</value>
     <comment>Answer to "Is there a limit on photos?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="HappensWhenSignOutQ" xml:space="preserve">
@@ -1187,6 +1187,18 @@
     <value>Starting a propagation works the same way: add its photos with &lt;em&gt;Camera&lt;/em&gt; or &lt;em&gt;Gallery&lt;/em&gt; on the form. The newest becomes the cover, and &lt;em&gt;Started on&lt;/em&gt; moves back to the day of the oldest photo.</value>
     <comment>Answer to "Can I add old photos from before I used the app?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="AttachFileQ" xml:space="preserve">
+    <value>Can I keep a receipt or a plant tag with a plant?</value>
+    <comment>Question on the Help page, in the photos and history section.</comment>
+  </data>
+  <data name="AttachFileA1" xml:space="preserve">
+    <value>Yes. Open the plant, cutting or order and choose &lt;em&gt;Add file&lt;/em&gt; in the menu (on an order it is the button under the title). That can be a receipt, a plant tag or a care card, as an image or a PDF. Each can be up to 10 MB, and each plant, cutting or order holds 20. The files show in a &lt;em&gt;Files&lt;/em&gt; card on its page. Tap one to open it, or use the menu on its row to rename it, save a copy to your device or delete it.</value>
+    <comment>Answer to "Can I keep a receipt or a plant tag with a plant?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="AttachFileA2" xml:space="preserve">
+    <value>Images are made smaller but stay readable. The files sync to your other devices and count toward the same 1 GB as your photos. They are in backups, and never on shared pages, share links or your public page.</value>
+    <comment>Answer to "Can I keep a receipt or a plant tag with a plant?" on the Help page.</comment>
+  </data>
   <data name="SharePlantOrCuttingQ" xml:space="preserve">
     <value>How do I share a plant or a cutting?</value>
     <comment>Question in the "Photos and history" part of the Help page.</comment>
@@ -1220,7 +1232,7 @@
     <comment>Answer to "Can I share a link to a plant's page?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="ShareLinkPlantSPageA2" xml:space="preserve">
-    <value>You choose what is on it. Switch off &lt;em&gt;Show my notes&lt;/em&gt; to keep your notes to yourself, tap a photo to leave it out, and change the name and the line under it. The line starts as the one on the share card, like "Cutting from my Monstera", so change it if that says more than you want. The page never shows the room, the price, the shop or person it came from, who it went to, its tags, pots or care. While notes are shown, the note box on that plant says so.</value>
+    <value>You choose what is on it. Switch off &lt;em&gt;Show my notes&lt;/em&gt; to keep your notes to yourself, tap a photo to leave it out, and change the name and the line under it. The line starts as the one on the share card, like "Cutting from my Monstera", so change it if that says more than you want. The page never shows the room, the price, the shop or person it came from, who it went to, its tags, pots, care or attached files. While notes are shown, the note box on that plant says so.</value>
     <comment>Answer to "Can I share a link to a plant's page?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="ShareLinkPlantSPageA3" xml:space="preserve">

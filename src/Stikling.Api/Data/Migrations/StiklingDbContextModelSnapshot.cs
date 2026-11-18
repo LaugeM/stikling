@@ -505,6 +505,30 @@ namespace Stikling.Api.Data.Migrations
                     b.ToTable("ShareLinks");
                 });
 
+            modelBuilder.Entity("Stikling.Api.Data.StoredFile", b =>
+                {
+                    b.Property<Guid>("CollectionId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FileId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<long>("Bytes")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTimeOffset>("StoredAt")
+                        .HasColumnType("datetimeoffset");
+
+                    b.HasKey("CollectionId", "FileId");
+
+                    b.ToTable("StoredFiles");
+                });
+
             modelBuilder.Entity("Stikling.Api.Data.StoredPushSubscription", b =>
                 {
                     b.Property<Guid>("Id")
@@ -713,6 +737,15 @@ namespace Stikling.Api.Data.Migrations
                         .WithMany()
                         .HasForeignKey("CreatedBy")
                         .OnDelete(DeleteBehavior.SetNull);
+                });
+
+            modelBuilder.Entity("Stikling.Api.Data.StoredFile", b =>
+                {
+                    b.HasOne("Stikling.Api.Data.Collection", null)
+                        .WithMany()
+                        .HasForeignKey("CollectionId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Stikling.Api.Data.StoredPushSubscription", b =>

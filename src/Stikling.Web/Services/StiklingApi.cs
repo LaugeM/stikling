@@ -101,7 +101,7 @@ public sealed record PeopleOutcome<T>(T? Value, PeopleFailure? Failure = null, i
 /// that it turns away, throws <see cref="HttpRequestException"/>. Photo images are sent and
 /// fetched through <see cref="PhotoService"/>, which keeps them in JavaScript.
 /// </summary>
-public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, DeviceFiles files) : ISyncServer, IPhotoServer, IShareLinkServer, IPublicPageServer, IFriendPageServer
+public sealed class StiklingApi(AccountSettings settings, AccountService account, PhotoService photos, AttachmentService attachments, DeviceFiles files) : ISyncServer, IPhotoServer, IFileServer, IShareLinkServer, IPublicPageServer, IFriendPageServer
 {
     private readonly HttpClient http = new() { BaseAddress = settings.ApiAddress };
 
@@ -445,7 +445,14 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
         return (await SendAsync<StoredPhotosResponse>(request)).Photos;
     }
 
-    /// <summary>How much space the collection's photos take on the server, and how much they may.</summary>
+    public async Task<IReadOnlyList<Guid>> GetStoredFilesAsync(Guid collectionId, IReadOnlyList<Guid> ids)
+    {
+        using var request = await RequestAsync(HttpMethod.Post, $"collections/{collectionId}/files/stored");
+        request.Content = JsonContent.Create(new StoredFilesRequest([.. ids]));
+        return (await SendAsync<StoredFilesResponse>(request)).Files;
+    }
+
+    /// <summary>How much space the collection's photos and files take on the server, and how much they may.</summary>
     public async Task<PhotoUsage> GetPhotoUsageAsync(Guid collectionId)
     {
         using var request = await RequestAsync(HttpMethod.Get, $"collections/{collectionId}/photos/usage");
@@ -660,6 +667,39 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
             _ => throw Failed(status),
         };
     }
+
+    // Attached files go the same way, in attachments.js
+
+    public async Task<UploadOutcome> UploadFileAsync(Guid collectionId, Guid fileId)
+    {
+        var status = await UntilNotTooManyAsync(async () =>
+            await attachments.UploadAsync(FileAddress(collectionId, fileId), await TokenAsync(), fileId));
+        return status switch
+        {
+            0 => UploadOutcome.NotHere,
+            >= 200 and < 300 => UploadOutcome.Uploaded,
+            404 => UploadOutcome.NotYet,
+            410 => UploadOutcome.Gone,
+            507 => UploadOutcome.Full,
+            400 or 413 or 415 => UploadOutcome.Refused,
+            _ => throw Failed(status),
+        };
+    }
+
+    public async Task<bool> DownloadFileAsync(Guid collectionId, Guid fileId)
+    {
+        var status = await UntilNotTooManyAsync(async () =>
+            await attachments.DownloadAsync(FileAddress(collectionId, fileId), await TokenAsync(), fileId));
+        return status switch
+        {
+            200 => true,
+            404 => false,
+            _ => throw Failed(status),
+        };
+    }
+
+    private Uri FileAddress(Guid collectionId, Guid fileId) =>
+        new(http.BaseAddress!, $"collections/{collectionId}/files/{fileId}");
 
     /// <summary>How long a photo waits when the server says this account has sent too much at once.</summary>
     private static readonly TimeSpan TooManyWait = TimeSpan.FromSeconds(10);
