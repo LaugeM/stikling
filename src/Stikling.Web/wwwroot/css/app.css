@@ -3831,6 +3831,14 @@ main.app-content:has(.form-bar) {
     margin-bottom: 1rem;
 }
 
+/* The box and the hint are a line of text, so they keep a readable width when the results spread out */
+@media (min-width: 64rem) {
+    .search-box,
+    .search-hint {
+        max-width: 40rem;
+    }
+}
+
 .search-hint {
     margin: 0 0 1.25rem;
     color: var(--pa-muted);
@@ -3906,7 +3914,7 @@ button.search-recent svg {
 @media (min-width: 64rem) {
     .search-results.has-notes {
         display: grid;
-        grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+        grid-template-columns: minmax(0, 1fr) clamp(20rem, 30%, 32rem);
         grid-template-rows: repeat(var(--search-rows), auto) 1fr;
         column-gap: 2rem;
         align-items: start;

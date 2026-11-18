@@ -119,3 +119,14 @@
     margin-block: -0.75rem 0;
     font-size: 0.9rem;
 }
+
+@media (min-width: 64rem) {
+    .results-sections {
+        columns: 2 26rem;
+        column-gap: 2.5rem;
+    }
+
+    .results-sections .results-section {
+        break-inside: avoid;
+    }
+}
