@@ -1,4 +1,5 @@
 @page "/propagations/results"
+@layout WideLayout
 @inject IPropagationRepository Repository
 @inject IPropagationCareLogRepository CareLogs
 @inject RoomService RoomService
@@ -37,6 +38,8 @@ else if (overall is null)
 }
 else
 {
+    @* On a wide screen the sections sit side by side, as many as fit *@
+    <div class="results-sections">
     <section class="results-section">
         <h2>@Strings.Propagations.StatsAllHeading</h2>
         <ul class="results-list">
@@ -136,6 +139,8 @@ else
             </ul>
         </section>
     }
+
+    </div>
 
     <p class="aid-note">
         <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => readyByOpen = true">@Strings.Propagations.ReadyByLink</button>

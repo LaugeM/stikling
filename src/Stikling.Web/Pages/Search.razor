@@ -23,7 +23,8 @@
            @ref="input" value="@query" @oninput="OnInput" />
 </div>
 
-<div @ref="root">
+@* page-full: on a wide screen the results take the whole width beside the menu *@
+<div @ref="root" class="page-full">
     @if (!Searching)
     {
         <p class="search-hint">@Strings.Shared.SearchHint</p>
@@ -35,7 +36,7 @@
                     <h2 class="section-label" id="recent-title">@Strings.Shared.SearchRecent</h2>
                     <button type="button" class="btn btn-link btn-sm link-action search-stop" @onclick="ClearRecentAsync">@Strings.Shared.SearchClear</button>
                 </div>
-                <ul class="item-list">
+                <ul class="item-list list-grid">
                     @foreach (var past in recent)
                     {
                         <li>
@@ -78,7 +79,7 @@
                 var shown = open ? items : items.Take(Preview).ToList();
                 <section class="search-group @(kind == SearchKind.Note ? "search-notes" : null)" aria-labelledby="group-@kind">
                     <h2 class="section-label" id="group-@kind">@GroupLabel(kind) · @items.Count</h2>
-                    <ul class="item-list">
+                    <ul class="item-list list-grid">
                         @foreach (var item in shown)
                         {
                             <li>@Row(item)</li>
@@ -96,7 +97,7 @@
             {
                 <section class="search-group" aria-labelledby="group-dictionary">
                     <h2 class="section-label" id="group-dictionary">@Strings.Dictionary.SearchGroup · @DictionaryCount</h2>
-                    <ul class="item-list">
+                    <ul class="item-list list-grid">
                         @foreach (var group in groupHits)
                         {
                             <li>
@@ -120,7 +121,7 @@
             {
                 <section class="search-group" aria-labelledby="group-guides">
                     <h2 class="section-label" id="group-guides">@Strings.Guides.SearchGroup · @guideHits.Count</h2>
-                    <ul class="item-list">
+                    <ul class="item-list list-grid">
                         @foreach (var guide in guideHits)
                         {
                             <li>
@@ -138,7 +139,7 @@
 
             <section class="search-group" aria-labelledby="group-help">
                 <h2 class="section-label" id="group-help">@Strings.Shared.SearchHelpGroup</h2>
-                <ul class="item-list">
+                <ul class="item-list list-grid">
                     <li>
                         <a class="item-card search-stop" href="@HelpHref">
                             <div class="item-text">
