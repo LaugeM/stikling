@@ -58,6 +58,7 @@ public class StiklingDbContext(DbContextOptions<StiklingDbContext> options) : Db
             invite.Property(i => i.Token).HasMaxLength(40).UseCollation("Latin1_General_100_BIN2");
             invite.HasIndex(i => i.Token).IsUnique();
             invite.Property(i => i.Role).HasConversion<string>().HasMaxLength(20);
+            invite.Property(i => i.ForName).HasMaxLength(60);
             invite.HasIndex(i => new { i.CreatedBy, i.CreatedAt });
             invite.HasIndex(i => i.CollectionId);
 

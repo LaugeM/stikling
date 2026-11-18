@@ -197,6 +197,61 @@ public class InviteTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task An_invite_can_say_who_it_is_for_and_the_list_returns_it_trimmed()
+    {
+        var owner = await SignIn();
+
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "  Plant-sitter in July ");
+
+        Assert.Equal("Plant-sitter in July", invite.ForName);
+        Assert.Equal("Plant-sitter in July", Assert.Single(await OpenInvites(owner)).ForName);
+    }
+
+    [Fact]
+    public async Task A_blank_for_name_is_stored_as_null()
+    {
+        var owner = await SignIn();
+
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "   ");
+
+        Assert.Null(invite.ForName);
+        Assert.Null(Assert.Single(await OpenInvites(owner)).ForName);
+        string? stored = "not read";
+        await api.WithDbAsync(async db => stored = await db.Invites.Where(i => i.Id == invite.Id).Select(i => i.ForName).SingleAsync());
+        Assert.Null(stored);
+    }
+
+    [Fact]
+    public async Task A_for_name_over_60_characters_is_400_and_makes_no_invite()
+    {
+        var owner = await SignIn();
+
+        var tooLong = await _people.CreateInvite(owner, MemberRole.Viewer, forName: new string('a', 61));
+        var longest = await _people.CreateInvite(owner, MemberRole.Viewer, forName: new string('a', 60));
+
+        Assert.Equal(HttpStatusCode.BadRequest, tooLong.StatusCode);
+        Assert.Contains("forName", await tooLong.Content.ReadAsStringAsync());
+        Assert.Equal(HttpStatusCode.Created, longest.StatusCode);
+        Assert.Single(await OpenInvites(owner));
+    }
+
+    [Fact]
+    public async Task The_preview_never_contains_who_the_invite_is_for()
+    {
+        var owner = await SignIn();
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer, forName: "Zebediah Quux");
+        var other = await SignIn();
+
+        var signedIn = await (await _people.Preview(other, invite.Token!)).Content.ReadAsStringAsync();
+        var anonymous = await (await api.CreateClient().GetAsync($"/invites/{invite.Token!}")).Content.ReadAsStringAsync();
+
+        Assert.Contains("collectionName", signedIn, StringComparison.OrdinalIgnoreCase);
+        Assert.DoesNotContain("Zebediah", signedIn);
+        Assert.DoesNotContain("Zebediah", anonymous);
+        Assert.DoesNotContain("forName", anonymous, StringComparison.OrdinalIgnoreCase);
+    }
+
+    [Fact]
     public async Task An_unknown_token_is_404()
     {
         var who = await SignIn();

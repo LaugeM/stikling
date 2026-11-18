@@ -38,12 +38,12 @@ public sealed class PeopleSupport(ApiFactory api)
         return new Who(client, me.PersonId, own, own, name);
     }
 
-    public Task<HttpResponseMessage> CreateInvite(Who by, MemberRole role, bool managesPeople = false) =>
-        by.Client.PostAsJsonAsync($"/collections/{by.CollectionId}/invites", new CreateInviteRequest(role, managesPeople), ApiFactory.Json);
+    public Task<HttpResponseMessage> CreateInvite(Who by, MemberRole role, bool managesPeople = false, string? forName = null) =>
+        by.Client.PostAsJsonAsync($"/collections/{by.CollectionId}/invites", new CreateInviteRequest(role, managesPeople, forName), ApiFactory.Json);
 
-    public async Task<InviteResponse> InviteOk(Who by, MemberRole role, bool managesPeople = false)
+    public async Task<InviteResponse> InviteOk(Who by, MemberRole role, bool managesPeople = false, string? forName = null)
     {
-        var response = await CreateInvite(by, role, managesPeople);
+        var response = await CreateInvite(by, role, managesPeople, forName);
         Assert.Equal(HttpStatusCode.Created, response.StatusCode);
         return (await response.Content.ReadFromJsonAsync<InviteResponse>(ApiFactory.Json))!;
     }

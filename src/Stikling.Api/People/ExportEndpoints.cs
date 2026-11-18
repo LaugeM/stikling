@@ -179,6 +179,7 @@ public static class ExportEndpoints
                     i.Id,
                     Role = i.Role.ToString(),
                     i.ManagesPeople,
+                    i.ForName,
                     i.CreatedAt,
                     i.ExpiresAt,
                     i.UsedAt,

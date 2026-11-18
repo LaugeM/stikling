@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Core.People;
 using static Stikling.Api.Collections.CollectionEndpoints;
 using static Stikling.Api.People.MeEndpoints;
 
@@ -14,10 +15,10 @@ namespace Stikling.Api.Collections;
 /// </summary>
 public static class InviteEndpoints
 {
-    public record CreateInviteRequest(MemberRole? Role, bool ManagesPeople);
+    public record CreateInviteRequest(MemberRole? Role, bool ManagesPeople, string? ForName = null);
 
     public record InviteResponse(
-        Guid Id, string? Token, MemberRole Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName);
+        Guid Id, string? Token, MemberRole Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName, string? ForName = null);
 
     public record InvitePreview(
         Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember,
@@ -35,6 +36,15 @@ public static class InviteEndpoints
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["role"] = ["Choose a role."] });
             if (!PeopleRules.IsValidCombination(role, request.ManagesPeople))
                 return Results.ValidationProblem(new Dictionary<string, string[]> { ["managesPeople"] = ["Only an editor can manage people."] });
+
+            var forName = string.IsNullOrWhiteSpace(request.ForName) ? null : request.ForName.Trim();
+            if (forName is not null && forName.Length > PeopleLimits.MaxInviteForNameLength)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]>
+                {
+                    ["forName"] = [$"Who it is for can have at most {PeopleLimits.MaxInviteForNameLength} characters."],
+                });
+            }
 
             if (await current.FindAsync() is not { } person)
                 return Results.NotFound();
@@ -77,6 +87,7 @@ public static class InviteEndpoints
                 CollectionId = collectionId,
                 Role = role,
                 ManagesPeople = request.ManagesPeople,
+                ForName = forName,
                 CreatedBy = person.Id,
                 CreatedAt = now,
                 ExpiresAt = now + PeopleRules.InviteLifetime,
@@ -100,7 +111,8 @@ public static class InviteEndpoints
                 .OrderByDescending(i => i.CreatedAt).ThenBy(i => i.Id)
                 .Select(i => new InviteResponse(
                     i.Id, i.ManagesPeople && !isOwner ? null : i.Token, i.Role, i.ManagesPeople, i.CreatedAt, i.ExpiresAt,
-                    db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault()))
+                    db.People.Where(p => p.Id == i.CreatedBy).Select(p => p.Name).FirstOrDefault(),
+                    i.ForName))
                 .ToListAsync();
         })
         .RequireAuthorization(CollectionPolicies.Manage);
@@ -219,7 +231,7 @@ public static class InviteEndpoints
             await db.People.Where(p => p.Id == collection.OwnerPersonId).Select(p => p.Name).FirstOrDefaultAsync());
 
     private static InviteResponse Respond(Invite invite, string? createdByName) =>
-        new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName);
+        new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName, invite.ForName);
 
     /// <summary>Whether it could be a token at all, so an address that can't be one never reaches the database.</summary>
     private static bool LooksLikeToken(string token) =>

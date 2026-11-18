@@ -18,6 +18,7 @@ public static class PeopleText
         PeopleFailure.TooMany => Strings.People.TooManyInvites,
         PeopleFailure.Owner => Strings.People.OwnerCantLeaveProblem,
         PeopleFailure.Invalid when string.Equals(field, "name", StringComparison.OrdinalIgnoreCase) => F(Strings.People.NeedsLength, nameMax),
+        PeopleFailure.Invalid when string.Equals(field, "forName", StringComparison.OrdinalIgnoreCase) => F(Strings.People.InviteForTooLong, PeopleLimits.MaxInviteForNameLength),
         _ => Strings.Account.ShareTurnedDown,
     };
 }

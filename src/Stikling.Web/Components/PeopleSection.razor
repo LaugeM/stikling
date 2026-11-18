@@ -201,6 +201,12 @@ else
                 else if (inviteStep == InviteStep.Choosing)
                 {
                     <div class="confirm-card">
+                        <div class="mb-3">
+                            <label class="form-label" for="invite-for">@Strings.People.InviteForLabel</label>
+                            <input id="invite-for" class="form-control" maxlength="@PeopleLimits.MaxInviteForNameLength" autocomplete="off"
+                                   @bind="inviteFor" @bind:event="oninput" />
+                            <p class="settings-hint">@Strings.People.InviteForHint</p>
+                        </div>
                         <fieldset>
                             <legend class="h6">@Strings.People.InviteChoose</legend>
                             <div class="role-choices">
@@ -226,6 +232,10 @@ else
                 else if (made is { } invite && link is not null)
                 {
                     <div class="confirm-card">
+                        @if (!string.IsNullOrWhiteSpace(invite.ForName))
+                        {
+                            <p><strong>@invite.ForName</strong></p>
+                        }
                         <label class="form-label" for="invite-link">@Strings.People.InviteLinkLabel</label>
                         <input id="invite-link" class="form-control invite-link" readonly value="@link" onfocus="this.select()"
                                @ref="linkField" autocomplete="off" autocapitalize="off" spellcheck="false" />
@@ -264,22 +274,33 @@ else
                         @foreach (var invite in open)
                         {
                             var expires = Labels.Date(DateOnly.FromDateTime(invite.ExpiresAt.ToLocalTime().DateTime));
+                            var hasFor = !string.IsNullOrWhiteSpace(invite.ForName);
+                            var rowName = hasFor ? invite.ForName! : RoleText.Label(invite.Choice);
+                            var madeOn = Labels.Date(DateOnly.FromDateTime(invite.CreatedAt.ToLocalTime().DateTime));
+                            var hasMaker = !string.IsNullOrWhiteSpace(invite.CreatedByName);
+                            var rowSub = hasFor
+                                ? (hasMaker
+                                    ? F(Strings.People.InviteNamedMadeRunsOut, RoleText.Label(invite.Choice), madeOn, invite.CreatedByName!, expires)
+                                    : F(Strings.People.InviteNamedRunsOut, RoleText.Label(invite.Choice), expires))
+                                : (hasMaker
+                                    ? F(Strings.People.InviteMadeRunsOut, madeOn, invite.CreatedByName!, expires)
+                                    : F(Strings.People.InviteRunsOut, expires));
                             <li class="people-row">
                                 <div class="people-line">
-                                    <span class="people-name">@RoleText.Label(invite.Choice)</span>
+                                    <span class="people-name">@rowName</span>
                                     <span class="people-actions">
                                         @if (invite.Token is not null)
                                         {
                                             <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                    aria-label="@F(Strings.People.ShowLinkFor, rowName, rowSub)"
                                                     @onclick="() => ShowInvite(invite)">@Strings.People.ShowLink</button>
                                         }
                                         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                aria-label="@F(Strings.People.WithdrawFor, rowName, rowSub)"
                                                 @onclick="() => WithdrawAsync(invite)">@Strings.People.Withdraw</button>
                                     </span>
                                 </div>
-                                <p class="people-sub">@(string.IsNullOrWhiteSpace(invite.CreatedByName)
-                                    ? F(Strings.People.InviteRunsOut, expires)
-                                    : F(Strings.People.InviteMadeRunsOut, Labels.Date(DateOnly.FromDateTime(invite.CreatedAt.ToLocalTime().DateTime)), invite.CreatedByName, expires))</p>
+                                <p class="people-sub">@rowSub</p>
                             </li>
                         }
                     </ul>
@@ -442,6 +463,7 @@ else
     private InviteStep inviteStep = InviteStep.None;
     private RoleChoice inviteChoice = RoleChoice.CanView;
     private InviteInfo? made;
+    private string inviteFor = "";
     private string? link;
     private bool canShare;
     private bool copied;
@@ -657,6 +679,7 @@ else
     {
         var offered = RoleChoice.ForInvite(access);
         inviteChoice = offered.Count > 0 ? offered[0] : RoleChoice.CanView;
+        inviteFor = "";
         inviteStep = InviteStep.Choosing;
     }
 
@@ -669,7 +692,7 @@ else
         message = null;
         try
         {
-            var result = await Api.CreateInviteAsync(current.Id, inviteChoice.Role, inviteChoice.ManagesPeople);
+            var result = await Api.CreateInviteAsync(current.Id, inviteChoice.Role, inviteChoice.ManagesPeople, inviteFor);
             if (result is { Failure: PeopleFailure.Invalid, Field: "name" })
             {
                 // The server has no name for the person, though the device thought it did

@@ -426,4 +426,32 @@
     <value>People and invites</value>
     <comment>Link at the bottom of the collection switcher, to the People section on the Account page.</comment>
   </data>
+  <data name="InviteForLabel" xml:space="preserve">
+    <value>Who is it for?</value>
+    <comment>Label of the optional text field when choosing what an invite lets someone do, in the People section.</comment>
+  </data>
+  <data name="InviteForHint" xml:space="preserve">
+    <value>Optional. Only people who manage the collection see it.</value>
+    <comment>Under the Who is it for? field. Says the note is private to the people who manage the collection.</comment>
+  </data>
+  <data name="InviteForTooLong" xml:space="preserve">
+    <value>Who it is for can have at most {0} characters.</value>
+    <comment>Shown when the server turns down the Who is it for? note as too long. {0} is the most characters.</comment>
+  </data>
+  <data name="InviteNamedMadeRunsOut" xml:space="preserve">
+    <value>{0}. Made {1} by {2}, runs out {3}</value>
+    <comment>Under an open invite that has a Who is it for? note, in the People section. {0} is the role, {1} the date it was made, {2} the name of who made it, {3} the date it runs out.</comment>
+  </data>
+  <data name="InviteNamedRunsOut" xml:space="preserve">
+    <value>{0}. Runs out {1}</value>
+    <comment>Under an open invite that has a Who is it for? note, when the maker is not known. {0} is the role, {1} the date it runs out.</comment>
+  </data>
+  <data name="ShowLinkFor" xml:space="preserve">
+    <value>Show link: {0}, {1}</value>
+    <comment>Spoken name of the Show link button on an open invite, so a screen reader can tell the rows apart. {0} is the invite name, {1} the line under it.</comment>
+  </data>
+  <data name="WithdrawFor" xml:space="preserve">
+    <value>Withdraw: {0}, {1}</value>
+    <comment>Spoken name of the Withdraw button on an open invite, so a screen reader can tell the rows apart. {0} is the invite name, {1} the line under it.</comment>
+  </data>
 </root>

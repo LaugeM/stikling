@@ -37,5 +37,7 @@ public static class PeopleLimits
 
     public const int MaxPersonNameLength = 40;
 
+    public const int MaxInviteForNameLength = 60;
+
     public const int MaxCollectionNameLength = 100;
 }

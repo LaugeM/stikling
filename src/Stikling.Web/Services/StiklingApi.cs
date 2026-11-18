@@ -36,7 +36,7 @@ public sealed record FormerCollectionMember(Guid PersonId, string? Name);
 
 /// <summary>An open invite. <see cref="Token"/> is null when the caller may not have the link, as for one that lets someone add people.</summary>
 public sealed record InviteInfo(
-    Guid Id, string? Token, string Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName)
+    Guid Id, string? Token, string Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName, string? ForName = null)
 {
     public RoleChoice Choice => RoleChoice.Of(CollectionRoles.Parse(Role), ManagesPeople);
 }
@@ -173,8 +173,8 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
     public async Task<PeopleOutcome<bool>> HandOverAsync(Guid id, Guid personId) =>
         await PeopleCallAsync<bool>(HttpMethod.Put, $"collections/{id}/owner", new { personId });
 
-    public async Task<PeopleOutcome<InviteInfo>> CreateInviteAsync(Guid id, CollectionRole role, bool managesPeople) =>
-        await PeopleCallAsync<InviteInfo>(HttpMethod.Post, $"collections/{id}/invites", new { role = role.ToString(), managesPeople });
+    public async Task<PeopleOutcome<InviteInfo>> CreateInviteAsync(Guid id, CollectionRole role, bool managesPeople, string? forName) =>
+        await PeopleCallAsync<InviteInfo>(HttpMethod.Post, $"collections/{id}/invites", new { role = role.ToString(), managesPeople, forName });
 
     public async Task<PeopleOutcome<List<InviteInfo>>> GetInvitesAsync(Guid id) =>
         await PeopleCallAsync<List<InviteInfo>>(HttpMethod.Get, $"collections/{id}/invites", null);
