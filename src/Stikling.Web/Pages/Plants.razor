@@ -1,6 +1,7 @@
 @page "/plants"
 @layout WideLayout
 @inject IPlantRepository Repository
+@inject CollectionsService Collections
 @inject PlantService PlantService
 @inject OwnFieldService OwnFieldBook
 @inject RoomService RoomService
@@ -27,8 +28,10 @@
 
 <PageTitle>@Strings.Plants.ListPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
-<RowPhotoDrop />
-<PlantQuickActions Plants="@(all ?? [])" Pots="pots" OnChanged="LoadAsync" />
+<IfCan Log>
+    <RowPhotoDrop />
+    <PlantQuickActions Plants="@(all ?? [])" Pots="pots" OnChanged="LoadAsync" />
+</IfCan>
 
 @* page-full: on a wide screen the list takes the whole width beside the menu, in every view *@
 <div class="page-heading page-full">
@@ -37,7 +40,7 @@
     {
         <div class="d-flex align-items-baseline justify-content-end flex-wrap gap-2">
             <span class="text-body-secondary small">@F(Strings.Plants.ListShown, visible.Count, total)</span>
-            <a class="btn btn-outline-primary btn-sm phone-link" href="water?from=plants">@Strings.Plants.ListWaterPlants</a>
+            <IfCan Log><a class="btn btn-outline-primary btn-sm phone-link" href="water?from=plants">@Strings.Plants.ListWaterPlants</a></IfCan>
             <a class="btn btn-link btn-sm link-action phone-link" href="plants/flowering">@Strings.Plants.ListFlowering</a>
             <button type="button" class="btn btn-link btn-sm link-action phone-link" disabled="@(ShareCount == 0)" @onclick="OpenShare">@Strings.Plants.ListShareAsText</button>
             <a class="btn btn-link btn-sm link-action phone-link" href="plants/collection">@Strings.Plants.ListCollection</a>
@@ -46,25 +49,39 @@
             {
                 <a class="btn btn-link btn-sm link-action phone-link" href="scan">@Strings.QrLabels.ScanTitle</a>
             }
+            <IfCan Edit>
             <button type="button" class="btn btn-link btn-sm link-action phone-link" @onclick="ToggleSelectMode">
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
+            </IfCan>
             @* On a wide screen the links above are in the filters' block below, and these two take over from the round buttons *@
+            <IfCan Log>
             <a class="btn btn-outline-primary btn-sm icon-btn heading-add" href="add-photos">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
                 @Strings.AddPhotos.EntryLabel
             </a>
+            </IfCan>
+            <IfCan Edit>
             <a class="btn btn-primary btn-sm icon-btn heading-add" href="plants/new">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
                 @Strings.Plants.AddAPlant
             </a>
+            </IfCan>
         </div>
     }
 </div>
+<OpenCollectionLine />
 
 @if (all is null)
 {
     <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else if (all.Count == 0 && !Access.CanEdit)
+{
+    @* Someone who can't add plants isn't told to. The collection is just empty so far. *@
+    <div class="empty-state">
+        <p>@EmptyText</p>
+    </div>
 }
 else if (all.Count == 0)
 {
@@ -91,7 +108,7 @@ else
     <div class="list-side">
         @* The page's links: a row under the title from 64rem, quiet rows at the top of the filter column from 80rem. A phone has them in the heading above. *@
         <div class="list-side-links">
-            <a class="btn btn-outline-primary btn-sm list-side-water" href="water?from=plants">@Strings.Plants.ListWaterPlants</a>
+            <IfCan Log><a class="btn btn-outline-primary btn-sm list-side-water" href="water?from=plants">@Strings.Plants.ListWaterPlants</a></IfCan>
             <a class="btn btn-link btn-sm link-action list-side-link" href="plants/flowering">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="2.5" /><circle cx="12" cy="6.5" r="2.5" /><circle cx="12" cy="17.5" r="2.5" /><circle cx="6.5" cy="12" r="2.5" /><circle cx="17.5" cy="12" r="2.5" /></svg>
                 @Strings.Plants.ListFlowering
@@ -115,10 +132,12 @@ else
                     @Strings.QrLabels.ScanTitle
                 </a>
             }
+            <IfCan Edit>
             <button type="button" class="btn btn-link btn-sm link-action list-side-link" @onclick="ToggleSelectMode">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.CheckBox</svg>
                 @(selecting ? Strings.Common.Done : Strings.Plants.ListSelect)
             </button>
+            </IfCan>
         </div>
 
     <div class="plant-filters">
@@ -161,7 +180,7 @@ else
                 </select>
                 @if (PickedRoom is { Spots.Count: 0 } && PickedPlace is { } roomPlace)
                 {
-                    <a class="btn btn-outline-primary go-round" href="round/@roomPlace?from=plants">@Strings.Plants.ListGoRound</a>
+                    <IfCan Log><a class="btn btn-outline-primary go-round" href="round/@roomPlace?from=plants">@Strings.Plants.ListGoRound</a></IfCan>
                 }
             }
 
@@ -247,7 +266,7 @@ else
                 }
                 @if (PickedPlace is { } spotPlace)
                 {
-                    <a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">@Strings.Plants.ListGoRound</a>
+                    <IfCan Log><a class="btn btn-outline-primary btn-sm go-round" href="round/@spotPlace?from=plants">@Strings.Plants.ListGoRound</a></IfCan>
                 }
             </div>
         }
@@ -359,7 +378,7 @@ else
             else if (status == StatusFilter.Active)
             {
                 <p>@Strings.Plants.ListNoneActive</p>
-                <a class="btn btn-primary mt-3" href="plants/new">@Strings.Plants.AddAPlant</a>
+                <IfCan Edit><a class="btn btn-primary mt-3" href="plants/new">@Strings.Plants.AddAPlant</a></IfCan>
             }
             else if (status == StatusFilter.Gone && goneAs == PlantStatus.Died)
             {
@@ -675,15 +694,27 @@ else
 }
 else
 {
+    <IfCan Log>
     <a class="fab fab-small" href="add-photos" aria-label="@Strings.AddPhotos.EntryLabel" title="@Strings.AddPhotos.EntryLabel">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Camera</svg>
     </a>
+    </IfCan>
+    <IfCan Edit>
     <a class="fab" href="plants/new" aria-label="@Strings.Plants.AddAPlant" title="@Strings.Plants.AddAPlant">
         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
     </a>
+    </IfCan>
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // For someone who can't add plants, an empty collection is only empty so far
+    private string EmptyText => Collections.Open?.OwnerName is { Length: > 0 } owner
+        ? F(Strings.People.EmptyPlants, owner)
+        : Strings.People.EmptyPlantsNoOwner;
+
     /// <summary>Starts the list on one tag, e.g. from a tag on a plant's page.</summary>
     [SupplyParameterFromQuery(Name = "tag")]
     public string? Tag { get; set; }

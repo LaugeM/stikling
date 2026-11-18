@@ -1,5 +1,6 @@
 @page "/propagations/new"
 @page "/propagations/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject PropagationForms Forms
 @inject ILogger<PropagationEdit> Logger
 @inject PropagationService PropagationService

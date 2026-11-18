@@ -163,6 +163,20 @@ public class PhotoEntriesTests
     }
 
     [Fact]
+    public void For_a_helper_photos_on_their_own_go_on_notes_without_text()
+    {
+        var entries = PhotoEntries.For(SubjectType.Plant, Subject, ThreeDays, Time, asNotes: true);
+
+        Assert.Equal(3, entries.Count);
+        Assert.All(entries, e =>
+        {
+            Assert.Equal(TimelineKind.Note, e.Kind);
+            Assert.Null(e.Text);
+        });
+        Assert.Equal(ThreeDays.Select(p => p.Id).Order(), entries.SelectMany(e => e.PhotoIds).Order());
+    }
+
+    [Fact]
     public void A_blank_note_counts_as_no_note() =>
         Assert.Equal(3, PhotoEntries.For(SubjectType.Plant, Subject, ThreeDays, Time, "  ").Count);
 

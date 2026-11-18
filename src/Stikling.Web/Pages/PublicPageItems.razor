@@ -1,4 +1,5 @@
 @page "/settings/public-page/{Kind}"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @using System.Globalization
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository

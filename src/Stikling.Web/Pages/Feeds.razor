@@ -119,7 +119,7 @@
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Supplies.FeedsAddButton</button>
+        <IfCan Edit><button type="button" class="btn btn-primary" @onclick="StartNew">@Strings.Supplies.FeedsAddButton</button></IfCan>
     </div>
 }
 
@@ -134,7 +134,7 @@ else if (uses.Count == 0)
         <p class="text-body-secondary">
             @Strings.Supplies.FeedsEmptyHint
         </p>
-        @if (products.Count == 0)
+        @if (products.Count == 0 && Access.CanEdit)
         {
             <a class="btn btn-outline-primary mt-3" href="products">@Strings.Supplies.FeedsAddProductsFirst</a>
         }
@@ -225,10 +225,12 @@ else
                         <div class="care-actions">
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => ToggleMixing(use.Feed)">@(measuring ? Strings.Common.Done : Strings.Supplies.FeedsMixBatch)</button>
+                            <IfCan Edit>
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => StartEdit(use.Feed)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => { confirming = use.Feed.Id; mixing = null; }">@Strings.Common.Delete</button>
+                            </IfCan>
                         </div>
                     }
                 </li>
@@ -238,6 +240,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "show")]
     public Guid? Show { get; set; }

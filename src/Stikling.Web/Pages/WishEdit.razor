@@ -1,5 +1,6 @@
 @page "/wishlist/new"
 @page "/wishlist/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @inject WishService WishService
 @inject ILogger<WishEdit> Logger
 @inject NavigationManager Navigation

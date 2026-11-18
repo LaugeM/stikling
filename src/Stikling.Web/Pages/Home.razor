@@ -1,6 +1,7 @@
 @page "/"
 @using System.Globalization
 @inject CoverPhotos Covers
+@inject CollectionsService Collections
 @inject TodayService TodayService
 @inject ITimelineRepository Entries
 @inject IPhotoRepository PhotoRepository
@@ -40,10 +41,18 @@
     <h1>@Strings.Care.TodayTitle</h1>
     <span class="today-date">@TextCulture.Date(Today, Strings.Care.TodayLongDayFormat)</span>
 </div>
+<OpenCollectionLine />
 
 @if (!loaded)
 {
     <p class="text-body-secondary">@Strings.Care.Loading</p>
+}
+else if (plants.Count == 0 && propagations.Count == 0 && !Access.CanEdit)
+{
+    @* Someone who can't add plants isn't told to. The collection is just empty so far. *@
+    <div class="empty-state">
+        <p>@EmptyText</p>
+    </div>
 }
 else if (plants.Count == 0 && propagations.Count == 0)
 {
@@ -87,7 +96,7 @@ else
         @Labels.Plants(plants.Count(p => p.InCollection)) · @Plural.Of(active.Count, Strings.Care.TodayPropagationsGoing_One, Strings.Care.TodayPropagationsGoing_Other)@(monthResult is null ? "" : " · " + F(Strings.Care.TodayPottedUp, monthResult.PottedUp, monthResult.Total))
     </p>
 
-    @if (exampleLoaded)
+    @if (exampleLoaded && Access.CanEdit)
     {
         <div class="reminder">
             @if (confirmingRemoval)
@@ -112,7 +121,7 @@ else
     {
         <div class="reminder">
             <span><b>@(F(Strings.Care.TodayAwayFrom, TextCulture.Date(upcoming.From, Strings.Care.TodayLongDayFormat)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
-            <a class="btn btn-outline-primary" href="sitter-sheet">@Strings.Care.TodaySitterSheet</a>
+            <IfCan Edit><a class="btn btn-outline-primary" href="sitter-sheet">@Strings.Care.TodaySitterSheet</a></IfCan>
         </div>
     }
 
@@ -145,6 +154,7 @@ else
                     ? Strings.Care.TodayNothingAsksAway
                     : F(Strings.Care.TodayNothingAsksQuiet, TextCulture.Date(span.Until, Strings.Care.TodayLongDayFormat)))
             </p>
+            <IfCan Edit>
             <div class="away-actions">
                 <button type="button" class="btn btn-primary" disabled="@awayBusy" @onclick="ImBackAsync">@Strings.Care.TodayImBack</button>
                 <a class="btn btn-outline-primary" href="@(span.Stretches.Count == 1 ? $"away/{span.Stretches[0].Id}" : "away")">@Strings.Care.SitterChange</a>
@@ -153,6 +163,7 @@ else
                     <a class="away-link" href="sitter-sheet">@Strings.Care.TodaySitterSheet</a>
                 }
             </div>
+            </IfCan>
         </section>
     }
 
@@ -177,16 +188,18 @@ else
                                 <div class="item-meta">@BackMeta(row)</div>
                             </div>
                         </a>
+                        <IfCan Edit>
                         <button type="button" class="row-btn" title="@Strings.Care.TodayLookedAtIt" aria-label="@Strings.Care.TodayLookedAtIt" disabled="@awayBusy"
                                 @onclick="() => LookedAtAsync(row)">
                             <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                         </button>
+                        </IfCan>
                     </li>
                 }
             </ol>
             <div class="back-foot">
-                <a class="btn btn-primary" href="round/back">@Strings.Care.TodayGoRoundThese</a>
-                <button type="button" class="back-done" disabled="@awayBusy" @onclick="DoneWithListAsync">@Strings.Care.TodayDoneWithList</button>
+                <IfCan Log><a class="btn btn-primary" href="round/back">@Strings.Care.TodayGoRoundThese</a></IfCan>
+                <IfCan Edit><button type="button" class="back-done" disabled="@awayBusy" @onclick="DoneWithListAsync">@Strings.Care.TodayDoneWithList</button></IfCan>
             </div>
         </section>
     }
@@ -199,7 +212,7 @@ else
         </div>
     }
 
-    @if (!sections.Away && waitingPhotos > 0)
+    @if (!sections.Away && waitingPhotos > 0 && Access.CanLog)
     {
         <div class="reminder">
             <span>@Plural.Of(waitingPhotos, Strings.AddPhotos.TodayWaiting_One, Strings.AddPhotos.TodayWaiting_Other)</span>
@@ -210,7 +223,7 @@ else
     @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
     <div class="today-columns" data-tour="today">
     <div class="today-todo">
-    @if (!sections.Away && sections.RoundSuggestion is { } suggested)
+    @if (!sections.Away && sections.RoundSuggestion is { } suggested && Access.CanLog)
     {
         <section class="today-section">
             <h2>@Strings.Care.TodayRound</h2>
@@ -364,6 +377,7 @@ else
                                     </div>
                                 </div>
                             </a>
+                            <IfCan Edit>
                             <div class="look-again-buttons" role="group" aria-label="@(F(Strings.Care.TodayHowDoesItLook, item.Plant.DisplayName))">
                                 @foreach (var trend in Enum.GetValues<ProblemTrend>())
                                 {
@@ -374,6 +388,7 @@ else
                                     </button>
                                 }
                             </div>
+                            </IfCan>
                         </div>
                     </TodayRow>
                 }
@@ -493,7 +508,7 @@ else
                     </li>
                 }
             </ul>
-            <button type="button" class="btn btn-outline-primary btn-sm today-winter-not" @onclick="() => PutOffAsync(WinterLight.Key(winter.Start), WinterLight.PutOffUntil(winter))">@LightStrings.WinterNot</button>
+            <IfCan Edit><button type="button" class="btn btn-outline-primary btn-sm today-winter-not" @onclick="() => PutOffAsync(WinterLight.Key(winter.Start), WinterLight.PutOffUntil(winter))">@LightStrings.WinterNot</button></IfCan>
         </section>
     }
 
@@ -502,7 +517,7 @@ else
         <section class="today-section">
             <div class="today-section-head">
                 <h2>@Strings.Care.TodayEmptyOuterPot</h2>
-                @if (sections.OuterPot.Due.Count >= 2)
+                @if (sections.OuterPot.Due.Count >= 2 && Access.CanEdit)
                 {
                     <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync(sections.OuterPot.Due)">@Strings.Care.TodayAllEmptied</button>
                 }
@@ -518,7 +533,7 @@ else
                                     <div class="item-name">@due.Plant.DisplayName</div>
                                 </div>
                             </a>
-                            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync([due])">@Strings.Care.TodayEmptied</button>
+                            <IfCan Edit><button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync([due])">@Strings.Care.TodayEmptied</button></IfCan>
                         </div>
                     </li>
                 }
@@ -534,11 +549,13 @@ else
             <div class="today-section-head">
                 <h2>@Strings.Care.TodayWater</h2>
                 <div class="today-head-links">
+                    <IfCan Log>
                     <a class="today-go-round" href="water">
                         @Strings.Care.WaterTitle
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRightSmall</svg>
                     </a>
-                    @if (now.Count >= 2)
+                    </IfCan>
+                    @if (now.Count >= 2 && Access.CanLog)
                     {
                         <a class="today-go-round" href="round/due">
                             @Strings.Care.TodayGoRoundThese
@@ -551,10 +568,12 @@ else
             {
                 <p class="today-next-round">
                     <span>@nextRound</span>
+                    <IfCan Log>
                     <a class="today-go-round" href="round/next">
                         @Strings.Care.TodayGoRoundNow
                         <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRightSmall</svg>
                     </a>
+                    </IfCan>
                 </p>
             }
             @if (now.Any(d => d.Guess.Form == WateringForm.TopWatered && d.Guess.Mode != WateringMode.Meter))
@@ -664,10 +683,12 @@ else
                                     </div>
                                 </div>
                             </a>
+                            <IfCan Log>
                             <button type="button" class="row-btn" title="@Strings.Care.TodayWaterChanged" aria-label="@Strings.Care.TodayWaterChanged" disabled="@waterBusy"
                                     @onclick="() => WaterChangedAsync(due.Propagation)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                             </button>
+                            </IfCan>
                         </div>
                     </li>
                 }
@@ -679,7 +700,7 @@ else
     {
     <section class="today-section worth-a-look">
         <h2>@Strings.Care.TodayWorthALook</h2>
-        @if (StillToPlace > 0)
+        @if (StillToPlace > 0 && Access.CanEdit)
         {
             <a class="item-card still-to-place" href="moving-house/place">
                 <div class="item-text">
@@ -776,7 +797,7 @@ else
                     <text> · </text><span>@F(Strings.Care.TodayAnniversaryMore, anniversaries.Count - AnniversariesListed)</span>
                 }
             </p>
-            <button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="DismissAnniversariesAsync">@Strings.Care.TodayAnniversaryDismiss</button>
+            <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action ps-0" @onclick="DismissAnniversariesAsync">@Strings.Care.TodayAnniversaryDismiss</button></IfCan>
         </section>
     }
 
@@ -791,10 +812,13 @@ else
                         <a class="coming-back-name" href="@(note.Entry.SubjectType == SubjectType.Plant ? "plants" : "propagations")/@note.Entry.SubjectId">@note.Name</a>
                         <p class="coming-back-text">@note.Entry.Text</p>
                         <p class="coming-back-written">@(F(Strings.Care.TodayWritten, Labels.Date(Time.LocalDay(note.Entry.OccurredAt))))</p>
-                        <div class="coming-back-actions">
-                            <button type="button" class="btn btn-primary btn-sm" @onclick="() => NoteDoneAsync(note.Entry)">@Strings.Common.Done</button>
-                            <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => NoteAgainAsync(note.Entry)">@Strings.Care.TodayAgainNextYear</button>
-                        </div>
+                        @if (Access.CanChangeEntry(note.Entry))
+                        {
+                            <div class="coming-back-actions">
+                                <button type="button" class="btn btn-primary btn-sm" @onclick="() => NoteDoneAsync(note.Entry)">@Strings.Common.Done</button>
+                                <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => NoteAgainAsync(note.Entry)">@Strings.Care.TodayAgainNextYear</button>
+                            </div>
+                        }
                     </li>
                 }
             </ul>
@@ -895,6 +919,14 @@ else
 </div>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // For someone who can't add plants, an empty collection is only empty so far
+    private string EmptyText => Collections.Open?.OwnerName is { Length: > 0 } owner
+        ? F(Strings.People.EmptyToday, owner)
+        : Strings.People.EmptyTodayNoOwner;
+
     private bool FirstRun => loaded && plants.Count == 0 && propagations.Count == 0;
 
     private RenderFragment WaterRow(WateringDue due) => __builder =>
@@ -906,7 +938,7 @@ else
                   AnswerChoiceLabel="form == WateringForm.Reservoir ? ReservoirLevels.Text : null"
                   AnswerNoneLabel="@(form == WateringForm.TopWatered ? Strings.Care.TodayNoMeter : form == WateringForm.Reservoir ? Strings.Care.TodayNoReservoirReading : null)"
                   AnswerGroupLabel="@(form == WateringForm.Reservoir ? Strings.Care.TodayReservoirLevel : Strings.Care.RoundMeterReading)"
-                  OnPutOff="days => PutOffWaterAsync(due, days)">
+                  DoneIsCare="true" OnPutOff="days => PutOffWaterAsync(due, days)">
             <a class="item-card" href="plants/@due.Plant.Id">
                 <SubjectThumb Subject="due.Plant" />
                 <div class="item-text">

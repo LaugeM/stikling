@@ -150,7 +150,7 @@
 else
 {
     <div class="form-actions mb-3">
-        <button type="button" class="btn btn-primary" @onclick="StartNew">+ @Strings.Pests.PlansAddAPlan</button>
+        <IfCan Edit><button type="button" class="btn btn-primary" @onclick="StartNew">+ @Strings.Pests.PlansAddAPlan</button></IfCan>
     </div>
 }
 
@@ -186,10 +186,12 @@ else
                     {
                         <div class="plan-summary">@plan.Notes</div>
                     }
+                    <IfCan Edit>
                     <div class="care-actions">
                         <button type="button" class="btn btn-link btn-sm link-action"
                                 @onclick="() => StartEdit(plan)">@Strings.Common.Edit</button>
                     </div>
+                    </IfCan>
                 </li>
             }
         </ul>

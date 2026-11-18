@@ -1,0 +1,54 @@
+@* Gives every page what the person may do in the collection that is open, as a MemberAccess. Their own
+   collection and signed out give full access, so nothing looks different there. A sync can change the
+   role, so it is read again when sync reports. *@
+@implements IDisposable
+@inject CollectionsService Collections
+@inject SyncRunner Sync
+@inject CareService Care
+@inject ILogger<AccessScope> Logger
+
+@if (access is not null)
+{
+    <CascadingValue Value="access">@ChildContent</CascadingValue>
+}
+
+@code {
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private MemberAccess? access;
+
+    protected override async Task OnInitializedAsync()
+    {
+        Sync.StatusChanged += OnSyncChanged;
+        await ReadAsync();
+    }
+
+    private void OnSyncChanged() => _ = InvokeAsync(async () =>
+    {
+        await ReadAsync();
+        StateHasChanged();
+    });
+
+    private async Task ReadAsync()
+    {
+        MemberAccess now;
+        try
+        {
+            now = await Collections.GetAccessAsync();
+        }
+        catch (Exception ex) when (ex is JSException or InvalidOperationException)
+        {
+            // The server checks every request, so this only decides what is drawn
+            Logger.LogWarning(ex, "Reading what the person may do here failed");
+            now = access ?? MemberAccess.Full(Guid.Empty);
+        }
+
+        // A helper's care entries go to the server, but the history line that goes with some of them can't
+        Care.WritesHistory = now.CanEdit;
+        if (now != access)
+            access = now;
+    }
+
+    public void Dispose() => Sync.StatusChanged -= OnSyncChanged;
+}

@@ -24,11 +24,11 @@
     else if (note is not null)
     {
         <p class="your-note">@note.Text</p>
-        <button type="button" class="btn btn-link btn-sm link-action your-edit" @onclick="Edit">@Strings.Common.Edit</button>
+        <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action your-edit" @onclick="Edit">@Strings.Common.Edit</button></IfCan>
     }
     else
     {
-        <button type="button" class="btn btn-outline-primary btn-sm" @onclick="Edit">@Strings.NameNotes.NoteAdd</button>
+        <IfCan Edit><button type="button" class="btn btn-outline-primary btn-sm" @onclick="Edit">@Strings.NameNotes.NoteAdd</button></IfCan>
     }
 
     @if (!Yours.HasAnything)

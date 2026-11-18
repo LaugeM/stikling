@@ -1,5 +1,6 @@
 @page "/plants/new"
 @page "/plants/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @using Stikling.Core.Settings
 @inject ILogger<PlantEdit> Logger
 @inject PlantForms Forms

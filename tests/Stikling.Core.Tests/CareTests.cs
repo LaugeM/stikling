@@ -31,6 +31,17 @@ public class CareTests
     private CareLog Entry(CareKind kind, DateOnly on, Guid? plantId = null, int? moisture = null, string? notes = null) =>
         new() { PlantId = plantId ?? plant, Kind = kind, OccurredOn = on, Moisture = moisture, Notes = notes };
 
+    [Fact]
+    public async Task A_repot_leaves_no_line_on_the_history_when_it_is_turned_off()
+    {
+        service.WritesHistory = false;
+
+        await service.LogAsync(Entry(CareKind.Repotted, Today), Label);
+
+        Assert.Single(await logs.GetAllAsync());
+        Assert.Empty(timeline.Entries);
+    }
+
     // Validation
 
     [Fact]

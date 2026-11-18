@@ -127,9 +127,10 @@ else
                 }
             </ul>
         }
-        <a class="btn btn-outline-primary btn-sm mt-2" href="orders/new?seller=@seller.Id">@Strings.Orders.ListNew</a>
+        <IfCan Edit><a class="btn btn-outline-primary btn-sm mt-2" href="orders/new?seller=@seller.Id">@Strings.Orders.ListNew</a></IfCan>
     </section>
 
+    <IfCan Edit>
     <section class="settings-section">
         <h2>@Strings.Supplies.SellerAbout</h2>
 
@@ -205,6 +206,7 @@ else
             </div>
         }
     </section>
+    </IfCan>
 }
 
 @code {

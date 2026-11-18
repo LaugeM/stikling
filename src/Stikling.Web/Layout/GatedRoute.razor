@@ -1,0 +1,33 @@
+@* Draws the page the address names, or a notice in its place when the page is marked [NeedsAccess] and the
+   person's role in the open collection doesn't allow it. *@
+
+@if (Allowed)
+{
+    <RouteView RouteData="@RouteData" DefaultLayout="@DefaultLayout" />
+}
+else
+{
+    <RouteView RouteData="@NoticeData" DefaultLayout="@DefaultLayout" />
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public RouteData RouteData { get; set; } = default!;
+
+    [Parameter]
+    public Type? DefaultLayout { get; set; }
+
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    private static readonly RouteData NoticeData = new(typeof(Pages.NoAccess), new Dictionary<string, object?>());
+
+    private bool Allowed => RouteData.PageType.GetCustomAttributes(typeof(NeedsAccessAttribute), inherit: true) is [NeedsAccessAttribute needs, ..]
+        ? needs.Level switch
+        {
+            AccessLevel.Edit => Access.CanEdit,
+            AccessLevel.Log => Access.CanLog,
+            _ => true
+        }
+        : true;
+}

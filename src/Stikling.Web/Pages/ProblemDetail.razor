@@ -199,6 +199,7 @@ else
 
     </div>
 
+    <IfCan Edit>
     <section class="danger-zone problem-foot">
         @if (confirmDelete)
         {
@@ -215,6 +216,7 @@ else
             <button class="btn btn-link btn-sm text-danger link-action" @onclick="AskDeleteAsync">@Strings.Pests.ProblemDelete</button>
         }
     </section>
+    </IfCan>
 
     <Sheet Title="@SheetTitle" Open="sheet != Shown.None" OpenChanged="open => { if (!open) sheet = Shown.None; }">
         @switch (sheet)
@@ -288,6 +290,9 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter]
     public Guid Id { get; set; }
 
@@ -321,7 +326,7 @@ else
     private DateOnly Today => Time.Today();
 
     /// <summary>A plant that is gone only has its problem to read, or delete.</summary>
-    private bool Here => plant is { InCollection: true };
+    private bool Here => plant is { InCollection: true } && Access.CanEdit;
 
     private IReadOnlyList<ProblemTrend> trends =>
         updates.Where(u => u.Trend is not null).Select(u => u.Trend!.Value).ToList();

@@ -16,7 +16,7 @@ public sealed class TimelineService(
     /// </summary>
     public async Task<IReadOnlyList<TimelineEntry>> AddPhotosAsync(
         SubjectType subjectType, Guid subjectId, IReadOnlyList<Photo> added, string? note = null, DateOnly? day = null,
-        IReadOnlyList<Mention>? mentions = null)
+        IReadOnlyList<Mention>? mentions = null, bool asNotes = false)
     {
         if (day is { } d)
         {
@@ -28,7 +28,7 @@ public sealed class TimelineService(
             }
         }
 
-        var entries = PhotoEntries.For(subjectType, subjectId, added, time, note);
+        var entries = PhotoEntries.For(subjectType, subjectId, added, time, note, asNotes);
         foreach (var entry in entries)
         {
             entry.Mentions = Mentions.Keep(entry.Text, mentions);

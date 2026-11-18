@@ -13,7 +13,8 @@
             {
                 var shown = item;
                 <li>
-                    <button type="button" class="flowering-row leaf-row" @onclick="() => OnOpen.InvokeAsync(shown.Leaf)">
+                    @* Opening a leaf is for changing it, so someone who can't only reads the row *@
+                    <button type="button" class="flowering-row leaf-row" @onclick="() => OpenIfAllowed(shown.Leaf)">
                         @if (Thumbnail(shown.Leaf) is { } photoId)
                         {
                             <span class="leaf-thumb"><PhotoImage PhotoId="photoId" Alt="@Strings.Shared.LeafPhotoOf" /></span>
@@ -38,6 +39,11 @@
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    private Task OpenIfAllowed(Leaf leaf) => Access.CanEdit ? OnOpen.InvokeAsync(leaf) : Task.CompletedTask;
+
     private const int Fewer = 6;
 
     /// <summary>Newest first, the leaves of the page's subject and any carried over from its cutting.</summary>

@@ -1,0 +1,23 @@
+@* A quiet line near the top of Today, Plants and Propagations while a shared collection is open, so it is clear
+   whose plants these are and what the person can do. Links to the account page, where collections are switched. *@
+@inject CollectionsService Collections
+
+@if (Collections.Open is { } here)
+{
+    <p class="open-collection-line">
+        <a href="account">@Text(here)</a>
+    </p>
+}
+
+@code {
+    private string Text(RegisteredCollection here)
+    {
+        if (here.Gone)
+            return F(Strings.People.OpenLineGone, here.Name);
+
+        var verb = RoleText.Verb(here.Role, here.ManagesPeople);
+        return string.IsNullOrWhiteSpace(here.OwnerName)
+            ? F(Strings.People.OpenLineNoOwner, here.Name, verb)
+            : F(Strings.People.OpenLine, here.OwnerName, verb);
+    }
+}

@@ -11,7 +11,8 @@ namespace Stikling.Web.Services;
 /// places that take a photo without opening its page (the photo round on Today and going round).
 /// </summary>
 public sealed class SubjectPhotos(
-    PhotoService photos, TimelineService timeline, IPlantRepository plants, IPropagationRepository propagations)
+    PhotoService photos, TimelineService timeline, IPlantRepository plants, IPropagationRepository propagations,
+    CollectionsService collections)
 {
     /// <summary>
     /// Saves the photos in <paramref name="input"/>. The first photo of something becomes its cover,
@@ -37,8 +38,11 @@ public sealed class SubjectPhotos(
             return (message, false);
 
         var subjectType = subject is Plant ? SubjectType.Plant : SubjectType.Propagation;
-        await timeline.AddPhotosAsync(subjectType, subject.Id, result.Saved);
-        await SetCoverAsync(subject, PhotoEntries.Cover(result.Saved).Id);
+        // A helper can add photos but not change the plant, so its cover is left as it is
+        var canEdit = (await collections.GetAccessAsync()).CanEdit;
+        await timeline.AddPhotosAsync(subjectType, subject.Id, result.Saved, asNotes: !canEdit);
+        if (canEdit)
+            await SetCoverAsync(subject, PhotoEntries.Cover(result.Saved).Id);
         return (message, true);
     }
 

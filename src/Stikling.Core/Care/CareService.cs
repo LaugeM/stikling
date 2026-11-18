@@ -28,6 +28,13 @@ public sealed class CareService(
 {
     private DateOnly Today => time.Today();
 
+    /// <summary>
+    /// Whether a repot, flush or prune also gets a line on the plant's history. The app turns it off for a
+    /// helper in a shared collection: a helper can't send history lines of that kind, so one would only
+    /// show on their own device.
+    /// </summary>
+    public bool WritesHistory { get; set; } = true;
+
     /// <summary>A blank entry for one plant, dated today.</summary>
     public CareLog Start(Guid plantId, CareKind kind = CareKind.Watered) =>
         new() { PlantId = plantId, Kind = kind, OccurredOn = Today };
@@ -354,7 +361,7 @@ public sealed class CareService(
             onHistory = own.TryGetValue(ownId, out var kind) && kind.OnHistory;
         }
 
-        if (!CareKinds.IsNotable(entry.Kind) && !onHistory)
+        if (!WritesHistory || (!CareKinds.IsNotable(entry.Kind) && !onHistory))
             return;
 
         // Saved in English, so the words in the product doses and the name of a built-in kind are the English ones

@@ -1,0 +1,21 @@
+/* A member's role is picked under their name, so a long label has room on a phone */
+.member-role {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    max-width: 22rem;
+    margin-bottom: 0.25rem;
+}
+
+.invite-link {
+    font-size: 0.875rem;
+}
+
+/* White with dark dots whatever the theme, so a phone camera can read it, and big enough to scan from arm's length */
+.invite-qr {
+    display: block;
+    width: min(100%, 18rem);
+    height: auto;
+    margin: 1rem auto 0;
+    border-radius: 0.5rem;
+}

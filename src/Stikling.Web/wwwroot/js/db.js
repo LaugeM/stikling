@@ -2,7 +2,13 @@
 // Imported as an ES module from C# (see Services/IndexedDb.cs). Values are plain
 // JSON objects with an "id" property as the key.
 
-const DB_NAME = "stikling";
+// The main database. A collection someone is invited into has a database of its own, "stikling-<id>",
+// with every store and the same upgrade code below. Which one is open is chosen once, when it is first
+// opened, from the id in localStorage (the key DeviceFiles calls "open-collection"). Anything that isn't
+// a lower case GUID with dashes means the main one. Switching sets the key and reloads the app.
+const MAIN_DB = "stikling";
+const OPEN_KEY = "stikling-open-collection";
+const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
 const DB_VERSION = 32;
 
 // The stores the first version created. Later versions add theirs in their own
@@ -14,10 +20,32 @@ const STORES_V1 = ["plants", "propagations", "timeline", "photos", "photoBlobs"]
 const NOT_RECORDS = new Set(["photoBlobs", "changes", "syncState", "photoUploads", "photoDownloads"]);
 
 let dbPromise;
+let openName;
+
+// The name of the database in use. It stays the same for as long as the app runs.
+export function openDatabaseName() {
+    if (openName) return openName;
+    let id = null;
+    try {
+        id = localStorage.getItem(OPEN_KEY);
+    } catch {
+        // Blocked storage means the main database
+    }
+    openName = id && GUID.test(id) ? `${MAIN_DB}-${id}` : MAIN_DB;
+    return openName;
+}
 
 function openDb() {
-    dbPromise ??= new Promise((resolve, reject) => {
-        const request = indexedDB.open(DB_NAME, DB_VERSION);
+    dbPromise ??= openNamed(openDatabaseName()).catch(error => {
+        dbPromise = undefined;
+        throw error;
+    });
+    return dbPromise;
+}
+
+function openNamed(name) {
+    return new Promise((resolve, reject) => {
+        const request = indexedDB.open(name, DB_VERSION);
 
         // Runs when the database is created or DB_VERSION goes up. Each version's changes
         // go in their own "if (event.oldVersion < N)" block, and the blocks run in order:
@@ -164,12 +192,8 @@ function openDb() {
             db.onversionchange = () => db.close();
             resolve(db);
         };
-        request.onerror = () => {
-            dbPromise = undefined;
-            reject(request.error);
-        };
+        request.onerror = () => reject(request.error);
     });
-    return dbPromise;
 }
 
 // Runs work in one transaction over the stores, and resolves once it has committed. The work
@@ -458,11 +482,39 @@ export async function countPhotoUploads() {
     return await run("photoUploads", "readonly", store => store.count());
 }
 
-// Empties every store, for signing out and removing the data from this device
+// Empties every store of the main database, for signing out and removing the data from this device.
+// The databases of other collections are deleted instead, see deleteCollectionDatabase.
 export async function clearAll() {
-    const db = await openDb();
+    const inUse = openDatabaseName() === MAIN_DB;
+    const db = inUse ? await openDb() : await openNamed(MAIN_DB);
     const names = Array.from(db.objectStoreNames);
-    await transact(names, "readwrite", tx => {
+    await new Promise((resolve, reject) => {
+        const tx = db.transaction(names, "readwrite");
         for (const name of names) tx.objectStore(name).clear();
+        tx.oncomplete = () => resolve();
+        tx.onerror = () => reject(tx.error);
+        tx.onabort = () => reject(tx.error);
+    });
+    if (!inUse) db.close();
+}
+
+// Deletes the database of a collection, with everything in it. Never the main one. Resolves when it is
+// done, or when another tab keeps it open, which closes its connection by itself and lets it go after.
+// If it is the one open here, the app goes on with the main database until it is reloaded.
+export async function deleteCollectionDatabase(collectionId) {
+    const id = String(collectionId).toLowerCase();
+    if (!GUID.test(id)) return;
+
+    const name = `${MAIN_DB}-${id}`;
+    if (openName === name) {
+        const db = await dbPromise?.catch(() => null);
+        db?.close();
+        dbPromise = undefined;
+        openName = MAIN_DB;
+    }
+
+    await new Promise(resolve => {
+        const request = indexedDB.deleteDatabase(name);
+        request.onsuccess = request.onerror = request.onblocked = () => resolve();
     });
 }

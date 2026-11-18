@@ -5,7 +5,7 @@ using Stikling.Core.Today;
 
 namespace Stikling.Web.Services;
 
-public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time) : ITimelineRepository
+public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time, CollectionsService people) : ITimelineRepository
 {
     public async Task<IReadOnlyList<TimelineEntry>> GetForAsync(Guid subjectId) =>
         TimelineOrder.NewestFirst((await db.GetAllAsync(RecordKinds.Timeline)).Where(e => e.SubjectId == subjectId));
@@ -39,6 +39,7 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
     public async Task AddAsync(TimelineEntry entry)
     {
         entry.CreatedAt = entry.UpdatedAt = time.GetUtcNow();
+        entry.CreatedBy ??= await people.GetPersonIdAsync();
         if (entry.OccurredAt == default)
             entry.OccurredAt = entry.CreatedAt;
         await db.PutAsync(RecordKinds.Timeline, entry);
@@ -60,7 +61,7 @@ public sealed class IndexedDbTimelineRepository(IndexedDb db, TimeProvider time)
     }
 }
 
-public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : IPhotoRepository
+public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time, CollectionsService people) : IPhotoRepository
 {
     public async Task<IReadOnlyList<Photo>> GetForAsync(Guid subjectId) =>
         (await db.GetAllAsync(RecordKinds.Photos))
@@ -89,6 +90,7 @@ public sealed class IndexedDbPhotoRepository(IndexedDb db, TimeProvider time) : 
     public async Task AddAsync(Photo photo)
     {
         photo.CreatedAt = photo.UpdatedAt = time.GetUtcNow();
+        photo.CreatedBy ??= await people.GetPersonIdAsync();
         await db.PutAsync(RecordKinds.Photos, photo);
     }
 

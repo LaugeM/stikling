@@ -21,7 +21,7 @@
                 <div class="care-label">@Group.Label</div>
                 <div class="care-meta">@Labels.Plants(Group.Items.Count) · @CareIntervals.EveryText(Group.Interval)</div>
             </div>
-            @if (!Coming && Remaining.Count >= 2)
+            @if (!Coming && Remaining.Count >= 2 && Access.CanLog)
             {
                 <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="DoneForAllAsync">@Strings.Care.CardDoneForAll</button>
             }
@@ -41,7 +41,7 @@
                 }
                 else
                 {
-                    <TodayRow @key="item.Plant.Id" DoneLabel="@(F(Strings.Care.CardDoneLabel, Group.Label))" OnDone="() => DoneAsync(item)"
+                    <TodayRow @key="item.Plant.Id" DoneIsCare="true" DoneLabel="@(F(Strings.Care.CardDoneLabel, Group.Label))" OnDone="() => DoneAsync(item)"
                               OnPutOff="days => PutOffAsync(item, days)">
                         <a class="item-card" href="plants/@item.Plant.Id">
                             <SubjectThumb Subject="item.Plant" />
@@ -64,6 +64,9 @@
 </section>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     private const int Preview = 5;
 
     [Parameter, EditorRequired]

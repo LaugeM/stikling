@@ -1,5 +1,6 @@
 @page "/orders/new"
 @page "/orders/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
 @using System.Globalization
 @using Stikling.Core.Orders
 @inject OrderService OrderService

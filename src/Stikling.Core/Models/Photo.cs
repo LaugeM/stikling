@@ -4,8 +4,14 @@ namespace Stikling.Core.Models;
 /// Photo metadata. The image itself (and a thumbnail) is stored separately as binary data,
 /// keyed by the photo's id, so lists of photos stay small and fast to load.
 /// </summary>
-public sealed class Photo : Entity
+public sealed class Photo : Entity, IHasCreatedBy
 {
+    /// <summary>
+    /// Who added it, when they were signed in. Null when nobody was, and on everything from before this was
+    /// kept. A helper can only change what they added themselves.
+    /// </summary>
+    public Guid? CreatedBy { get; set; }
+
     public SubjectType SubjectType { get; set; }
     public Guid SubjectId { get; set; }
 

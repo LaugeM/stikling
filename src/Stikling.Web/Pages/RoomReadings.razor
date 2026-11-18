@@ -33,18 +33,18 @@ else
         <div class="empty-state mt-3">
             <p>@F(Strings.Shared.ReadingsEmpty, found.Name)</p>
             <p class="text-body-secondary">@F(Strings.Shared.ReadingsHint, found.Name)</p>
-            <button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+            <IfCan Edit><button type="button" class="btn btn-primary mt-3" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button></IfCan>
         </div>
     }
     else
     {
-        <button type="button" class="btn btn-outline-primary mt-2" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button>
+        <IfCan Edit><button type="button" class="btn btn-outline-primary mt-2" @onclick="OpenAdd">@Strings.Shared.ReadingAdd</button></IfCan>
         <ul class="reading-list">
             @foreach (var reading in readings)
             {
                 var item = reading;
                 <li>
-                    <button type="button" class="reading-row" @onclick="() => OpenCorrect(item)">
+                    <button type="button" class="reading-row" @onclick="() => OpenCorrectIfAllowed(item)">
                         <span class="reading-when">@When(item)</span>
                         <span class="reading-values">@ReadingText.Values(item)</span>
                         @if (Detail(item) is { Length: > 0 } detail)
@@ -65,6 +65,16 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // Opening a reading is for correcting it, so someone who can't only reads the row
+    private void OpenCorrectIfAllowed(PlaceReading reading)
+    {
+        if (Access.CanEdit)
+            OpenCorrect(reading);
+    }
+
     [Parameter]
     public Guid Id { get; set; }
 

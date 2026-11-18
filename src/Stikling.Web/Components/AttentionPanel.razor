@@ -67,6 +67,7 @@ else if (Current is { } flag)
             <span class="attention-reason">@flag.Reason</span>
             <span class="attention-since">@(Waiting is { } from ? Labels.FlagFrom(from) : Since(flag))</span>
         </div>
+        <IfCan Edit>
         <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="OpenAsync">@Strings.Propagations.AttentionChange</button>
         @if (Waiting is not null)
         {
@@ -76,6 +77,7 @@ else if (Current is { } flag)
         {
             <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ClearAsync">@Strings.Common.Done</button>
         }
+        </IfCan>
     </div>
 }
 

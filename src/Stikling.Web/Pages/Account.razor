@@ -80,6 +80,8 @@ else if (account is { SignedIn: true })
 
     @if (signOut is null && !deleting)
     {
+        <h2 class="h6 mt-4">@Strings.People.Heading</h2>
+        <PeopleSection />
         <div class="settings-actions">
             <button type="button" class="btn btn-outline-primary" @onclick="DownloadDataAsync"
                     disabled="@(accountBusy || downloading)">

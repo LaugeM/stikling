@@ -1,0 +1,208 @@
+@page "/join/{Token}"
+@* What an invite link opens: who invited the person, to what, and what they can do there. Signed out, it sends
+   them to sign in and comes back to this page. *@
+@using Stikling.Core.People
+@inject AccountService Account
+@inject StiklingApi Api
+@inject CollectionsService Collections
+@inject NavigationManager Nav
+
+<PageTitle>@Strings.People.JoinTitle</PageTitle>
+
+<h1>@Strings.People.JoinTitle</h1>
+
+@if (state == JoinState.Loading)
+{
+    <p class="settings-hint" role="status">@Strings.Account.Loading</p>
+}
+else if (state == JoinState.SignedOut)
+{
+    <p>@Strings.People.JoinSignIn</p>
+    @if (Account.IsAvailable)
+    {
+        <div class="settings-actions">
+            <a class="btn btn-primary" href="@SignInUrl">@Strings.Account.AccountSignIn</a>
+        </div>
+    }
+}
+else if (state == JoinState.Problem)
+{
+    <p class="settings-message" role="alert">@problem</p>
+    <div class="settings-actions">
+        <a class="btn btn-outline-primary" href="./">@Strings.Common.Close</a>
+    </div>
+}
+else if (preview is { } invite)
+{
+    @if (state == JoinState.AlreadyMember)
+    {
+        <p>@F(Strings.People.AlreadyMember, invite.CollectionName)</p>
+        <div class="settings-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="OpenAsync">@Strings.People.OpenIt</button>
+        </div>
+    }
+    else
+    {
+        <p>
+            <strong>@(string.IsNullOrWhiteSpace(invite.InvitedByName)
+                ? F(Strings.People.JoinInvitesNoName, invite.CollectionName)
+                : F(Strings.People.JoinInvites, invite.InvitedByName, invite.CollectionName))</strong>
+        </p>
+        <p>@F(Strings.People.JoinYouCan, RoleText.Verb(invite.Choice))</p>
+
+        @if (state == JoinState.NeedsName)
+        {
+            <NameDialog Name="@name" OnSaved="NameSavedAsync" OnCancel="NotNow" />
+        }
+        else
+        {
+            <div class="settings-actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="JoinAsync">@Strings.People.JoinButton</button>
+                <button type="button" class="btn btn-link" disabled="@busy" @onclick="NotNow">@Strings.People.NotNow</button>
+            </div>
+            @if (problem is not null)
+            {
+                <p class="settings-message" role="alert">@problem</p>
+            }
+        }
+    }
+}
+
+@code {
+    private enum JoinState { Loading, SignedOut, Problem, NeedsName, Ready, AlreadyMember }
+
+    [Parameter]
+    public string Token { get; set; } = "";
+
+    private JoinState state = JoinState.Loading;
+    private InvitePreviewInfo? preview;
+    private string? name;
+    private string? problem;
+    private bool busy;
+
+    // Back to this page once signed in
+    private string SignInUrl => $"sign-in?return={Uri.EscapeDataString($"join/{Token}")}";
+
+    protected override async Task OnParametersSetAsync()
+    {
+        state = JoinState.Loading;
+        preview = null;
+        problem = null;
+
+        if (!Account.IsAvailable || !await Account.WasSignedInAsync())
+        {
+            state = JoinState.SignedOut;
+            return;
+        }
+
+        var result = await Api.PreviewInviteAsync(Token);
+        if (!result.Ok)
+        {
+            ShowProblem(result.Failure!.Value, result.Field);
+            return;
+        }
+
+        preview = result.Value;
+        if (preview!.AlreadyMember)
+        {
+            state = JoinState.AlreadyMember;
+            return;
+        }
+
+        // The server won't take someone in without a name, so it is asked for first. Also puts the list of collections up to date
+        var needsName = false;
+        try
+        {
+            if (await Collections.RefreshAsync() is { } me)
+            {
+                name = me.Name;
+                needsName = string.IsNullOrWhiteSpace(me.Name);
+            }
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            // Accepting says so if the server has no name
+        }
+
+        state = needsName ? JoinState.NeedsName : JoinState.Ready;
+    }
+
+    private void ShowProblem(PeopleFailure failure, string? field)
+    {
+        problem = failure switch
+        {
+            PeopleFailure.NotFound => Strings.People.JoinNotFound,
+            PeopleFailure.Gone => Strings.People.JoinGone,
+            PeopleFailure.Full => F(Strings.People.JoinFull, preview?.CollectionName ?? "", PeopleLimits.MaxMembers),
+            _ => PeopleText.Problem(failure, field),
+        };
+        state = failure == PeopleFailure.SignedOut ? JoinState.SignedOut : JoinState.Problem;
+    }
+
+    private void NameSavedAsync() => state = JoinState.Ready;
+
+    private void NotNow() => Nav.NavigateTo("./");
+
+    private async Task OpenAsync()
+    {
+        if (preview is null)
+            return;
+
+        busy = true;
+        try
+        {
+            await RefreshQuietlyAsync();
+            await Collections.SwitchToAsync(preview.CollectionId);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task JoinAsync()
+    {
+        busy = true;
+        problem = null;
+        try
+        {
+            var result = await Api.AcceptInviteAsync(Token);
+            if (result is { Failure: PeopleFailure.Invalid, Field: "name" })
+            {
+                state = JoinState.NeedsName;
+                return;
+            }
+
+            if (!result.Ok)
+            {
+                var failure = result.Failure!.Value;
+                ShowProblem(failure, result.Field);
+
+                // The page stays on the invite for a problem that may pass, like being offline
+                if (failure is PeopleFailure.Offline or PeopleFailure.Other)
+                    state = JoinState.Ready;
+                return;
+            }
+
+            await RefreshQuietlyAsync();
+            await Collections.SwitchToAsync(result.Value!.Id);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // So the collection is in the list before it is opened. Sync does the same if this can't reach the server
+    private async Task RefreshQuietlyAsync()
+    {
+        try
+        {
+            await Collections.RefreshAsync();
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            // The first sync in the opened collection adds it to the list
+        }
+    }
+}

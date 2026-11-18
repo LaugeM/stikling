@@ -2,6 +2,7 @@
 @page "/round/due"
 @page "/round/next"
 @page "/round/back"
+@attribute [NeedsAccess(AccessLevel.Log)]
 @using GoingRoundLogic = Stikling.Core.Today.GoingRound
 @using Stikling.Core.Settings
 @inject CoverPhotos Covers
@@ -197,6 +198,8 @@ else
                                 @WateringText.DoneLabel(waterForm)
                             </button>
                         }
+                        @* "Looked over" is a line on the history, which a helper can't send *@
+                        <IfCan Edit>
                         <button type="button" class="btn btn-outline-primary round-action" aria-pressed="@(day.LookedOverId is null ? "false" : "true")"
                                 disabled="@busy" @onclick="LookedOverAsync">
                             @if (day.LookedOverId is not null)
@@ -205,6 +208,7 @@ else
                             }
                             @Strings.Care.RoundTileLookedOver
                         </button>
+                        </IfCan>
                     </div>
 
                     <div class="round-more">

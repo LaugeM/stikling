@@ -1,4 +1,5 @@
 using Microsoft.JSInterop;
+using Stikling.Core.People;
 
 namespace Stikling.Web.Services;
 
@@ -30,9 +31,20 @@ public sealed class DeviceFiles(IJSRuntime js) : JsModule(js, ModulePath)
     public async Task SetAsync(string key, string? value) =>
         await (await Module).InvokeVoidAsync("set", key, value);
 
-    public async Task<DateOnly?> GetLastBackupAsync() =>
-        DateOnly.TryParse(await GetAsync(LastBackupKey), out var date) ? date : null;
+    /// <summary>The shared collection this device has open, or null when it is the main database.</summary>
+    public async Task<Guid?> GetOpenCollectionAsync() =>
+        OpenCollection.Parse(await GetAsync(OpenCollection.Key));
 
-    public Task SetLastBackupAsync(DateOnly date) =>
-        SetAsync(LastBackupKey, date.ToString("yyyy-MM-dd"));
+    /// <summary>
+    /// The key for something kept per database, like when it last synced or was backed up. The main database
+    /// keeps the plain key, and a shared collection's database gets its id added.
+    /// </summary>
+    public async Task<string> KeyForOpenAsync(string key) =>
+        OpenCollection.KeyFor(key, await GetOpenCollectionAsync());
+
+    public async Task<DateOnly?> GetLastBackupAsync() =>
+        DateOnly.TryParse(await GetAsync(await KeyForOpenAsync(LastBackupKey)), out var date) ? date : null;
+
+    public async Task SetLastBackupAsync(DateOnly date) =>
+        await SetAsync(await KeyForOpenAsync(LastBackupKey), date.ToString("yyyy-MM-dd"));
 }

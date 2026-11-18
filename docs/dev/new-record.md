@@ -9,6 +9,7 @@ A new IndexedDB store touches more places than the model and its page, and missi
 - a number in `BackupCounts` and its line in `BackupData.Counts`
 - the implementation in `IndexedDbRepositories.cs`, which passes its `RecordKinds` field to `IndexedDbEntityRepository`, and the registration in `Program.cs`
 - a fake in `tests/Stikling.Core.Tests/Fakes.cs`
+- only for a kind a helper (the role that can log care) may send: add its name to `HelperSync.Kinds`, make the model implement `IHasCreatedBy` so it gets a `CreatedBy`, and check the server side in `PeopleRules.HelperProblem`. Any other kind is refused for a helper by default, which is what most kinds want.
 
 Nothing else is needed for sync, export or restore. The sync kinds, the change list, the backup's export and restore and the check for something to save first all go through `RecordKinds` and `BackupData.Lists`.
 

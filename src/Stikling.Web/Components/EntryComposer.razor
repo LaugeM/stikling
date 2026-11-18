@@ -57,7 +57,8 @@
             }
         </div>
 
-        <MeasureFields Draft="measure" Changed="() => { }" Disabled="busy" />
+        @* Measurements are records of their own, which a helper can't send *@
+        <IfCan Edit><MeasureFields Draft="measure" Changed="() => { }" Disabled="busy" /></IfCan>
 
         @if (photos.Count == 0)
         {
@@ -99,6 +100,9 @@
 </Sheet>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter, EditorRequired]
     public SubjectType SubjectType { get; set; }
 
@@ -389,10 +393,12 @@
             if (photos.Count > 0)
             {
                 var text = Clean(noteText);
-                var added = await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn, picked);
+                // A helper's photos go on notes, the only kind of history entry they can send
+                var added = await TimelineService.AddPhotosAsync(SubjectType, SubjectId, photos, text, occurredOn, picked, asNotes: !Access.CanEdit);
                 if (values is { Count: > 0 } && added.Count > 0)
                     await MeasureService.SetForEntryAsync(added.MaxBy(e => e.OccurredAt)!, values);
-                if (CoverPhotoId is null)
+                // The cover is part of the plant, which a helper can't change
+                if (CoverPhotoId is null && Access.CanEdit)
                     await OnCoverChanged.InvokeAsync(PhotoEntries.Cover(photos).Id);
             }
             else if (!string.IsNullOrWhiteSpace(noteText))

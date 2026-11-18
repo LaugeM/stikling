@@ -1,0 +1,16 @@
+.open-collection-line {
+    margin: -0.25rem 0 0.75rem;
+    font-size: 0.875rem;
+    color: var(--bs-secondary-color);
+}
+
+.open-collection-line a {
+    color: inherit;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
+
+.open-collection-line a:hover {
+    color: inherit;
+    text-decoration-thickness: 2px;
+}

@@ -7,6 +7,7 @@ using Microsoft.JSInterop;
 using Stikling.Core.Calendar;
 using Stikling.Core.Compare;
 using Stikling.Core.Notifications;
+using Stikling.Core.People;
 using Stikling.Core.PlantFacts;
 using Stikling.Core.Sharing;
 using Stikling.Core.Sync;
@@ -14,10 +15,80 @@ using Stikling.Core.Sync;
 namespace Stikling.Web.Services;
 
 /// <summary>The signed-in person and the collections they are in, from <c>GET /me</c>.</summary>
-public sealed record Me(Guid PersonId, List<MeCollection> Collections);
+public sealed record Me(Guid PersonId, List<MeCollection> Collections, string? Name = null);
 
-/// <param name="Role">"Editor" or "Viewer".</param>
-public sealed record MeCollection(Guid Id, string Name, string Role);
+/// <param name="Role">"Editor", "Helper" or "Viewer".</param>
+/// <param name="ManagesPeople">Whether they can invite people and change viewers and helpers. Only editors can.</param>
+/// <param name="IsOwner">Whether it is their own collection, with all it brings.</param>
+public sealed record MeCollection(Guid Id, string Name, string Role, bool ManagesPeople = false, bool IsOwner = false);
+
+/// <summary><c>GET /collections/{id}</c>: a collection and the people in it.</summary>
+public sealed record CollectionDetails(
+    Guid Id, string Name, Guid? OwnerPersonId, List<CollectionMember> Members, List<FormerCollectionMember> FormerMembers);
+
+public sealed record CollectionMember(Guid PersonId, string Role, string? Name, bool ManagesPeople, bool IsOwner, DateTimeOffset JoinedAt)
+{
+    public CollectionRole RoleKind => CollectionRoles.Parse(Role);
+}
+
+public sealed record FormerCollectionMember(Guid PersonId, string? Name);
+
+/// <summary>An open invite. <see cref="Token"/> is null when the caller may not have the link, as for one that lets someone add people.</summary>
+public sealed record InviteInfo(
+    Guid Id, string? Token, string Role, bool ManagesPeople, DateTimeOffset CreatedAt, DateTimeOffset ExpiresAt, string? CreatedByName)
+{
+    public RoleChoice Choice => RoleChoice.Of(CollectionRoles.Parse(Role), ManagesPeople);
+}
+
+/// <summary>What the person who opened an invite link is told before they join.</summary>
+public sealed record InvitePreviewInfo(
+    Guid CollectionId, string CollectionName, string? InvitedByName, string Role, bool ManagesPeople, bool AlreadyMember)
+{
+    public RoleChoice Choice => RoleChoice.Of(CollectionRoles.Parse(Role), ManagesPeople);
+}
+
+/// <summary>Why a call about people failed, so the screen can pick the words.</summary>
+public enum PeopleFailure
+{
+    /// <summary>The API couldn't be reached, or no sign-in could be had.</summary>
+    Offline,
+
+    /// <summary>401. The sign-in ran out.</summary>
+    SignedOut,
+
+    /// <summary>403. The person may not do this, usually since their place changed.</summary>
+    Forbidden,
+
+    /// <summary>404. Not found, like an invite link that doesn't exist.</summary>
+    NotFound,
+
+    /// <summary>410. An invite that has run out, been used or withdrawn.</summary>
+    Gone,
+
+    /// <summary>409 with problem "full". The collection has as many people as it can have.</summary>
+    Full,
+
+    /// <summary>409 with problem "owner". The owner can't leave.</summary>
+    Owner,
+
+    /// <summary>429. Too many invites.</summary>
+    TooMany,
+
+    /// <summary>400 with a field that broke a rule, named in <see cref="PeopleOutcome{T}.Field"/>.</summary>
+    Invalid,
+
+    Other,
+}
+
+/// <summary>The answer to a call about people: the value, or why it failed with the status and the field a rule was broken in.</summary>
+public sealed record PeopleOutcome<T>(T? Value, PeopleFailure? Failure = null, int Status = 0, string? Field = null)
+{
+    public bool Ok => Failure is null;
+
+    public static PeopleOutcome<T> Success(T value) => new(value);
+
+    public static PeopleOutcome<T> Failed(PeopleFailure failure, int status = 0, string? field = null) => new(default, failure, status, field);
+}
 
 /// <summary>
 /// Calls the sync API as whoever is signed in. Every request carries a fresh session token from
@@ -63,6 +134,117 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
     {
         using var request = await RequestAsync(HttpMethod.Get, "me");
         return await SendAsync<Me>(request);
+    }
+
+    /// <summary>A collection and the people in it, who have left it too. Any member can ask.</summary>
+    /// <exception cref="HttpRequestException">The API couldn't be reached or turned the request away.</exception>
+    public async Task<CollectionDetails> GetCollectionAsync(Guid id)
+    {
+        using var request = await RequestAsync(HttpMethod.Get, $"collections/{id}");
+        return await SendAsync<CollectionDetails>(request);
+    }
+
+    // People in a collection. A call that fails comes back as an outcome with the reason, since the screen
+    // chooses its own words by it.
+
+    /// <summary>Sets the name other people in a shared collection see.</summary>
+    public async Task<PeopleOutcome<bool>> SetNameAsync(string name) =>
+        await PeopleCallAsync<bool>(HttpMethod.Put, "me/name", new { name });
+
+    public async Task<PeopleOutcome<bool>> RenameCollectionAsync(Guid id, string name) =>
+        await PeopleCallAsync<bool>(HttpMethod.Put, $"collections/{id}/name", new { name });
+
+    public async Task<PeopleOutcome<bool>> ChangeMemberAsync(Guid id, Guid personId, CollectionRole role, bool managesPeople) =>
+        await PeopleCallAsync<bool>(HttpMethod.Put, $"collections/{id}/members/{personId}", new { role = role.ToString(), managesPeople });
+
+    public async Task<PeopleOutcome<bool>> RemoveMemberAsync(Guid id, Guid personId) =>
+        await PeopleCallAsync<bool>(HttpMethod.Delete, $"collections/{id}/members/{personId}", null);
+
+    /// <summary>The caller leaves. The owner can't, which comes back as <see cref="PeopleFailure.Owner"/>.</summary>
+    public async Task<PeopleOutcome<bool>> LeaveAsync(Guid id) =>
+        await PeopleCallAsync<bool>(HttpMethod.Post, $"collections/{id}/leave", null);
+
+    /// <summary>The owner gives the collection to another member, who becomes an editor that adds people.</summary>
+    public async Task<PeopleOutcome<bool>> HandOverAsync(Guid id, Guid personId) =>
+        await PeopleCallAsync<bool>(HttpMethod.Put, $"collections/{id}/owner", new { personId });
+
+    public async Task<PeopleOutcome<InviteInfo>> CreateInviteAsync(Guid id, CollectionRole role, bool managesPeople) =>
+        await PeopleCallAsync<InviteInfo>(HttpMethod.Post, $"collections/{id}/invites", new { role = role.ToString(), managesPeople });
+
+    public async Task<PeopleOutcome<List<InviteInfo>>> GetInvitesAsync(Guid id) =>
+        await PeopleCallAsync<List<InviteInfo>>(HttpMethod.Get, $"collections/{id}/invites", null);
+
+    public async Task<PeopleOutcome<bool>> WithdrawInviteAsync(Guid id, Guid inviteId) =>
+        await PeopleCallAsync<bool>(HttpMethod.Delete, $"collections/{id}/invites/{inviteId}", null);
+
+    public async Task<PeopleOutcome<InvitePreviewInfo>> PreviewInviteAsync(string token) =>
+        await PeopleCallAsync<InvitePreviewInfo>(HttpMethod.Get, $"invites/{Uri.EscapeDataString(token)}", null);
+
+    /// <summary>Joins. Someone who is in already gets the collection back, as when the invite is for them twice.</summary>
+    public async Task<PeopleOutcome<MeCollection>> AcceptInviteAsync(string token) =>
+        await PeopleCallAsync<MeCollection>(HttpMethod.Post, $"invites/{Uri.EscapeDataString(token)}/accept", null);
+
+    private async Task<PeopleOutcome<T>> PeopleCallAsync<T>(HttpMethod method, string path, object? body)
+    {
+        try
+        {
+            using var request = await RequestAsync(method, path);
+            if (body is not null)
+                request.Content = JsonContent.Create(body, body.GetType());
+            using var response = await http.SendAsync(request);
+            if (!response.IsSuccessStatusCode)
+                return await PeopleFailureOfAsync<T>(response);
+
+            if (typeof(T) == typeof(bool))
+                return PeopleOutcome<T>.Success((T)(object)true);
+
+            return await response.Content.ReadFromJsonAsync<T>() is { } value
+                ? PeopleOutcome<T>.Success(value)
+                : PeopleOutcome<T>.Failed(PeopleFailure.Other, (int)response.StatusCode);
+        }
+        catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Unauthorized)
+        {
+            return PeopleOutcome<T>.Failed(PeopleFailure.SignedOut, 401);
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException or JsonException)
+        {
+            return PeopleOutcome<T>.Failed(PeopleFailure.Offline);
+        }
+    }
+
+    // The API names what went wrong in "problem" for the cases that have one, and the field in "errors" for a rule a value broke
+    private static async Task<PeopleOutcome<T>> PeopleFailureOfAsync<T>(HttpResponseMessage response)
+    {
+        var status = (int)response.StatusCode;
+        string? problem = null;
+        string? field = null;
+        try
+        {
+            using var document = await JsonDocument.ParseAsync(await response.Content.ReadAsStreamAsync());
+            var root = document.RootElement;
+            if (root.TryGetProperty("problem", out var code) && code.ValueKind == JsonValueKind.String)
+                problem = code.GetString();
+            if (root.TryGetProperty("errors", out var errors) && errors.ValueKind == JsonValueKind.Object)
+                field = errors.EnumerateObject().FirstOrDefault().Name;
+        }
+        catch (Exception e) when (e is JsonException or HttpRequestException)
+        {
+            // Then the status is all there is
+        }
+
+        var failure = response.StatusCode switch
+        {
+            HttpStatusCode.Unauthorized => PeopleFailure.SignedOut,
+            HttpStatusCode.Forbidden => PeopleFailure.Forbidden,
+            HttpStatusCode.NotFound => PeopleFailure.NotFound,
+            HttpStatusCode.Gone => PeopleFailure.Gone,
+            HttpStatusCode.TooManyRequests => PeopleFailure.TooMany,
+            HttpStatusCode.Conflict when string.Equals(problem, "full", StringComparison.OrdinalIgnoreCase) => PeopleFailure.Full,
+            HttpStatusCode.Conflict when string.Equals(problem, "owner", StringComparison.OrdinalIgnoreCase) => PeopleFailure.Owner,
+            HttpStatusCode.BadRequest when field is not null => PeopleFailure.Invalid,
+            _ => PeopleFailure.Other,
+        };
+        return PeopleOutcome<T>.Failed(failure, status, field);
     }
 
     /// <summary>

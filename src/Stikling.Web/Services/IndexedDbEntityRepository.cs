@@ -29,6 +29,9 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
     public async Task<bool> IsDeletedAsync(Guid id) =>
         await db.GetAsync<T>(kind, id) is { IsDeleted: true };
 
+    /// <summary>Runs when a record is saved for the first time, for kinds that note who added them.</summary>
+    protected virtual Task BeforeFirstSaveAsync(T entity) => Task.CompletedTask;
+
     public async Task SaveAsync(T entity)
     {
         var errors = Validate(entity);
@@ -37,7 +40,10 @@ public abstract class IndexedDbEntityRepository<T>(IndexedDb db, TimeProvider ti
 
         var now = time.GetUtcNow();
         if (entity.CreatedAt == default)
+        {
+            await BeforeFirstSaveAsync(entity);
             entity.CreatedAt = now;
+        }
         entity.UpdatedAt = now;
 
         await db.PutAsync(kind, entity);

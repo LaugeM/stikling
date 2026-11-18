@@ -1,0 +1,88 @@
+@using Stikling.Core.People
+@inject StiklingApi Api
+@inject CollectionsService Collections
+@* Asks what people in a shared collection should call the person. It is a panel in the page, not a pop-up.
+   The name is the person's, not a collection's, so it is saved on the server and read back with /me. *@
+
+<div class="confirm-card name-dialog">
+    <p><strong>@Strings.People.NameDialogHeading</strong></p>
+    <label class="visually-hidden" for="@inputId">@Strings.People.NameLabel</label>
+    <input id="@inputId" class="form-control" maxlength="@PeopleLimits.MaxPersonNameLength" autocomplete="nickname"
+           value="@draft" @oninput="e => draft = e.Value?.ToString() ?? string.Empty"
+           @onkeydown="OnKeyAsync" @ref="input" />
+    <p class="settings-hint">@Strings.People.NameDialogHint</p>
+    <div class="settings-actions">
+        <button type="button" class="btn btn-primary" disabled="@(busy || string.IsNullOrWhiteSpace(draft))"
+                @onclick="SaveAsync">@Strings.Common.Save</button>
+        <button type="button" class="btn btn-link" disabled="@busy" @onclick="OnCancel">@Strings.Common.Cancel</button>
+    </div>
+    @if (problem is not null)
+    {
+        <p class="settings-message" role="alert">@problem</p>
+    }
+</div>
+
+@code {
+    private static int count;
+    private readonly string inputId = $"person-name-{++count}";
+    private string draft = "";
+    private string? problem;
+    private bool busy;
+    private ElementReference input;
+
+    /// <summary>The name as it stands, which the box starts with.</summary>
+    [Parameter]
+    public string? Name { get; set; }
+
+    /// <summary>Called once the name is saved and the registry knows it.</summary>
+    [Parameter]
+    public EventCallback OnSaved { get; set; }
+
+    [Parameter]
+    public EventCallback OnCancel { get; set; }
+
+    protected override void OnInitialized() => draft = Name ?? "";
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await input.FocusAsync();
+    }
+
+    private async Task OnKeyAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !busy && !string.IsNullOrWhiteSpace(draft))
+            await SaveAsync();
+    }
+
+    private async Task SaveAsync()
+    {
+        busy = true;
+        problem = null;
+        try
+        {
+            var result = await Api.SetNameAsync(draft.Trim());
+            if (!result.Ok)
+            {
+                problem = PeopleText.Problem(result.Failure!.Value, result.Field);
+                return;
+            }
+
+            // So the registry has the name, and the sections that read it
+            try
+            {
+                await Collections.RefreshAsync();
+            }
+            catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+            {
+                // It was saved. The next sync brings the name into the list
+            }
+
+            await OnSaved.InvokeAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

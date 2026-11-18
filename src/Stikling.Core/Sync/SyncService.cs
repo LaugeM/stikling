@@ -1,4 +1,6 @@
 using System.Text.Json;
+using System.Text.Json.Nodes;
+using Stikling.Core.People;
 
 namespace Stikling.Core.Sync;
 
@@ -35,6 +37,12 @@ public interface ISyncStore
     /// <summary>Takes the records off the change list, unless they changed again after they were read.</summary>
     Task MarkSentAsync(IReadOnlyList<PendingRecord> sent);
 
+    /// <summary>
+    /// Takes changes off the list without sending them, because this person's role can't send them. The
+    /// records here stay as they are. A change that was made again after it was read stays on the list.
+    /// </summary>
+    Task DropPendingAsync(IReadOnlyList<PendingRecord> dropped);
+
     /// <summary>Puts every record on the device on the change list.</summary>
     Task QueueAllAsync();
 
@@ -69,7 +77,8 @@ public interface ISyncServer
 /// <param name="Sent">Changes from here that reached the server.</param>
 /// <param name="Refused">
 /// Changes the server wouldn't keep, e.g. one dated in the future by a clock that is wrong. They
-/// stay on the change list and are tried again next time.
+/// stay on the change list and are tried again next time. Changes this person's role can't send, which
+/// are taken off the list, don't count.
 /// </param>
 public sealed record SyncResult(int Received, int Sent, int Refused);
 
@@ -91,8 +100,12 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
     /// device syncs with the collection, everything already on it is sent, so it is merged with
     /// what the collection has.
     /// </summary>
-    /// <param name="canEdit">False for someone who can only view the collection. Their own settings are still sent.</param>
-    public async Task<SyncResult> SyncAsync(Guid collectionId, bool canEdit)
+    /// <param name="me">
+    /// The person's place in the collection. An editor sends everything, a helper only what they added of the
+    /// kinds helpers may send, and a viewer nothing. Everyone's own settings are sent. A change the role can't
+    /// send is taken off the change list, since the server would only turn it away.
+    /// </param>
+    public async Task<SyncResult> SyncAsync(Guid collectionId, MemberAccess me)
     {
         var state = await store.GetStateAsync();
         if (state is null || state.CollectionId != collectionId)
@@ -123,7 +136,7 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         if (await server.GetSettingsAsync() is { } settings)
             received += await SaveAsync([new SyncRecord(SyncKinds.Settings, settings)]);
 
-        var (sent, newer, refused) = await SendAsync(collectionId, canEdit);
+        var (sent, newer, refused) = await SendAsync(collectionId, me);
         return new SyncResult(received + newer, sent, refused);
     }
 
@@ -136,24 +149,27 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         return state;
     }
 
-    private async Task<(int Sent, int Newer, int Refused)> SendAsync(Guid collectionId, bool canEdit)
+    private async Task<(int Sent, int Newer, int Refused)> SendAsync(Guid collectionId, MemberAccess me)
     {
-        // A viewer's changes to the collection stay on the list, since the server won't take them
-        IReadOnlyCollection<string> kinds = canEdit ? SyncKinds.All : [SyncKinds.Settings];
         int sent = 0, newer = 0;
 
         // Refused ones stay on the list for next time, but aren't sent again in this sync
         var refused = new HashSet<(string Kind, Guid Id)>();
 
+        // Dropped ones come off the list. One that was changed again meanwhile stays on it, and isn't looked at again in this sync
+        var dropped = new HashSet<(string Kind, Guid Id)>();
+
         for (var round = 0; round < MaxRounds; round++)
         {
-            var batch = await store.GetPendingAsync(kinds, SyncRules.BatchSize);
-            var pending = batch.Where(p => !refused.Contains((p.Kind, p.Id))).ToList();
+            // Everything on the list is read, also what this role can't send, or it would stay on it for good
+            var batch = await store.GetPendingAsync(SyncKinds.All, SyncRules.BatchSize);
+            var pending = batch.Where(p => !refused.Contains((p.Kind, p.Id)) && !dropped.Contains((p.Kind, p.Id))).ToList();
             if (pending.Count == 0)
                 break;
 
             var done = new List<PendingRecord>();
             var forCollection = new List<PendingRecord>();
+            var cantSend = new List<PendingRecord>();
             foreach (var record in pending)
             {
                 // It left the device after it was changed. There's nothing to send, only the entry to clear
@@ -170,18 +186,26 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
                     else
                         refused.Add((record.Kind, record.Id));
                 }
-                else
+                else if (HelperSync.MaySend(record.Kind, data, me))
                     forCollection.Add(record);
+                else
+                    cantSend.Add(record);
             }
 
             if (forCollection.Count > 0)
             {
                 var response = await server.PushAsync(collectionId, forCollection.Select(p => new SyncRecord(p.Kind, p.Data!.Value)).ToList());
-                var turnedAway = response.Refused.Select(r => r.Index).ToHashSet();
+                var turnedAway = response.Refused.GroupBy(r => r.Index).ToDictionary(g => g.Key, g => g.First().Reason);
                 for (var i = 0; i < forCollection.Count; i++)
                 {
-                    if (turnedAway.Contains(i))
-                        refused.Add((forCollection[i].Kind, forCollection[i].Id));
+                    if (turnedAway.TryGetValue(i, out var reason))
+                    {
+                        // The server says this role can't send it, and sending it again wouldn't change that
+                        if (HelperSync.IsHelperReason(reason))
+                            cantSend.Add(forCollection[i]);
+                        else
+                            refused.Add((forCollection[i].Kind, forCollection[i].Id));
+                    }
                     else
                     {
                         done.Add(forCollection[i]);
@@ -193,6 +217,12 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
             }
 
             await store.MarkSentAsync(done);
+            if (cantSend.Count > 0)
+            {
+                foreach (var record in cantSend)
+                    dropped.Add((record.Kind, record.Id));
+                await store.DropPendingAsync(cantSend);
+            }
 
             if (batch.Count < SyncRules.BatchSize)
                 break;
@@ -211,6 +241,7 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         foreach (var kind in records.Where(r => SyncKinds.IsKnown(r.Kind)).GroupBy(r => r.Kind))
         {
             var incoming = kind
+                .Select(WithCreatedBy)
                 .Select(r => (Json: r.Data.GetRawText(), r.Data, Valid: RecordStamp.TryRead(r.Data, out var stamp), Stamp: stamp))
                 .Where(r => r.Valid)
                 .GroupBy(r => r.Stamp.Id)
@@ -239,5 +270,19 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
         }
 
         return saved;
+    }
+
+    /// <summary>
+    /// The kinds a helper may add also remember who added them, and the server is where that is known.
+    /// So what comes from it gets the person's id in the record, or null when the server doesn't know.
+    /// </summary>
+    private static SyncRecord WithCreatedBy(SyncRecord record)
+    {
+        if (!HelperSync.Kinds.Contains(record.Kind, StringComparer.Ordinal) || record.Data.ValueKind != JsonValueKind.Object)
+            return record;
+
+        var node = JsonNode.Parse(record.Data.GetRawText())!.AsObject();
+        node["createdBy"] = record.CreatedBy?.ToString();
+        return record with { Data = JsonSerializer.SerializeToElement(node) };
     }
 }

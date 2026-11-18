@@ -27,7 +27,7 @@ else if (rows.Count == 0)
         <p class="text-body-secondary">
             @Strings.Care.IntervalListEmptyText
         </p>
-        <a class="btn btn-primary" href="care-intervals/new">@Strings.Care.IntervalListAdd</a>
+        <IfCan Edit><a class="btn btn-primary" href="care-intervals/new">@Strings.Care.IntervalListAdd</a></IfCan>
     </div>
 }
 else
@@ -35,16 +35,21 @@ else
     <div class="settings-rows interval-rows">
         @foreach (var row in rows)
         {
-            <SettingsRow Href="@($"care-intervals/{row.Interval.Id}")" Title="@row.Title" Detail="@row.Detail" />
+            <SettingsRow Href="@(Access.CanEdit ? $"care-intervals/{row.Interval.Id}" : null)" Title="@row.Title" Detail="@row.Detail" />
         }
     </div>
 
+    <IfCan Edit>
     <div class="form-actions mt-3">
         <a class="btn btn-primary" href="care-intervals/new">@Strings.Care.IntervalListAdd</a>
     </div>
+    </IfCan>
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     private sealed record Row(CareInterval Interval, string Title, string Detail);
 
     private IReadOnlyList<Row> rows = [];

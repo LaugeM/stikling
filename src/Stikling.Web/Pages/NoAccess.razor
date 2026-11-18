@@ -1,0 +1,38 @@
+@* Stands in for a page that only changes the collection, for someone whose role doesn't allow it. GatedRoute draws it. *@
+@inject CollectionsService Collections
+@inject NavigationManager Nav
+@inject IJSRuntime JS
+
+<PageTitle>@Strings.People.CantChangeTitle</PageTitle>
+
+<a class="back-link" href="" @onclick="GoBackAsync" @onclick:preventDefault>@Strings.Common.Back</a>
+
+<h1 class="visually-hidden">@Strings.People.CantChangeTitle</h1>
+<p role="status">@Message</p>
+
+@code {
+    private string Message
+    {
+        get
+        {
+            var here = Collections.Current;
+            var name = here?.Name ?? "";
+            return string.IsNullOrWhiteSpace(here?.OwnerName)
+                ? F(Strings.People.CantChangeHereNoOwner, name)
+                : F(Strings.People.CantChangeHere, name, here.OwnerName);
+        }
+    }
+
+    // Back to where the person came from, which is Today when they opened the address directly
+    private async Task GoBackAsync()
+    {
+        try
+        {
+            await JS.InvokeVoidAsync("history.back");
+        }
+        catch (JSException)
+        {
+            Nav.NavigateTo("");
+        }
+    }
+}

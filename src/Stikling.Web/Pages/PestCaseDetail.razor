@@ -52,6 +52,7 @@ else
         </div>
     </header>
 
+    <IfCan Edit>
     <div class="detail-actions">
         @if (view.Case.IsOpen)
         {
@@ -91,6 +92,7 @@ else
         }
         <a class="btn btn-outline-primary" href="pests/@view.Case.Id/edit">@Strings.Common.Edit</a>
     </div>
+    </IfCan>
 
     @if (RoundPage)
     {
@@ -127,7 +129,7 @@ else
             @if (view.ReadyToResolve)
             {
                 <p>@Plural.Of(view.CleanWeeks, Strings.Pests.CaseCleanReady_One, Strings.Pests.CaseCleanReady_Other)</p>
-                <button type="button" class="btn btn-primary" disabled="@resolving" @onclick="ResolveAsync">@Strings.Pests.CaseResolve</button>
+                <IfCan Edit><button type="button" class="btn btn-primary" disabled="@resolving" @onclick="ResolveAsync">@Strings.Pests.CaseResolve</button></IfCan>
             }
             else
             {
@@ -235,7 +237,7 @@ else
                         {
                             <div class="plan-progress-note">@step.Notes</div>
                         }
-                        @if (current)
+                        @if (current && Access.CanEdit)
                         {
                             @if (movingStep == step.Id)
                             {
@@ -272,7 +274,7 @@ else
                 <p class="plan-progress-note">@F(Strings.Pests.CasePlanStopped, Labels.Date(stopped))</p>
             }
 
-            @if (view.Case.PlanRunning)
+            @if (view.Case.PlanRunning && Access.CanEdit)
             {
                 @if (confirmStop)
                 {
@@ -347,7 +349,7 @@ else
             <p class="detail-notes">@view.Case.Notes</p>
         }
 
-        @if (view.Case.IsOpen && !ShowTrap)
+        @if (view.Case.IsOpen && !ShowTrap && Access.CanEdit)
         {
             @* Mites and mealybugs rarely end up on a trap, but someone may have one up anyway *@
             <p class="trap-offer">
@@ -362,7 +364,7 @@ else
         <section class="detail-card">
             <div class="trap-head">
                 <h2>@Strings.Pests.CaseStickyTrap</h2>
-                @if (view.Case.IsOpen && !counting)
+                @if (view.Case.IsOpen && !counting && Access.CanEdit)
                 {
                     <button type="button" class="btn btn-outline-primary btn-sm" @onclick="StartCounting">@Strings.Pests.CaseCountTrap</button>
                 }
@@ -474,7 +476,7 @@ else
                         }
                         else
                         {
-                            <button type="button" class="btn btn-link btn-sm link-action text-danger remove-treatment" disabled="@busy" @onclick="() => AskRemoveAsync(treatment)">@Strings.Common.Remove</button>
+                            <IfCan Edit><button type="button" class="btn btn-link btn-sm link-action text-danger remove-treatment" disabled="@busy" @onclick="() => AskRemoveAsync(treatment)">@Strings.Common.Remove</button></IfCan>
                         }
                     </li>
                 }
@@ -510,7 +512,7 @@ else
                                 <span class="text-body-secondary small"> · @location</span>
                             }
                         </div>
-                        @if (view.Case.IsOpen)
+                        @if (view.Case.IsOpen && Access.CanEdit)
                         {
                             <button type="button" class="btn btn-sm @(seen ? "btn-primary" : "btn-outline-primary")"
                                     aria-pressed="@(seen ? "true" : "false")"
@@ -520,7 +522,7 @@ else
                     </li>
                 }
             </ul>
-            @if (view.Case.IsOpen && view.Case.FoundOnPlantIds.Count == 0)
+            @if (view.Case.IsOpen && view.Case.FoundOnPlantIds.Count == 0 && Access.CanEdit)
             {
                 <p class="family-hint">@Strings.Pests.CaseSeenHint</p>
             }
@@ -531,7 +533,7 @@ else
         }
     </section>
 
-    @if (neighbours.Count > 0)
+    @if (neighbours.Count > 0 && Access.CanEdit)
     {
         <section class="detail-card">
             <h2>@Strings.Pests.CaseNeighbours</h2>
@@ -556,6 +558,7 @@ else
 
     <PhotoViewer PhotoList="casePhotos" @bind-Index="viewerIndex" Caption="PlantOf" />
 
+    <IfCan Edit>
     <section class="danger-zone">
         @if (confirmDelete)
         {
@@ -568,9 +571,13 @@ else
             <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Pests.CaseDelete</button>
         }
     </section>
+    </IfCan>
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     [Parameter]
     public Guid Id { get; set; }
 

@@ -26,7 +26,7 @@ public static class RecordEndpoints
                 .Where(r => r.CollectionId == collectionId && r.Version > from)
                 .OrderBy(r => r.Version)
                 .Take(SyncRules.BatchSize + 1)
-                .Select(r => new { r.Kind, r.Version, r.Data })
+                .Select(r => new { r.Kind, r.Version, r.Data, r.CreatedBy })
                 .ToListAsync();
 
             var more = page.Count > SyncRules.BatchSize;
@@ -34,7 +34,7 @@ public static class RecordEndpoints
                 page.RemoveAt(page.Count - 1);
 
             return new PullResponse(
-                page.Select(r => new SyncRecord(r.Kind, Parse(r.Data))).ToList(),
+                page.Select(r => new SyncRecord(r.Kind, Parse(r.Data), r.CreatedBy)).ToList(),
                 page.Count > 0 ? page[^1].Version : from,
                 more);
         })
@@ -143,7 +143,7 @@ public static class RecordEndpoints
                 }
                 else if (SyncRules.Replaces(here, current.Data, stamp, data))
                 {
-                    newer.Add(new SyncRecord(current.Kind, Parse(current.Data)));
+                    newer.Add(new SyncRecord(current.Kind, Parse(current.Data), current.CreatedBy));
                     deletedPhotos.Remove(stamp.Id);
                     deletedSubjects.Remove(stamp.Id);
                 }

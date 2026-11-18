@@ -169,6 +169,9 @@ else
 <canvas @ref="canvas" hidden aria-hidden="true"></canvas>
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<Propagation> propagations = [];
     private Dictionary<Guid, Plant> plantsById = [];
@@ -225,7 +228,7 @@ else
 
     // Plants tagged For swap before marks existed. The tag is left on
     private RenderFragment ConvertPanel => @<text>
-        @if (tagged.Count > 0)
+        @if (tagged.Count > 0 && Access.CanEdit)
         {
             <section class="swap-convert" aria-labelledby="swap-convert-title">
                 <h2 id="swap-convert-title" class="swap-convert-title">@F(Strings.Shared.SwapConvertTitle, Labels.Plants(tagged.Count))</h2>

@@ -30,8 +30,14 @@ public enum CareKind
 /// One entry in a plant's care log: watered, fertilised, repotted and so on. Kept separate
 /// from the timeline so "last watered" is a lookup rather than a search through history text.
 /// </summary>
-public sealed class CareLog : Entity
+public sealed class CareLog : Entity, IHasCreatedBy
 {
+    /// <summary>
+    /// Who added it, when they were signed in. Null when nobody was, and on everything from before this was
+    /// kept. A helper can only change what they added themselves.
+    /// </summary>
+    public Guid? CreatedBy { get; set; }
+
     public Guid PlantId { get; set; }
 
     /// <summary>The day it was done, which can be earlier than when it was written down.</summary>

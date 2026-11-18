@@ -60,6 +60,7 @@ else
                 </div>
             }
 
+            <IfCan Edit>
             <div class="mb-2">
                 <div class="form-label">@Strings.Pests.RoundWhat</div>
                 @if (recipes.Count > 0)
@@ -105,6 +106,7 @@ else
                        placeholder="@Strings.Pests.TreatNotesPlaceholder"
                        value="@notes" @onchange="NotesChangedAsync" />
             </div>
+            </IfCan>
 
             <div class="form-bar round-bar">
                 <p class="tick-progress" role="status" aria-live="polite">@progressText</p>
@@ -130,7 +132,7 @@ else
                 <section class="tick-group">
                     <div class="tick-group-head">
                         <h2 class="section-label">@heading</h2>
-                        @if (group.Rows.Count >= 2)
+                        @if (group.Rows.Count >= 2 && Access.CanEdit)
                         {
                             var label = all ? Strings.Pests.RoundUntickAll : F(Strings.Pests.RoundTickAll, group.Rows.Count);
                             <button type="button" class="btn btn-link tick-all" aria-label="@($"{label} · {heading}")"
@@ -144,7 +146,7 @@ else
                             <li>
                                 <button type="button" class="item-card tick-row @(row.Ticked ? "ticked" : null)"
                                         aria-pressed="@(row.Ticked ? "true" : "false")"
-                                        @onclick="() => ToggleAsync(plant.Id)">
+                                        @onclick="() => ToggleIfAllowedAsync(plant.Id)">
                                     <SubjectThumb Subject="plant" />
                                     <div class="item-text">
                                         <div class="item-name">@plant.DisplayName</div>
@@ -166,6 +168,12 @@ else
 }
 
 @code {
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
+    // A tick is a change to the treatment, so someone who can't change it only sees what is ticked
+    private Task ToggleIfAllowedAsync(Guid plantId) => Access.CanEdit ? ToggleAsync(plantId) : Task.CompletedTask;
+
     [Parameter]
     public Guid CaseId { get; set; }
 

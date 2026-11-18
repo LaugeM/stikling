@@ -147,10 +147,17 @@
         await CheckPestsAsync();
     }
 
+    [CascadingParameter]
+    private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
+
     // Plants and propagations with Source text but no seller get one. It is safe to run again, so it
-    // runs at start-up and whenever changes arrive, from a sync or a restored backup.
+    // runs at start-up and whenever changes arrive, from a sync or a restored backup. Someone who can't
+    // change the collection leaves it to those who can, since what it writes could not be sent.
     private async Task AdoptSellersAsync()
     {
+        if (!Access.CanEdit)
+            return;
+
         try
         {
             if (await Sellers.AdoptSourcesAsync() > 0)
