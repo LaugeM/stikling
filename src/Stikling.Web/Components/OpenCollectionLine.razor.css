@@ -85,3 +85,10 @@ ul.switcher-rows {
     margin: 1rem 0 0;
     font-size: 0.9rem;
 }
+
+/* A 44px tap area without making the line look bigger */
+.switcher-manage a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+}

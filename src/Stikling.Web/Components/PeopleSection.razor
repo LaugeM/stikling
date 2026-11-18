@@ -620,7 +620,9 @@ else
         savingRole = member.PersonId;
         try
         {
-            await RunAsync(() => Api.ChangeMemberAsync(current.Id, member.PersonId, choice.Role, choice.ManagesPeople));
+            // A change that wasn't saved puts the select back on the role that is saved
+            if (!await RunAsync(() => Api.ChangeMemberAsync(current.Id, member.PersonId, choice.Role, choice.ManagesPeople)))
+                roleEpoch++;
         }
         finally
         {

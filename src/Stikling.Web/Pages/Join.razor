@@ -99,7 +99,8 @@ else if (preview is { } invite)
         preview = null;
         problem = null;
 
-        // The account has to be loaded before the page asks, or Clerk has no session yet and the call answers 401
+        // The account has to be loaded before the page asks. Opened cold, Clerk may have no session yet, and the app then
+        // answers signed out without sending the request, so it is asked once more after loading again
         var signedIn = await LoadSignedInAsync();
         var result = await Api.PreviewInviteAsync(Token, signedIn);
         if (signedIn && result.Failure == PeopleFailure.SignedOut)
