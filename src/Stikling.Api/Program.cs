@@ -125,10 +125,15 @@ app.UseForwardedHeaders(forwarded);
 if (!app.Environment.IsDevelopment())
     app.UseHsts();
 
-// A response is only ever read as the type it says it is, so a file can't be taken for a page
+// A response is only ever read as the type it says it is, so a file can't be taken for a page. It is set as the
+// response starts, since the exception handler below clears the headers before it writes a 500 or 410.
 app.Use((context, next) =>
 {
-    context.Response.Headers.XContentTypeOptions = "nosniff";
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.XContentTypeOptions = "nosniff";
+        return Task.CompletedTask;
+    });
     return next(context);
 });
 
