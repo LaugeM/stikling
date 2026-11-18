@@ -24,26 +24,45 @@ else
         <p class="settings-message" role="alert">@loadProblem</p>
     }
 
-    @if (registry is not null && (registry.Collections.Count > 1 || Collections.IsSharedOpen))
+    @if (registry is not null && ShownCollections.Count > 0)
     {
-        <h3 class="h6 mt-3">@Strings.People.OnDeviceTitle</h3>
-        @foreach (var collection in registry.Collections)
-        {
-            var isOpen = collection.Id == openId;
-            <div class="room-row">
-                <span class="room-name">@CollectionText.Name(collection)</span>
-                @if (isOpen)
-                {
-                    <span class="settings-hint ms-auto my-0">@Strings.People.OpenNow</span>
-                }
-                else
-                {
-                    <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
-                            @onclick="() => Collections.SwitchToAsync(collection.Id)">@Strings.People.Open</button>
-                }
-            </div>
-            <p class="settings-hint mt-0">@CollectionHint(collection)</p>
-        }
+        <h3 class="section-label mt-4">@(ManyCollections ? Strings.People.OnDeviceTitle : Strings.People.CollectionTitle)</h3>
+        <ul class="settings-rows">
+            @foreach (var collection in ShownCollections)
+            {
+                var isOpen = collection.Id == openId;
+                <li class="people-row">
+                    @if (isOpen && renaming && !collection.Gone && access.CanEdit)
+                    {
+                        <RoomRenameRow Name="@collection.Name" Label="@Strings.People.CollectionName" Busy="busy"
+                                       OnSave="RenameAsync" OnCancel="@(() => renaming = false)" />
+                    }
+                    else
+                    {
+                        <div class="people-line">
+                            <span class="people-name">@CollectionText.Name(collection)</span>
+                            <span class="people-actions">
+                                @if (isOpen)
+                                {
+                                    <span class="settings-hint my-0">@Strings.People.OpenNow</span>
+                                    @if (access.CanEdit && !collection.Gone)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="() => renaming = true">@Strings.People.Rename</button>
+                                    }
+                                }
+                                else
+                                {
+                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                            @onclick="() => Collections.SwitchToAsync(collection.Id)">@Strings.People.Open</button>
+                                }
+                            </span>
+                        </div>
+                        <p class="people-sub">@CollectionText.Hint(collection)</p>
+                    }
+                </li>
+            }
+        </ul>
     }
 
     @if (current is { Gone: true } gone)
@@ -74,80 +93,93 @@ else
     }
     else if (registry is not null && current is { } here)
     {
-        @* The open collection's name *@
-        @if (renaming)
-        {
-            <div class="mt-3">
-                <RoomRenameRow Name="@here.Name" Label="@Strings.People.CollectionName" Busy="busy"
-                               OnSave="RenameAsync" OnCancel="@(() => renaming = false)" />
-            </div>
-        }
-        else
-        {
-            <div class="room-row mt-3">
-                <span class="room-name">@CollectionText.Name(here)</span>
-                @if (access.CanEdit)
-                {
-                    <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
-                            @onclick="() => renaming = true">@Strings.People.Rename</button>
-                }
-            </div>
-        }
-
         @if (details is { } found)
         {
-            <h3 class="h6 mt-3">@Strings.People.MembersTitle</h3>
-            <ul class="room-list people-members">
+            <h3 class="section-label mt-4">@Strings.People.MembersTitle</h3>
+            <ul class="settings-rows">
                 @foreach (var member in found.Members)
                 {
                     var target = new MemberAccess(member.PersonId, member.RoleKind, member.ManagesPeople, member.IsOwner);
                     var choice = RoleChoice.Of(member.RoleKind, member.ManagesPeople);
-                    var name = string.IsNullOrWhiteSpace(member.Name) ? Strings.People.NoNameYet : member.Name!;
+                    var name = MemberName(member);
                     var options = RoleChoice.ForChange(access, target);
-                    <li>
-                        <div class="room-row">
-                            <span class="room-name">@name</span>
-                            @if (member.PersonId == registry.PersonId)
-                            {
-                                <span class="settings-hint my-0">@Strings.People.You</span>
-                            }
-                            @if (access.CanRemove(target))
-                            {
-                                <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
-                                        @onclick="() => removingMember = member.PersonId">@Strings.Common.Remove</button>
-                            }
-                        </div>
-                        @* With a select the role is shown by the select, and this line is for screen readers *@
-                        <p class="settings-hint mt-0 @(options.Count > 0 ? "visually-hidden" : null)">
-                            @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Label(choice)) : RoleText.Label(choice))
-                        </p>
-                        @if (options.Count > 0)
+                    var isYou = member.PersonId == registry.PersonId;
+                    var hasName = !string.IsNullOrWhiteSpace(registry.PersonName);
+                    <li class="people-row">
+                        @if (isYou && showNameDialog && !inviteAfterName)
                         {
-                            <div class="member-role">
-                                <select class="form-select w-auto" aria-label="@F(Strings.People.ChangeRoleFor, name)"
-                                        disabled="@busy" @onchange="e => ChangeRoleAsync(member, e.Value?.ToString())">
-                                    @foreach (var option in options)
-                                    {
-                                        <option value="@IndexOf(option)" selected="@(option == choice)">@RoleText.Label(option)</option>
-                                    }
-                                </select>
-                                @if (savingRole == member.PersonId)
-                                {
-                                    <span class="settings-hint my-0" role="status">@Strings.People.Saving</span>
-                                }
-                            </div>
+                            <NameDialog Name="@registry.PersonName" OnSaved="NameSavedAsync" OnCancel="CancelNameDialog" />
                         }
-                        @if (removingMember == member.PersonId)
+                        else
                         {
-                            <div class="confirm-card confirm-card-danger">
-                                <p>@F(Strings.People.RemoveMemberExplain, name)</p>
-                                <div class="settings-actions">
-                                    <button type="button" class="btn btn-danger" disabled="@busy"
-                                            @onclick="() => RemoveMemberAsync(member)">@Strings.Common.Remove</button>
-                                    <button type="button" class="btn btn-link" disabled="@busy"
-                                            @onclick="() => removingMember = null">@Strings.Common.Cancel</button>
-                                </div>
+                            <div class="people-line">
+                                <span class="people-name">@name</span>
+                                @if (isYou)
+                                {
+                                    <span class="settings-hint my-0">@Strings.People.You</span>
+                                }
+                                <span class="people-actions">
+                                    @if (isYou)
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="OpenNameDialog">@(hasName ? Strings.People.ChangeName : Strings.People.SetName)</button>
+                                    }
+                                    @if (access.CanRemove(target))
+                                    {
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="() => removingMember = member.PersonId">@Strings.Common.Remove</button>
+                                    }
+                                </span>
                             </div>
+                            @* With a select the role is shown by the select, and this line is for screen readers *@
+                            <p class="people-sub @(options.Count > 0 ? "visually-hidden" : null)">
+                                @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Label(choice)) : RoleText.Label(choice))
+                            </p>
+                            @if (isYou && !hasName)
+                            {
+                                <p class="people-sub">@Strings.People.YourNameHint</p>
+                            }
+                            @if (options.Count > 0)
+                            {
+                                <div class="member-role">
+                                    <select class="form-select w-auto" aria-label="@F(Strings.People.ChangeRoleFor, name)"
+                                            @key="(member.PersonId, roleEpoch)"
+                                            disabled="@busy" @onchange="e => RolePickedAsync(member, choice, e.Value?.ToString())">
+                                        @foreach (var option in options)
+                                        {
+                                            <option value="@IndexOf(option)" selected="@(option == choice)">@RoleText.Label(option)</option>
+                                        }
+                                    </select>
+                                    @if (savingRole == member.PersonId)
+                                    {
+                                        <span class="settings-hint my-0" role="status">@Strings.People.Saving</span>
+                                    }
+                                </div>
+                            }
+                            @if (raisingMember == member.PersonId)
+                            {
+                                <div class="confirm-card">
+                                    <p>@F(Strings.People.RaiseConfirm, name)</p>
+                                    <div class="settings-actions">
+                                        <button type="button" class="btn btn-primary" disabled="@busy"
+                                                @onclick="() => ConfirmRaiseAsync(member)">@Strings.People.RaiseConfirmButton</button>
+                                        <button type="button" class="btn btn-link" disabled="@busy"
+                                                @onclick="CancelRaise">@Strings.Common.Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                            @if (removingMember == member.PersonId)
+                            {
+                                <div class="confirm-card confirm-card-danger">
+                                    <p>@F(Strings.People.RemoveMemberExplain, name)</p>
+                                    <div class="settings-actions">
+                                        <button type="button" class="btn btn-danger" disabled="@busy"
+                                                @onclick="() => RemoveMemberAsync(member)">@Strings.Common.Remove</button>
+                                        <button type="button" class="btn btn-link" disabled="@busy"
+                                                @onclick="() => removingMember = null">@Strings.Common.Cancel</button>
+                                    </div>
+                                </div>
+                            }
                         }
                     </li>
                 }
@@ -171,15 +203,17 @@ else
                     <div class="confirm-card">
                         <fieldset>
                             <legend class="h6">@Strings.People.InviteChoose</legend>
-                            @foreach (var option in RoleChoice.ForInvite(access))
-                            {
-                                var id = $"invite-role-{IndexOf(option)}";
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="invite-role" id="@id"
-                                           checked="@(option == inviteChoice)" @onchange="() => inviteChoice = option" />
-                                    <label class="form-check-label" for="@id">@RoleText.Label(option)</label>
-                                </div>
-                            }
+                            <div class="role-choices">
+                                @foreach (var option in RoleChoice.ForInvite(access))
+                                {
+                                    <label class="role-choice @(option == inviteChoice ? "picked" : null)">
+                                        <input class="visually-hidden" type="radio" name="invite-role"
+                                               checked="@(option == inviteChoice)" @onchange="() => inviteChoice = option" />
+                                        <span class="role-choice-label">@RoleText.Label(option)</span>
+                                        <span class="role-choice-meaning">@RoleText.Meaning(option)</span>
+                                    </label>
+                                }
+                            </div>
                         </fieldset>
                         <div class="settings-actions">
                             <button type="button" class="btn btn-primary" disabled="@busy"
@@ -225,128 +259,144 @@ else
 
                 @if (invites.Where(i => i.Id != made?.Id).ToList() is { Count: > 0 } open)
                 {
-                    <h3 class="h6 mt-3">@Strings.People.OpenInvites</h3>
-                    <ul class="room-list">
+                    <h3 class="section-label mt-4">@Strings.People.OpenInvites</h3>
+                    <ul class="settings-rows">
                         @foreach (var invite in open)
                         {
-                            <li>
-                                <div class="room-row">
-                                    <span class="room-name">@RoleText.Label(invite.Choice)</span>
-                                    <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
-                                            @onclick="() => WithdrawAsync(invite)">@Strings.People.Withdraw</button>
+                            var expires = Labels.Date(DateOnly.FromDateTime(invite.ExpiresAt.ToLocalTime().DateTime));
+                            <li class="people-row">
+                                <div class="people-line">
+                                    <span class="people-name">@RoleText.Label(invite.Choice)</span>
+                                    <span class="people-actions">
+                                        @if (invite.Token is not null)
+                                        {
+                                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                    @onclick="() => ShowInvite(invite)">@Strings.People.ShowLink</button>
+                                        }
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                @onclick="() => WithdrawAsync(invite)">@Strings.People.Withdraw</button>
+                                    </span>
                                 </div>
-                                <p class="settings-hint mt-0">@F(Strings.People.InviteRunsOut, Labels.Date(DateOnly.FromDateTime(invite.ExpiresAt.ToLocalTime().DateTime)))</p>
+                                <p class="people-sub">@(string.IsNullOrWhiteSpace(invite.CreatedByName)
+                                    ? F(Strings.People.InviteRunsOut, expires)
+                                    : F(Strings.People.InviteMadeRunsOut, Labels.Date(DateOnly.FromDateTime(invite.CreatedAt.ToLocalTime().DateTime)), invite.CreatedByName, expires))</p>
                             </li>
                         }
                     </ul>
                 }
             }
-
-            @if (access.CanHandOver && OtherMembers.Count > 0)
-            {
-                @if (handingOver)
-                {
-                    <div class="confirm-card">
-                        <p><strong>@Strings.People.HandOverTitle</strong></p>
-                        <p class="settings-hint">@Strings.People.HandOverHint</p>
-                        <label class="form-label" for="hand-over-to">@Strings.People.HandOverChoose</label>
-                        <select id="hand-over-to" class="form-select" disabled="@busy"
-                                @onchange="e => handOverTo = Guid.TryParse(e.Value?.ToString(), out var picked) ? picked : null">
-                            <option value="" selected="@(handOverTo is null)"></option>
-                            @foreach (var member in OtherMembers)
-                            {
-                                <option value="@member.PersonId" selected="@(handOverTo == member.PersonId)">@MemberName(member)</option>
-                            }
-                        </select>
-                        @if (OtherMembers.FirstOrDefault(m => m.PersonId == handOverTo) is { } next)
-                        {
-                            <p class="mt-2">@F(Strings.People.HandOverConfirm, MemberName(next))</p>
-                        }
-                        <div class="settings-actions">
-                            <button type="button" class="btn btn-danger" disabled="@(busy || handOverTo is null)"
-                                    @onclick="HandOverAsync">@Strings.People.HandOverButton</button>
-                            <button type="button" class="btn btn-link" disabled="@busy"
-                                    @onclick="() => handingOver = false">@Strings.Common.Cancel</button>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <div class="settings-actions">
-                        <button type="button" class="btn btn-outline-primary" disabled="@busy"
-                                @onclick="() => handingOver = true">@Strings.People.HandOverTitle</button>
-                    </div>
-                }
-            }
         }
-
-        @if (access.CanLeave && Collections.IsSharedOpen)
+        else if (showNameDialog && !inviteAfterName)
         {
-            @if (leaving)
-            {
-                <div class="confirm-card confirm-card-danger">
-                    <p>@F(Strings.People.LeaveConfirm, CollectionText.Name(here))</p>
-                    @if (checkingUnsent)
-                    {
-                        <p class="settings-hint" role="status">@Strings.Account.AccountSendingLatest</p>
-                    }
-                    else
-                    {
-                        @if (unsentPhotos > 0)
-                        {
-                            <p class="settings-hint">
-                                @Plural.Of(unsentPhotos, Strings.Account.AccountUnsentPhotos_One, Strings.Account.AccountUnsentPhotos_Other)
-                            </p>
-                        }
-                        @if (unsentChanges > 0)
-                        {
-                            <p class="settings-hint">
-                                @Plural.Of(unsentChanges, Strings.Account.AccountUnsentChanges_One, Strings.Account.AccountUnsentChanges_Other)
-                            </p>
-                        }
-                    }
-                    <div class="settings-actions">
-                        <button type="button" class="btn btn-outline-primary" disabled="@busy"
-                                @onclick="SaveBackupAsync">@Strings.People.LeaveSaveFirst</button>
-                    </div>
-                    @if (backupMessage is not null)
-                    {
-                        <p class="settings-message" role="status">@backupMessage</p>
-                    }
-                    <div class="settings-actions">
-                        <button type="button" class="btn btn-danger" disabled="@busy"
-                                @onclick="LeaveAsync">@Strings.People.Leave</button>
-                        <button type="button" class="btn btn-link" disabled="@busy"
-                                @onclick="() => leaving = false">@Strings.Common.Cancel</button>
-                    </div>
-                </div>
-            }
-            else
-            {
-                <div class="settings-actions">
-                    <button type="button" class="btn btn-outline-secondary" disabled="@busy"
-                            @onclick="StartLeaveAsync">@Strings.People.LeaveButton</button>
-                </div>
-            }
-        }
-        else if (access.IsOwner && Collections.IsSharedOpen)
-        {
-            <p class="settings-hint">@Strings.People.OwnerCantLeave</p>
-        }
-
-        @* Your name *@
-        @if (showNameDialog && !inviteAfterName)
-        {
+            @* The people couldn't be listed, so the name is set here instead of in a row *@
             <NameDialog Name="@registry.PersonName" OnSaved="NameSavedAsync" OnCancel="CancelNameDialog" />
         }
         else
         {
-            <div class="room-row mt-3">
+            <div class="room-row mt-4">
                 <span>@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.YourNameNone : F(Strings.People.YourName, registry.PersonName))</span>
                 <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
                         @onclick="OpenNameDialog">@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.SetName : Strings.People.ChangeName)</button>
             </div>
             <p class="settings-hint mt-0">@Strings.People.YourNameHint</p>
+        }
+
+        @if (CanHandOverNow || (access.CanLeave && Collections.IsSharedOpen) || (access.IsOwner && Collections.IsSharedOpen))
+        {
+            <div class="people-end">
+                @if (CanHandOverNow)
+                {
+                    @if (handingOver)
+                    {
+                        <div class="confirm-card">
+                            <p><strong>@Strings.People.HandOverTitle</strong></p>
+                            <p class="settings-hint">@Strings.People.HandOverHint</p>
+                            <label class="form-label" for="hand-over-to">@Strings.People.HandOverChoose</label>
+                            <select id="hand-over-to" class="form-select" disabled="@busy"
+                                    @onchange="e => handOverTo = Guid.TryParse(e.Value?.ToString(), out var picked) ? picked : null">
+                                <option value="" selected="@(handOverTo is null)"></option>
+                                @foreach (var member in OtherMembers)
+                                {
+                                    <option value="@member.PersonId" selected="@(handOverTo == member.PersonId)">@MemberName(member)</option>
+                                }
+                            </select>
+                            @if (OtherMembers.FirstOrDefault(m => m.PersonId == handOverTo) is { } next)
+                            {
+                                <p class="mt-2">@F(Strings.People.HandOverConfirm, MemberName(next))</p>
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-danger" disabled="@(busy || handOverTo is null)"
+                                        @onclick="HandOverAsync">@Strings.People.HandOverButton</button>
+                                <button type="button" class="btn btn-link" disabled="@busy"
+                                        @onclick="() => handingOver = false">@Strings.Common.Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <button type="button" class="btn btn-link link-action" disabled="@busy"
+                                    @onclick="() => handingOver = true">@Strings.People.HandOverTitle</button>
+                            <p class="settings-hint">@Strings.People.HandOverHint</p>
+                        </div>
+                    }
+                }
+
+                @if (access.CanLeave && Collections.IsSharedOpen)
+                {
+                    @if (leaving)
+                    {
+                        <div class="confirm-card confirm-card-danger">
+                            <p>@F(Strings.People.LeaveConfirm, CollectionText.Name(here))</p>
+                            @if (checkingUnsent)
+                            {
+                                <p class="settings-hint" role="status">@Strings.Account.AccountSendingLatest</p>
+                            }
+                            else
+                            {
+                                @if (unsentPhotos > 0)
+                                {
+                                    <p class="settings-hint">
+                                        @Plural.Of(unsentPhotos, Strings.Account.AccountUnsentPhotos_One, Strings.Account.AccountUnsentPhotos_Other)
+                                    </p>
+                                }
+                                @if (unsentChanges > 0)
+                                {
+                                    <p class="settings-hint">
+                                        @Plural.Of(unsentChanges, Strings.Account.AccountUnsentChanges_One, Strings.Account.AccountUnsentChanges_Other)
+                                    </p>
+                                }
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                                        @onclick="SaveBackupAsync">@Strings.People.LeaveSaveFirst</button>
+                            </div>
+                            @if (backupMessage is not null)
+                            {
+                                <p class="settings-message" role="status">@backupMessage</p>
+                            }
+                            <div class="settings-actions">
+                                <button type="button" class="btn btn-danger" disabled="@busy"
+                                        @onclick="LeaveAsync">@Strings.People.Leave</button>
+                                <button type="button" class="btn btn-link" disabled="@busy"
+                                        @onclick="() => leaving = false">@Strings.Common.Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else
+                    {
+                        <div>
+                            <button type="button" class="btn btn-outline-danger" disabled="@busy"
+                                    @onclick="StartLeaveAsync">@Strings.People.LeaveButton</button>
+                            <p class="settings-hint">@Strings.People.LeaveHint</p>
+                        </div>
+                    }
+                }
+                else if (access.IsOwner && Collections.IsSharedOpen)
+                {
+                    <p class="settings-hint">@Strings.People.OwnerCantLeave</p>
+                }
+            </div>
         }
     }
 
@@ -375,6 +425,9 @@ else
 
     private bool renaming;
     private Guid? removingMember;
+    private Guid? raisingMember;
+    private RoleChoice? raisingChoice;
+    private int roleEpoch;
     private Guid? savingRole;
     private bool removingFromDevice;
     private bool leaving;
@@ -397,6 +450,14 @@ else
     private bool showQr;
     private int qrSize;
     private string qrPath = "";
+
+    private bool ManyCollections => registry is not null && (registry.Collections.Count > 1 || Collections.IsSharedOpen);
+
+    // Just the open one while it is the only one, since it is then the collection
+    private IReadOnlyList<RegisteredCollection> ShownCollections =>
+        registry is null ? [] : ManyCollections ? registry.Collections : current is null ? [] : [current];
+
+    private bool CanHandOverNow => access.CanHandOver && OtherMembers.Count > 0;
 
     private IReadOnlyList<CollectionMember> OtherMembers =>
         details is null || registry is null ? [] : [.. details.Members.Where(m => m.PersonId != registry.PersonId)];
@@ -426,19 +487,6 @@ else
 
     private static string MemberName(CollectionMember member) =>
         string.IsNullOrWhiteSpace(member.Name) ? Strings.People.NoNameYet : member.Name!;
-
-    private string CollectionHint(RegisteredCollection collection)
-    {
-        if (collection.Gone)
-            return Strings.People.CollectionGone;
-        if (collection.IsOwner)
-            return Strings.People.CollectionYours;
-
-        var verb = RoleText.Verb(collection.Role, collection.ManagesPeople);
-        return string.IsNullOrWhiteSpace(collection.OwnerName)
-            ? F(Strings.People.CollectionSharedNoOwner, verb)
-            : F(Strings.People.CollectionShared, collection.OwnerName, verb);
-    }
 
     /// <summary>Reads the list of collections and the open one's people. With <paramref name="refresh"/> the server is asked who the person is first.</summary>
     private async Task LoadAsync(bool refresh)
@@ -530,12 +578,45 @@ else
             renaming = false;
     }
 
-    private async Task ChangeRoleAsync(CollectionMember member, string? picked)
+    // Raising someone to "edit and add people" asks first. Anything else saves at once
+    private async Task RolePickedAsync(CollectionMember member, RoleChoice now, string? picked)
     {
-        if (current is null || !int.TryParse(picked, out var index) || index < 0 || index >= RoleChoice.All.Count)
+        if (!int.TryParse(picked, out var index) || index < 0 || index >= RoleChoice.All.Count)
             return;
 
         var choice = RoleChoice.All[index];
+        if (choice.ManagesPeople && !now.ManagesPeople)
+        {
+            raisingMember = member.PersonId;
+            raisingChoice = choice;
+            return;
+        }
+
+        raisingMember = null;
+        await ChangeRoleAsync(member, choice);
+    }
+
+    private async Task ConfirmRaiseAsync(CollectionMember member)
+    {
+        if (raisingChoice is not { } choice)
+            return;
+
+        raisingMember = null;
+        await ChangeRoleAsync(member, choice);
+    }
+
+    // The select is made again, since Blazor leaves a select showing what was picked when nothing it renders has changed
+    private void CancelRaise()
+    {
+        raisingMember = null;
+        roleEpoch++;
+    }
+
+    private async Task ChangeRoleAsync(CollectionMember member, RoleChoice choice)
+    {
+        if (current is null)
+            return;
+
         savingRole = member.PersonId;
         try
         {
@@ -602,19 +683,12 @@ else
                 return;
             }
 
-            made = result.Value;
-            link = made!.Token is null ? null : $"{Nav.BaseUri}join/{made.Token}";
-            if (link is null)
+            if (!ShowInvite(result.Value!))
             {
                 inviteStep = InviteStep.None;
                 return;
             }
 
-            copied = false;
-            copyFailed = false;
-            showQr = false;
-            BuildQr(link);
-            inviteStep = InviteStep.Made;
             var listed = await Api.GetInvitesAsync(current.Id);
             if (listed.Ok)
                 invites = listed.Value!;
@@ -623,6 +697,22 @@ else
         {
             busy = false;
         }
+    }
+
+    /// <summary>Shows an invite's link and QR code. False when the invite has no token to build a link from.</summary>
+    private bool ShowInvite(InviteInfo invite)
+    {
+        made = invite;
+        link = invite.Token is null ? null : $"{Nav.BaseUri}join/{invite.Token}";
+        if (link is null)
+            return false;
+
+        copied = false;
+        copyFailed = false;
+        showQr = false;
+        BuildQr(link);
+        inviteStep = InviteStep.Made;
+        return true;
     }
 
     private void BuildQr(string text)

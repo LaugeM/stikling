@@ -90,6 +90,7 @@ else if (account is { SignedIn: true })
     {
         <h2 class="h6 mt-4">@Strings.People.Heading</h2>
         <PeopleSection />
+        <h2 class="h6 mt-4">@Strings.Account.AccountDataHeading</h2>
         <div class="settings-actions">
             <button type="button" class="btn btn-outline-primary" @onclick="DownloadDataAsync"
                     disabled="@(accountBusy || downloading)">

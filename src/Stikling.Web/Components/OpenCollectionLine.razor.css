@@ -4,13 +4,84 @@
     color: var(--bs-secondary-color);
 }
 
-.open-collection-line a {
+/* A button that reads as the link it was: same colour, underlined. The padding makes a 44px tap area and the
+   equal negative margin keeps the text where it was. */
+.open-collection-line button {
+    display: inline-block;
+    padding: 0.75rem 0;
+    margin: -0.75rem 0;
+    border: 0;
+    background: none;
+    font: inherit;
     color: inherit;
+    text-align: left;
     text-decoration: underline;
     text-underline-offset: 0.15em;
+    cursor: pointer;
 }
 
-.open-collection-line a:hover {
-    color: inherit;
+.open-collection-line button:hover {
     text-decoration-thickness: 2px;
+}
+
+ul.switcher-rows {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.switcher-rows > li + li {
+    border-top: 1px solid var(--pa-border);
+}
+
+.switcher-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    width: 100%;
+    min-height: 2.75rem;
+    padding: 0.65rem 0.85rem;
+    border: 0;
+    background: none;
+    font: inherit;
+    color: inherit;
+    text-align: left;
+}
+
+.switcher-text {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-width: 0;
+}
+
+.switcher-name {
+    font-family: var(--pa-font-display);
+    font-weight: 600;
+}
+
+.switcher-sub,
+.switcher-now {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.switcher-button {
+    cursor: pointer;
+    transition: background-color 0.15s ease-out;
+}
+
+.switcher-button:hover,
+.switcher-button:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.switcher-button:focus-visible {
+    outline: 2px solid var(--pa-green);
+    outline-offset: -2px;
+}
+
+.switcher-manage {
+    margin: 1rem 0 0;
+    font-size: 0.9rem;
 }

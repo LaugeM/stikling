@@ -1,6 +1,6 @@
 @page "/join/{Token}"
-@* What an invite link opens: who invited the person, to what, and what they can do there. Signed out, it sends
-   them to sign in and comes back to this page. *@
+@* What an invite link opens: who invited the person, to what, and what they can do there. Signed out, it shows the
+   same and sends them to sign in, and comes back to this page. *@
 @using Stikling.Core.People
 @inject AccountService Account
 @inject StiklingApi Api
@@ -15,16 +15,6 @@
 {
     <p class="settings-hint" role="status">@Strings.Account.Loading</p>
 }
-else if (state == JoinState.SignedOut)
-{
-    <p>@Strings.People.JoinSignIn</p>
-    @if (Account.IsAvailable)
-    {
-        <div class="settings-actions">
-            <a class="btn btn-primary" href="@SignInUrl">@Strings.Account.AccountSignIn</a>
-        </div>
-    }
-}
 else if (state == JoinState.Problem)
 {
     <p class="settings-message" role="alert">@problem</p>
@@ -34,36 +24,56 @@ else if (state == JoinState.Problem)
 }
 else if (preview is { } invite)
 {
-    @if (state == JoinState.AlreadyMember)
+    <section class="join-card">
+        @if (state == JoinState.AlreadyMember)
+        {
+            <h2>@F(Strings.People.AlreadyMember, invite.DisplayName)</h2>
+        }
+        else
+        {
+            <h2>@(string.IsNullOrWhiteSpace(invite.InvitedByName)
+                ? F(Strings.People.JoinInvitesNoName, invite.DisplayName)
+                : F(Strings.People.JoinInvites, invite.InvitedByName, invite.DisplayName))</h2>
+            <p class="join-role">@RoleText.JoinMeaning(invite.Choice)</p>
+            <p class="settings-hint">@Strings.People.JoinOwnStay</p>
+        }
+    </section>
+
+    @if (state == JoinState.SignedOut)
     {
-        <p>@F(Strings.People.AlreadyMember, invite.DisplayName)</p>
+        <p class="settings-hint">@Strings.People.JoinAboutStikling</p>
+        @if (Account.IsAvailable)
+        {
+            <div class="settings-actions">
+                <a class="btn btn-primary" href="@SignInUrl">@Strings.People.JoinSignInButton</a>
+                <button type="button" class="btn btn-link" @onclick="NotNow">@Strings.People.NotNow</button>
+            </div>
+            <p class="settings-hint">@Strings.People.JoinSignIn</p>
+        }
+        else
+        {
+            <p class="settings-hint">@Strings.Account.SignInNotSetUp</p>
+        }
+    }
+    else if (state == JoinState.AlreadyMember)
+    {
         <div class="settings-actions">
             <button type="button" class="btn btn-primary" disabled="@busy" @onclick="OpenAsync">@Strings.People.OpenIt</button>
         </div>
     }
+    else if (state == JoinState.NeedsName)
+    {
+        <NameDialog Name="@name" OnSaved="NameSavedAsync" OnCancel="NotNow" />
+    }
     else
     {
-        <p>
-            <strong>@(string.IsNullOrWhiteSpace(invite.InvitedByName)
-                ? F(Strings.People.JoinInvitesNoName, invite.DisplayName)
-                : F(Strings.People.JoinInvites, invite.InvitedByName, invite.DisplayName))</strong>
-        </p>
-        <p>@F(Strings.People.JoinYouCan, RoleText.Verb(invite.Choice))</p>
-
-        @if (state == JoinState.NeedsName)
+        <div class="settings-actions">
+            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="JoinAsync">@Strings.People.JoinButton</button>
+            <button type="button" class="btn btn-link" disabled="@busy" @onclick="NotNow">@Strings.People.NotNow</button>
+        </div>
+        @if (problem is not null)
         {
-            <NameDialog Name="@name" OnSaved="NameSavedAsync" OnCancel="NotNow" />
-        }
-        else
-        {
-            <div class="settings-actions">
-                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="JoinAsync">@Strings.People.JoinButton</button>
-                <button type="button" class="btn btn-link" disabled="@busy" @onclick="NotNow">@Strings.People.NotNow</button>
-            </div>
-            @if (problem is not null)
-            {
-                <p class="settings-message" role="alert">@problem</p>
-            }
+            <p class="settings-message" role="alert">@problem</p>
         }
     }
 }
@@ -89,13 +99,21 @@ else if (preview is { } invite)
         preview = null;
         problem = null;
 
-        if (!Account.IsAvailable || !await Account.WasSignedInAsync())
+        // The account has to be loaded before the page asks, or Clerk has no session yet and the call answers 401
+        var signedIn = await LoadSignedInAsync();
+        var result = await Api.PreviewInviteAsync(Token, signedIn);
+        if (signedIn && result.Failure == PeopleFailure.SignedOut)
         {
-            state = JoinState.SignedOut;
-            return;
+            signedIn = await LoadSignedInAsync();
+            result = await Api.PreviewInviteAsync(Token, signedIn);
+            if (result.Failure == PeopleFailure.SignedOut)
+            {
+                // Still no session, so the person sees the invite signed out
+                signedIn = false;
+                result = await Api.PreviewInviteAsync(Token, signedIn);
+            }
         }
 
-        var result = await Api.PreviewInviteAsync(Token);
         if (!result.Ok)
         {
             ShowProblem(result.Failure!.Value, result.Field);
@@ -103,6 +121,12 @@ else if (preview is { } invite)
         }
 
         preview = result.Value;
+        if (!signedIn)
+        {
+            state = JoinState.SignedOut;
+            return;
+        }
+
         if (preview!.AlreadyMember)
         {
             state = JoinState.AlreadyMember;
@@ -127,6 +151,18 @@ else if (preview is { } invite)
         state = needsName ? JoinState.NeedsName : JoinState.Ready;
     }
 
+    private async Task<bool> LoadSignedInAsync()
+    {
+        try
+        {
+            return Account.IsAvailable && await Account.WasSignedInAsync() && (await Account.LoadAsync()).SignedIn;
+        }
+        catch (Exception e) when (e is AccountUnavailableException or JSException)
+        {
+            return false;
+        }
+    }
+
     private void ShowProblem(PeopleFailure failure, string? field)
     {
         problem = failure switch
@@ -136,7 +172,7 @@ else if (preview is { } invite)
             PeopleFailure.Full => F(Strings.People.JoinFull, preview?.DisplayName ?? "", PeopleLimits.MaxMembers),
             _ => PeopleText.Problem(failure, field),
         };
-        state = failure == PeopleFailure.SignedOut ? JoinState.SignedOut : JoinState.Problem;
+        state = failure == PeopleFailure.SignedOut && preview is not null ? JoinState.SignedOut : JoinState.Problem;
     }
 
     private void NameSavedAsync() => state = JoinState.Ready;

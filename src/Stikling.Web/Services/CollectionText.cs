@@ -20,4 +20,18 @@ public static class CollectionText
         CollectionLabelKind.Owners => F(Strings.People.NameOwners, Possessive.Of(label.Text)),
         _ => label.Text,
     };
+
+    /// <summary>The line under a collection's name: whose it is and what the person can do in it.</summary>
+    public static string Hint(RegisteredCollection collection)
+    {
+        if (collection.Gone)
+            return Strings.People.CollectionGone;
+        if (collection.IsOwner)
+            return Strings.People.CollectionYours;
+
+        var verb = RoleText.Verb(collection.Role, collection.ManagesPeople);
+        return string.IsNullOrWhiteSpace(collection.OwnerName)
+            ? F(Strings.People.CollectionSharedNoOwner, verb)
+            : F(Strings.People.CollectionShared, collection.OwnerName, verb);
+    }
 }

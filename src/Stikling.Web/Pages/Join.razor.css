@@ -1,0 +1,22 @@
+/* The invite, warm and lifted off the page: Leaf Tint, no border, no shadow */
+.join-card {
+    margin-bottom: 1rem;
+    padding: 1rem 1.1rem;
+    background: var(--pa-green-soft);
+    border-radius: 0.75rem;
+}
+
+.join-card h2 {
+    margin: 0 0 0.4rem;
+    font-family: var(--pa-font-display);
+    font-size: 1.125rem;
+    font-weight: 600;
+}
+
+.join-role {
+    margin: 0;
+}
+
+.join-card .settings-hint {
+    margin-top: 0.4rem;
+}

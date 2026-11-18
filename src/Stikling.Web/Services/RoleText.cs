@@ -27,4 +27,22 @@ public static class RoleText
     };
 
     public static string Verb(CollectionRole role, bool managesPeople) => Verb(RoleChoice.Of(role, managesPeople));
+
+    /// <summary>One line under a choice of role, for the person making the invite.</summary>
+    public static string Meaning(RoleChoice choice) => choice switch
+    {
+        { Role: CollectionRole.Viewer } => Strings.People.RoleMeaningView,
+        { Role: CollectionRole.Helper } => Strings.People.RoleMeaningLog,
+        { ManagesPeople: true } => Strings.People.RoleMeaningEditAndManage,
+        _ => Strings.People.RoleMeaningEdit,
+    };
+
+    /// <summary>What an invite allows, written to the person who got it.</summary>
+    public static string JoinMeaning(RoleChoice choice) => choice switch
+    {
+        { Role: CollectionRole.Viewer } => Strings.People.JoinRoleView,
+        { Role: CollectionRole.Helper } => Strings.People.JoinRoleLog,
+        { ManagesPeople: true } => Strings.People.JoinRoleEditAndManage,
+        _ => Strings.People.JoinRoleEdit,
+    };
 }

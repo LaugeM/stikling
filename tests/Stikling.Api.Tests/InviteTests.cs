@@ -206,16 +206,48 @@ public class InviteTests(ApiFactory api)
     }
 
     [Fact]
-    public async Task An_invite_needs_a_sign_in()
+    public async Task Anyone_with_the_link_sees_what_it_is_for_but_joining_needs_a_sign_in()
+    {
+        var owner = await SignIn("Anna");
+        var invite = await _people.InviteOk(owner, MemberRole.Helper);
+        var anonymous = api.CreateClient();
+
+        var preview = await anonymous.GetAsync($"/invites/{invite.Token!}");
+        var accept = await anonymous.PostAsync($"/invites/{invite.Token!}/accept", null);
+
+        Assert.Equal(HttpStatusCode.OK, preview.StatusCode);
+        Assert.Equal(
+            new InvitePreview(owner.CollectionId, Stikling.Api.People.CurrentPerson.FirstCollectionName, "Anna", MemberRole.Helper, false, AlreadyMember: false, OwnerName: "Anna"),
+            await preview.Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json));
+        Assert.Equal(HttpStatusCode.Unauthorized, accept.StatusCode);
+        Assert.Single((await _people.Collection(owner)).Members);
+    }
+
+    [Fact]
+    public async Task Without_a_sign_in_an_unknown_or_closed_invite_answers_as_it_does_signed_in()
+    {
+        var owner = await SignIn();
+        var withdrawn = await _people.InviteOk(owner, MemberRole.Viewer);
+        await Withdraw(owner, withdrawn.Id);
+        var anonymous = api.CreateClient();
+
+        Assert.Equal(HttpStatusCode.NotFound, (await anonymous.GetAsync("/invites/nosuchtoken")).StatusCode);
+        Assert.Equal(HttpStatusCode.NotFound, (await anonymous.GetAsync($"/invites/{new string('a', 22)}")).StatusCode);
+        Assert.Equal(HttpStatusCode.Gone, (await anonymous.GetAsync($"/invites/{withdrawn.Token!}")).StatusCode);
+    }
+
+    [Fact]
+    public async Task A_sign_in_that_has_run_out_gets_the_preview_without_being_counted_as_in()
     {
         var owner = await SignIn();
         var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+        var client = api.CreateClient();
+        client.DefaultRequestHeaders.Authorization = new("Bearer", "not-a-real-token");
 
-        var preview = await api.CreateClient().GetAsync($"/invites/{invite.Token!}");
-        var accept = await api.CreateClient().PostAsync($"/invites/{invite.Token!}/accept", null);
+        var preview = await client.GetAsync($"/invites/{invite.Token!}");
 
-        Assert.Equal(HttpStatusCode.Unauthorized, preview.StatusCode);
-        Assert.Equal(HttpStatusCode.Unauthorized, accept.StatusCode);
+        Assert.Equal(HttpStatusCode.OK, preview.StatusCode);
+        Assert.False((await preview.Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json))!.AlreadyMember);
     }
 
     [Fact]

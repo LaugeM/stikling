@@ -182,18 +182,22 @@ public sealed class StiklingApi(AccountSettings settings, AccountService account
     public async Task<PeopleOutcome<bool>> WithdrawInviteAsync(Guid id, Guid inviteId) =>
         await PeopleCallAsync<bool>(HttpMethod.Delete, $"collections/{id}/invites/{inviteId}", null);
 
-    public async Task<PeopleOutcome<InvitePreviewInfo>> PreviewInviteAsync(string token) =>
-        await PeopleCallAsync<InvitePreviewInfo>(HttpMethod.Get, $"invites/{Uri.EscapeDataString(token)}", null);
+    /// <summary>
+    /// What an invite is for. The token is the secret, so it is answered without a sign-in too. Signed in,
+    /// <see cref="InvitePreviewInfo.AlreadyMember"/> says whether the person is in already; signed out it is false.
+    /// </summary>
+    public async Task<PeopleOutcome<InvitePreviewInfo>> PreviewInviteAsync(string token, bool signedIn) =>
+        await PeopleCallAsync<InvitePreviewInfo>(HttpMethod.Get, $"invites/{Uri.EscapeDataString(token)}", null, signedIn);
 
     /// <summary>Joins. Someone who is in already gets the collection back, as when the invite is for them twice.</summary>
     public async Task<PeopleOutcome<MeCollection>> AcceptInviteAsync(string token) =>
         await PeopleCallAsync<MeCollection>(HttpMethod.Post, $"invites/{Uri.EscapeDataString(token)}/accept", null);
 
-    private async Task<PeopleOutcome<T>> PeopleCallAsync<T>(HttpMethod method, string path, object? body)
+    private async Task<PeopleOutcome<T>> PeopleCallAsync<T>(HttpMethod method, string path, object? body, bool signedIn = true)
     {
         try
         {
-            using var request = await RequestAsync(method, path);
+            using var request = signedIn ? await RequestAsync(method, path) : new HttpRequestMessage(method, path);
             if (body is not null)
                 request.Content = JsonContent.Create(body, body.GetType());
             using var response = await http.SendAsync(request);

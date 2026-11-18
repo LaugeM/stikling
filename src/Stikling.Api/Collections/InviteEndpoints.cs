@@ -9,8 +9,8 @@ using static Stikling.Api.People.MeEndpoints;
 namespace Stikling.Api.Collections;
 
 /// <summary>
-/// Invites to a collection. Someone with the right to manage people makes a link with a role, and
-/// whoever opens it while signed in can join. The table is only kept on the server.
+/// Invites to a collection. Someone with the right to manage people makes a link with a role. Anyone
+/// with the link can see what it is for, and whoever opens it while signed in can join. The table is only kept on the server.
 /// </summary>
 public static class InviteEndpoints
 {
@@ -126,10 +126,15 @@ public static class InviteEndpoints
         })
         .RequireAuthorization(CollectionPolicies.Manage);
 
-        // What the person who opened the link is told before they decide to join
-        app.MapGet("/invites/{token}", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
+        // What the person who opened the link is told before they decide to join. The token is the secret, so it
+        // answers without a sign-in too, and the page can say what the invite is before asking someone to sign in.
+        // Signed in, it also says whether they are in already.
+        app.MapGet("/invites/{token}", async (string token, HttpContext http, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
         {
-            var person = await current.FindOrCreateAsync();
+            if (!LooksLikeToken(token))
+                return Results.NotFound();
+
+            var person = http.User.Identity?.IsAuthenticated == true ? await current.FindOrCreateAsync() : null;
             var invite = await db.Invites.AsNoTracking().SingleOrDefaultAsync(i => i.Token == token);
             if (invite is null)
                 return Results.NotFound();
@@ -140,11 +145,11 @@ public static class InviteEndpoints
                 .Select(c => new { c.Name, OwnerName = db.People.Where(p => p.Id == c.OwnerPersonId).Select(p => p.Name).FirstOrDefault() })
                 .SingleAsync();
             var invitedBy = await db.People.Where(p => p.Id == invite.CreatedBy).Select(p => p.Name).SingleOrDefaultAsync();
-            var already = await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
+            var already = person is not null
+                && await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
 
             return Results.Ok(new InvitePreview(invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName));
-        })
-        .RequireAuthorization();
+        });
 
         app.MapPost("/invites/{token}/accept", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
         {
@@ -215,6 +220,10 @@ public static class InviteEndpoints
 
     private static InviteResponse Respond(Invite invite, string? createdByName) =>
         new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName);
+
+    /// <summary>Whether it could be a token at all, so an address that can't be one never reaches the database.</summary>
+    private static bool LooksLikeToken(string token) =>
+        token.Length == 22 && token.All(c => char.IsAsciiLetterOrDigit(c) || c is '-' or '_');
 
     /// <summary>16 random bytes as base64url without padding, 22 characters that can't be guessed.</summary>
     private static string NewToken() => WebEncoders.Base64UrlEncode(RandomNumberGenerator.GetBytes(16));

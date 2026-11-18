@@ -1,15 +1,55 @@
 @* A quiet line near the top of Today, Plants and Propagations while a shared collection is open, so it is clear
-   whose plants these are and what the person can do. Links to the account page, where collections are switched. *@
+   whose plants these are and what the person can do. Opens a small switcher for the collections on this device,
+   with a link on to the account page for people and invites. *@
 @inject CollectionsService Collections
 
 @if (Collections.Open is { } here)
 {
     <p class="open-collection-line">
-        <a href="account">@Text(here)</a>
+        <button type="button" aria-haspopup="dialog" @onclick="OpenAsync">@Text(here)</button>
     </p>
+
+    <Sheet Title="@Strings.People.SwitcherTitle" Open="open" OpenChanged="v => open = v">
+        <ul class="settings-rows switcher-rows">
+            @foreach (var collection in collections)
+            {
+                @if (collection.Id == Collections.Current?.Id)
+                {
+                    <li class="switcher-row">
+                        <span class="switcher-text">
+                            <span class="switcher-name">@CollectionText.Name(collection)</span>
+                            <span class="switcher-sub">@CollectionText.Hint(collection)</span>
+                        </span>
+                        <span class="switcher-now">@Strings.People.OpenNow</span>
+                    </li>
+                }
+                else
+                {
+                    <li>
+                        <button type="button" class="switcher-row switcher-button" @onclick="() => Collections.SwitchToAsync(collection.Id)">
+                            <span class="switcher-text">
+                                <span class="switcher-name">@CollectionText.Name(collection)</span>
+                                <span class="switcher-sub">@CollectionText.Hint(collection)</span>
+                            </span>
+                        </button>
+                    </li>
+                }
+            }
+        </ul>
+        <p class="switcher-manage"><a href="account">@Strings.People.SwitcherManage</a></p>
+    </Sheet>
 }
 
 @code {
+    private bool open;
+    private IReadOnlyList<RegisteredCollection> collections = [];
+
+    private async Task OpenAsync()
+    {
+        collections = (await Collections.GetRegistryAsync())?.Collections ?? [];
+        open = true;
+    }
+
     private string Text(RegisteredCollection here)
     {
         if (here.Gone)

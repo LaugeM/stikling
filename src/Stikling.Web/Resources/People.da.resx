@@ -193,7 +193,7 @@
     <value>Vælg et navn</value>
   </data>
   <data name="YourNameHint" xml:space="preserve">
-    <value>Vises for dem du deler med, og ved siden af det du registrerer.</value>
+    <value>Vises for dem du deler med, og ved siden af det du logger.</value>
   </data>
   <data name="NameDialogHeading" xml:space="preserve">
     <value>Hvad skal folk kalde dig?</value>
@@ -208,16 +208,13 @@
     <value>Deltag i en samling</value>
   </data>
   <data name="JoinSignIn" xml:space="preserve">
-    <value>Log ind for at se invitationen.</value>
+    <value>Log ind eller opret en gratis konto. Bagefter kommer du tilbage hertil.</value>
   </data>
   <data name="JoinInvites" xml:space="preserve">
     <value>{0} inviterer dig med i {1}</value>
   </data>
   <data name="JoinInvitesNoName" xml:space="preserve">
     <value>Du er inviteret med i {0}</value>
-  </data>
-  <data name="JoinYouCan" xml:space="preserve">
-    <value>Du kan {0}</value>
   </data>
   <data name="JoinButton" xml:space="preserve">
     <value>Deltag</value>
@@ -302,5 +299,62 @@
   </data>
   <data name="CopyFailed" xml:space="preserve">
     <value>Linket kunne ikke kopieres automatisk. Det er markeret, så du kan kopiere det selv.</value>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Samling</value>
+  </data>
+  <data name="RoleMeaningView" xml:space="preserve">
+    <value>Ser alt, ændrer ingenting.</value>
+  </data>
+  <data name="RoleMeaningLog" xml:space="preserve">
+    <value>Logger pleje og tilføjer noter og billeder. Ændrer kun det personen selv har tilføjet. Passer til en plantesitter.</value>
+  </data>
+  <data name="RoleMeaningEdit" xml:space="preserve">
+    <value>Ændrer alt, ligesom dig.</value>
+  </data>
+  <data name="RoleMeaningEditAndManage" xml:space="preserve">
+    <value>Ændrer alt, inviterer andre og bestemmer hvem der må hvad.</value>
+  </data>
+  <data name="JoinRoleView" xml:space="preserve">
+    <value>Du kan se alt i den, men ikke ændre noget.</value>
+  </data>
+  <data name="JoinRoleLog" xml:space="preserve">
+    <value>Du kan logge pleje på planter og stiklinger, tilføje noter og billeder og ændre det du selv har tilføjet.</value>
+  </data>
+  <data name="JoinRoleEdit" xml:space="preserve">
+    <value>Du kan ændre alt i den, ligesom ejeren.</value>
+  </data>
+  <data name="JoinRoleEditAndManage" xml:space="preserve">
+    <value>Du kan ændre alt i den, invitere andre og bestemme hvem der må hvad.</value>
+  </data>
+  <data name="JoinOwnStay" xml:space="preserve">
+    <value>Dine egne planter bliver som de er.</value>
+  </data>
+  <data name="JoinAboutStikling" xml:space="preserve">
+    <value>Stikling er en gratis app til at holde styr på dine planter og de stiklinger du tager af dem, med billeder og noter til hver enkelt.</value>
+  </data>
+  <data name="JoinSignInButton" xml:space="preserve">
+    <value>Log ind for at deltage</value>
+  </data>
+  <data name="RaiseConfirm" xml:space="preserve">
+    <value>Skal {0} kunne redigere og tilføje personer? Så kan {0} også invitere andre og bestemme hvem der må hvad.</value>
+  </data>
+  <data name="RaiseConfirmButton" xml:space="preserve">
+    <value>Ja, giv lov</value>
+  </data>
+  <data name="InviteMadeRunsOut" xml:space="preserve">
+    <value>Lavet {0} af {1}, udløber {2}</value>
+  </data>
+  <data name="ShowLink" xml:space="preserve">
+    <value>Vis link</value>
+  </data>
+  <data name="LeaveHint" xml:space="preserve">
+    <value>Samlingen bliver fjernet fra denne enhed. Du kan være med igen hvis du får en ny invitation.</value>
+  </data>
+  <data name="SwitcherTitle" xml:space="preserve">
+    <value>Samlinger på denne enhed</value>
+  </data>
+  <data name="SwitcherManage" xml:space="preserve">
+    <value>Personer og invitationer</value>
   </data>
 </root>

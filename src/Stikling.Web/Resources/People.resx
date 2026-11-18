@@ -239,7 +239,7 @@
     <comment>Title of the page an invite link opens.</comment>
   </data>
   <data name="JoinSignIn" xml:space="preserve">
-    <value>Sign in to see this invite.</value>
+    <value>Sign in or make a free account. You come back here afterwards.</value>
   </data>
   <data name="JoinInvites" xml:space="preserve">
     <value>{0} invites you to {1}</value>
@@ -248,10 +248,6 @@
   <data name="JoinInvitesNoName" xml:space="preserve">
     <value>You're invited to {0}</value>
     <comment>{0} is the name of the collection. Used when the person who invited hasn't set a name.</comment>
-  </data>
-  <data name="JoinYouCan" xml:space="preserve">
-    <value>You can {0}</value>
-    <comment>{0} is what the invite lets the person do, like 'edit'.</comment>
   </data>
   <data name="JoinButton" xml:space="preserve">
     <value>Join</value>
@@ -353,5 +349,81 @@
   <data name="CopyFailed" xml:space="preserve">
     <value>The link couldn't be copied automatically. It's selected, so you can copy it yourself.</value>
     <comment>Shown under the invite link when the browser wouldn't let the app copy it.</comment>
+  </data>
+  <data name="CollectionTitle" xml:space="preserve">
+    <value>Collection</value>
+    <comment>Label above the collection's name in the People section on the Account page, when there is only one collection on the device.</comment>
+  </data>
+  <data name="RoleMeaningView" xml:space="preserve">
+    <value>Sees everything, changes nothing.</value>
+    <comment>Under 'Can view' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningLog" xml:space="preserve">
+    <value>Logs care and adds notes and photos. Changes only what they added. Suits a plant-sitter.</value>
+    <comment>Under 'Can log care' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningEdit" xml:space="preserve">
+    <value>Changes anything, like you.</value>
+    <comment>Under 'Can edit' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="RoleMeaningEditAndManage" xml:space="preserve">
+    <value>Changes anything, and also invites others and decides who can do what.</value>
+    <comment>Under 'Can edit and add people' when choosing what an invited person can do.</comment>
+  </data>
+  <data name="JoinRoleView" xml:space="preserve">
+    <value>You can see everything in it, but not change anything.</value>
+    <comment>On the page an invite link opens, under who invited the person. For an invite that can view.</comment>
+  </data>
+  <data name="JoinRoleLog" xml:space="preserve">
+    <value>You can log care on plants and cuttings and add notes and photos, and change what you added yourself.</value>
+    <comment>On the page an invite link opens. For an invite that can log care.</comment>
+  </data>
+  <data name="JoinRoleEdit" xml:space="preserve">
+    <value>You can change anything in it, like the owner.</value>
+    <comment>On the page an invite link opens. For an invite that can edit.</comment>
+  </data>
+  <data name="JoinRoleEditAndManage" xml:space="preserve">
+    <value>You can change anything in it, invite others and change who can do what.</value>
+    <comment>On the page an invite link opens. For an invite that can edit and add people.</comment>
+  </data>
+  <data name="JoinOwnStay" xml:space="preserve">
+    <value>Your own plants stay as they are.</value>
+    <comment>On the page an invite link opens, under what the invite allows.</comment>
+  </data>
+  <data name="JoinAboutStikling" xml:space="preserve">
+    <value>Stikling is a free app to keep track of your plants and the cuttings you take from them, with photos and notes for each one.</value>
+    <comment>On the page an invite link opens, when the person isn't signed in. Says what the app is.</comment>
+  </data>
+  <data name="JoinSignInButton" xml:space="preserve">
+    <value>Sign in to join</value>
+    <comment>Button on the page an invite link opens, when the person isn't signed in.</comment>
+  </data>
+  <data name="RaiseConfirm" xml:space="preserve">
+    <value>Let {0} edit and add people? They can invite others and change who can do what.</value>
+    <comment>Question under a member when the owner picks 'Can edit and add people' for them. {0} is the member's name.</comment>
+  </data>
+  <data name="RaiseConfirmButton" xml:space="preserve">
+    <value>Yes, let them</value>
+    <comment>Button on the question about letting a member edit and add people.</comment>
+  </data>
+  <data name="InviteMadeRunsOut" xml:space="preserve">
+    <value>Made {0} by {1}, runs out {2}</value>
+    <comment>Under an open invite in the People section. {0} is the date it was made, {1} the name of who made it, {2} the date it runs out.</comment>
+  </data>
+  <data name="ShowLink" xml:space="preserve">
+    <value>Show link</value>
+    <comment>Button next to an open invite in the People section. Shows its link and QR code again.</comment>
+  </data>
+  <data name="LeaveHint" xml:space="preserve">
+    <value>The collection goes from this device. You can join again with a new invite.</value>
+    <comment>Under the Leave button in the People section.</comment>
+  </data>
+  <data name="SwitcherTitle" xml:space="preserve">
+    <value>Collections on this device</value>
+    <comment>Title of the small sheet that opens from the line at the top of Today, Plants and Cuttings saying whose collection is open.</comment>
+  </data>
+  <data name="SwitcherManage" xml:space="preserve">
+    <value>People and invites</value>
+    <comment>Link at the bottom of the collection switcher, to the People section on the Account page.</comment>
   </data>
 </root>
