@@ -1,6 +1,7 @@
 using System.Security.Cryptography;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Memory;
 using Stikling.Api.Data;
 using Stikling.Api.People;
 using Stikling.Api.Sharing;
@@ -143,7 +144,8 @@ public static class InviteEndpoints
         // What the person who opened the link is told before they decide to join. The token is the secret, so it
         // answers without a sign-in too, and the page can say what the invite is before asking someone to sign in.
         // Signed in, it also says whether they are in already.
-        app.MapGet("/invites/{token}", async (string token, HttpContext http, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
+        app.MapGet("/invites/{token}", async (
+            string token, HttpContext http, CurrentPerson current, StiklingDbContext db, TimeProvider clock, IMemoryCache cache) =>
         {
             if (!LooksLikeToken(token))
                 return Results.NotFound();
@@ -162,10 +164,15 @@ public static class InviteEndpoints
             var already = person is not null
                 && await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
 
-            // Only how many there are, never names or photos
-            var plants = await LiveAsync<Plant>(db, invite.CollectionId, "plants");
-            var propagations = await LiveAsync<Propagation>(db, invite.CollectionId, "propagations");
-            var (plantCount, cuttingCount) = CollectionCounts.Of(plants, propagations);
+            // Only how many there are, never names or photos. Counting reads every plant and cutting, and anyone with
+            // the link can ask, so the counts are kept for a couple of minutes
+            var (plantCount, cuttingCount) = await cache.GetOrCreateAsync($"invite-counts:{invite.CollectionId}", async entry =>
+            {
+                entry.AbsoluteExpirationRelativeToNow = CountsKeptFor;
+                var plants = await LiveAsync<Plant>(db, invite.CollectionId, "plants");
+                var propagations = await LiveAsync<Propagation>(db, invite.CollectionId, "propagations");
+                return CollectionCounts.Of(plants, propagations);
+            });
 
             return Results.Ok(new InvitePreview(
                 invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName,
@@ -231,6 +238,8 @@ public static class InviteEndpoints
 
         return app;
     }
+
+    private static readonly TimeSpan CountsKeptFor = TimeSpan.FromMinutes(2);
 
     private static IResult Gone() =>
         Results.Problem("This invite has been used, withdrawn or has run out.", statusCode: StatusCodes.Status410Gone);

@@ -887,7 +887,8 @@ else
 
     private async Task WithdrawAsync(InviteInfo invite)
     {
-        if (current is not null && await RunAsync(() => Api.WithdrawInviteAsync(current.Id, invite.Id)))
+        // The invite button is only there while no invite card is open
+        if (current is not null && await RunAsync(() => Api.WithdrawInviteAsync(current.Id, invite.Id)) && inviteStep == InviteStep.None)
             FocusAfterRender(FocusTarget.Invite);
     }
 
@@ -1002,11 +1003,12 @@ else
     private async Task NameSavedAsync()
     {
         showNameDialog = false;
-        if (!inviteAfterName)
-            FocusAfterRender(FocusTarget.Name);
         await LoadAsync(refresh: false);
+        // After loading, so the button is there to take it
         if (inviteAfterName)
             BeginChoosing();
+        else
+            FocusAfterRender(FocusTarget.Name);
         inviteAfterName = false;
     }
 

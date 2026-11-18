@@ -60,6 +60,7 @@ builder.Services.AddClerkAuthentication();
 builder.Services.AddTestSignIn();
 builder.Services.AddCollectionAuthorization();
 builder.Services.AddRequestLimits(builder.Configuration);
+builder.Services.AddMemoryCache();
 builder.Services.Configure<ShareOptions>(builder.Configuration.GetSection(ShareOptions.Section));
 builder.Services.Configure<NotificationOptions>(builder.Configuration.GetSection(NotificationOptions.Section));
 builder.Services.AddSingleton<IPushSender, WebPushSender>();
