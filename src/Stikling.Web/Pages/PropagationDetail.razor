@@ -498,7 +498,7 @@ else
 
                 <LeafCard Leaves="leaves" PhotoOf="LeafPhoto" OnOpen="OpenLeaf" />
 
-                <FilesCard SubjectType="FileSubject.Propagation" SubjectId="propagation.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => more = More.None" />
+                <FilesCard SubjectType="FileSubject.Propagation" SubjectId="propagation.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => { more = More.None; detailsOpen = true; }" />
             </div>
 
             <GrowthBlock @key="@($"{historyVersion}-{growthVersion}")" SubjectId="propagation.Id" StartDay="PhotoDayCount.StartOf(propagation)" />

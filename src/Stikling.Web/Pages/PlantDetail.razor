@@ -776,7 +776,7 @@ else
                     </IfCan>
                 </section>
 
-                <FilesCard SubjectType="FileSubject.Plant" SubjectId="plant.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => more = More.None" />
+                <FilesCard SubjectType="FileSubject.Plant" SubjectId="plant.Id" CanEdit="Access.CanEdit" InputId="@filesInputId" OnPicked="() => { more = More.None; detailsOpen = true; }" />
             </div>
 
             <GrowthBlock @key="@($"{historyVersion}-{growthVersion}-{earlierId}")" SubjectId="plant.Id"
