@@ -274,7 +274,7 @@ else
     }
     </div>
     </div>
-    @if (HasPane && Open is { } openId)
+    @if (HasPane && paneId is { } openId)
     {
         <SidePane Label="@F(Strings.Propagations.PaneLabel, OpenName)" Href="@($"propagations/{openId}")" OpenText="@Strings.Propagations.PaneOpenPage">
             <PropagationDetail @key="openId" Id="openId" InPane="true" />
@@ -356,10 +356,19 @@ else
     private string OpenName => all?.FirstOrDefault(p => p.Id == Open)?.DisplayName ?? Strings.Propagations.DetFallbackTitle;
     private int FilterCount => (string.IsNullOrWhiteSpace(search) ? 0 : 1) + (progress != ProgressFilter.Active ? 1 : 0);
 
-    protected override void OnParametersSet()
+    // The one the pane shows. It follows Open one render later: the page in the pane reads the address too, and
+    // Blazor fails when something starts or stops listening to the address while a change of it is handed out.
+    private Guid? paneId;
+
+    protected override async Task OnParametersSetAsync()
     {
         if (Open is null)
             filtersShown = false;
+        if (Open != paneId)
+        {
+            await Task.Yield();
+            paneId = Open;
+        }
     }
 
     private static readonly (ProgressFilter Value, string Label)[] progressOptions =

@@ -2994,7 +2994,7 @@ main.app-content:has(.form-bar) {
     /* The plant and propagation pages count their columns by the width of their own container, not the
        screen, so they fit wherever they are shown. Under 44rem the blocks stack in markup order.
        From 44rem it is two columns, as above, with the history spanning the head and the details.
-       From 78rem the details move to a third column. */
+       From 76rem the details move to a third column (a 96rem window, less a scrollbar). */
     .profile-frame {
         container-type: inline-size;
     }
@@ -3026,7 +3026,7 @@ main.app-content:has(.form-bar) {
         }
     }
 
-    @container (min-width: 78rem) {
+    @container (min-width: 76rem) {
         .profile-layout.profile-three {
             grid-template-columns: clamp(16rem, 22%, 22rem) minmax(0, 1fr) clamp(18rem, 26%, 26rem);
             grid-template-rows: auto;

@@ -33,11 +33,15 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender)
+        // The list can render again while the module loads, so the attach is tried again after a render
+        // that left it without an element to listen on
+        if (attached is null)
         {
-            module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/sidepane.js");
-            self = DotNetObjectReference.Create(this);
-            attached = await module.InvokeAsync<IJSObjectReference>("attach", root, self, Prefix);
+            module ??= await JS.InvokeAsync<IJSObjectReference>("import", "./js/sidepane.js");
+            self ??= DotNetObjectReference.Create(this);
+            attached = await module.InvokeAsync<IJSObjectReference?>("attach", root, self, Prefix);
+            if (attached is null)
+                return;
             shownId = OpenId;
             // A shared link, or a window made narrower since: no pane here, so it is the page of its own
             if (OpenId is { } id && !await module.InvokeAsync<bool>("isWide"))

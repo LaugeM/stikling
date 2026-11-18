@@ -16,6 +16,8 @@ export const isWide = wide;
 // prefix is "plants" or "propagations". dotnet.Open(id) and dotnet.Close() are called on the .NET side.
 // Returns something to call dispose() on. setEnabled(false) turns the clicks back into ordinary navigation.
 export function attach(root, dotnet, prefix) {
+    if (!root?.isConnected)
+        return null;
     let enabled = false;
     const pattern = new RegExp(`^${prefix}/([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})$`, "i");
 
