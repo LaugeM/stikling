@@ -31,6 +31,7 @@ public class HelperSyncTests
     [InlineData("places")]
     [InlineData("settings")]
     [InlineData("pots")]
+    [InlineData("files")]
     public void A_helper_sends_no_other_kind(string kind) =>
         Assert.False(HelperSync.MaySend(kind, Record(Mine()), Helper));
 

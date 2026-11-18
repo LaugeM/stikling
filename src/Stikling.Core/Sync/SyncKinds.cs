@@ -12,6 +12,9 @@ public static class SyncKinds
     /// <summary>A photo's record. Its images travel separately, see <see cref="PhotoSyncService"/>.</summary>
     public const string Photos = "photos";
 
+    /// <summary>An attached file's record. Its bytes travel separately, see <see cref="FileSyncService"/>.</summary>
+    public const string Files = "files";
+
     public static readonly IReadOnlyList<string> Collection =
         [.. RecordKinds.All.Where(k => k.Owner == RecordOwner.Collection).Select(k => k.Name)];
 

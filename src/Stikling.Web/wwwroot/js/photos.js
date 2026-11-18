@@ -14,7 +14,9 @@ const urlCache = new Map();
 
 const thumbKey = id => `${id}:thumb`;
 
-async function resize(bitmap, maxSide) {
+// Shrinks an image so its longest side is at most maxSide (never enlarging it) and encodes it as WebP,
+// or as JPEG where the browser can't make WebP. attachments.js uses it with its own qualities.
+export async function resize(bitmap, maxSide, webpQuality = WEBP_QUALITY, jpegQuality = JPEG_QUALITY) {
     const scale = Math.min(1, maxSide / Math.max(bitmap.width, bitmap.height));
     const width = Math.round(bitmap.width * scale);
     const height = Math.round(bitmap.height * scale);
@@ -29,9 +31,9 @@ async function resize(bitmap, maxSide) {
     const toBlob = (type, quality) => new Promise(resolve => canvas.toBlob(resolve, type, quality));
 
     // A browser that can't make WebP quietly gives back a PNG (or null), so check what came back
-    let blob = await toBlob("image/webp", WEBP_QUALITY);
+    let blob = await toBlob("image/webp", webpQuality);
     if (blob?.type !== "image/webp")
-        blob = await toBlob("image/jpeg", JPEG_QUALITY);
+        blob = await toBlob("image/jpeg", jpegQuality);
     return { blob, width, height };
 }
 

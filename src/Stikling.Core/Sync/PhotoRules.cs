@@ -36,11 +36,14 @@ public static class PhotoRules
         : null;
 }
 
-/// <summary>A kind of image the app saves, with its media type and the file extension it gets in a download.</summary>
+/// <summary>A kind of image the app saves (and PDF, for attached files), with its media type and the file extension it gets in a download.</summary>
 public sealed record ImageFormat(string ContentType, string Extension)
 {
     public static readonly ImageFormat Jpeg = new("image/jpeg", "jpg");
     public static readonly ImageFormat WebP = new("image/webp", "webp");
+
+    /// <summary>Not an image, but kept the same way for attached files.</summary>
+    public static readonly ImageFormat Pdf = new("application/pdf", "pdf");
 }
 
 /// <summary><c>POST /collections/{id}/photos/stored</c>: which of these photos have their images on the server.</summary>

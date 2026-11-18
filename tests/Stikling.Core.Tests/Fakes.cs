@@ -1295,3 +1295,94 @@ internal sealed class FakePlaceReadingRepository() : FakeRepository<PlaceReading
             throw new InvalidOperationException(error);
     }
 }
+
+internal sealed class FakeFileRepository() : FakeRepository<AttachedFile>(stampsDates: true), Stikling.Core.Files.IFileRepository
+{
+    public Dictionary<Guid, AttachedFile> Files => Records;
+
+    protected override void Check(AttachedFile file)
+    {
+        if (file.Validate().FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}
+
+/// <summary>The attached files' bytes on one device and the list of those to send, as the browser database keeps them.</summary>
+internal sealed class FakeFileSyncStore : IFileSyncStore
+{
+    private static readonly IComparer<Guid> ByText = Comparer<Guid>.Create((a, b) => string.CompareOrdinal(a.ToString(), b.ToString()));
+
+    public SortedSet<Guid> Uploads { get; } = new(ByText);
+    public HashSet<Guid> Bytes { get; } = [];
+
+    /// <summary>A file added on this device: its bytes, and on the list to send.</summary>
+    public Guid Add()
+    {
+        var id = Guid.NewGuid();
+        Bytes.Add(id);
+        Uploads.Add(id);
+        return id;
+    }
+
+    public Task<IReadOnlyList<Guid>> GetFileUploadsAsync(Guid? after, int max) =>
+        Task.FromResult<IReadOnlyList<Guid>>(Uploads.Where(id => after is null || ByText.Compare(id, after.Value) > 0).Take(max).ToList());
+
+    public Task RemoveFileUploadsAsync(IReadOnlyCollection<Guid> ids)
+    {
+        Uploads.ExceptWith(ids);
+        return Task.CompletedTask;
+    }
+}
+
+/// <summary>The attached files' bytes of one collection on the server. Each file counts as <see cref="FileBytes"/> towards <see cref="Limit"/>.</summary>
+internal sealed class FakeFileServer(FakeFileSyncStore device) : IFileServer
+{
+    public const int FileBytes = 100;
+
+    public HashSet<Guid> Files { get; } = [];
+    public HashSet<Guid> Records { get; } = [];
+    public HashSet<Guid> Deleted { get; } = [];
+    public HashSet<Guid> Refuses { get; } = [];
+    public long Limit { get; set; } = long.MaxValue;
+    public List<Guid> Sent { get; } = [];
+    public List<Guid> Fetched { get; } = [];
+
+    public Task<IReadOnlyList<Guid>> GetStoredFilesAsync(Guid collectionId, IReadOnlyList<Guid> ids)
+    {
+        Assert.True(ids.Count <= FileRules.BatchSize);
+        return Task.FromResult<IReadOnlyList<Guid>>(ids.Where(Files.Contains).ToList());
+    }
+
+    public Task<UploadOutcome> UploadFileAsync(Guid collectionId, Guid fileId)
+    {
+        UploadOutcome outcome;
+        if (!device.Bytes.Contains(fileId))
+            outcome = UploadOutcome.NotHere;
+        else if (Deleted.Contains(fileId))
+            outcome = UploadOutcome.Gone;
+        else if (!Records.Contains(fileId))
+            outcome = UploadOutcome.NotYet;
+        else if (Refuses.Contains(fileId))
+            outcome = UploadOutcome.Refused;
+        else if ((long)(Files.Count + 1) * FileBytes > Limit)
+            outcome = UploadOutcome.Full;
+        else
+        {
+            Files.Add(fileId);
+            Sent.Add(fileId);
+            outcome = UploadOutcome.Uploaded;
+        }
+
+        return Task.FromResult(outcome);
+    }
+
+    public Task<bool> DownloadFileAsync(Guid collectionId, Guid fileId)
+    {
+        if (!Files.Contains(fileId))
+            return Task.FromResult(false);
+
+        device.Bytes.Add(fileId);
+        Fetched.Add(fileId);
+        return Task.FromResult(true);
+    }
+}

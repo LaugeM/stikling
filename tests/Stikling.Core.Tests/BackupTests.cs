@@ -2,6 +2,7 @@ using System.Text.Json;
 using Stikling.Core.Backup;
 using Stikling.Core.Models;
 using Stikling.Core.Sellers;
+using Stikling.Core.Sync;
 
 namespace Stikling.Core.Tests;
 
@@ -157,12 +158,13 @@ public class BackupTests
             OwnMeasureKinds = [new OwnMeasureKind { Name = "Nodes" }, new OwnMeasureKind { Name = "Old", DeletedAt = Now }],
             PhotoMarkups = [new PhotoMarkup { Shape = MarkupShape.Circle }, new PhotoMarkup { DeletedAt = Now }],
             PlaceReadings = [new PlaceReading { Lux = 300 }, new PlaceReading { DeletedAt = Now }],
-            NameNotes = [new NameNote { Level = NameLevel.Genus, Key = "monstera", Text = "Likes it tight" }, new NameNote { DeletedAt = Now }]
+            NameNotes = [new NameNote { Level = NameLevel.Genus, Key = "monstera", Text = "Likes it tight" }, new NameNote { DeletedAt = Now }],
+            Files = [new AttachedFile { Name = "Receipt.pdf" }, new AttachedFile { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -198,6 +200,7 @@ public class BackupTests
         Assert.Empty(data.PhotoMarkups);
         Assert.Empty(data.PlaceReadings);
         Assert.Empty(data.NameNotes);
+        Assert.Empty(data.Files);
     }
 
     [Fact]
@@ -222,6 +225,65 @@ public class BackupTests
         Assert.Equal((kind.Id, "Bottom watered"), (log.OwnKindId, log.OwnKindName));
         Assert.Equal(1, BackupMerge.Merge<OwnCareKind>([], back.OwnCareKinds).Added);
         Assert.Equal(0, BackupMerge.Merge([kind], back.OwnCareKinds).Added);
+    }
+
+    [Fact]
+    public void Attached_files_survive_a_backup_as_text_and_a_restore_merges_them()
+    {
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var subject = Guid.NewGuid();
+        var file = new AttachedFile
+        {
+            SubjectType = FileSubject.Order, SubjectId = subject, Name = "Invoice.pdf", ContentType = "application/pdf",
+            Size = 48213, AddedAt = Now, UpdatedAt = Now
+        };
+
+        var json = JsonSerializer.Serialize(new BackupData { Files = [file] }, options);
+        Assert.Contains("\"subjectType\":\"Order\"", json);
+        Assert.Contains("\"contentType\":\"application/pdf\"", json);
+
+        var back = JsonSerializer.Deserialize<BackupData>(json, options)!;
+
+        var restored = Assert.Single(back.Files);
+        Assert.Equal((file.Id, FileSubject.Order, subject, "Invoice.pdf", "application/pdf", 48213L), (restored.Id, restored.SubjectType, restored.SubjectId, restored.Name, restored.ContentType, restored.Size));
+        Assert.Equal(Now, restored.AddedAt);
+        Assert.Equal(1, BackupMerge.Merge<AttachedFile>([], back.Files).Added);
+        Assert.Equal(0, BackupMerge.Merge([file], back.Files).Added);
+    }
+
+    [Fact]
+    public void A_file_deleted_in_the_backup_is_a_delete_the_restore_carries_over()
+    {
+        var file = new AttachedFile { Name = "Tag", UpdatedAt = Now };
+        var deletedLater = new AttachedFile { Id = file.Id, Name = "Tag", UpdatedAt = Now.AddHours(1), DeletedAt = Now.AddHours(1) };
+
+        var merged = BackupMerge.Merge([file], [deletedLater]);
+
+        Assert.Equal(1, merged.Updated);
+        Assert.True(Assert.Single(merged.ToSave).IsDeleted);
+    }
+
+    [Fact]
+    public async Task Files_are_exported_and_restored_through_the_backup_lists()
+    {
+        var store = new InMemoryRecordStore();
+        var live = new AttachedFile { Name = "Receipt.pdf", SubjectId = Guid.NewGuid(), UpdatedAt = Now };
+        var gone = new AttachedFile { Name = "Old", SubjectId = Guid.NewGuid(), UpdatedAt = Now, DeletedAt = Now };
+        await store.PutAsync(RecordKinds.Files, live);
+        await store.PutAsync(RecordKinds.Files, gone);
+
+        var data = new BackupData();
+        await BackupData.FileList.ExportAsync(data, store);
+        var options = new JsonSerializerOptions(JsonSerializerDefaults.Web);
+        var back = JsonSerializer.Deserialize<BackupData>(JsonSerializer.Serialize(data, options), options)!;
+
+        Assert.Equal(2, back.Files.Count);
+        Assert.Equal(1, back.Counts.Files);
+
+        var empty = new InMemoryRecordStore();
+        var counts = await BackupData.FileList.RestoreAsync(back, empty);
+        Assert.Equal(2, counts.Added);
+        Assert.Equivalent(new[] { live.Id, gone.Id }, empty.IdsOf(RecordKinds.Files));
     }
 
     [Fact]
@@ -817,14 +879,14 @@ public class BackupTests
             "version,app,exportedAt,plants,propagations,propagationCareLogs,timeline,photos,careLogs,pestCases,pestTreatments,"
             + "pots,soilMixes,products,feeds,treatmentRecipes,places,settings,putOffs,growLights,receivedHistories,awayStretches,"
             + "sitterSheets,floweringMarks,problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,"
-            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,counts",
+            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,counts",
             string.Join(",", json.RootElement.EnumerateObject().Select(p => p.Name)));
 
         Assert.Equal(
             "plants,propagations,entries,photos,careEntries,pestCases,treatments,pots,soilMixes,products,feeds,recipes,rooms,"
             + "settings,putOffs,growLights,receivedHistories,awayStretches,sitterSheets,propagationCareEntries,floweringMarks,"
             + "problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,ownFields,orders,orderItems,"
-            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes",
+            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files",
             string.Join(",", json.RootElement.GetProperty("counts").EnumerateObject().Select(p => p.Name)));
     }
 }

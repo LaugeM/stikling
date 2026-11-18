@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Heading" xml:space="preserve">
+    <value>Filer</value>
+  </data>
+  <data name="Add" xml:space="preserve">
+    <value>Tilføj fil</value>
+  </data>
+  <data name="AddHint" xml:space="preserve">
+    <value>En kvittering, et plantemærke eller et plejekort</value>
+  </data>
+  <data name="TypePdf" xml:space="preserve">
+    <value>PDF</value>
+  </data>
+  <data name="TypeImage" xml:space="preserve">
+    <value>Billede</value>
+  </data>
+  <data name="RowMeta" xml:space="preserve">
+    <value>{0} · {1} · {2}</value>
+  </data>
+  <data name="RowOpen" xml:space="preserve">
+    <value>Åbn {0}</value>
+  </data>
+  <data name="RowOptions" xml:space="preserve">
+    <value>Valg for {0}</value>
+  </data>
+  <data name="Rename" xml:space="preserve">
+    <value>Omdøb</value>
+  </data>
+  <data name="SaveToDevice" xml:space="preserve">
+    <value>Gem på enheden</value>
+  </data>
+  <data name="RenameLabel" xml:space="preserve">
+    <value>Filnavn</value>
+  </data>
+  <data name="RenameEmpty" xml:space="preserve">
+    <value>Giv filen et navn.</value>
+  </data>
+  <data name="DeleteAsk" xml:space="preserve">
+    <value>Slet filen? Den forsvinder fra alle enheder hvor du er logget ind.</value>
+  </data>
+  <data name="Added_One" xml:space="preserve">
+    <value>{0} fil tilføjet</value>
+  </data>
+  <data name="Added_Other" xml:space="preserve">
+    <value>{0} filer tilføjet</value>
+  </data>
+  <data name="Unsupported_One" xml:space="preserve">
+    <value>{0} fil var ikke et billede eller en PDF og blev ikke tilføjet</value>
+  </data>
+  <data name="Unsupported_Other" xml:space="preserve">
+    <value>{0} filer var ikke billeder eller PDF'er og blev ikke tilføjet</value>
+  </data>
+  <data name="TooLarge_One" xml:space="preserve">
+    <value>{0} fil var over 10 MB og blev ikke tilføjet</value>
+  </data>
+  <data name="TooLarge_Other" xml:space="preserve">
+    <value>{0} filer var over 10 MB og blev ikke tilføjet</value>
+  </data>
+  <data name="NoRoom_One" xml:space="preserve">
+    <value>Der er kun plads til 20 filer her, så {0} blev ikke tilføjet</value>
+  </data>
+  <data name="NoRoom_Other" xml:space="preserve">
+    <value>Der er kun plads til 20 filer her, så {0} blev ikke tilføjet</value>
+  </data>
+  <data name="AddFailed" xml:space="preserve">
+    <value>Kunne ikke tilføje filen. Prøv igen.</value>
+  </data>
+  <data name="NotHere" xml:space="preserve">
+    <value>Filen er ikke nået frem til denne enhed endnu. Den kommer når du er online og logget ind.</value>
+  </data>
+</root>

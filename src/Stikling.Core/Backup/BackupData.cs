@@ -5,7 +5,7 @@ namespace Stikling.Core.Backup;
 
 /// <summary>
 /// Everything the app stores, as it is written to data.json inside a backup ZIP.
-/// The photo files sit next to it in the same ZIP, named after the photo ids.
+/// The photo files sit next to it in the same ZIP, named after the photo ids, and the attached files under <c>files/</c> named after theirs.
 /// </summary>
 public sealed class BackupData
 {
@@ -60,10 +60,14 @@ public sealed class BackupData
     public List<PhotoMarkup> PhotoMarkups { get; set; } = [];
     public List<PlaceReading> PlaceReadings { get; set; } = [];
     public List<NameNote> NameNotes { get; set; } = [];
+    public List<AttachedFile> Files { get; set; } = [];
 
     /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
     // Before Lists, which uses it: static fields are set in the order they are written
     public static BackupList<Photo> PhotoList { get; } = List(RecordKinds.Photos, d => d.Photos, (d, l) => d.Photos = l);
+
+    /// <summary>The files' list on its own, since their bytes are saved and restored after the records.</summary>
+    public static BackupList<AttachedFile> FileList { get; } = List(RecordKinds.Files, d => d.Files, (d, l) => d.Files = l);
 
     /// <summary>
     /// Each kind of record with its list above, in the order of the lists. The property names are
@@ -112,6 +116,7 @@ public sealed class BackupData
         List(RecordKinds.PhotoMarkups, d => d.PhotoMarkups, (d, l) => d.PhotoMarkups = l),
         List(RecordKinds.PlaceReadings, d => d.PlaceReadings, (d, l) => d.PlaceReadings = l),
         List(RecordKinds.NameNotes, d => d.NameNotes, (d, l) => d.NameNotes = l),
+        FileList,
     ];
 
     private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
@@ -162,7 +167,8 @@ public sealed class BackupData
         OwnMeasureKinds.Count(k => !k.IsDeleted),
         PhotoMarkups.Count(m => !m.IsDeleted),
         PlaceReadings.Count(r => !r.IsDeleted),
-        NameNotes.Count(n => !n.IsDeleted));
+        NameNotes.Count(n => !n.IsDeleted),
+        Files.Count(f => !f.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -206,4 +212,5 @@ public sealed record BackupCounts(
     int OwnMeasureKinds,
     int PhotoMarkups,
     int PlaceReadings,
-    int NameNotes);
+    int NameNotes,
+    int Files);

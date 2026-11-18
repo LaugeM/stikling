@@ -52,6 +52,8 @@ public sealed class SyncRunner(
     private Task current = Task.CompletedTask;
     private readonly Dictionary<(Guid, PhotoSize), Task<bool>> fetching = [];
     private readonly HashSet<(Guid, PhotoSize)> notOnServer = [];
+    private readonly Dictionary<Guid, Task<bool>> fetchingFiles = [];
+    private readonly HashSet<Guid> filesNotOnServer = [];
 
     public bool Running { get; private set; }
 
@@ -144,9 +146,9 @@ public sealed class SyncRunner(
         return current = RunAsync();
     }
 
-    /// <summary>How much would be lost by removing the data from this device right now.</summary>
+    /// <summary>How much would be lost by removing the data from this device right now. Photos counts attached files too.</summary>
     public async Task<(int Pending, int Photos)> CountUnsentAsync() =>
-        (await store.CountPendingAsync(), await store.CountPhotoUploadsAsync());
+        (await store.CountPendingAsync(), await store.CountPhotoUploadsAsync() + await store.CountFileUploadsAsync());
 
     /// <summary>How many of these photos haven't been sent to the server yet. Nothing is waiting when nobody is signed in.</summary>
     public async Task<int> CountPhotosWaitingAsync(IReadOnlyCollection<Guid> ids) =>
@@ -195,7 +197,49 @@ public sealed class SyncRunner(
         }
     }
 
-    /// <summary>How much space the collection's photos take on the server, or null when it can't be found out now.</summary>
+    /// <summary>
+    /// Fetches the bytes of an attached file from the server and keeps them here, for a file added on
+    /// another device that is being opened. False when nobody is signed in, the server doesn't have it,
+    /// or it can't be reached. Never throws.
+    /// </summary>
+    public Task<bool> FetchFileAsync(Guid fileId)
+    {
+        // A file asked for twice is fetched once, and one the server didn't have isn't asked for
+        // again until the next sync, when it may have arrived
+        if (filesNotOnServer.Contains(fileId))
+            return Task.FromResult(false);
+        if (fetchingFiles.TryGetValue(fileId, out var running))
+            return running;
+
+        var fetch = FetchFileCoreAsync(fileId);
+        if (!fetch.IsCompleted)
+            fetchingFiles[fileId] = fetch;
+        return fetch;
+    }
+
+    private async Task<bool> FetchFileCoreAsync(Guid fileId)
+    {
+        try
+        {
+            if (!signedIn || await CollectionIdAsync() is not { } collectionId)
+                return false;
+
+            var fetched = await api.DownloadFileAsync(collectionId, fileId);
+            if (!fetched)
+                filesNotOnServer.Add(fileId);
+            return fetched;
+        }
+        catch (Exception e) when (e is HttpRequestException or AccountUnavailableException or JSException or TaskCanceledException)
+        {
+            return false;
+        }
+        finally
+        {
+            fetchingFiles.Remove(fileId);
+        }
+    }
+
+    /// <summary>How much space the collection's photos and files take on the server, or null when it can't be found out now.</summary>
     public async Task<PhotoUsage?> GetPhotoUsageAsync()
     {
         try
@@ -432,6 +476,11 @@ public sealed class SyncRunner(
             notOnServer.Clear();
             if (photos.Downloaded > 0)
                 PhotosArrived?.Invoke();
+
+            // The same for the files' bytes. A full collection is the same problem as full photo space.
+            var attached = await new FileSyncService(store, api).SyncAsync(collection.Id, access);
+            PhotosFull |= attached.CollectionFull;
+            filesNotOnServer.Clear();
 
             // Last, and it never throws, so the names can't hold up anything else
             await RefreshPeopleAsync(registry, collection.Id);

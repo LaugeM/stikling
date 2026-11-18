@@ -20,9 +20,10 @@ public sealed record PhotoFolderSummary(int Added, int Skipped);
 
 /// <summary>
 /// Backup to a ZIP file and back again. The ZIP holds data.json with everything the app
-/// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own.
+/// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own,
+/// and the attached files under files/ as the PDFs and images they are.
 /// </summary>
-public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner sync, DeviceFiles files, TimeProvider time)
+public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentService attachments, SyncRunner sync, DeviceFiles files, TimeProvider time)
 {
     internal const string DataFile = "data.json";
 
@@ -67,6 +68,16 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
 
                 await AddPhotoAsync(zip, photo.Id, thumbnail: false);
                 await AddPhotoAsync(zip, photo.Id, thumbnail: true);
+            }
+
+            foreach (var file in data.Files.Where(f => !f.IsDeleted))
+            {
+                // A file added on another device only has its bytes here once it has been opened. One that
+                // still can't be had is left out, and the record stays in data.json.
+                if (!await attachments.HasBytesAsync(file.Id))
+                    await sync.FetchFileAsync(file.Id);
+
+                await AddFileAsync(zip, file.Id);
             }
         }
 
@@ -167,6 +178,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             }
             else
             {
+                // A file the merge deleted frees its bytes when its record is written, in db.js
                 counts += await list.RestoreAsync(data, db);
             }
         }
@@ -191,6 +203,17 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
             restoredPhotos++;
         }
 
+        // Likewise for the attached files whose bytes are missing here. They are listed to be sent to the server.
+        // A file the backup has is never deleted here after the merge, since it comes back.
+        foreach (var file in BackupMerge.Newest(data.Files).Where(f => !f.IsDeleted))
+        {
+            if (await attachments.HasBytesAsync(file.Id))
+                continue;
+            if (await ReadFileAsync(zip, file.Id) is not { } bytes)
+                continue;
+            await attachments.PutBytesAsync(file.Id, bytes);
+        }
+
         Restored?.Invoke();
         return new ImportSummary(counts.Added, counts.Updated, counts.BroughtBack, counts.Skipped, restoredPhotos);
     }
@@ -205,6 +228,24 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, SyncRunner 
         await using var entry = zip.CreateEntry(PhotoPath(id, thumbnail, extension), CompressionLevel.NoCompression).Open();
         await entry.WriteAsync(bytes);
     }
+
+    private async Task AddFileAsync(ZipArchive zip, Guid id)
+    {
+        if (await attachments.GetBytesAsync(id) is not { } bytes)
+            return;
+
+        // PDFs and images are already compressed
+        var extension = (FileRules.FormatOf(bytes) ?? ImageFormat.Jpeg).Extension;
+        await using var entry = zip.CreateEntry(FilePath(id, extension), CompressionLevel.NoCompression).Open();
+        await entry.WriteAsync(bytes);
+    }
+
+    private static async Task<byte[]?> ReadFileAsync(ZipArchive zip, Guid id) =>
+        await ReadEntryAsync(zip, FilePath(id, ImageFormat.Pdf.Extension))
+        ?? await ReadEntryAsync(zip, FilePath(id, ImageFormat.WebP.Extension))
+        ?? await ReadEntryAsync(zip, FilePath(id, ImageFormat.Jpeg.Extension));
+
+    private static string FilePath(Guid id, string extension) => $"files/{id}.{extension}";
 
     private static async Task<byte[]?> ReadEntryAsync(ZipArchive zip, string path)
     {

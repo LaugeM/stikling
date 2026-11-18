@@ -12,6 +12,10 @@ public static class Stores
 {
     public const string PhotoBlobs = "photoBlobs";
 
+    /// <summary>The bytes of attached files, by the file's id. Their list to send is <c>fileUploads</c>.</summary>
+    public const string FileBlobs = "fileBlobs";
+    public const string FileUploads = "fileUploads";
+
     // Kept by sync, and not synced themselves
     public const string Changes = "changes";
     public const string SyncState = "syncState";

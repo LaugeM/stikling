@@ -1,0 +1,292 @@
+@* The receipts, plant tags and care cards kept with a plant, a cutting or an order. The card is left out until
+   there is a file, so the page still reads as a profile. It loads its own list and reloads when sync brings changes.
+   The hidden file input is always here when the person may change things, so the page's menu can open it with a
+   label for InputId even while the card isn't shown. *@
+@using Stikling.Core.Files
+@using Stikling.Core.Sync
+@inject FileService Files
+@inject AttachmentService Attachments
+@inject AttachmentActions Actions
+
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (CanEdit)
+{
+    <input id="@InputId" type="file" accept="image/*,application/pdf,.pdf" multiple class="visually-hidden" tabindex="-1"
+           @ref="input" @onchange="AddAsync" disabled="@busy" />
+}
+
+@if (files.Count > 0)
+{
+    <section class="detail-card files-card" id="files-@SubjectId" aria-labelledby="files-heading-@SubjectId">
+        <h2 id="files-heading-@SubjectId">@Strings.Files.Heading <span class="files-count">@files.Count</span></h2>
+        <ul class="files-list">
+            @foreach (var file in files)
+            {
+                <li class="file-row">
+                    <button type="button" class="file-open" aria-label="@F(Strings.Files.RowOpen, file.Name)" @onclick="() => OpenAsync(file)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@(file.ContentType == AttachedFile.Pdf ? Icons.Document : Icons.Photo)</svg>
+                        <span class="file-text">
+                            <span class="file-name">@file.Name</span>
+                            <span class="file-meta">@Meta(file)</span>
+                        </span>
+                    </button>
+                    <button type="button" class="file-more" aria-label="@F(Strings.Files.RowOptions, file.Name)" title="@F(Strings.Files.RowOptions, file.Name)"
+                            @onclick="() => OpenMenu(file)">
+                        <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.More</svg>
+                    </button>
+                </li>
+            }
+        </ul>
+        @Messages
+        @if (CanEdit && files.Count < FileRules.MaxFilesPerRecord)
+        {
+            <label class="btn btn-outline-primary btn-sm files-add" for="@InputId">@Strings.Files.Add</label>
+        }
+    </section>
+}
+else
+{
+    @Messages
+}
+
+<Sheet Title="@(chosen?.Name ?? Strings.Files.Heading)" Open="panel != Panel.None" OpenChanged="open => { if (!open) Close(); }">
+    @if (chosen is not null)
+    {
+        @switch (panel)
+        {
+            case Panel.Menu:
+                <ul class="sheet-actions">
+                    @if (CanEdit)
+                    {
+                        <li>
+                            <button type="button" class="sheet-action" @onclick="StartRename">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Pencil</svg>
+                                <span class="sheet-action-text"><b>@Strings.Files.Rename</b></span>
+                            </button>
+                        </li>
+                    }
+                    <li>
+                        <button type="button" class="sheet-action" @onclick="SaveToDeviceAsync">
+                            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.ArrowToEnd</svg>
+                            <span class="sheet-action-text"><b>@Strings.Files.SaveToDevice</b></span>
+                        </button>
+                    </li>
+                    @if (CanEdit)
+                    {
+                        <li>
+                            <button type="button" class="sheet-action danger" @onclick="() => panel = Panel.Delete">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Close</svg>
+                                <span class="sheet-action-text"><b>@Strings.Common.Delete</b></span>
+                            </button>
+                        </li>
+                    }
+                </ul>
+                break;
+            case Panel.Rename:
+                <div class="mb-3">
+                    <label class="form-label" for="@renameId">@Strings.Files.RenameLabel</label>
+                    <input id="@renameId" class="form-control @(renameError ? "is-invalid" : null)" maxlength="@AttachedFile.MaxNameLength"
+                           value="@draft" @oninput="e => draft = e.Value?.ToString() ?? string.Empty" @onkeydown="OnRenameKeyAsync" />
+                    @if (renameError)
+                    {
+                        <div class="invalid-feedback d-block" role="alert">@Strings.Files.RenameEmpty</div>
+                    }
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-primary" disabled="@busy" @onclick="RenameAsync">@Strings.Common.Save</button>
+                    <button type="button" class="btn btn-link" @onclick="() => panel = Panel.Menu">@Strings.Common.Cancel</button>
+                </div>
+                break;
+            case Panel.Delete:
+                <p class="mb-3">@Strings.Files.DeleteAsk</p>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-danger" disabled="@busy" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                    <button type="button" class="btn btn-link" @onclick="() => panel = Panel.Menu">@Strings.Common.Cancel</button>
+                </div>
+                break;
+        }
+    }
+</Sheet>
+
+@code {
+    private enum Panel { None, Menu, Rename, Delete }
+
+    private static int count;
+    private readonly string renameId = $"file-name-{++count}";
+
+    [Parameter, EditorRequired]
+    public FileSubject SubjectType { get; set; }
+
+    [Parameter, EditorRequired]
+    public Guid SubjectId { get; set; }
+
+    /// <summary>Whether the person may add, rename and delete files. Everyone can open and save them.</summary>
+    [Parameter]
+    public bool CanEdit { get; set; }
+
+    /// <summary>The id of the hidden file input. A label on the page with <c>for</c> set to it opens the picker.</summary>
+    [Parameter, EditorRequired]
+    public string InputId { get; set; } = "";
+
+    /// <summary>Called when files were chosen, so the page can close the menu the choice was made from.</summary>
+    [Parameter]
+    public EventCallback OnPicked { get; set; }
+
+    private IReadOnlyList<AttachedFile> files = [];
+    private Guid loadedFor;
+    private ElementReference input;
+    private bool busy;
+    private List<string> messages = [];
+
+    private Panel panel;
+    private AttachedFile? chosen;
+    private string draft = "";
+    private bool renameError;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (loadedFor != SubjectId)
+        {
+            loadedFor = SubjectId;
+            messages = [];
+            await LoadAsync();
+        }
+    }
+
+    private async Task LoadAsync() => files = await Files.ForSubjectAsync(SubjectType, SubjectId);
+
+    private static string Meta(AttachedFile file) =>
+        F(Strings.Files.RowMeta,
+            file.ContentType == AttachedFile.Pdf ? Strings.Files.TypePdf : Strings.Files.TypeImage,
+            FileSizes.Of(file.Size),
+            Labels.Date(DateOnly.FromDateTime(file.AddedAt.ToLocalTime().DateTime)));
+
+    private RenderFragment Messages => __builder =>
+    {
+        @if (messages.Count > 0)
+        {
+            <div class="files-messages" role="status">
+                @foreach (var message in messages)
+                {
+                    <p>@message</p>
+                }
+            </div>
+        }
+    };
+
+    private async Task AddAsync()
+    {
+        busy = true;
+        messages = [];
+        await OnPicked.InvokeAsync();
+        try
+        {
+            var result = await Attachments.AddFromInputAsync(input, SubjectType, SubjectId);
+            if (result.Added.Count > 0)
+                messages.Add(Plural.Of(result.Added.Count, Strings.Files.Added_One, Strings.Files.Added_Other));
+            if (result.Unsupported > 0)
+                messages.Add(Plural.Of(result.Unsupported, Strings.Files.Unsupported_One, Strings.Files.Unsupported_Other));
+            if (result.TooLarge > 0)
+                messages.Add(Plural.Of(result.TooLarge, Strings.Files.TooLarge_One, Strings.Files.TooLarge_Other));
+            if (result.NoRoom > 0)
+                messages.Add(Plural.Of(result.NoRoom, Strings.Files.NoRoom_One, Strings.Files.NoRoom_Other));
+        }
+        catch (Exception e) when (e is not OutOfMemoryException)
+        {
+            messages = [Strings.Files.AddFailed];
+        }
+        finally
+        {
+            busy = false;
+        }
+        await LoadAsync();
+    }
+
+    private async Task OpenAsync(AttachedFile file)
+    {
+        messages = [];
+        if (await Actions.OpenAsync(file) == AttachmentOutcome.NotHere)
+            messages.Add(Strings.Files.NotHere);
+    }
+
+    private void OpenMenu(AttachedFile file)
+    {
+        chosen = file;
+        panel = Panel.Menu;
+    }
+
+    private void Close()
+    {
+        panel = Panel.None;
+        chosen = null;
+        renameError = false;
+    }
+
+    private void StartRename()
+    {
+        draft = chosen?.Name ?? "";
+        renameError = false;
+        panel = Panel.Rename;
+    }
+
+    private async Task OnRenameKeyAsync(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter" && !busy)
+            await RenameAsync();
+    }
+
+    private async Task RenameAsync()
+    {
+        if (chosen is null)
+            return;
+        var trimmed = draft.Trim();
+        if (trimmed.Length == 0 || trimmed.Length > AttachedFile.MaxNameLength)
+        {
+            renameError = true;
+            return;
+        }
+
+        messages = [];
+        busy = true;
+        try
+        {
+            await Files.RenameAsync(chosen.Id, trimmed);
+        }
+        finally
+        {
+            busy = false;
+        }
+        Close();
+        await LoadAsync();
+    }
+
+    private async Task SaveToDeviceAsync()
+    {
+        var file = chosen;
+        Close();
+        if (file is null)
+            return;
+        messages = [];
+        if (await Actions.SaveAsync(file) == AttachmentOutcome.NotHere)
+            messages.Add(Strings.Files.NotHere);
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (chosen is null)
+            return;
+        messages = [];
+        busy = true;
+        try
+        {
+            await Files.DeleteAsync(chosen.Id);
+        }
+        finally
+        {
+            busy = false;
+        }
+        Close();
+        await LoadAsync();
+    }
+}

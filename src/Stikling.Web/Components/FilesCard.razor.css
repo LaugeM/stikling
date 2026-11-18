@@ -1,0 +1,97 @@
+.files-count {
+    margin-inline-start: 0.25rem;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--pa-muted);
+}
+
+.files-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.file-row {
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.file-row + .file-row {
+    border-top: 1px solid var(--pa-border);
+}
+
+.file-open {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+    min-height: 3rem;
+    padding: 0.4rem 0.25rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+    color: inherit;
+    text-align: start;
+}
+
+.file-open:hover,
+.file-open:focus-visible,
+.file-more:hover,
+.file-more:focus-visible {
+    background: var(--pa-green-soft);
+}
+
+.file-open > svg,
+.file-more > svg {
+    flex: none;
+    width: 1.35rem;
+    height: 1.35rem;
+    fill: none;
+    stroke: var(--pa-green-dark);
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.file-text {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.file-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.file-meta {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.file-more {
+    flex: none;
+    display: grid;
+    place-items: center;
+    width: 2.75rem;
+    height: 2.75rem;
+    border: 0;
+    border-radius: 0.6rem;
+    background: transparent;
+}
+
+.files-messages {
+    margin-top: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.files-messages p {
+    margin: 0 0 0.25rem;
+}
+
+.files-add {
+    margin-top: 0.5rem;
+}

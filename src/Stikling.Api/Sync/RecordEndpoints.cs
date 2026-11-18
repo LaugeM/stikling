@@ -2,6 +2,7 @@ using System.Text.Json;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
+using Stikling.Api.Files;
 using Stikling.Api.Photos;
 using Stikling.Core.Sync;
 
@@ -44,7 +45,7 @@ public static class RecordEndpoints
         // one that can't be kept is refused on its own, so it doesn't hold up the rest.
         // A helper may send some kinds of record, and change only what they added themselves. An
         // editor may send everything.
-        records.MapPost("", async (Guid collectionId, PushRequest request, HttpContext http, StiklingDbContext db, PhotoStorage photos, TimeProvider clock) =>
+        records.MapPost("", async (Guid collectionId, PushRequest request, HttpContext http, StiklingDbContext db, PhotoStorage photos, FileStorage fileStorage, TimeProvider clock) =>
         {
             var caller = http.Rights();
             var isHelper = !caller.Allows(CollectionRight.Edit);
@@ -98,6 +99,7 @@ public static class RecordEndpoints
 
             var newer = new List<SyncRecord>();
             var deletedPhotos = new List<Guid>();
+            var deletedFiles = new List<Guid>();
             var deletedSubjects = new List<Guid>();
             foreach (var (kind, stamp, data, index, element) in winners)
             {
@@ -114,6 +116,8 @@ public static class RecordEndpoints
 
                 if (kind == SyncKinds.Photos && stamp.DeletedAt is not null)
                     deletedPhotos.Add(stamp.Id);
+                if (kind == SyncKinds.Files && stamp.DeletedAt is not null)
+                    deletedFiles.Add(stamp.Id);
                 if (kind is "plants" or "propagations" && stamp.DeletedAt is not null)
                     deletedSubjects.Add(stamp.Id);
 
@@ -145,6 +149,7 @@ public static class RecordEndpoints
                 {
                     newer.Add(new SyncRecord(current.Kind, Parse(current.Data), current.CreatedBy));
                     deletedPhotos.Remove(stamp.Id);
+                    deletedFiles.Remove(stamp.Id);
                     deletedSubjects.Remove(stamp.Id);
                 }
 
@@ -168,10 +173,17 @@ public static class RecordEndpoints
                 .Where(i => i.CollectionId == collectionId && deletedPhotos.Contains(i.PhotoId))
                 .ToListAsync();
             db.PhotoImages.RemoveRange(goneImages);
+
+            // Same for a deleted file's bytes
+            var goneFiles = await db.StoredFiles
+                .Where(f => f.CollectionId == collectionId && deletedFiles.Contains(f.FileId))
+                .ToListAsync();
+            db.StoredFiles.RemoveRange(goneFiles);
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
             await photos.DeleteAsync(goneImages);
+            await fileStorage.DeleteAsync(goneFiles);
 
             return Results.Ok(new PushResponse(newer, refused));
         })
