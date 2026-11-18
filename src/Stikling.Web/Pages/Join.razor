@@ -5,11 +5,12 @@
 @inject AccountService Account
 @inject StiklingApi Api
 @inject CollectionsService Collections
+@inject IPlantRepository Plants
 @inject NavigationManager Nav
 
-<PageTitle>@Strings.People.JoinTitle</PageTitle>
+<PageTitle>@Heading</PageTitle>
 
-<h1>@Strings.People.JoinTitle</h1>
+<h1>@Heading</h1>
 
 @if (state == JoinState.Loading)
 {
@@ -18,8 +19,9 @@
 else if (state == JoinState.Problem)
 {
     <p class="settings-message" role="alert">@problem</p>
+    <p class="settings-hint">@Strings.People.JoinAboutStikling</p>
     <div class="settings-actions">
-        <a class="btn btn-outline-primary" href="./">@Strings.Common.Close</a>
+        <a class="btn btn-outline-primary" href="./">@Strings.People.JoinLookAround</a>
     </div>
 }
 else if (preview is { } invite)
@@ -34,8 +36,16 @@ else if (preview is { } invite)
             <h2>@(string.IsNullOrWhiteSpace(invite.InvitedByName)
                 ? F(Strings.People.JoinInvitesNoName, invite.DisplayName)
                 : F(Strings.People.JoinInvites, invite.InvitedByName, invite.DisplayName))</h2>
+            @if (CountsLine(invite) is { } counts)
+            {
+                <p class="join-counts">@counts</p>
+            }
             <p class="join-role">@RoleText.JoinMeaning(invite.Choice)</p>
-            <p class="settings-hint">@Strings.People.JoinOwnStay</p>
+            <a class="first-run-help join-roles-help" href="help#collection-roles">@Strings.People.JoinRolesHelp</a>
+            @if (state != JoinState.SignedOut || deviceHasPlants)
+            {
+                <p class="settings-hint">@Strings.People.JoinOwnStay</p>
+            }
         }
     </section>
 
@@ -58,7 +68,14 @@ else if (preview is { } invite)
     else if (state == JoinState.AlreadyMember)
     {
         <div class="settings-actions">
-            <button type="button" class="btn btn-primary" disabled="@busy" @onclick="OpenAsync">@Strings.People.OpenIt</button>
+            @if (preview?.CollectionId == Collections.Current?.Id)
+            {
+                <a class="btn btn-primary" href="./">@Strings.People.JoinGoToday</a>
+            }
+            else
+            {
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="OpenAsync">@Strings.People.OpenIt</button>
+            }
         </div>
     }
     else if (state == JoinState.NeedsName)
@@ -89,6 +106,22 @@ else if (preview is { } invite)
     private string? name;
     private string? problem;
     private bool busy;
+    private bool deviceHasPlants;
+
+    // The collection's name once the person is in it, so the page says which one this is
+    private string Heading => state == JoinState.AlreadyMember && preview is { } known ? known.DisplayName : Strings.People.JoinTitle;
+
+    // "24 plants · 6 cuttings", leaving out a part that is none and the whole line when both are
+    private static string? CountsLine(InvitePreviewInfo invite)
+    {
+        var plants = invite.Plants > 0
+            ? Plural.Of(invite.Plants, Strings.People.JoinCountPlants_One, Strings.People.JoinCountPlants_Other)
+            : null;
+        var cuttings = invite.Cuttings > 0
+            ? Plural.Of(invite.Cuttings, Strings.People.JoinCountCuttings_One, Strings.People.JoinCountCuttings_Other)
+            : null;
+        return plants is not null && cuttings is not null ? F(Strings.People.JoinCounts, plants, cuttings) : plants ?? cuttings;
+    }
 
     // Back to this page once signed in
     private string SignInUrl => $"sign-in?return={Uri.EscapeDataString($"join/{Token}")}";
@@ -124,6 +157,16 @@ else if (preview is { } invite)
         preview = result.Value;
         if (!signedIn)
         {
+            // Someone signed out who has plants here is told they stay as they are. The example doesn't count
+            try
+            {
+                deviceHasPlants = (await Plants.GetAllAsync()).Any(p => !ExampleFamily.PlantIds.Contains(p.Id));
+            }
+            catch (JSException)
+            {
+                deviceHasPlants = false;
+            }
+
             state = JoinState.SignedOut;
             return;
         }

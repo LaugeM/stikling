@@ -112,8 +112,8 @@
     <comment>After the person's own name in the list of members.</comment>
   </data>
   <data name="MemberOwner" xml:space="preserve">
-    <value>Owner. {0}</value>
-    <comment>Under the owner in the list of members. {0} is their role, like 'Can edit and add people'.</comment>
+    <value>Owner, can {0}</value>
+    <comment>Under the owner in the list of members. {0} is what they can do, like 'edit and add people'.</comment>
   </data>
   <data name="ChangeRoleFor" xml:space="preserve">
     <value>Role for {0}</value>
@@ -217,7 +217,7 @@
     <value>You haven't set a name.</value>
   </data>
   <data name="ChangeName" xml:space="preserve">
-    <value>Change</value>
+    <value>Change name</value>
   </data>
   <data name="SetName" xml:space="preserve">
     <value>Set a name</value>
@@ -239,7 +239,8 @@
     <comment>Title of the page an invite link opens.</comment>
   </data>
   <data name="JoinSignIn" xml:space="preserve">
-    <value>Sign in or make a free account. You come back here afterwards.</value>
+    <value>On the next page you sign in, or make an account in a minute, and then come back here.</value>
+    <comment>On the page an invite link opens, under the button, when the person isn't signed in.</comment>
   </data>
   <data name="JoinInvites" xml:space="preserve">
     <value>{0} invites you to {1}</value>
@@ -297,13 +298,9 @@
     <value>by {0}</value>
     <comment>After an entry in a shared collection that someone else made. {0} is their name.</comment>
   </data>
-  <data name="OpenLine" xml:space="preserve">
-    <value>{0} collection, you can {1}</value>
-    <comment>A quiet line on the main pages while a shared collection is open. {0} is the owner's name with its possessive ending (Alma's), {1} what the person can do, like 'edit'.</comment>
-  </data>
   <data name="OpenLineNoOwner" xml:space="preserve">
     <value>{0}, you can {1}</value>
-    <comment>Same, when the owner's name isn't known yet. {0} is the collection's name.</comment>
+    <comment>A quiet line on the main pages while a shared collection is open. {0} is the collection's name, {1} what the person can do, like 'edit'.</comment>
   </data>
   <data name="OpenLineGone" xml:space="preserve">
     <value>You're no longer in {0}. Nothing here syncs.</value>
@@ -395,7 +392,7 @@
     <comment>On the page an invite link opens, when the person isn't signed in. Says what the app is.</comment>
   </data>
   <data name="JoinSignInButton" xml:space="preserve">
-    <value>Sign in to join</value>
+    <value>Join with a free account</value>
     <comment>Button on the page an invite link opens, when the person isn't signed in.</comment>
   </data>
   <data name="RaiseConfirm" xml:space="preserve">
@@ -453,5 +450,37 @@
   <data name="WithdrawFor" xml:space="preserve">
     <value>Withdraw: {0}, {1}</value>
     <comment>Spoken name of the Withdraw button on an open invite, so a screen reader can tell the rows apart. {0} is the invite name, {1} the line under it.</comment>
+  </data>
+  <data name="JoinCountPlants_One" xml:space="preserve">
+    <value>{0} plant</value>
+    <comment>On the page an invite link opens, in the line of counts under the headline. {0} is how many.</comment>
+  </data>
+  <data name="JoinCountPlants_Other" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>Same, for more than one plant.</comment>
+  </data>
+  <data name="JoinCountCuttings_One" xml:space="preserve">
+    <value>{0} cutting</value>
+    <comment>On the page an invite link opens, in the line of counts under the headline. {0} is how many.</comment>
+  </data>
+  <data name="JoinCountCuttings_Other" xml:space="preserve">
+    <value>{0} cuttings</value>
+    <comment>Same, for more than one cutting.</comment>
+  </data>
+  <data name="JoinCounts" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>On the page an invite link opens. Puts the number of plants and the number of cuttings in one line, like "24 plants · 6 cuttings".</comment>
+  </data>
+  <data name="JoinRolesHelp" xml:space="preserve">
+    <value>What each role can do</value>
+    <comment>Link on the page an invite link opens, under what the invite allows. Goes to the answer about roles on the Help page.</comment>
+  </data>
+  <data name="JoinLookAround" xml:space="preserve">
+    <value>Look around Stikling</value>
+    <comment>Button on the page an invite link opens when the link doesn't work (not found, run out or full). Goes to the front of the app.</comment>
+  </data>
+  <data name="JoinGoToday" xml:space="preserve">
+    <value>Go to Today</value>
+    <comment>Button on the page an invite link opens when the person is already in the collection that is open now.</comment>
   </data>
 </root>

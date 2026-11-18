@@ -58,7 +58,11 @@ else
                                 }
                             </span>
                         </div>
-                        <p class="people-sub">@CollectionText.Hint(collection)</p>
+                        @* "Yours" under "Your plants" adds nothing, so it is only there to tell several apart *@
+                        @if (ManyCollections || collection.Gone)
+                        {
+                            <p class="people-sub">@CollectionText.Hint(collection)</p>
+                        }
                     }
                 </li>
             }
@@ -121,7 +125,7 @@ else
                                 <span class="people-actions">
                                     @if (isYou)
                                     {
-                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @ref="nameButton"
                                                 @onclick="OpenNameDialog">@(hasName ? Strings.People.ChangeName : Strings.People.SetName)</button>
                                     }
                                     @if (access.CanRemove(target))
@@ -133,7 +137,7 @@ else
                             </div>
                             @* With a select the role is shown by the select, and this line is for screen readers *@
                             <p class="people-sub @(options.Count > 0 ? "visually-hidden" : null)">
-                                @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Label(choice)) : RoleText.Label(choice))
+                                @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Verb(choice)) : RoleText.Label(choice))
                             </p>
                             @if (isYou && !hasName)
                             {
@@ -143,6 +147,7 @@ else
                             {
                                 <div class="member-role">
                                     <select class="form-select w-auto" aria-label="@F(Strings.People.ChangeRoleFor, name)"
+                                            @ref="roleSelects[member.PersonId]"
                                             @key="(member.PersonId, roleEpoch)"
                                             disabled="@busy" @onchange="e => RolePickedAsync(member, choice, e.Value?.ToString())">
                                         @foreach (var option in options)
@@ -164,7 +169,7 @@ else
                                         <button type="button" class="btn btn-primary" disabled="@busy"
                                                 @onclick="() => ConfirmRaiseAsync(member)">@Strings.People.RaiseConfirmButton</button>
                                         <button type="button" class="btn btn-link" disabled="@busy"
-                                                @onclick="CancelRaise">@Strings.Common.Cancel</button>
+                                                @onclick="() => CancelRaise(member.PersonId)">@Strings.Common.Cancel</button>
                                     </div>
                                 </div>
                             }
@@ -194,7 +199,7 @@ else
                 else if (inviteStep == InviteStep.None)
                 {
                     <div class="settings-actions">
-                        <button type="button" class="btn btn-outline-primary" disabled="@busy"
+                        <button type="button" class="btn btn-outline-primary" disabled="@busy" @ref="inviteButton"
                                 @onclick="StartInvite">@Strings.People.InviteSomeone</button>
                     </div>
                 }
@@ -316,7 +321,7 @@ else
         {
             <div class="room-row mt-4">
                 <span>@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.YourNameNone : F(Strings.People.YourName, registry.PersonName))</span>
-                <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
+                <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy" @ref="nameButton"
                         @onclick="OpenNameDialog">@(string.IsNullOrWhiteSpace(registry.PersonName) ? Strings.People.SetName : Strings.People.ChangeName)</button>
             </div>
             <p class="settings-hint mt-0">@Strings.People.YourNameHint</p>
@@ -469,6 +474,15 @@ else
     private bool copied;
     private bool copyFailed;
     private ElementReference linkField;
+    private ElementReference inviteButton;
+    private ElementReference nameButton;
+    private readonly Dictionary<Guid, ElementReference> roleSelects = [];
+
+    // Where focus goes after the next render, so it isn't left on a button that is gone
+    private enum FocusTarget { None, Link, Invite, Name, RoleSelect }
+    private FocusTarget pendingFocus;
+    private Guid pendingFocusMember;
+    private int focusTries;
     private bool showQr;
     private int qrSize;
     private string qrPath = "";
@@ -494,6 +508,40 @@ else
         catch (JSException)
         {
             canShare = false;
+        }
+    }
+
+    private void FocusAfterRender(FocusTarget target, Guid member = default)
+    {
+        pendingFocus = target;
+        pendingFocusMember = member;
+        focusTries = 0;
+    }
+
+    // The element may not be there until a later render, so it is tried a few times
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (pendingFocus == FocusTarget.None || disposed)
+            return;
+
+        var target = pendingFocus switch
+        {
+            FocusTarget.Link => linkField,
+            FocusTarget.Invite => inviteButton,
+            FocusTarget.Name => nameButton,
+            _ => roleSelects.GetValueOrDefault(pendingFocusMember),
+        };
+
+        try
+        {
+            await target.FocusAsync();
+            pendingFocus = FocusTarget.None;
+        }
+        catch (Exception e) when (e is JSException or InvalidOperationException)
+        {
+            // Not rendered yet, or not at all, e.g. the box was closed
+            if (++focusTries >= 3)
+                pendingFocus = FocusTarget.None;
         }
     }
 
@@ -628,10 +676,11 @@ else
     }
 
     // The select is made again, since Blazor leaves a select showing what was picked when nothing it renders has changed
-    private void CancelRaise()
+    private void CancelRaise(Guid memberId)
     {
         raisingMember = null;
         roleEpoch++;
+        FocusAfterRender(FocusTarget.RoleSelect, memberId);
     }
 
     private async Task ChangeRoleAsync(CollectionMember member, RoleChoice choice)
@@ -737,6 +786,7 @@ else
         showQr = false;
         BuildQr(link);
         inviteStep = InviteStep.Made;
+        FocusAfterRender(FocusTarget.Link);
         return true;
     }
 
@@ -837,8 +887,8 @@ else
 
     private async Task WithdrawAsync(InviteInfo invite)
     {
-        if (current is not null)
-            await RunAsync(() => Api.WithdrawInviteAsync(current.Id, invite.Id));
+        if (current is not null && await RunAsync(() => Api.WithdrawInviteAsync(current.Id, invite.Id)))
+            FocusAfterRender(FocusTarget.Invite);
     }
 
     private async Task HandOverAsync()
@@ -945,12 +995,15 @@ else
     private void CancelNameDialog()
     {
         showNameDialog = false;
+        FocusAfterRender(inviteAfterName ? FocusTarget.Invite : FocusTarget.Name);
         inviteAfterName = false;
     }
 
     private async Task NameSavedAsync()
     {
         showNameDialog = false;
+        if (!inviteAfterName)
+            FocusAfterRender(FocusTarget.Name);
         await LoadAsync(refresh: false);
         if (inviteAfterName)
             BeginChoosing();

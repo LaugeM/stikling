@@ -94,7 +94,7 @@
     <value>(dig)</value>
   </data>
   <data name="MemberOwner" xml:space="preserve">
-    <value>Ejer. {0}</value>
+    <value>Ejer, kan {0}</value>
   </data>
   <data name="ChangeRoleFor" xml:space="preserve">
     <value>Rolle for {0}</value>
@@ -187,7 +187,7 @@
     <value>Du har ikke valgt et navn.</value>
   </data>
   <data name="ChangeName" xml:space="preserve">
-    <value>Skift</value>
+    <value>Skift navn</value>
   </data>
   <data name="SetName" xml:space="preserve">
     <value>Vælg et navn</value>
@@ -208,7 +208,7 @@
     <value>Deltag i en samling</value>
   </data>
   <data name="JoinSignIn" xml:space="preserve">
-    <value>Log ind eller opret en gratis konto. Bagefter kommer du tilbage hertil.</value>
+    <value>På næste side logger du ind eller opretter en konto på et minut, og så kommer du tilbage hertil.</value>
   </data>
   <data name="JoinInvites" xml:space="preserve">
     <value>{0} har inviteret dig til {1}</value>
@@ -257,9 +257,6 @@
   </data>
   <data name="ByName" xml:space="preserve">
     <value>af {0}</value>
-  </data>
-  <data name="OpenLine" xml:space="preserve">
-    <value>{0} samling, du kan {1}</value>
   </data>
   <data name="OpenLineNoOwner" xml:space="preserve">
     <value>{0}, du kan {1}</value>
@@ -334,7 +331,7 @@
     <value>Stikling er en gratis app til at holde styr på dine planter og de stiklinger du tager af dem, med billeder og noter til hver enkelt.</value>
   </data>
   <data name="JoinSignInButton" xml:space="preserve">
-    <value>Log ind for at deltage</value>
+    <value>Deltag med en gratis konto</value>
   </data>
   <data name="RaiseConfirm" xml:space="preserve">
     <value>Skal {0} kunne redigere og tilføje personer? Så kan {0} også invitere andre og bestemme hvem der må hvad.</value>
@@ -377,5 +374,29 @@
   </data>
   <data name="WithdrawFor" xml:space="preserve">
     <value>Træk tilbage: {0}, {1}</value>
+  </data>
+  <data name="JoinCountPlants_One" xml:space="preserve">
+    <value>{0} plante</value>
+  </data>
+  <data name="JoinCountPlants_Other" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="JoinCountCuttings_One" xml:space="preserve">
+    <value>{0} stikling</value>
+  </data>
+  <data name="JoinCountCuttings_Other" xml:space="preserve">
+    <value>{0} stiklinger</value>
+  </data>
+  <data name="JoinCounts" xml:space="preserve">
+    <value>{0} · {1}</value>
+  </data>
+  <data name="JoinRolesHelp" xml:space="preserve">
+    <value>Hvad hver rolle må</value>
+  </data>
+  <data name="JoinLookAround" xml:space="preserve">
+    <value>Se dig omkring i Stikling</value>
+  </data>
+  <data name="JoinGoToday" xml:space="preserve">
+    <value>Gå til I dag</value>
   </data>
 </root>

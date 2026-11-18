@@ -31,6 +31,7 @@
                                 <span class="switcher-name">@CollectionText.Name(collection)</span>
                                 <span class="switcher-sub">@CollectionText.Hint(collection)</span>
                             </span>
+                            <svg class="switcher-chevron" viewBox="0 0 24 24" aria-hidden="true">@Icons.ChevronRight</svg>
                         </button>
                     </li>
                 }
@@ -55,9 +56,6 @@
         if (here.Gone)
             return F(Strings.People.OpenLineGone, CollectionText.Name(here));
 
-        var verb = RoleText.Verb(here.Role, here.ManagesPeople);
-        return string.IsNullOrWhiteSpace(here.OwnerName)
-            ? F(Strings.People.OpenLineNoOwner, CollectionText.Name(here), verb)
-            : F(Strings.People.OpenLine, Stikling.Core.Text.Possessive.Of(here.OwnerName), verb);
+        return F(Strings.People.OpenLineNoOwner, CollectionText.Name(here), RoleText.Verb(here.Role, here.ManagesPeople));
     }
 }

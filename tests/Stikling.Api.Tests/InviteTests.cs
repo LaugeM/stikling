@@ -1,5 +1,7 @@
 using System.Net;
 using System.Net.Http.Json;
+using System.Text.Json;
+using Stikling.Core.Sync;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Collections;
 using Stikling.Api.Data;
@@ -272,10 +274,50 @@ public class InviteTests(ApiFactory api)
 
         Assert.Equal(HttpStatusCode.OK, preview.StatusCode);
         Assert.Equal(
-            new InvitePreview(owner.CollectionId, Stikling.Api.People.CurrentPerson.FirstCollectionName, "Anna", MemberRole.Helper, false, AlreadyMember: false, OwnerName: "Anna"),
+            new InvitePreview(owner.CollectionId, Stikling.Api.People.CurrentPerson.FirstCollectionName, "Anna", MemberRole.Helper, false, AlreadyMember: false, OwnerName: "Anna", Plants: 0, Cuttings: 0),
             await preview.Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json));
         Assert.Equal(HttpStatusCode.Unauthorized, accept.StatusCode);
         Assert.Single((await _people.Collection(owner)).Members);
+    }
+
+    private static SyncRecord PropagationRecord(Guid id, DateTimeOffset updatedAt, DateTimeOffset? deletedAt = null) =>
+        new("propagations", JsonSerializer.SerializeToElement(new { id, createdAt = PeopleSupport.Monday, updatedAt, deletedAt }, ApiFactory.Json));
+
+    [Fact]
+    public async Task The_preview_counts_plants_and_cuttings_and_leaves_out_a_deleted_one()
+    {
+        var owner = await SignIn();
+        var at = PeopleSupport.Monday;
+        await _people.PushOk(
+            owner,
+            PeopleSupport.Plant(Guid.NewGuid(), at), PeopleSupport.Plant(Guid.NewGuid(), at), PeopleSupport.Plant(Guid.NewGuid(), at),
+            PropagationRecord(Guid.NewGuid(), at), PropagationRecord(Guid.NewGuid(), at));
+        var gonePlant = Guid.NewGuid();
+        var goneCutting = Guid.NewGuid();
+        await _people.PushOk(owner, PeopleSupport.Plant(gonePlant, at), PropagationRecord(goneCutting, at));
+        await _people.PushOk(owner, PlantDeleted(gonePlant, at.AddHours(1)), PropagationRecord(goneCutting, at.AddHours(1), at.AddHours(1)));
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+
+        var preview = await (await _people.Preview(await SignIn(), invite.Token!)).Content.ReadFromJsonAsync<InvitePreview>(ApiFactory.Json);
+
+        Assert.Equal(3, preview!.Plants);
+        Assert.Equal(2, preview.Cuttings);
+    }
+
+    private static SyncRecord PlantDeleted(Guid id, DateTimeOffset at) =>
+        new("plants", JsonSerializer.SerializeToElement(new { id, createdAt = PeopleSupport.Monday, updatedAt = at, deletedAt = at }, ApiFactory.Json));
+
+    [Fact]
+    public async Task The_preview_gives_the_same_counts_without_a_sign_in()
+    {
+        var owner = await SignIn();
+        await _people.PushOk(owner, PeopleSupport.Plant(Guid.NewGuid(), PeopleSupport.Monday), PropagationRecord(Guid.NewGuid(), PeopleSupport.Monday));
+        var invite = await _people.InviteOk(owner, MemberRole.Viewer);
+
+        var preview = await api.CreateClient().GetFromJsonAsync<InvitePreview>($"/invites/{invite.Token!}", ApiFactory.Json);
+
+        Assert.Equal(1, preview!.Plants);
+        Assert.Equal(1, preview.Cuttings);
     }
 
     [Fact]

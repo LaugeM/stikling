@@ -88,9 +88,9 @@ else if (account is { SignedIn: true })
 
     @if (signOut is null && !deleting)
     {
-        <h2 class="h6 mt-4">@Strings.People.Heading</h2>
+        <h2 class="title-heading mt-4">@Strings.People.Heading</h2>
         <PeopleSection />
-        <h2 class="h6 mt-4">@Strings.Account.AccountDataHeading</h2>
+        <h2 class="title-heading mt-4">@Strings.Account.AccountDataHeading</h2>
         <div class="settings-actions">
             <button type="button" class="btn btn-outline-primary" @onclick="DownloadDataAsync"
                     disabled="@(accountBusy || downloading)">
@@ -102,7 +102,7 @@ else if (account is { SignedIn: true })
         </p>
         @if (passkeysSupported)
         {
-            <h2 class="h6 mt-4">@Strings.Account.PasskeysHeading</h2>
+            <h2 class="title-heading mt-4">@Strings.Account.PasskeysHeading</h2>
             <p class="settings-hint">@Strings.Account.PasskeysHint</p>
             @foreach (var passkey in passkeys)
             {

@@ -44,7 +44,7 @@ public sealed record InviteInfo(
 /// <summary>What the person who opened an invite link is told before they join.</summary>
 public sealed record InvitePreviewInfo(
     Guid CollectionId, string CollectionName, string? InvitedByName, string Role, bool ManagesPeople, bool AlreadyMember,
-    string? OwnerName = null)
+    string? OwnerName = null, int Plants = 0, int Cuttings = 0)
 {
     /// <summary>The collection's name as the app writes it, so the server's English default isn't shown.</summary>
     public string DisplayName => CollectionText.Name(CollectionNames.Label(CollectionName, isOwner: false, OwnerName));

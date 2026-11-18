@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
 using Stikling.Api.Data;
 using Stikling.Api.People;
+using Stikling.Api.Sharing;
+using Stikling.Core.Models;
 using Stikling.Core.People;
 using static Stikling.Api.Collections.CollectionEndpoints;
 using static Stikling.Api.People.MeEndpoints;
@@ -22,7 +24,7 @@ public static class InviteEndpoints
 
     public record InvitePreview(
         Guid CollectionId, string CollectionName, string? InvitedByName, MemberRole Role, bool ManagesPeople, bool AlreadyMember,
-        string? OwnerName = null);
+        string? OwnerName = null, int Plants = 0, int Cuttings = 0);
 
     public static IEndpointRouteBuilder MapInvites(this IEndpointRouteBuilder app)
     {
@@ -160,7 +162,14 @@ public static class InviteEndpoints
             var already = person is not null
                 && await db.Memberships.AnyAsync(m => m.CollectionId == invite.CollectionId && m.PersonId == person.Id);
 
-            return Results.Ok(new InvitePreview(invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName));
+            // Only how many there are, never names or photos
+            var plants = await LiveAsync<Plant>(db, invite.CollectionId, "plants");
+            var propagations = await LiveAsync<Propagation>(db, invite.CollectionId, "propagations");
+            var (plantCount, cuttingCount) = CollectionCounts.Of(plants, propagations);
+
+            return Results.Ok(new InvitePreview(
+                invite.CollectionId, collection.Name, invitedBy, invite.Role, invite.ManagesPeople, already, collection.OwnerName,
+                plantCount, cuttingCount));
         });
 
         app.MapPost("/invites/{token}/accept", async (string token, CurrentPerson current, StiklingDbContext db, TimeProvider clock) =>
@@ -229,6 +238,16 @@ public static class InviteEndpoints
     private static async Task<CollectionSummary> SummaryAsync(StiklingDbContext db, Collection collection, Membership membership) =>
         new(collection.Id, collection.Name, membership.Role, membership.ManagesPeople, collection.OwnerPersonId == membership.PersonId,
             await db.People.Where(p => p.Id == collection.OwnerPersonId).Select(p => p.Name).FirstOrDefaultAsync());
+
+    // The collection's records of one kind that aren't deleted, read as the public collection page reads them
+    private static async Task<List<T>> LiveAsync<T>(StiklingDbContext db, Guid collectionId, string kind) where T : Entity
+    {
+        var rows = await db.Records.AsNoTracking()
+            .Where(r => r.CollectionId == collectionId && r.Kind == kind && r.DeletedAt == null)
+            .Select(r => r.Data)
+            .ToListAsync();
+        return rows.Select(SharePageEndpoints.Read<T>).OfType<T>().ToList();
+    }
 
     private static InviteResponse Respond(Invite invite, string? createdByName) =>
         new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName, invite.ForName);
