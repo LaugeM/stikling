@@ -1,9 +1,13 @@
 // Blazor scrolls to the top after moving to another page, so a link like "help#pests"
-// from elsewhere in the app needs a push to reach its section
+// from elsewhere in the app needs a push to reach its section. A link to one answer opens it
 export function scrollToFragment() {
     const id = decodeURIComponent(location.hash.slice(1));
-    if (id)
-        document.getElementById(id)?.scrollIntoView({ behavior: "instant" });
+    const target = id ? document.getElementById(id) : null;
+    if (!target)
+        return;
+    if (target instanceof HTMLDetailsElement)
+        target.open = true;
+    target.scrollIntoView({ behavior: "instant" });
 }
 
 // Brings an alert into view and moves focus to it, so a screen reader reads it and the

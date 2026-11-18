@@ -30,10 +30,14 @@
     color: var(--pa-green-dark);
 }
 
+.help-section,
+.help-item {
+    /* Clears the sticky header when a topic or one answer is jumped to */
+    scroll-margin-top: calc(4.5rem + env(safe-area-inset-top));
+}
+
 .help-section {
     margin-bottom: 1.75rem;
-    /* Clears the sticky header when a topic is jumped to */
-    scroll-margin-top: calc(4.5rem + env(safe-area-inset-top));
 }
 
 .help-section h2 {
