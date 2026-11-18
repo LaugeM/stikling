@@ -3,6 +3,7 @@
 @using Stikling.Core.Sync
 @inject AccountService Accounts
 @inject SyncRunner Sync
+@inject CollectionsService Collections
 @inject TimeProvider Time
 @inject NavigationManager Nav
 
@@ -67,11 +68,18 @@ else if (account is { SignedIn: true })
                     </p>
                 }
             }
+            @if (Collections.IsSharedOpen)
+            {
+                <p class="settings-hint">@Strings.People.RemoveNeedsOwnCollection</p>
+            }
             <div class="settings-actions">
                 <button type="button" class="btn btn-primary" disabled="@(accountBusy || unsent.Checking)"
                         @onclick="() => SignOutAsync(keepData: true)">@Strings.Account.AccountKeepAndSignOut</button>
-                <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
-                        @onclick="() => SignOutAsync(keepData: false)">@Strings.Account.AccountRemoveAndSignOut</button>
+                @if (!Collections.IsSharedOpen)
+                {
+                    <button type="button" class="btn btn-danger" disabled="@(accountBusy || unsent.Checking)"
+                            @onclick="() => SignOutAsync(keepData: false)">@Strings.Account.AccountRemoveAndSignOut</button>
+                }
                 <button type="button" class="btn btn-link" disabled="@accountBusy"
                         @onclick="() => signOut = null">@Strings.Common.Cancel</button>
             </div>
@@ -138,14 +146,22 @@ else if (account is { SignedIn: true })
                 <strong>@Strings.Account.AccountDeleteHeading</strong><br />
                 @Strings.Account.AccountDeleteExplain
             </p>
-            <div class="form-check mt-2">
-                <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
-                       disabled="@accountBusy" />
-                <label class="form-check-label" for="delete-here-too">@Strings.Account.AccountRemoveHereToo</label>
-            </div>
-            <p class="settings-hint">
-                @(removeHereToo ? Strings.Account.AccountEmptyAfter : Strings.Account.AccountKeepsWhatItHas)
-            </p>
+            @if (Collections.IsSharedOpen)
+            {
+                <p class="settings-hint">@Strings.People.RemoveNeedsOwnCollection</p>
+                <p class="settings-hint">@Strings.Account.AccountKeepsWhatItHas</p>
+            }
+            else
+            {
+                <div class="form-check mt-2">
+                    <input type="checkbox" class="form-check-input" id="delete-here-too" @bind="removeHereToo"
+                           disabled="@accountBusy" />
+                    <label class="form-check-label" for="delete-here-too">@Strings.Account.AccountRemoveHereToo</label>
+                </div>
+                <p class="settings-hint">
+                    @(removeHereToo ? Strings.Account.AccountEmptyAfter : Strings.Account.AccountKeepsWhatItHas)
+                </p>
+            }
             <div class="settings-actions">
                 <button type="button" class="btn btn-danger" disabled="@accountBusy"
                         @onclick="DeleteAccountAsync">@Strings.Account.AccountDeleteButton</button>

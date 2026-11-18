@@ -13,11 +13,11 @@
     private string Text(RegisteredCollection here)
     {
         if (here.Gone)
-            return F(Strings.People.OpenLineGone, here.Name);
+            return F(Strings.People.OpenLineGone, CollectionText.Name(here));
 
         var verb = RoleText.Verb(here.Role, here.ManagesPeople);
         return string.IsNullOrWhiteSpace(here.OwnerName)
-            ? F(Strings.People.OpenLineNoOwner, here.Name, verb)
-            : F(Strings.People.OpenLine, here.OwnerName, verb);
+            ? F(Strings.People.OpenLineNoOwner, CollectionText.Name(here), verb)
+            : F(Strings.People.OpenLine, Stikling.Core.Text.Possessive.Of(here.OwnerName), verb);
     }
 }

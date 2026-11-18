@@ -293,6 +293,12 @@ public sealed class SyncRunner(
     private async Task LeaveSharedAsync(bool keepData, bool accountDeleted = false)
     {
         var wasShared = collections.IsSharedOpen;
+
+        // The checks before this only looked at the open database, so with a shared one open the main
+        // database, which may hold unsent changes, is never emptied. The screens don't offer it either
+        if (wasShared)
+            keepData = true;
+
         if (!keepData || accountDeleted)
             await collections.ForgetAllSharedAsync();
         if (!keepData)
@@ -402,8 +408,7 @@ public sealed class SyncRunner(
             LastSynced = time.GetUtcNow();
             await files.SetAsync(await files.KeyForOpenAsync(LastSyncKey), LastSynced.Value.ToString("O"));
 
-            // Never throw, so a problem with the people or the links can't stop the photos
-            await RefreshPeopleAsync(registry, collection.Id);
+            // Never throws, so a problem with the links can't stop the photos
             await shares.RefreshAsync(collection.Id);
             await publicPage.RefreshAsync(collection.Id);
 
@@ -427,6 +432,9 @@ public sealed class SyncRunner(
             notOnServer.Clear();
             if (photos.Downloaded > 0)
                 PhotosArrived?.Invoke();
+
+            // Last, and it never throws, so the names can't hold up anything else
+            await RefreshPeopleAsync(registry, collection.Id);
         }
         catch (HttpRequestException e) when (e.StatusCode == HttpStatusCode.Gone)
         {
@@ -475,9 +483,10 @@ public sealed class SyncRunner(
                     : c with { People = people, OwnerName = string.IsNullOrWhiteSpace(ownerName) ? c.OwnerName : ownerName, Name = details.Name })],
             });
         }
-        catch (Exception e) when (e is HttpRequestException or TaskCanceledException or AccountUnavailableException or JSException)
+        catch (Exception e) when (e is not OperationCanceledException)
         {
-            // A brief outage keeps the names from last time
+            // An outage, or anything else, keeps the names from last time. Nothing waits for them
+            logger.LogWarning(e, "Fetching the people of the collection failed");
         }
     }
 

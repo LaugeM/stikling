@@ -98,11 +98,10 @@ public class CollectionRegistryTests
         Assert.True(update.ForgetMainState);
         Assert.Equal(OwnId, update.Registry.MainCollectionId);
         Assert.Null(update.Registry.Find(SharedId));
-        Assert.Empty(update.Discard);
     }
 
     [Fact]
-    public void Another_person_signing_in_starts_a_new_registry_and_discards_the_shared_databases()
+    public void Another_persons_registry_is_never_merged_and_gets_a_key_of_its_own()
     {
         var before = Merge(null, OwnId, Own(), Shared());
         var other = Guid.NewGuid();
@@ -110,7 +109,8 @@ public class CollectionRegistryTests
 
         var update = CollectionRegistry.Merge(before, other, "Bo", [otherOwn], storedMain: OwnId);
 
-        Assert.Equal([SharedId], update.Discard);
+        Assert.NotEqual(CollectionRegistry.KeyFor(Me), CollectionRegistry.KeyFor(other));
+        Assert.Equal($"collections-{other}", CollectionRegistry.KeyFor(other));
         Assert.Equal(other, update.Registry.PersonId);
         Assert.Equal([otherOwn.Id], update.Registry.Collections.Select(c => c.Id));
         Assert.Equal(otherOwn.Id, update.Registry.MainCollectionId);

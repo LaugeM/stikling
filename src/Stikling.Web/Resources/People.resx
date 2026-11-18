@@ -302,8 +302,8 @@
     <comment>After an entry in a shared collection that someone else made. {0} is their name.</comment>
   </data>
   <data name="OpenLine" xml:space="preserve">
-    <value>{0}'s collection, you can {1}</value>
-    <comment>A quiet line on the main pages while a shared collection is open. {0} is the owner's name, {1} what the person can do, like 'edit'.</comment>
+    <value>{0} collection, you can {1}</value>
+    <comment>A quiet line on the main pages while a shared collection is open. {0} is the owner's name with its possessive ending (Alma's), {1} what the person can do, like 'edit'.</comment>
   </data>
   <data name="OpenLineNoOwner" xml:space="preserve">
     <value>{0}, you can {1}</value>
@@ -337,5 +337,21 @@
   <data name="CantChangeTitle" xml:space="preserve">
     <value>Not available here</value>
     <comment>Page title and hidden heading of the notice shown instead of a page the person can't use in the open collection.</comment>
+  </data>
+  <data name="NameYours" xml:space="preserve">
+    <value>Your plants</value>
+    <comment>What a collection is called when it still has the name the server gave it and it is the person's own.</comment>
+  </data>
+  <data name="NameOwners" xml:space="preserve">
+    <value>{0} plants</value>
+    <comment>What someone else's collection is called when it still has the name the server gave it. {0} is the owner's name with its possessive ending (Alma's).</comment>
+  </data>
+  <data name="RemoveNeedsOwnCollection" xml:space="preserve">
+    <value>To remove the data from this device, open your own collection first, so it can check that everything has been sent.</value>
+    <comment>Shown instead of the option to remove the data when signing out or deleting the account while a shared collection is open.</comment>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Couldn't copy it by itself. The link is selected, so you can copy it yourself.</value>
+    <comment>Shown under the invite link when the browser wouldn't let the app copy it.</comment>
   </data>
 </root>

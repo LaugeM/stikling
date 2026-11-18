@@ -162,7 +162,7 @@ public static class InviteEndpoints
 
             // Someone who is in already isn't changed, and the invite stays open for the one it was meant for
             if (members.SingleOrDefault(m => m.PersonId == person.Id) is { } existing)
-                return Results.Ok(Summary(collection, existing));
+                return Results.Ok(await SummaryAsync(db, collection, existing));
 
             if (!invite.IsOpen(now))
                 return Gone();
@@ -196,7 +196,7 @@ public static class InviteEndpoints
             await db.SaveChangesAsync();
             await transaction.CommitAsync();
 
-            return Results.Ok(Summary(collection, membership));
+            return Results.Ok(await SummaryAsync(db, collection, membership));
         })
         .RequireAuthorization();
 
@@ -206,8 +206,9 @@ public static class InviteEndpoints
     private static IResult Gone() =>
         Results.Problem("This invite has been used, withdrawn or has run out.", statusCode: StatusCodes.Status410Gone);
 
-    private static CollectionSummary Summary(Collection collection, Membership membership) =>
-        new(collection.Id, collection.Name, membership.Role, membership.ManagesPeople, collection.OwnerPersonId == membership.PersonId);
+    private static async Task<CollectionSummary> SummaryAsync(StiklingDbContext db, Collection collection, Membership membership) =>
+        new(collection.Id, collection.Name, membership.Role, membership.ManagesPeople, collection.OwnerPersonId == membership.PersonId,
+            await db.People.Where(p => p.Id == collection.OwnerPersonId).Select(p => p.Name).FirstOrDefaultAsync());
 
     private static InviteResponse Respond(Invite invite, string? createdByName) =>
         new(invite.Id, invite.Token, invite.Role, invite.ManagesPeople, invite.CreatedAt, invite.ExpiresAt, createdByName);

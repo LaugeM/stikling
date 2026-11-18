@@ -39,6 +39,18 @@ public class MeTests(ApiFactory api)
     }
 
     [Fact]
+    public async Task Each_collection_says_who_owns_it()
+    {
+        var owner = api.ClientFor(ApiFactory.NewClerkUserId());
+        await owner.PutAsJsonAsync("/me/name", new NameRequest("Anna"));
+        var ownerMe = await GetMe(owner);
+        var unnamed = await GetMe(api.ClientFor(ApiFactory.NewClerkUserId()));
+
+        Assert.Equal("Anna", Assert.Single(ownerMe!.Collections).OwnerName);
+        Assert.Null(Assert.Single(unnamed!.Collections).OwnerName);
+    }
+
+    [Fact]
     public async Task The_name_is_set_trimmed_and_shown_in_me()
     {
         var client = api.ClientFor(ApiFactory.NewClerkUserId());

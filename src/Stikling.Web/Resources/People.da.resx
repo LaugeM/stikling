@@ -262,7 +262,7 @@
     <value>af {0}</value>
   </data>
   <data name="OpenLine" xml:space="preserve">
-    <value>{0}s samling, du kan {1}</value>
+    <value>{0} samling, du kan {1}</value>
   </data>
   <data name="OpenLineNoOwner" xml:space="preserve">
     <value>{0}, du kan {1}</value>
@@ -290,5 +290,17 @@
   </data>
   <data name="CantChangeTitle" xml:space="preserve">
     <value>Ikke tilgængelig her</value>
+  </data>
+  <data name="NameYours" xml:space="preserve">
+    <value>Dine planter</value>
+  </data>
+  <data name="NameOwners" xml:space="preserve">
+    <value>{0} planter</value>
+  </data>
+  <data name="RemoveNeedsOwnCollection" xml:space="preserve">
+    <value>For at fjerne data fra denne enhed skal du først åbne din egen samling, så den kan tjekke, at alt er sendt.</value>
+  </data>
+  <data name="CopyFailed" xml:space="preserve">
+    <value>Kunne ikke kopiere af sig selv. Linket er markeret, så du selv kan kopiere det.</value>
   </data>
 </root>

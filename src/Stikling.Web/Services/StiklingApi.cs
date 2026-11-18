@@ -20,7 +20,8 @@ public sealed record Me(Guid PersonId, List<MeCollection> Collections, string? N
 /// <param name="Role">"Editor", "Helper" or "Viewer".</param>
 /// <param name="ManagesPeople">Whether they can invite people and change viewers and helpers. Only editors can.</param>
 /// <param name="IsOwner">Whether it is their own collection, with all it brings.</param>
-public sealed record MeCollection(Guid Id, string Name, string Role, bool ManagesPeople = false, bool IsOwner = false);
+/// <param name="OwnerName">The owner's name, if they have set one.</param>
+public sealed record MeCollection(Guid Id, string Name, string Role, bool ManagesPeople = false, bool IsOwner = false, string? OwnerName = null);
 
 /// <summary><c>GET /collections/{id}</c>: a collection and the people in it.</summary>
 public sealed record CollectionDetails(

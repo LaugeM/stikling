@@ -283,7 +283,7 @@ public class InviteTests(ApiFactory api)
         var summary = await response.Content.ReadFromJsonAsync<CollectionSummary>(ApiFactory.Json);
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
-        Assert.Equal(new CollectionSummary(owner.CollectionId, "My plants", role, managesPeople, IsOwner: false), summary);
+        Assert.Equal(new CollectionSummary(owner.CollectionId, "My plants", role, managesPeople, IsOwner: false, owner.Name), summary);
         var member = await _people.MemberOf(owner, guest with { CollectionId = owner.CollectionId });
         Assert.Equal(role, member.Role);
         Assert.Equal(managesPeople, member.ManagesPeople);

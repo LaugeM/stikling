@@ -43,15 +43,29 @@ public sealed class CollectionsService(
         if (loaded)
             return;
 
-        registry = CollectionRegistry.FromJson(await files.GetAsync(CollectionRegistry.Key));
+        // Each person has a registry of their own. The device remembers whose is in use, until someone else's sync takes over
+        registry = await ReadRegistryAsync(await files.GetAsync(PersonKey));
         openId = await files.GetOpenCollectionAsync();
         loaded = true;
 
-        if (openId is not null && !await account.WasSignedInAsync())
+        // Signed out, or a collection that isn't in this person's list, opens the main database
+        if (openId is not null && (!await account.WasSignedInAsync() || registry?.Find(openId.Value) is null))
         {
             openId = null;
             await files.SetAsync(OpenCollection.Key, null);
         }
+    }
+
+    /// <summary>The key in <see cref="DeviceFiles"/> for the id of the person whose registry is in use.</summary>
+    internal const string PersonKey = "current-person";
+
+    private async Task<CollectionRegistry?> ReadRegistryAsync(string? personText)
+    {
+        if (!Guid.TryParse(personText, out var person))
+            return null;
+
+        var read = CollectionRegistry.FromJson(await files.GetAsync(CollectionRegistry.KeyFor(person)));
+        return read?.PersonId == person ? read : null;
     }
 
     /// <summary>The collection whose database is open: the shared one, or else the one the main database holds. Null before the first sync.</summary>
@@ -85,14 +99,25 @@ public sealed class CollectionsService(
     internal async Task<CollectionRegistry> ApplyMeAsync(Me me)
     {
         await LoadAsync();
+
+        // Someone else is signed in than the person whose list this was. Theirs is read, and the shared
+        // collection that was open isn't in it, so the main database opens
+        if (registry?.PersonId != me.PersonId)
+        {
+            registry = await ReadRegistryAsync(me.PersonId.ToString("D"));
+            await files.SetAsync(PersonKey, me.PersonId.ToString("D"));
+            if (openId is { } open && registry?.Find(open) is null)
+            {
+                openId = null;
+                await files.SetAsync(OpenCollection.Key, null);
+            }
+        }
+
         var storedMain = openId is null ? (await store.GetStateAsync())?.CollectionId : registry?.MainCollectionId;
         var mine = me.Collections
-            .Select(c => new RegisteredCollection(c.Id, c.Name, CollectionRoles.Parse(c.Role), c.ManagesPeople, c.IsOwner))
+            .Select(c => new RegisteredCollection(c.Id, c.Name, CollectionRoles.Parse(c.Role), c.ManagesPeople, c.IsOwner, c.OwnerName))
             .ToList();
         var update = CollectionRegistry.Merge(registry, me.PersonId, me.Name, mine, storedMain);
-
-        // Someone else signing in here: what the person before had of shared collections is on the server
-        await DiscardAsync(update.Discard);
 
         // The main database's collection is gone, so it starts over and its data merges into the person's own
         if (update.ForgetMainState && openId is null)
@@ -223,30 +248,19 @@ public sealed class CollectionsService(
         await files.SetAsync(OpenCollection.Key, null);
         openId = null;
         await DeleteDatabasesAsync(shared);
-        await files.SetAsync(CollectionRegistry.Key, null);
+
+        // Only the signed-in person's. What someone else kept on this device is theirs to remove
+        if (registry is not null)
+            await files.SetAsync(CollectionRegistry.KeyFor(registry.PersonId), null);
+        await files.SetAsync(PersonKey, null);
         registry = null;
     }
 
-    /// <summary>Deletes the databases of collections whose person is no longer here. Sync uses it when someone else signs in.</summary>
-    internal async Task DiscardAsync(IReadOnlyList<Guid> collectionIds)
-    {
-        if (collectionIds.Count == 0)
-            return;
-
-        await LoadAsync();
-        if (openId is { } open && collectionIds.Contains(open))
-        {
-            openId = null;
-            await files.SetAsync(OpenCollection.Key, null);
-        }
-
-        await DeleteDatabasesAsync(collectionIds);
-    }
-
-    internal async Task SaveRegistryAsync(CollectionRegistry? updated)
+    internal async Task SaveRegistryAsync(CollectionRegistry updated)
     {
         registry = updated;
-        await files.SetAsync(CollectionRegistry.Key, updated?.ToJson());
+        await files.SetAsync(CollectionRegistry.KeyFor(updated.PersonId), updated.ToJson());
+        await files.SetAsync(PersonKey, updated.PersonId.ToString("D"));
     }
 
     private async Task DeleteDatabasesAsync(IEnumerable<Guid> collectionIds)

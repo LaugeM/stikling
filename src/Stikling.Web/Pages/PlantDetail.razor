@@ -768,10 +768,12 @@ else
                             }
                         </ul>
                     }
-                    <p class="family-hint">
-                        @Html(Strings.PlantDetail.FamilyHintCutting, Link($"propagations/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintCuttingLink))
-                        @Html(Strings.PlantDetail.FamilyHintRooted, Link($"plants/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintRootedLink))
-                    </p>
+                    <IfCan Edit>
+                        <p class="family-hint">
+                            @Html(Strings.PlantDetail.FamilyHintCutting, Link($"propagations/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintCuttingLink))
+                            @Html(Strings.PlantDetail.FamilyHintRooted, Link($"plants/new?parent={plant.Id}", Strings.PlantDetail.FamilyHintRootedLink))
+                        </p>
+                    </IfCan>
                 </section>
 
             </div>

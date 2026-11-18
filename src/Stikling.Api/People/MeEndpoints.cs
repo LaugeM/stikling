@@ -9,7 +9,8 @@ public static class MeEndpoints
 {
     public record MeResponse(Guid PersonId, string? Name, List<CollectionSummary> Collections);
 
-    public record CollectionSummary(Guid Id, string Name, MemberRole Role, bool ManagesPeople, bool IsOwner);
+    /// <param name="OwnerName">The owner's name, so the app can write "Anna's plants" for a collection still called by the default name.</param>
+    public record CollectionSummary(Guid Id, string Name, MemberRole Role, bool ManagesPeople, bool IsOwner, string? OwnerName = null);
 
     public record NameRequest(string? Name);
 
@@ -36,7 +37,8 @@ public static class MeEndpoints
                 .Where(m => m.PersonId == person.Id)
                 .OrderBy(m => m.CreatedAt)
                 .Select(m => new CollectionSummary(
-                    m.CollectionId, m.Collection.Name, m.Role, m.ManagesPeople, m.Collection.OwnerPersonId == m.PersonId))
+                    m.CollectionId, m.Collection.Name, m.Role, m.ManagesPeople, m.Collection.OwnerPersonId == m.PersonId,
+                    db.People.Where(p => p.Id == m.Collection.OwnerPersonId).Select(p => p.Name).FirstOrDefault()))
                 .ToListAsync();
 
             return new MeResponse(person.Id, person.Name, collections);

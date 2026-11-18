@@ -41,7 +41,8 @@ public sealed record CollectionRegistry(
     Guid? MainCollectionId,
     List<RegisteredCollection> Collections)
 {
-    public const string Key = "collections";
+    /// <summary>The key in <c>DeviceFiles</c>. Each person has a registry of their own, so someone else signing in never sees or touches it.</summary>
+    public static string KeyFor(Guid personId) => $"collections-{personId:D}";
 
     private static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web);
 
@@ -68,8 +69,7 @@ public sealed record CollectionRegistry(
     /// <summary>
     /// Brings the registry up to date with what <c>/me</c> says.
     /// <list type="bullet">
-    /// <item>Someone else signing in on the device starts a new registry. The previous person's shared databases
-    /// are returned in <see cref="RegistryUpdate.Discard"/>, since their data is on the server.</item>
+    /// <item>A registry of another person is never merged: the caller reads the one of the person who is signed in.</item>
     /// <item>The main database holds the collection in its stored sync state if the person is still in it, else
     /// the one they own, else the first. When the stored one is gone, its sync state is forgotten
     /// (<see cref="RegistryUpdate.ForgetMainState"/>), so the next sync sends everything and it merges
@@ -87,12 +87,8 @@ public sealed record CollectionRegistry(
         CollectionRegistry? previous, Guid personId, string? personName,
         IReadOnlyList<RegisteredCollection> mine, Guid? storedMain)
     {
-        var discard = new List<Guid>();
         if (previous is not null && previous.PersonId != personId)
-        {
-            discard.AddRange(previous.Collections.Where(c => c.Id != previous.MainCollectionId).Select(c => c.Id));
             previous = null;
-        }
 
         var forget = false;
         Guid? main = null;
@@ -114,7 +110,7 @@ public sealed record CollectionRegistry(
             collections.Add(c with
             {
                 Gone = false,
-                OwnerName = c.IsOwner ? personName ?? before?.OwnerName : before?.OwnerName,
+                OwnerName = c.OwnerName ?? (c.IsOwner ? personName : null) ?? before?.OwnerName,
                 People = before?.People ?? [],
             });
         }
@@ -129,11 +125,10 @@ public sealed record CollectionRegistry(
             collections.Add(before with { Gone = true });
         }
 
-        return new RegistryUpdate(new CollectionRegistry(personId, personName, main, collections), forget, discard);
+        return new RegistryUpdate(new CollectionRegistry(personId, personName, main, collections), forget);
     }
 }
 
 /// <param name="Registry">The registry as it is now.</param>
 /// <param name="ForgetMainState">True when the main database's sync state should be forgotten, so it starts over with the person's own collection.</param>
-/// <param name="Discard">Shared databases of a person who isn't signed in any more, to delete.</param>
-public sealed record RegistryUpdate(CollectionRegistry Registry, bool ForgetMainState, IReadOnlyList<Guid> Discard);
+public sealed record RegistryUpdate(CollectionRegistry Registry, bool ForgetMainState);

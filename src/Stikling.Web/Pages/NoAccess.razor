@@ -16,7 +16,7 @@
         get
         {
             var here = Collections.Current;
-            var name = here?.Name ?? "";
+            var name = here is null ? "" : CollectionText.Name(here);
             return string.IsNullOrWhiteSpace(here?.OwnerName)
                 ? F(Strings.People.CantChangeHereNoOwner, name)
                 : F(Strings.People.CantChangeHere, name, here.OwnerName);

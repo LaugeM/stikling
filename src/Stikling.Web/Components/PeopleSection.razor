@@ -2,6 +2,7 @@
 @using Stikling.Core.People
 @inject CollectionsService Collections
 @inject StiklingApi Api
+@inject SyncRunner Sync
 @inject BackupService Backup
 @inject ShareCardService Cards
 @inject NavigationManager Nav
@@ -30,7 +31,7 @@ else
         {
             var isOpen = collection.Id == openId;
             <div class="room-row">
-                <span class="room-name">@collection.Name</span>
+                <span class="room-name">@CollectionText.Name(collection)</span>
                 @if (isOpen)
                 {
                     <span class="settings-hint ms-auto my-0">@Strings.People.OpenNow</span>
@@ -61,7 +62,7 @@ else
         @if (removingFromDevice)
         {
             <div class="confirm-card confirm-card-danger">
-                <p>@F(Strings.People.RemoveFromDeviceExplain, gone.Name)</p>
+                <p>@F(Strings.People.RemoveFromDeviceExplain, CollectionText.Name(gone))</p>
                 <div class="settings-actions">
                     <button type="button" class="btn btn-danger" disabled="@busy"
                             @onclick="() => RemoveFromDeviceAsync(gone.Id)">@Strings.Common.Remove</button>
@@ -84,7 +85,7 @@ else
         else
         {
             <div class="room-row mt-3">
-                <span class="room-name">@here.Name</span>
+                <span class="room-name">@CollectionText.Name(here)</span>
                 @if (access.CanEdit)
                 {
                     <button type="button" class="btn btn-link btn-sm link-action ms-auto" disabled="@busy"
@@ -116,13 +117,14 @@ else
                                         @onclick="() => removingMember = member.PersonId">@Strings.Common.Remove</button>
                             }
                         </div>
-                        <p class="settings-hint mt-0">
+                        @* With a select the role is shown by the select, and this line is for screen readers *@
+                        <p class="settings-hint mt-0 @(options.Count > 0 ? "visually-hidden" : null)">
                             @(member.IsOwner ? F(Strings.People.MemberOwner, RoleText.Label(choice)) : RoleText.Label(choice))
                         </p>
                         @if (options.Count > 0)
                         {
                             <div class="member-role">
-                                <select class="form-select form-select-sm" aria-label="@F(Strings.People.ChangeRoleFor, name)"
+                                <select class="form-select w-auto" aria-label="@F(Strings.People.ChangeRoleFor, name)"
                                         disabled="@busy" @onchange="e => ChangeRoleAsync(member, e.Value?.ToString())">
                                     @foreach (var option in options)
                                     {
@@ -192,7 +194,11 @@ else
                     <div class="confirm-card">
                         <label class="form-label" for="invite-link">@Strings.People.InviteLinkLabel</label>
                         <input id="invite-link" class="form-control invite-link" readonly value="@link" onfocus="this.select()"
-                               autocomplete="off" autocapitalize="off" spellcheck="false" />
+                               @ref="linkField" autocomplete="off" autocapitalize="off" spellcheck="false" />
+                        @if (copyFailed)
+                        {
+                            <p class="settings-message" role="status">@Strings.People.CopyFailed</p>
+                        }
                         <p class="settings-hint">@F(Strings.People.InviteLinkHint, RoleText.Verb(invite.Choice), PeopleLimits.InviteDays)</p>
                         <div class="settings-actions">
                             @if (canShare)
@@ -279,7 +285,26 @@ else
             @if (leaving)
             {
                 <div class="confirm-card confirm-card-danger">
-                    <p>@F(Strings.People.LeaveConfirm, here.Name)</p>
+                    <p>@F(Strings.People.LeaveConfirm, CollectionText.Name(here))</p>
+                    @if (checkingUnsent)
+                    {
+                        <p class="settings-hint" role="status">@Strings.Account.AccountSendingLatest</p>
+                    }
+                    else
+                    {
+                        @if (unsentPhotos > 0)
+                        {
+                            <p class="settings-hint">
+                                @Plural.Of(unsentPhotos, Strings.Account.AccountUnsentPhotos_One, Strings.Account.AccountUnsentPhotos_Other)
+                            </p>
+                        }
+                        @if (unsentChanges > 0)
+                        {
+                            <p class="settings-hint">
+                                @Plural.Of(unsentChanges, Strings.Account.AccountUnsentChanges_One, Strings.Account.AccountUnsentChanges_Other)
+                            </p>
+                        }
+                    }
                     <div class="settings-actions">
                         <button type="button" class="btn btn-outline-primary" disabled="@busy"
                                 @onclick="SaveBackupAsync">@Strings.People.LeaveSaveFirst</button>
@@ -300,7 +325,7 @@ else
             {
                 <div class="settings-actions">
                     <button type="button" class="btn btn-outline-secondary" disabled="@busy"
-                            @onclick="StartLeave">@Strings.People.LeaveButton</button>
+                            @onclick="StartLeaveAsync">@Strings.People.LeaveButton</button>
                 </div>
             }
         }
@@ -353,6 +378,9 @@ else
     private Guid? savingRole;
     private bool removingFromDevice;
     private bool leaving;
+    private bool checkingUnsent;
+    private int unsentChanges;
+    private int unsentPhotos;
     private bool handingOver;
     private Guid? handOverTo;
 
@@ -364,6 +392,8 @@ else
     private string? link;
     private bool canShare;
     private bool copied;
+    private bool copyFailed;
+    private ElementReference linkField;
     private bool showQr;
     private int qrSize;
     private string qrPath = "";
@@ -581,6 +611,7 @@ else
             }
 
             copied = false;
+            copyFailed = false;
             showQr = false;
             BuildQr(link);
             inviteStep = InviteStep.Made;
@@ -637,7 +668,7 @@ else
         string outcome;
         try
         {
-            outcome = await Cards.ShareLinkAsync(F(Strings.People.ShareTitle, current.Name), link);
+            outcome = await Cards.ShareLinkAsync(F(Strings.People.ShareTitle, CollectionText.Name(current)), link);
         }
         catch (JSException)
         {
@@ -654,6 +685,7 @@ else
         if (link is null)
             return;
 
+        copyFailed = false;
         try
         {
             copied = await Cards.CopyTextAsync(link);
@@ -664,7 +696,20 @@ else
         }
 
         if (!copied)
+        {
+            // The browser wouldn't give the page the clipboard. The link is in the field, so it is selected for copying by hand
+            copyFailed = true;
+            StateHasChanged();
+            try
+            {
+                await linkField.FocusAsync();
+            }
+            catch (Exception e) when (e is JSException or InvalidOperationException)
+            {
+                // The field is gone, e.g. the box was closed
+            }
             return;
+        }
 
         StateHasChanged();
         await Task.Delay(TimeSpan.FromSeconds(2));
@@ -712,11 +757,24 @@ else
         }
     }
 
-    private void StartLeave()
+    /// <summary>Opens the question, after one last sync so as little as possible is left unsent: what is still waiting is lost with the collection's database.</summary>
+    private async Task StartLeaveAsync()
     {
         message = null;
         backupMessage = null;
+        unsentPhotos = unsentChanges = 0;
         leaving = true;
+        checkingUnsent = true;
+        StateHasChanged();
+        try
+        {
+            await Sync.SyncNowAsync();
+            (unsentChanges, unsentPhotos) = await Sync.CountUnsentAsync();
+        }
+        finally
+        {
+            checkingUnsent = false;
+        }
     }
 
     private async Task LeaveAsync()
