@@ -86,6 +86,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | nursery pot | inderpotte |
 | tag | tag (plural tags) |
 | label (printed, the Labels page) | etiket (plural etiketter) |
+| plant tag (the label from the nursery) | plantemærke (plural plantemærker) |
 | node | knude (plural knuder) |
 | mother plant | moderplante |
 | example plant | eksempelplante |
