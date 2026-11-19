@@ -117,6 +117,9 @@ public class FileTests(ApiFactory api)
         Assert.Equal(HttpStatusCode.OK, fetched.StatusCode);
         Assert.Equal("application/pdf", fetched.Content.Headers.ContentType?.MediaType);
         Assert.Equal(pdf, await fetched.Content.ReadAsByteArrayAsync());
+        // Opened straight from the API, a PDF is downloaded instead of shown there
+        Assert.Equal("attachment", fetched.Content.Headers.ContentDisposition?.DispositionType);
+        Assert.Equal("nosniff", Assert.Single(fetched.Headers.GetValues("X-Content-Type-Options")));
     }
 
     [Theory]

@@ -126,6 +126,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | species | art |
 | cultivar | kultivar |
 | supplies (the page with pots, products, soil mixes and feeds) | udstyr |
+| stock (what is taken off when something is used up) | lager |
 | treatment recipe | blanding (plural blandinger) |
 | tour (the guided tour) | rundvisning |
 | looked over (Going round, the history) | tjekket |
@@ -133,6 +134,7 @@ Read the English for what it means, then write the sentence the way a Dane would
 | cover photo | profilbillede |
 | medium (what a cutting roots in) | vækstmedie |
 | batch | batch (plural batches) |
+| cross, crossbreeding | krydsning |
 | resolve, resolved (a pest case or problem) | løse, løst |
 | gone (a plant that left the collection) | væk |
 | flag it | markér den (noun: markering) |

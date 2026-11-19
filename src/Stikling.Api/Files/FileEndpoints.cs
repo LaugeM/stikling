@@ -39,7 +39,7 @@ public static class FileEndpoints
         })
         .RequireAuthorization(CollectionPolicies.View);
 
-        files.MapGet("/{fileId:guid}", async (Guid collectionId, Guid fileId, StiklingDbContext db, FileStorage storage) =>
+        files.MapGet("/{fileId:guid}", async (Guid collectionId, Guid fileId, HttpContext http, StiklingDbContext db, FileStorage storage) =>
         {
             var row = await db.StoredFiles.AsNoTracking()
                 .Where(f => f.CollectionId == collectionId && f.FileId == fileId)
@@ -52,6 +52,9 @@ public static class FileEndpoints
             using var memory = new MemoryStream();
             await using (stream)
                 await stream.CopyToAsync(memory);
+            // The app fetches the bytes and opens them itself. A PDF opened straight from this address is
+            // downloaded instead of shown on the API's own origin.
+            http.Response.Headers.ContentDisposition = "attachment";
             return Results.Bytes(memory.ToArray(), row.ContentType);
         })
         .RequireAuthorization(CollectionPolicies.View);

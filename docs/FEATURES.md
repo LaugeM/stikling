@@ -39,7 +39,11 @@ In the order I would build them, with the ones that belong together built togeth
 
 The first group was for the people a post brings in, and it is built, so the posts on Reddit (r/propagation, r/houseplants and the collector subreddits) can go up. Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out. Danish is in, so every feature from now on is written in both languages from the start, and the Danish Facebook groups can be asked. The group for collectors is built too: the larger plant dictionary with a page to browse it, the leaf log for variegated plants, generation and orders. So is Showing it off: anniversaries and small celebrations, an experiment's result as an image, your year as a video, and a plant's story to print. So is Rooms and spots: the page for each room and spot, with its note and photos and the readings of light, temperature and humidity, shown on the plants that stand there. So is On the server: plant identification from a photo, the plant facts card and the public collection page. So is Supplies: the stock and the shopping list. And most of When something is wrong: the symptom check, and guides for cuttings, semi-hydro, wicks, soil, pests and plant groups that open from the place they are about. Compare lists with a friend is built, so there is something to show when asking the Facebook groups if a post is allowed. So is Loose ends in care: the reminder to change the water and how often it was changed on the results page, water type, releases of natural enemies on a pest case, Ready by, weighing a pot, the harvest amount, a feed on a propagation's care, and money spent and brought in. Hover text is in too: the browser's own tooltip on buttons and controls whose label doesn't say what they do. So is Moving and going round: moving house, with the old rooms kept and the plants placed afterwards, and your own walking order for going round a room. The home map stays out for now, since it is a large one on its own. QR labels are built too: a QR code on labels, sticker sheets, the page a code opens, and Scan a label in the app. So is Light at each spot: grow lights with a name, watts and hours a day, a history line when a lamp is added, removed or moved or a plant moves under or away from one, the direction of each room's windows, the light check, the filter by light and the winter note on Today. So is Notes and tidying: link to another plant in a note, the Tidy up page, unsure parent, and importing propagations from a spreadsheet. So is People in a collection: invite links, the four roles, switching between collections, leaving and handing over.
 
-1. **Translating**: a way for others to help translate Stikling, through Hosted Weblate once the Libre plan can be applied for on 19 December 2026. Your own words goes with it, since both are about the words the app uses. It starts when the date allows, whichever group is being built then.
+1. **Crossbreeding**: the whole of section 3b. A cross with both parents, how it was done, what came of it and a working name, seedlings that keep both parents in the family tree, the cross log and traits. Then the pollen store, seed lots, a plant in flower on Today with the pollen stored for it, and comparing the seedlings from one cross.
+2. **Batches and stock**: a dated batch of soil mixed from a recipe, which a plant can point at, and mixing a batch or a feed takes what went into it off the supplies stock.
+3. **Links to outside pages**: a short, checked list of outside pages, and links where they apply, like a pest case to a page about that pest or a plant to a care page for its genus. The guides in the app stay, and the links are for what they don't cover.
+4. **Translating**: a way for others to help translate Stikling, through Hosted Weblate once the Libre plan can be applied for on 19 December 2026. Your own words goes with it, since both are about the words the app uses. It starts when the date allows, whichever group is being built then.
+5. **Android APK**: a release through IzzyOnDroid first and then F-Droid, so Stikling can be installed as an app without a paid store account. How the app is wrapped is decided when the group starts.
 
 ---
 
@@ -195,17 +199,17 @@ For people who pollinate their own plants and raise the seedlings. A cross is tw
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Crosses**: record a pollination with the pod parent, the pollen parent and the date, shown as "pod parent × pollen parent". A parent that isn't in the app can be typed as a name | 7 | M | v1.x |
-| ☐ | How it was done: brush or by hand, fresh or stored pollen, whether the flower was bagged, and a note for anything else | 7 | S | v1.x |
-| ☐ | Outcome: whether it took, when the seed was ripe, how much there was, and when it was sown | 7 | S | v1.x |
-| ☐ | Seedlings from a cross keep both parents, so the family tree shows where a hybrid came from | 7 | M | v1.x |
-| ☐ | A working name for the cross, used on the seedlings until they earn a real one | 7 | S | v1.x |
-| ☐ | Cross log: every cross in one list with what came of it, so the ones worth repeating stand out | 8 | S | v1.x |
-| ☐ | Traits on parents and seedlings, e.g. dark new leaves or silver splash, to see which parent passes what on | 8 | S | v1.x |
-| ☐ | **Pollen store**: what is in the freezer, from which plant and when it was collected, since pollen doesn't keep forever | 8 | M | v1.x |
-| ☐ | **Seed lots**: seeds you have before sowing, with where they came from, when they were collected or bought, a sow-by date and an amount that can be rough, e.g. about 100 or 1 g. Sowing starts a seed propagation linked back to the lot, and a cross's pod becomes a lot | 8 | M | v1.x |
-| ☐ | A plant coming into flower shows on Today together with the pollen you have stored for it | 8 | M | v1.x |
-| ☐ | Compare the seedlings from one cross side by side, to pick the keepers | 8 | M | v1.x |
+| ☐ | **Crosses**: record a pollination with the pod parent, the pollen parent and the date, shown as "pod parent × pollen parent". A parent that isn't in the app can be typed as a name | 3 | M | v1.x |
+| ☐ | How it was done: brush or by hand, fresh or stored pollen, whether the flower was bagged, and a note for anything else | 3 | S | v1.x |
+| ☐ | Outcome: whether it took, when the seed was ripe, how much there was, and when it was sown | 3 | S | v1.x |
+| ☐ | Seedlings from a cross keep both parents, so the family tree shows where a hybrid came from | 3 | M | v1.x |
+| ☐ | A working name for the cross, used on the seedlings until they earn a real one | 3 | S | v1.x |
+| ☐ | Cross log: every cross in one list with what came of it, so the ones worth repeating stand out | 3 | S | v1.x |
+| ☐ | Traits on parents and seedlings, e.g. dark new leaves or silver splash, to see which parent passes what on | 3 | S | v1.x |
+| ☐ | **Pollen store**: what is in the freezer, from which plant and when it was collected, since pollen doesn't keep forever | 3 | M | v1.x |
+| ☐ | **Seed lots**: seeds you have before sowing, with where they came from, when they were collected or bought, a sow-by date and an amount that can be rough, e.g. about 100 or 1 g. Sowing starts a seed propagation linked back to the lot, and a cross's pod becomes a lot | 3 | M | v1.x |
+| ☐ | A plant coming into flower shows on Today together with the pollen you have stored for it | 3 | M | v1.x |
+| ☐ | Compare the seedlings from one cross side by side, to pick the keepers | 3 | M | v1.x |
 
 ## 4. Care log
 
@@ -311,8 +315,8 @@ Most people mix their own soil instead of using it straight from the bag. This i
 | ✅ | The mixes list says how many plants are in each mix, and tapping the count shows those plants | 7 | S | v1.x |
 | ✅ | Use a mix on a propagation too, for the ones that go straight into soil | 7 | S | v1.x |
 | ✅ | Batch calculator: pick a mix and a volume, and get how much of each ingredient to measure out | 7 | S | v1.x |
-| ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 8 | L | v1.x |
-| ☐ | Mixing a batch takes the ingredients off the supplies stock | 8 | M | v1.x |
+| ☐ | **Batches**: mix a dated batch from a recipe and top it up as it runs low, so a plant can point at the batch it was actually potted in rather than the recipe | 4 | L | v1.x |
+| ☐ | Mixing a batch takes the ingredients off the supplies stock | 4 | M | v1.x |
 
 ## 5d. Fertiliser mixes
 
@@ -328,7 +332,7 @@ Most feeds are more than one bottle. A fertiliser, then a rooting or growth stim
 | ✅ | See which plants got a given feed and when, so a mix that isn't working shows up. The feeds list says how many plants have had each feed and when it was last given, and opens to the plants and their dates | 7 | S | v1.x |
 | ✅ | A different mix for propagations: a watering or a water change on a propagation can carry one of the saved feeds, e.g. rooting water, and the entry shows its products. No dose editing or water amount there | 3 | S | v1.x |
 | ✅ | EC and pH reading on a feed, for the semi-hydro reservoirs | 8 | S | v1.x |
-| ☐ | Mixing a feed takes the products off the supplies stock | 8 | M | v1.x |
+| ☐ | Mixing a feed takes the products off the supplies stock | 4 | M | v1.x |
 
 ## 6. Today screen
 
@@ -431,8 +435,8 @@ Questions come up that the app can't answer from your own data: how long a cutti
 
 | ✓ | Feature | Priority | Effort | When |
 |---|---|---|---|---|
-| ☐ | **Reference links**: a short, checked list of outside pages (care by genus, pest identification, semi-hydro, soil), opened in the browser | 6 | S | v1.x |
-| ☐ | Links where they apply: a pest case links to a page about that pest, a plant links to a care page for its genus | 7 | M | v1.x |
+| ☐ | **Reference links**: a short, checked list of outside pages (care by genus, pest identification, semi-hydro, soil), opened in the browser | 4 | S | v1.x |
+| ☐ | Links where they apply: a pest case links to a page about that pest, a plant links to a care page for its genus | 4 | M | v1.x |
 | ✅ | **Built-in guides** that work offline, at /guides: taking a cutting, moving a plant to semi-hydro, watering through a wick and mixing soil, and under Pests, checking for pests and a guide for each pest a case can be for (thrips, spider mites, fungus gnats, mealybugs, scale, aphids and whitefly), and under By plant group, a guide for aroids, begonias, bromeliads and air plants, cacti and succulents, carnivorous plants, ferns, hoyas, orchids and prayer plants that says only what is special about looking after the group. Each is written from sources it lists at the end (extension services, the RHS, makers of the products), says "many growers" or "some growers" where only growers stand behind a line, and shows the common ways side by side where growers disagree, never marking one best. On a phone a switch picks the method, and from 64rem the methods sit in columns. The three guides with thin sources say so under the first paragraph. The pest guides have photos to tell the pests apart, each with a caption and a credit that links to the file on Wikimedia Commons, and list the kinds of treatment (rinsing, soap and oil, natural enemies, a product for houseplants) without products or active ingredients. Found from Help, Supplies and Search. | 4 | L | v1.x |
 | ✅ | A guide opens from the place it is about: a cutting's stage sheet and page and the empty Propagations page open the cutting guide, a plant's medium set to LECA or PON, its moving card and tracking sheet open the semi-hydro guide, a self-watering pot with a wick (on the Pots page, the plant form and the plant page) opens the wick guide, and Soil mixes opens the mixing guide. A pest case's page opens the guide for its pest (Checking for pests for Other), and the new and edit case form links to the guide for the pest picked, in a new tab. The Pests page and its empty state, the symptom check's Pests cause, and a plant's quarantine (its details and the sheet) open Checking for pests. The back link names where it was opened from and the guide opens on the method that fits. A plant's page and the dictionary's genus page open the guide for the plant's group, found from its family and genus (a hoya's guide is for the genus Hoya only, not its family). The semi-hydro guide can start tracking the move for the plant it was opened from. | 4 | S | v1.x |
 
@@ -460,7 +464,7 @@ Questions come up that the app can't answer from your own data: how long a cutti
 | ✅ | **Plant identification from a photo** through Pl@ntNet, which is free (500 identifications a day for non-commercial use) and doesn't keep the photos. A camera button joined to the name search on the plant and propagation forms, and "Find the name from a photo" under the name of a plant or propagation whose name is missing or unsure (cf., aff., sp. or name lost), open a sheet to take a photo, choose one, or use a photo the form already has. Up to five suggestions come back with the everyday name, the botanical name and "Good match", "Possible" or "Long shot". Tapping one fills in the genus and species (old names become current, the cultivar stays only when the species does), and nothing is filled in without a tap. It names the species, never the cultivar. On the plant form the photo can be kept on the plant. Picked from the page, the name is saved at once and marked cf. The photo is made into a JPEG in JavaScript and never passes through C#. Signed in, it goes through Stikling's API (`/identify`), which keeps the key secret, never stores or logs the photo, and allows 10 a day for each person and 500 a day in all. With a free Pl@ntNet key of your own added in Settings it goes straight from the device to Pl@ntNet, with no account, and the key stays on the device | 4 | L | v2 |
 | ✅ | **Notifications** from the web app, now that there is a server: on Android, and on an iPhone once the app is on the home screen. Off until turned on, and only for what Today would show, like a propagation to check on or a treatment due. Everything due comes as one list a day, at a time you choose, never one notification per plant. Never a reminder to water | 4 | L | v2 |
 | ☐ | Push notifications, widgets and a Google Play release (MAUI Blazor Hybrid) | 10 | L | v3 |
-| ☐ | **Android APK** released through IzzyOnDroid first, and then F-Droid, so it can be installed without a paid store account. Both take open source apps, and each has its own rules for how a release is built and signed | 10 | L | v3 |
+| ☐ | **Android APK** released through IzzyOnDroid first, and then F-Droid, so it can be installed without a paid store account. Both take open source apps, and each has its own rules for how a release is built and signed | 5 | L | v3 |
 
 ## 9. Quality (not features, but part of each milestone)
 

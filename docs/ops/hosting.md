@@ -30,6 +30,16 @@ While the API is stopped, a new version can't be checked after it's deployed, so
 
 Merging to main does it. The workflow pushes the API's image and moves the Container App to it, then the notification job too if there is one, and GitHub Pages gets the app.
 
+## Security headers
+
+GitHub Pages can't send headers, so the app's Content Security Policy is a meta tag that `.github/scripts/prepare-pages.py` adds to every page at deploy. It allows the app's own files and the outside services it talks to: Clerk, the API and Sentry (taken from `appsettings.Production.json`), Cloudflare Turnstile for Clerk's bot check, Google's sign-in and Photos picker, and Pl@ntNet. Inline scripts are allowed by their hash, worked out at deploy. Locally there is no policy, since the dev server adds scripts of its own.
+
+A feature that loads a script, a frame or an image from a new place, or calls a new service from the browser, has to add it there. Otherwise it works locally and is blocked on stikling.app. To check, publish, run the two steps from the workflow, serve `release/wwwroot` and look for "Content Security Policy" in the console.
+
+`'unsafe-eval'` is in the policy for h264-mp4-encoder, the time-lapse encoder for browsers without WebCodecs, like Firefox on Android, which can't load without it. A meta tag can't set `frame-ancestors`, so another site can still put the app in a frame.
+
+The API sends HSTS for a year and `X-Content-Type-Options: nosniff` on everything. Attached files and the photos the app fetches come with `Content-Disposition: attachment`, so a PDF opened from its API address is downloaded rather than shown on the API's origin. The photos of the share and public pages stay inline, since people open them in a tab.
+
 ## Changing the Azure resources
 
 The Bicep isn't deployed by the workflow, since that would need the right to hand out roles. Deploy it from your own machine after `az login`:
@@ -127,6 +137,25 @@ There are two projects, one for the app and one for the API. In each project's s
 The app's DSN goes in `src/Stikling.Web/wwwroot/appsettings.Production.json` under `Sentry:Dsn`. The API's goes in `infra/main.bicepparam` as `sentryDsn`, which is deployed by hand like any Bicep change. With a DSN left empty, that side sends nothing. DSNs are public by design, like Clerk's publishable key, so they can be in the repository.
 
 Session tracking, tracing and replays are turned off in code on purpose. What the app leaves out of a report, and the switch for it in Settings, are on the privacy page.
+
+## Why SQL and Key Vault are on the public network
+
+Both the SQL server and the Key Vault answer on public addresses. This was looked at in November 2026 and left as it is. What protects them:
+
+- **SQL**: no SQL logins exist, only Microsoft Entra sign-in with the API's identity as the admin (`azureADOnlyAuthentication`). The only firewall rule is the one that lets Azure's own services through (`0.0.0.0`). Anyone can reach the port, but nobody can sign in without a token for that identity, and the connection is TLS 1.2 or newer.
+- **Key Vault**: role-based access only, and the API's identity is the only one that may read secrets. Nothing is reachable without a token for it.
+
+Private endpoints would close the public port, but they don't fit:
+
+- **The environment would have to be recreated.** `cae-stikling` has no virtual network, and an environment's network can't be added after it is created. A new one needs a VNet and a subnet, which means new certificates, new domain bindings on `api` and `share`, new DNS records and downtime while it moves.
+- **Cost.** A private endpoint is about $0.01 an hour, so about $7 a month each. Two of them, plus a private DNS zone for each (`privatelink.database.windows.net` and `privatelink.vaultcore.azure.net`), come to about $15 a month. That is nearly twice the whole budget of about $8, and the budget is already used by the database. The VNet itself is free.
+- **Your own access.** Looking at the database or setting a secret from your machine (the last section above, and `az keyvault secret set`) would need a VPN or a machine inside the network, which is more cost and more setup.
+
+The cost stop and the deploy identity don't depend on the database or the vault. They only use Azure's management API, so they would have kept working.
+
+Locking the Key Vault down with network rules that allow trusted Azure services only is free, but it was left out. The API's secret references are read by the Container Apps platform, which isn't on the vault's list of trusted services, so a revision could fail to start. It would also block `az keyvault secret set` from a home address. Neither can be checked without deploying, so it stays open until there is a way to test it on a copy.
+
+If the budget grows or the app gets real money behind it, revisit this.
 
 ## Looking at the database
 

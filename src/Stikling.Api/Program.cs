@@ -94,6 +94,7 @@ builder.Services.AddCors(cors => cors.AddDefaultPolicy(policy => policy
 builder.Services.AddHealthChecks().AddDbContextCheck<StiklingDbContext>();
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
+builder.Services.AddHsts(hsts => hsts.MaxAge = TimeSpan.FromDays(365));
 builder.Services.ConfigureHttpJsonOptions(json =>
     json.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
@@ -118,10 +119,28 @@ if (app.Configuration.GetValue("Database:MigrateOnStart", true))
 // The client's address is in X-Forwarded-For, added by the Container Apps ingress, which is the only
 // way in. The public pages are limited by it, so it has to be read first. With one proxy in front, only
 // the last address is taken, which is the one the ingress saw and not one a caller made up.
-var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor, ForwardLimit = 1 };
+// X-Forwarded-Proto says the caller came in over HTTPS, which HSTS below goes by.
+var forwarded = new ForwardedHeadersOptions { ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto, ForwardLimit = 1 };
 forwarded.KnownIPNetworks.Clear();
 forwarded.KnownProxies.Clear();
 app.UseForwardedHeaders(forwarded);
+
+// The ingress only takes HTTPS already. HSTS also tells browsers never to try plain HTTP, so nobody
+// on the way can answer for the API. It is left out locally, where the API runs on plain HTTP.
+if (!app.Environment.IsDevelopment())
+    app.UseHsts();
+
+// A response is only ever read as the type it says it is, so a file can't be taken for a page. It is set as the
+// response starts, since the exception handler below clears the headers before it writes a 500 or 410.
+app.Use((context, next) =>
+{
+    context.Response.OnStarting(() =>
+    {
+        context.Response.Headers.XContentTypeOptions = "nosniff";
+        return Task.CompletedTask;
+    });
+    return next(context);
+});
 
 // A deleted account answers 410 Gone, and anything else that goes wrong 500 with no details
 app.UseExceptionHandler(new ExceptionHandlerOptions
