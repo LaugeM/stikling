@@ -9,7 +9,7 @@
     }
     <span class="item-text">
         <span class="item-name">@Title</span>
-        <span class="settings-row-detail @(Alert ? "alert" : null)">@(ChildContent is null ? Detail : ChildContent)</span>
+        <span class="settings-row-detail @(Alert ? "alert" : null)">@if (ChildContent is null) { @Detail } else { @ChildContent }</span>
     </span>
     @if (External)
     {
