@@ -196,3 +196,11 @@
     align-items: center;
     gap: 0.4rem;
 }
+
+.mix-batch-head {
+    justify-content: flex-start;
+}
+
+.mix-batch-head .mix-count-button {
+    text-align: left;
+}
