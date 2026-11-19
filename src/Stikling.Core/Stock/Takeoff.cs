@@ -83,6 +83,23 @@ public static class Takeoff
         return lines;
     }
 
+    /// <summary>
+    /// The supply an ingredient most likely comes out of: the one with the same name, ignoring case, with a
+    /// supply for mixing soil winning over another of the same name. Only a suggestion, set by the person.
+    /// </summary>
+    public static Supply? Suggest(string? ingredient, IEnumerable<Supply> supplies)
+    {
+        var name = ingredient?.Trim();
+        if (string.IsNullOrEmpty(name))
+            return null;
+
+        return supplies
+            .Where(s => !s.IsDeleted && string.Equals(s.Name?.Trim(), name, StringComparison.CurrentCultureIgnoreCase))
+            .OrderBy(s => s.EffectiveKind == SupplyKind.Mixing ? 0 : 1)
+            .ThenBy(s => s.Id)
+            .FirstOrDefault();
+    }
+
     private static Dictionary<Guid, Supply> LiveById(IEnumerable<Supply> supplies) =>
         supplies.Where(s => !s.IsDeleted).GroupBy(s => s.Id).ToDictionary(g => g.Key, g => g.First());
 

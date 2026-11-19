@@ -1072,4 +1072,76 @@
     <value>Saved a can of {0} with {1} of water.</value>
     <comment>Confirmation after saving that a can of a feed was mixed. {0} is the feed&apos;s name, {1} is the amount of water.</comment>
   </data>
+  <data name="BatchesHeading" xml:space="preserve">
+    <value>Batches</value>
+    <comment>Heading above the batches of soil mixed from a mix.</comment>
+  </data>
+  <data name="BatchMix" xml:space="preserve">
+    <value>Mix a batch</value>
+    <comment>Button on a soil mix that saves a dated batch of it, with a volume.</comment>
+  </data>
+  <data name="BatchVolume" xml:space="preserve">
+    <value>Volume</value>
+    <comment>Label of how much soil was mixed into a batch.</comment>
+  </data>
+  <data name="BatchDay" xml:space="preserve">
+    <value>Mixed on</value>
+    <comment>Label of the day a batch or a top-up was mixed.</comment>
+  </data>
+  <data name="BatchSave" xml:space="preserve">
+    <value>Save the batch</value>
+    <comment>Button that saves a new batch of soil.</comment>
+  </data>
+  <data name="BatchTopUpSave" xml:space="preserve">
+    <value>Save the top-up</value>
+    <comment>Button that saves more soil mixed into an existing batch.</comment>
+  </data>
+  <data name="BatchTopUp" xml:space="preserve">
+    <value>Top up</value>
+    <comment>Button on a batch of soil, for mixing more into the same batch.</comment>
+  </data>
+  <data name="BatchLine" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>A batch of soil. {0} is the day it was first mixed and {1} is how much there is, like 6 L.</comment>
+  </data>
+  <data name="BatchUsedUpTag" xml:space="preserve">
+    <value>used up</value>
+    <comment>Small tag on a batch of soil that has run out.</comment>
+  </data>
+  <data name="BatchMarkUsedUp" xml:space="preserve">
+    <value>Used up</value>
+    <comment>Button that marks a batch of soil as used up, so it is no longer offered when potting.</comment>
+  </data>
+  <data name="BatchUseAgain" xml:space="preserve">
+    <value>Use again</value>
+    <comment>Button that takes a used up batch of soil back into use.</comment>
+  </data>
+  <data name="BatchRemoveMixing" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button that removes one mixing from a batch and puts back what it took off the stock.</comment>
+  </data>
+  <data name="BatchDeleteConfirm" xml:space="preserve">
+    <value>Delete the batch from {0}? Plants and cuttings in it stay in the mix but stop saying which batch. What it took off the stock goes back.</value>
+    <comment>Question before deleting a batch of soil. {0} is the day it was mixed.</comment>
+  </data>
+  <data name="LinkAction" xml:space="preserve">
+    <value>Link to stock</value>
+    <comment>Button on a soil mix for saying which supply each ingredient comes out of.</comment>
+  </data>
+  <data name="LinkHint" xml:space="preserve">
+    <value>Say which supply each ingredient comes out of, so mixing a batch can take it off the stock. This doesn&apos;t change the recipe.</value>
+    <comment>Explanation above the supply picks for the ingredients of a soil mix.</comment>
+  </data>
+  <data name="LinkNone" xml:space="preserve">
+    <value>Not linked</value>
+    <comment>Option for an ingredient that is not linked to a supply.</comment>
+  </data>
+  <data name="LinkSave" xml:space="preserve">
+    <value>Save links</value>
+    <comment>Button that saves which supply each ingredient is linked to.</comment>
+  </data>
+  <data name="LinkNoSupplies" xml:space="preserve">
+    <value>You have no supplies yet. Add them on the Stock page first.</value>
+    <comment>Shown when a soil mix is to be linked to supplies but there are none.</comment>
+  </data>
 </root>

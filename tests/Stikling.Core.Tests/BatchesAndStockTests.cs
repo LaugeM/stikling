@@ -163,6 +163,20 @@ public class BatchesAndStockTests
         Assert.Equal(2.5m, line.Amount);
     }
 
+    [Fact]
+    public void An_ingredient_is_matched_to_the_supply_with_the_same_name_preferring_one_for_mixing()
+    {
+        var other = new Supply { Name = "leca", Kind = SupplyKind.Other };
+        var mixing = Supply("LECA ", SupplyUnit.Litres);
+        var deleted = Supply("Bark", SupplyUnit.Litres);
+        deleted.DeletedAt = Now;
+
+        Assert.Equal(mixing.Id, Takeoff.Suggest(" leca", [other, mixing])?.Id);
+        Assert.Null(Takeoff.Suggest("Bark", [deleted]));
+        Assert.Null(Takeoff.Suggest("Perlite", [mixing]));
+        Assert.Null(Takeoff.Suggest("  ", [mixing]));
+    }
+
     // Picking a batch
 
     private static BatchOption Option(Guid mix, int day, bool usedUp = false, decimal litres = 4)
