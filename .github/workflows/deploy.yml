@@ -58,14 +58,14 @@ jobs:
           docker build --file src/Stikling.Api/Dockerfile
           --label org.opencontainers.image.source=https://github.com/${{ github.repository }}
           --build-arg SOURCE_REVISION_ID=${{ github.sha }}
-          --tag "$API_IMAGE:${{ github.sha }}" --tag "$API_IMAGE:main" .
+          --tag "$API_IMAGE:${{ github.sha }}" .
 
-      # Pull requests only check that it builds
+      # Pull requests only check that it builds. The main tag is moved by deploy-api, so an older run can't move it back.
       - name: Push it to GitHub's container registry
         if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
         run: |
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
-          docker push --all-tags "$API_IMAGE"
+          docker push "$API_IMAGE:${{ github.sha }}"
 
   deploy:
     needs: build
@@ -88,9 +88,17 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      packages: write
       id-token: write
+    # Runs one at a time, but not in merge order: a run whose tests took longer can get here after a newer one.
+    # The check below stops that older run from putting its image back.
     concurrency: deploy-api
     steps:
+      # The whole history, to tell whether the running image is newer than this commit
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
       # Signs in as the deploy identity, which trusts this repository's main branch, so no password
       # is stored. The ids aren't passwords either, but as secrets they're hidden in the public logs.
       - uses: azure/login@v2
@@ -99,7 +107,25 @@ jobs:
           tenant-id: ${{ secrets.AZURE_TENANT_ID }}
           subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
 
+      # Skips the rest when the API already runs a later commit of main. The same commit again (a rerun)
+      # still deploys, and so does an image tagged some other way, like the main tag after a Bicep deploy.
+      - name: Check that the API doesn't run a newer commit
+        id: newer
+        run: |
+          running=$(az containerapp show --resource-group rg-stikling --name stikling-api \
+            --query "properties.template.containers[0].image" --output tsv)
+          running_sha=${running##*:}
+          echo "The API runs $running"
+          if [[ "$running_sha" =~ ^[0-9a-f]{40}$ && "$running_sha" != "$GITHUB_SHA" ]] \
+            && git merge-base --is-ancestor "$GITHUB_SHA" "$running_sha"; then
+            echo "That is newer than $GITHUB_SHA, so this run leaves it alone."
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "skip=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Move the API to the new image
+        if: steps.newer.outputs.skip == 'false'
         run: >
           az containerapp update --resource-group rg-stikling --name stikling-api
           --image "$API_IMAGE:${{ github.sha }}" --output none
@@ -107,6 +133,7 @@ jobs:
       # The job that sends the daily notifications runs the same image. It only exists once the Bicep
       # has been deployed with the notification keys, so this does nothing before that.
       - name: Move the notification job to the new image
+        if: steps.newer.outputs.skip == 'false'
         run: |
           if az containerapp job show --resource-group rg-stikling --name stikling-notify --output none 2>/dev/null; then
             az containerapp job update --resource-group rg-stikling --name stikling-notify \
@@ -117,4 +144,12 @@ jobs:
 
       # The new copy of the API takes a moment to start and apply its migrations
       - name: Check that it answers
+        if: steps.newer.outputs.skip == 'false'
         run: curl --fail --silent --show-error --retry 10 --retry-delay 10 --retry-all-errors --max-time 60 https://api.stikling.app/health
+
+      # infra/main.bicepparam deploys the main tag, so it follows what the API runs. Retags in the registry without pulling.
+      - name: Point the main tag at the new image
+        if: steps.newer.outputs.skip == 'false'
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io --username "${{ github.actor }}" --password-stdin
+          docker buildx imagetools create --tag "$API_IMAGE:main" "$API_IMAGE:${{ github.sha }}"
