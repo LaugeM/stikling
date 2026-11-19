@@ -107,6 +107,25 @@ The app's DSN goes in `src/Stikling.Web/wwwroot/appsettings.Production.json` und
 
 Session tracking, tracing and replays are turned off in code on purpose. What the app leaves out of a report, and the switch for it in Settings, are on the privacy page.
 
+## Why SQL and Key Vault are on the public network
+
+Both the SQL server and the Key Vault answer on public addresses. This was looked at in November 2026 and left as it is. What protects them:
+
+- **SQL**: no SQL logins exist, only Microsoft Entra sign-in with the API's identity as the admin (`azureADOnlyAuthentication`). The only firewall rule is the one that lets Azure's own services through (`0.0.0.0`). Anyone can reach the port, but nobody can sign in without a token for that identity, and the connection is TLS 1.2 or newer.
+- **Key Vault**: role-based access only, and the API's identity is the only one that may read secrets. Nothing is reachable without a token for it.
+
+Private endpoints would close the public port, but they don't fit:
+
+- **The environment would have to be recreated.** `cae-stikling` has no virtual network, and an environment's network can't be added after it is created. A new one needs a VNet and a subnet, which means new certificates, new domain bindings on `api` and `share`, new DNS records and downtime while it moves.
+- **Cost.** A private endpoint is about $0.01 an hour, so about $7 a month each. Two of them, plus a private DNS zone for each (`privatelink.database.windows.net` and `privatelink.vaultcore.azure.net`), come to about $15 a month. That is nearly twice the whole budget of about $8, and the budget is already used by the database. The VNet itself is free.
+- **Your own access.** Looking at the database or setting a secret from your machine (the last section above, and `az keyvault secret set`) would need a VPN or a machine inside the network, which is more cost and more setup.
+
+The cost stop and the deploy identity don't depend on the database or the vault. They only use Azure's management API, so they would have kept working.
+
+Locking the Key Vault down with network rules that allow trusted Azure services only is free, but it was left out. The API's secret references are read by the Container Apps platform, which isn't on the vault's list of trusted services, so a revision could fail to start. It would also block `az keyvault secret set` from a home address. Neither can be checked without deploying, so it stays open until there is a way to test it on a copy.
+
+If the budget grows or the app gets real money behind it, revisit this.
+
 ## Looking at the database
 
 Only the API's identity can sign in to the database. To look at it yourself, make your own account the admin for a while under Microsoft Entra ID on the SQL server in the portal, and set it back to `id-stikling-api` afterwards. The API can't reach the database while you are the admin.
