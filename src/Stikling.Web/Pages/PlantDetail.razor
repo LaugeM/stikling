@@ -596,6 +596,12 @@ else
                             <dd>@F(settledWeeks, Strings.PlantDetail.SettledAfter_One, Strings.PlantDetail.SettledAfter_Other, plant.TransitionTo is { } movedTo ? Labels.For(movedTo) : Strings.PlantDetail.SemiHydro, settledWeeks, Labels.Date(settledOn))</dd>
                         }
 
+                        @if (plant.Traits.Count > 0)
+                        {
+                            <dt>@Strings.Crosses.TraitsHeading</dt>
+                            <dd><TraitLine Traits="plant.Traits" /></dd>
+                        }
+
                         @if (plant.Tags.Count > 0)
                         {
                             <dt>@Strings.Plants.ListTagsLabel</dt>
@@ -1099,6 +1105,12 @@ else
                             <a class="sheet-action" href="crosses/new?pod=@plant.Id">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
                                 <span class="sheet-action-text"><b>@Strings.Crosses.MenuAsPod</b><small>@Strings.Crosses.MenuAsPodHint</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sheet-action" href="pollen/new?plant=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
+                                <span class="sheet-action-text"><b>@Strings.Crosses.MenuCollectPollen</b><small>@Strings.Crosses.MenuCollectPollenHint</small></span>
                             </a>
                         </li>
                         <li>

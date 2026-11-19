@@ -1,12 +1,13 @@
 @* The Crosses section at the top of the Propagations page. Hidden until there is a cross or a seed lot. *@
 @inject CrossService Crosses
+@inject PollenService Pollens
 @inject TimeProvider Time
 <ReloadOnSync Reload="LoadAsync" />
 
 @if (OnlyStart)
 {
     @* Before the first cross or seed lot, a quiet line at the end of the page is the way in. The section itself stays hidden. *@
-    @if (book is { Any: false })
+    @if (book is { Any: false } && pollenCount == 0)
     {
         <IfCan Edit>
             <p class="crosses-start">
@@ -18,7 +19,7 @@
         </IfCan>
     }
 }
-else if (book is { Any: true })
+else if (book is { Any: true } || pollenCount > 0)
 {
     <section class="crosses-section" aria-labelledby="crosses-title">
         <div class="crosses-heading">
@@ -36,9 +37,11 @@ else if (book is { Any: true })
             </ul>
         }
         <p class="crosses-links">
-            <a class="link-action" href="crosses">@F(Strings.Crosses.SectionAllCrosses, book.Crosses.Count)</a>
+            <a class="link-action" href="crosses">@F(Strings.Crosses.SectionAllCrosses, book!.Crosses.Count)</a>
             <span aria-hidden="true"> · </span>
             <a class="link-action" href="seedlots">@LotsText</a>
+            <span aria-hidden="true"> · </span>
+            <a class="link-action" href="pollen">@Plural.Of(pollenCount, Strings.Crosses.SectionPollen_One, Strings.Crosses.SectionPollen_Other)</a>
         </p>
     </section>
 }
@@ -49,6 +52,7 @@ else if (book is { Any: true })
     public bool OnlyStart { get; set; }
 
     private CrossBook? book;
+    private int pollenCount;
     private IReadOnlyList<CrossRow> recent = [];
 
     protected override async Task OnInitializedAsync() => await LoadAsync();
@@ -56,6 +60,7 @@ else if (book is { Any: true })
     private async Task LoadAsync()
     {
         book = await Crosses.GetBookAsync();
+        pollenCount = (await Pollens.GetAllAsync()).Count(p => !p.Pollen.IsUsedUp);
         recent = [.. book.Log().Take(3)];
     }
 

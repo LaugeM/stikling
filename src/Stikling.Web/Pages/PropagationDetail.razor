@@ -487,6 +487,12 @@ else
                         <PublicPageHideRow Subject="propagation" />
                     </dl>
 
+                    @if (propagation.Traits.Count > 0)
+                    {
+                        <h2>@Strings.Crosses.TraitsHeading</h2>
+                        <p><TraitLine Traits="propagation.Traits" /></p>
+                    }
+
                     @if (!string.IsNullOrWhiteSpace(propagation.Notes))
                     {
                         <h2>@Strings.Propagations.EditAbout</h2>

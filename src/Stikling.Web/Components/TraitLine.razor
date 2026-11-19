@@ -1,0 +1,19 @@
+@* A plant's or propagation's traits as small labels, or a dash when there are none. *@
+@if (Traits is { Count: > 0 })
+{
+    <span class="detail-tags">
+        @foreach (var trait in Traits)
+        {
+            <span class="tag-label">@trait</span>
+        }
+    </span>
+}
+else
+{
+    <span class="text-body-secondary">@Strings.Crosses.NoTraits</span>
+}
+
+@code {
+    [Parameter]
+    public IReadOnlyList<string>? Traits { get; set; }
+}

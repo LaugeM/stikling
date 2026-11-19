@@ -2,6 +2,7 @@
 @page "/plants/{Id:guid}/edit"
 @attribute [NeedsAccess(AccessLevel.Edit)]
 @using Stikling.Core.Settings
+@inject IPropagationRepository PropagationRepository
 @inject ILogger<PlantEdit> Logger
 @inject PlantForms Forms
 @inject PlantService PlantService
@@ -566,6 +567,13 @@ else
                 </div>
             </FormSection>
 
+            <FormSection Title="@Strings.Crosses.TraitsHeading" Summary="@TraitsSummary" Open="openTraits">
+                <div class="mb-3">
+                    <TagPicker @bind-Value="plant.Traits" Suggestions="traitSuggestions" />
+                    <div class="form-text">@Strings.Crosses.TraitsHint</div>
+                </div>
+            </FormSection>
+
             @* Only when adding. A plant already in the collection is put in quarantine from its page *@
             @if (IsNew)
             {
@@ -780,6 +788,7 @@ else
     }
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<string> tagSuggestions = [];
+    private IReadOnlyList<string> traitSuggestions = [];
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
     private bool openLives;
@@ -836,6 +845,7 @@ else
         plant.GrowingSeason is { } season ? Labels.For(season) : null);
     private bool openPot;
     private bool openTags;
+    private bool openTraits;
 
     // Your own fields. The text is as typed and is tidied when the plant is saved, so a field added
     // here shows up with an empty input and nothing else on the form is lost.
@@ -893,6 +903,8 @@ else
         addingField = false;
     }
 
+    private string? TraitsSummary => plant is { Traits.Count: > 0 } ? string.Join(", ", plant.Traits) : null;
+
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
     private string QuarantineSummary => plant is { InQuarantine: true }
@@ -941,6 +953,7 @@ else
         rooms = Room.List(form.Places, all, form.Propagations);
         nextNumber = CollectionNumbers.NextFree(all);
         tagSuggestions = PlantTags.Suggestions(all);
+        traitSuggestions = Traits.Suggestions(all, await PropagationRepository.GetAllAsync());
         var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
         sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
         possibleParents = PlantLineage.PossibleParents(plant, all);
@@ -953,6 +966,7 @@ else
         openLikes = !isNew && CareLikes.HasAny(plant);
         openPot = !isNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
         openTags = !isNew && plant.Tags.Count > 0;
+        openTraits = !isNew && plant.Traits.Count > 0;
         openFields = !isNew && plant.OwnFields.Any(v => form.OwnFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
         openSwap = !isNew && plant.Spare is not null;
         openSitter = !isNew && !string.IsNullOrWhiteSpace(plant.SitterNote);

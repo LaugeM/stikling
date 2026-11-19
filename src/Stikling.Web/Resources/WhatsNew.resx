@@ -37,9 +37,6 @@
   <data name="ComingNextHint" xml:space="preserve">
     <value>In the order they are planned. Plans can change, so there are no dates.</value>
   </data>
-  <data name="ComingNextCrossing" xml:space="preserve">
-    <value>Crossbreeding, the rest: stored pollen, traits on plants and seedlings, a plant in flower shown with the pollen you have for it, and comparing the seedlings from one cross.</value>
-  </data>
   <data name="ComingNextBatches" xml:space="preserve">
     <value>Batches of soil mixed from a recipe, so a plant shows what it was actually potted in, and mixing takes it off your supplies.</value>
   </data>
@@ -359,6 +356,10 @@
   </data>
   <data name="Nov2026Crosses" xml:space="preserve">
     <value>You can record crosses. Write down the pod parent, the pollen parent, the day and how you did it, then what came of it. Seed goes into seed lots you can sow from, a seedling keeps both parents in the family tree, and the cross log shows what came of every cross.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026Pollen" xml:space="preserve">
+    <value>Crossbreeding is complete. Keep pollen with where it came from, when you collected it and where it is kept. Today shows a plant coming into flower with the pollen you have stored from other plants of its genus, add traits to plants and seedlings, and compare the seedlings from one cross side by side.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
   </data>
 </root>
