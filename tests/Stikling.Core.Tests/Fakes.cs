@@ -1386,3 +1386,30 @@ internal sealed class FakeFileServer(FakeFileSyncStore device) : IFileServer
         return Task.FromResult(true);
     }
 }
+
+internal sealed class FakeSoilBatchRepository() : FakeRepository<SoilBatch>(stampsDates: true), ISoilBatchRepository
+{
+    public Dictionary<Guid, SoilBatch> Batches => Records;
+}
+
+internal sealed class FakeBatchMixingRepository() : FakeRepository<BatchMixing>(stampsDates: true), IBatchMixingRepository
+{
+    public Dictionary<Guid, BatchMixing> Mixings => Records;
+
+    protected override void Check(BatchMixing mixing)
+    {
+        if (mixing.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid mixing");
+    }
+}
+
+internal sealed class FakeFeedMixingRepository() : FakeRepository<FeedMixing>(stampsDates: true), IFeedMixingRepository
+{
+    public Dictionary<Guid, FeedMixing> Mixings => Records;
+
+    protected override void Check(FeedMixing mixing)
+    {
+        if (mixing.Validate().Count > 0)
+            throw new InvalidOperationException("Invalid can");
+    }
+}

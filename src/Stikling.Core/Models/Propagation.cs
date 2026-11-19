@@ -63,6 +63,9 @@ public sealed class Propagation : Entity
     /// <summary>The soil mix it is in, when the medium is soil and it is one you have saved.</summary>
     public Guid? SoilMixId { get; set; }
 
+    /// <summary>The batch of that mix it is in, when one was picked.</summary>
+    public Guid? SoilBatchId { get; set; }
+
     /// <summary>Free text for the setup, e.g. "Humidity box" or "Glass jar".</summary>
     public string? Container { get; set; }
 
@@ -328,7 +331,10 @@ public sealed class Propagation : Entity
     public void ClearMixUnlessSoil()
     {
         if (Medium != GrowingMedium.Soil)
+        {
             SoilMixId = null;
+            SoilBatchId = null;
+        }
     }
 
     public Propagation Copy()

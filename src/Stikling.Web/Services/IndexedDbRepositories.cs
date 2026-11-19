@@ -314,3 +314,21 @@ public sealed class IndexedDbFileRepository(IndexedDb db, TimeProvider time)
 {
     protected override IReadOnlyList<string> Validate(AttachedFile file) => file.Validate();
 }
+
+public sealed class IndexedDbSoilBatchRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<SoilBatch>(db, time, RecordKinds.SoilBatches), ISoilBatchRepository
+{
+    protected override IReadOnlyList<string> Validate(SoilBatch batch) => batch.Validate();
+}
+
+public sealed class IndexedDbBatchMixingRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<BatchMixing>(db, time, RecordKinds.BatchMixings), IBatchMixingRepository
+{
+    protected override IReadOnlyList<string> Validate(BatchMixing mixing) => mixing.Validate();
+}
+
+public sealed class IndexedDbFeedMixingRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<FeedMixing>(db, time, RecordKinds.FeedMixings), IFeedMixingRepository
+{
+    protected override IReadOnlyList<string> Validate(FeedMixing mixing) => mixing.Validate();
+}

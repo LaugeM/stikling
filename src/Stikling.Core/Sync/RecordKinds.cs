@@ -96,6 +96,9 @@ public static class RecordKinds
     public static readonly RecordKind<PlaceReading> PlaceReadings = new("placeReadings");
     public static readonly RecordKind<NameNote> NameNotes = new("nameNotes");
     public static readonly RecordKind<AttachedFile> Files = new(SyncKinds.Files);
+    public static readonly RecordKind<SoilBatch> SoilBatches = new("soilBatches");
+    public static readonly RecordKind<BatchMixing> BatchMixings = new("batchMixings");
+    public static readonly RecordKind<FeedMixing> FeedMixings = new("feedMixings");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -146,6 +149,9 @@ public static class RecordKinds
         PlaceReadings,
         NameNotes,
         Files,
+        SoilBatches,
+        BatchMixings,
+        FeedMixings,
         Settings,
     ];
 }

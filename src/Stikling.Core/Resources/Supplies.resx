@@ -239,4 +239,12 @@
   <data name="PotColourPatterned" xml:space="preserve">
     <value>Patterned</value>
   </data>
+  <data name="BatchNeedsVolume" xml:space="preserve">
+    <value>Say how much soil you mixed.</value>
+    <comment>Error when mixing a batch of soil or topping one up without a volume.</comment>
+  </data>
+  <data name="CanNeedsWater" xml:space="preserve">
+    <value>Say how much water is in the can.</value>
+    <comment>Error when saving a can of feed without an amount of water.</comment>
+  </data>
 </root>

@@ -77,12 +77,15 @@ public sealed class StockView
         IEnumerable<Product> products,
         IEnumerable<Pot> pots,
         Func<DateTimeOffset, DateOnly> dayOf,
-        DateOnly today)
+        DateOnly today,
+        IReadOnlySet<Guid>? goneSources = null)
     {
         var liveProducts = products.Where(p => !p.IsDeleted).GroupBy(p => p.Id).ToDictionary(g => g.Key, g => g.First());
         var livePots = pots.Where(p => !p.IsDeleted).GroupBy(p => p.Id).ToDictionary(g => g.Key, g => g.First());
         var liveSupplies = supplies.Where(s => !s.IsDeleted).GroupBy(s => s.Id).Select(g => g.First()).ToList();
-        var entriesBySupply = entries.Where(e => !e.IsDeleted).ToLookup(e => e.SupplyId);
+        var entriesBySupply = entries
+            .Where(e => !e.IsDeleted && !(e.UsedForId is { } source && goneSources?.Contains(source) == true))
+            .ToLookup(e => e.SupplyId);
 
         var statuses = liveSupplies
             .Select(s => StatusOf(s, entriesBySupply[s.Id], liveProducts, dayOf))
@@ -144,9 +147,10 @@ public sealed class StockView
         // The level is what was said last, not what happened last: a purchase entered today but dated
         // yesterday still means it's back after this morning's Out.
         var level = SupplyLevel.Have;
-        if (known.Count > 0)
+        var said = known.Where(e => e.Kind != SupplyEntryKind.Used).ToList();
+        if (said.Count > 0)
         {
-            var latest = known.MaxBy(e => (e.CreatedAt, e.At, e.Id))!;
+            var latest = said.MaxBy(e => (e.CreatedAt, e.At, e.Id))!;
             level = latest.Kind switch
             {
                 SupplyEntryKind.RunningLow => SupplyLevel.Low,
@@ -163,7 +167,15 @@ public sealed class StockView
         var countIndex = known.FindLastIndex(e => e.Kind is SupplyEntryKind.Counted or SupplyEntryKind.Out);
         if (countIndex >= 0 && known[countIndex] is { Kind: SupplyEntryKind.Counted, Amount: not null } count)
         {
-            amount = count.Amount + known.Skip(countIndex + 1).Where(e => e.Kind == SupplyEntryKind.Bought).Sum(e => e.Amount ?? 0);
+            var after = known.Skip(countIndex + 1).ToList();
+            amount = count.Amount + after.Where(e => e.Kind == SupplyEntryKind.Bought).Sum(e => e.Amount ?? 0)
+                     - after.Where(e => e.Kind == SupplyEntryKind.Used).Sum(e => e.Amount ?? 0);
+            // Used up what was counted: nothing is left, whatever was said last
+            if (amount <= 0)
+            {
+                amount = 0;
+                level = SupplyLevel.Out;
+            }
             countedOn = dayOf(count.At);
         }
 

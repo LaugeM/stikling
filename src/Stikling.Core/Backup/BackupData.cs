@@ -61,6 +61,9 @@ public sealed class BackupData
     public List<PlaceReading> PlaceReadings { get; set; } = [];
     public List<NameNote> NameNotes { get; set; } = [];
     public List<AttachedFile> Files { get; set; } = [];
+    public List<SoilBatch> SoilBatches { get; set; } = [];
+    public List<BatchMixing> BatchMixings { get; set; } = [];
+    public List<FeedMixing> FeedMixings { get; set; } = [];
 
     /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
     // Before Lists, which uses it: static fields are set in the order they are written
@@ -117,6 +120,9 @@ public sealed class BackupData
         List(RecordKinds.PlaceReadings, d => d.PlaceReadings, (d, l) => d.PlaceReadings = l),
         List(RecordKinds.NameNotes, d => d.NameNotes, (d, l) => d.NameNotes = l),
         FileList,
+        List(RecordKinds.SoilBatches, d => d.SoilBatches, (d, l) => d.SoilBatches = l),
+        List(RecordKinds.BatchMixings, d => d.BatchMixings, (d, l) => d.BatchMixings = l),
+        List(RecordKinds.FeedMixings, d => d.FeedMixings, (d, l) => d.FeedMixings = l),
     ];
 
     private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
@@ -168,7 +174,10 @@ public sealed class BackupData
         PhotoMarkups.Count(m => !m.IsDeleted),
         PlaceReadings.Count(r => !r.IsDeleted),
         NameNotes.Count(n => !n.IsDeleted),
-        Files.Count(f => !f.IsDeleted));
+        Files.Count(f => !f.IsDeleted),
+        SoilBatches.Count(b => !b.IsDeleted),
+        BatchMixings.Count(m => !m.IsDeleted),
+        FeedMixings.Count(m => !m.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -213,4 +222,7 @@ public sealed record BackupCounts(
     int PhotoMarkups,
     int PlaceReadings,
     int NameNotes,
-    int Files);
+    int Files,
+    int SoilBatches,
+    int BatchMixings,
+    int FeedMixings);
