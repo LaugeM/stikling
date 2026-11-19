@@ -96,6 +96,8 @@ public static class RecordKinds
     public static readonly RecordKind<PlaceReading> PlaceReadings = new("placeReadings");
     public static readonly RecordKind<NameNote> NameNotes = new("nameNotes");
     public static readonly RecordKind<AttachedFile> Files = new(SyncKinds.Files);
+    public static readonly RecordKind<Cross> Crosses = new("crosses");
+    public static readonly RecordKind<SeedLot> SeedLots = new("seedLots");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -146,6 +148,8 @@ public static class RecordKinds
         PlaceReadings,
         NameNotes,
         Files,
+        Crosses,
+        SeedLots,
         Settings,
     ];
 }

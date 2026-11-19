@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ErrNeedPodParent" xml:space="preserve">
+    <value>Say which plant the pod grew on, or type a name.</value>
+    <comment>Error when saving a cross with no pod parent.</comment>
+  </data>
+  <data name="ErrNeedPollenParent" xml:space="preserve">
+    <value>Say which plant the pollen came from, or type a name.</value>
+    <comment>Error when saving a cross with no pollen parent.</comment>
+  </data>
+  <data name="ErrFuture" xml:space="preserve">
+    <value>That day hasn't come yet.</value>
+    <comment>Error when the day of a pollination or of collecting seed is in the future.</comment>
+  </data>
+  <data name="ErrRipeBeforePollinated" xml:space="preserve">
+    <value>The seed can't be ripe before the flower was pollinated.</value>
+    <comment>Error when the day the seed was ripe is before the day of the pollination.</comment>
+  </data>
+  <data name="ErrCount" xml:space="preserve">
+    <value>Flowers and pods have to be whole numbers, with at least one flower.</value>
+    <comment>Error when the number of flowers pollinated or pods set is not a sensible whole number.</comment>
+  </data>
+  <data name="ErrLotNeedsName" xml:space="preserve">
+    <value>Say what the seed is, where it came from or which cross it is from.</value>
+    <comment>Error when saving a seed lot that has no name, source or cross.</comment>
+  </data>
+  <data name="ErrAmount" xml:space="preserve">
+    <value>The amount has to be more than nothing.</value>
+    <comment>Error when the amount of seed is zero, negative or very large.</comment>
+  </data>
+  <data name="AmountGrams" xml:space="preserve">
+    <value>{0} g</value>
+    <comment>An amount of seed in grams. {0} is the number.</comment>
+  </data>
+  <data name="AmountSeeds_One" xml:space="preserve">
+    <value>{0} seed</value>
+    <comment>An amount of seed counted in seeds, exactly one. {0} is the number.</comment>
+  </data>
+  <data name="AmountSeeds_Other" xml:space="preserve">
+    <value>{0} seeds</value>
+    <comment>An amount of seed counted in seeds, any other number. {0} is the number.</comment>
+  </data>
+  <data name="AmountAbout" xml:space="preserve">
+    <value>about {0}</value>
+    <comment>A rough amount of seed. {0} is the amount, like 100 seeds or 1 g.</comment>
+  </data>
+  <data name="ParentGone" xml:space="preserve">
+    <value>a plant you no longer have</value>
+    <comment>Name of a parent of a cross when the plant is gone and no name was kept.</comment>
+  </data>
+  <data name="TitleOf" xml:space="preserve">
+    <value>{0} × {1}</value>
+    <comment>Title of a cross. {0} is the pod parent and {1} the pollen parent.</comment>
+  </data>
+  <data name="TitleSelf" xml:space="preserve">
+    <value>{0} selfed</value>
+    <comment>Title of a cross where the same plant is both parents. {0} is the plant.</comment>
+  </data>
+  <data name="LotUnnamed" xml:space="preserve">
+    <value>Seed lot</value>
+    <comment>Name of a seed lot that has no name, source or cross to call it by.</comment>
+  </data>
+</root>

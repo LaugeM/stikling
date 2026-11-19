@@ -1,6 +1,7 @@
 using System.Text.Json;
 using Stikling.Core.Away;
 using Stikling.Core.Care;
+using Stikling.Core.Crosses;
 using Stikling.Core.Feeds;
 using Stikling.Core.Fields;
 using Stikling.Core.Flowering;
@@ -1384,5 +1385,27 @@ internal sealed class FakeFileServer(FakeFileSyncStore device) : IFileServer
         device.Bytes.Add(fileId);
         Fetched.Add(fileId);
         return Task.FromResult(true);
+    }
+}
+
+internal sealed class FakeCrossRepository() : FakeRepository<Cross>(stampsDates: true), ICrossRepository
+{
+    public Dictionary<Guid, Cross> Crosses => Records;
+
+    protected override void Check(Cross cross)
+    {
+        if (cross.Validate(new DateOnly(2100, 1, 1)).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}
+
+internal sealed class FakeSeedLotRepository() : FakeRepository<SeedLot>(stampsDates: true), ISeedLotRepository
+{
+    public Dictionary<Guid, SeedLot> Lots => Records;
+
+    protected override void Check(SeedLot lot)
+    {
+        if (lot.Validate(new DateOnly(2100, 1, 1)).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
     }
 }

@@ -38,6 +38,13 @@ public sealed class Propagation : Entity
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 
+    /// <summary>
+    /// The seed lot it was sown from. The pod parent is also the <see cref="ParentPlantId"/> when it is a
+    /// plant in the app, so everything that follows one parent works as before; the other parent is found
+    /// through the lot and its cross. Null for every other propagation.
+    /// </summary>
+    public Guid? SeedLotId { get; set; }
+
     /// <summary>The parent is a guess, so the page says "Probably from" and the family tree draws the line dotted. False on every older record.</summary>
     public bool ParentIsGuess { get; set; }
 
