@@ -63,6 +63,7 @@ public sealed class BackupData
     public List<AttachedFile> Files { get; set; } = [];
     public List<Cross> Crosses { get; set; } = [];
     public List<SeedLot> SeedLots { get; set; } = [];
+    public List<Pollen> Pollen { get; set; } = [];
 
     /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
     // Before Lists, which uses it: static fields are set in the order they are written
@@ -121,6 +122,7 @@ public sealed class BackupData
         FileList,
         List(RecordKinds.Crosses, d => d.Crosses, (d, l) => d.Crosses = l),
         List(RecordKinds.SeedLots, d => d.SeedLots, (d, l) => d.SeedLots = l),
+        List(RecordKinds.Pollen, d => d.Pollen, (d, l) => d.Pollen = l),
     ];
 
     private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
@@ -174,7 +176,8 @@ public sealed class BackupData
         NameNotes.Count(n => !n.IsDeleted),
         Files.Count(f => !f.IsDeleted),
         Crosses.Count(c => !c.IsDeleted),
-        SeedLots.Count(l => !l.IsDeleted));
+        SeedLots.Count(l => !l.IsDeleted),
+        Pollen.Count(p => !p.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -221,4 +224,5 @@ public sealed record BackupCounts(
     int NameNotes,
     int Files,
     int Crosses,
-    int SeedLots);
+    int SeedLots,
+    int Pollen);

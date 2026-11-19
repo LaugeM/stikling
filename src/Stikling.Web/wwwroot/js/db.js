@@ -9,7 +9,7 @@
 const MAIN_DB = "stikling";
 const OPEN_KEY = "stikling-open-collection";
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const DB_VERSION = 34;
+const DB_VERSION = 35;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -196,6 +196,10 @@ function openNamed(name) {
                 // Crosses (a pollination and what came of it) and seed lots (seeds before they are sown), one record each
                 db.createObjectStore("crosses", { keyPath: "id" });
                 db.createObjectStore("seedLots", { keyPath: "id" });
+            }
+            if (event.oldVersion < 35) {
+                // Pollen kept for crosses, one record each
+                db.createObjectStore("pollen", { keyPath: "id" });
             }
         };
 

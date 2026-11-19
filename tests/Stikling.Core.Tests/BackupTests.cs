@@ -161,12 +161,13 @@ public class BackupTests
             NameNotes = [new NameNote { Level = NameLevel.Genus, Key = "monstera", Text = "Likes it tight" }, new NameNote { DeletedAt = Now }],
             Files = [new AttachedFile { Name = "Receipt.pdf" }, new AttachedFile { DeletedAt = Now }],
             Crosses = [new Cross { PodParentName = "A" }, new Cross { DeletedAt = Now }],
-            SeedLots = [new SeedLot { Source = "Swap" }, new SeedLot { DeletedAt = Now }]
+            SeedLots = [new SeedLot { Source = "Swap" }, new SeedLot { DeletedAt = Now }],
+            Pollen = [new Pollen { FromName = "Dad" }, new Pollen { DeletedAt = Now }]
         };
 
         // The deleted plant is in the file, but it isn't something the restore brings back.
         // Spots aren't counted as rooms.
-        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
+        Assert.Equal(new BackupCounts(1, 0, 0, 2, 0, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1), data.Counts);
         Assert.Equal(BackupData.CurrentVersion, data.Version);
     }
 
@@ -205,6 +206,7 @@ public class BackupTests
         Assert.Empty(data.Files);
         Assert.Empty(data.Crosses);
         Assert.Empty(data.SeedLots);
+        Assert.Empty(data.Pollen);
     }
 
     [Fact]
@@ -883,14 +885,14 @@ public class BackupTests
             "version,app,exportedAt,plants,propagations,propagationCareLogs,timeline,photos,careLogs,pestCases,pestTreatments,"
             + "pots,soilMixes,products,feeds,treatmentRecipes,places,settings,putOffs,growLights,receivedHistories,awayStretches,"
             + "sitterSheets,floweringMarks,problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,"
-            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots,counts",
+            + "ownFields,orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots,pollen,counts",
             string.Join(",", json.RootElement.EnumerateObject().Select(p => p.Name)));
 
         Assert.Equal(
             "plants,propagations,entries,photos,careEntries,pestCases,treatments,pots,soilMixes,products,feeds,recipes,rooms,"
             + "settings,putOffs,growLights,receivedHistories,awayStretches,sitterSheets,propagationCareEntries,floweringMarks,"
             + "problems,problemUpdates,wishes,sellers,ownCareKinds,careIntervals,treatmentPlans,ownFields,orders,orderItems,"
-            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots",
+            + "leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots,pollen",
             string.Join(",", json.RootElement.GetProperty("counts").EnumerateObject().Select(p => p.Name)));
     }
 }

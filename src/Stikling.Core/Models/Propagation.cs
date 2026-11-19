@@ -145,6 +145,9 @@ public sealed class Propagation : Entity
 
     public string? Notes { get; set; }
 
+    /// <summary>Short texts for what it shows, like "dark new leaves". See <see cref="Plants.Traits"/>.</summary>
+    public List<string> Traits { get; set; } = [];
+
     /// <summary>A note for whoever looks after it while you are away. Not shared. Older propagations read as null.</summary>
     public string? SitterNote { get; set; }
 
@@ -343,6 +346,7 @@ public sealed class Propagation : Entity
         var copy = (Propagation)MemberwiseClone();
         copy.RootingAids = [.. RootingAids];
         copy.ArrivalProblems = [.. ArrivalProblems];
+        copy.Traits = [.. Traits];
         return copy;
     }
 
