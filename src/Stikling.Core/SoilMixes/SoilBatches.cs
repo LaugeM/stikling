@@ -65,6 +65,9 @@ public sealed class SoilBatchService(
     /// <summary>Starts a batch of a mix with its first mixing. Returns the mixing, for the stock check.</summary>
     public async Task<BatchMixing> MixAsync(SoilMix mix, decimal litres, DateOnly day)
     {
+        if (litres <= 0)
+            throw new InvalidOperationException(Stikling.Core.Resources.Supplies.BatchNeedsVolume);
+
         var batch = new SoilBatch { SoilMixId = mix.Id, MixName = mix.Name?.Trim(), MixedOn = day };
         await batches.SaveAsync(batch);
         return await TopUpAsync(batch.Id, litres, day);
