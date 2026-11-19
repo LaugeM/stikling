@@ -569,7 +569,7 @@ else
 
             <FormSection Title="@Strings.Crosses.TraitsHeading" Summary="@TraitsSummary" Open="openTraits">
                 <div class="mb-3">
-                    <TagPicker @bind-Value="plant.Traits" Suggestions="traitSuggestions" />
+                    <TagPicker @bind-Value="plant.Traits" Suggestions="traitSuggestions" Label="@Strings.Crosses.TraitsHeading" />
                     <div class="form-text">@Strings.Crosses.TraitsHint</div>
                 </div>
             </FormSection>

@@ -52,7 +52,7 @@ else
                 @if (usedPollen is { } used)
                 {
                     @* What was recorded when the pollen was stored, as it stands now. No advice on how long it lasts. *@
-                    <div class="text-body-secondary small"><a href="pollen/@used.Pollen.Id/edit">@used.Title</a> · @PollenService.Line(used.Pollen, cross.PollinatedOn)</div>
+                    <div class="text-body-secondary small"><a href="pollen/@used.Pollen.Id/edit">@used.Title</a> · @PollenService.Line(used.Pollen, Today)</div>
                 }
             </dd>
             @if (cross.Bagged is { } bagged)

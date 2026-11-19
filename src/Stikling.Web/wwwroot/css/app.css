@@ -4583,3 +4583,10 @@ tr.drop-target {
     font-size: 0.85rem;
     color: var(--pa-muted);
 }
+
+/* A line under a name that may be long and must not be cut off, like the pollen on the Today card */
+.item-sub.item-sub-wrap {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}

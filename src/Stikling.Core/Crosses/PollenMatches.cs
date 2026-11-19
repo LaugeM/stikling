@@ -22,13 +22,15 @@ public static class PollenMatches
         IEnumerable<FloweringMark> marks,
         IEnumerable<PollenView> pollen,
         PutOffs putOffs,
-        DateOnly today)
+        DateOnly today,
+        IEnumerable<Cross>? crosses = null)
     {
         var stored = pollen.Where(p => !p.Pollen.IsDeleted && !p.Pollen.IsUsedUp).ToList();
         if (stored.Count == 0)
             return [];
 
         var markList = marks.ToList();
+        var crossList = crosses?.Where(c => !c.IsDeleted).ToList() ?? [];
         var result = new List<FlowerMatch>();
         foreach (var plant in plants.Where(p => !p.IsDeleted && p.InCollection && !string.IsNullOrWhiteSpace(p.Genus)))
         {
@@ -39,6 +41,10 @@ public static class PollenMatches
                 continue;
 
             var since = now.Period.Start.Start;
+            // A cross already recorded with this plant as pod parent in this flowering is what the card is for
+            if (crossList.Any(c => c.PodParentPlantId == plant.Id && c.PollinatedOn >= since))
+                continue;
+
             var match = new FlowerMatch(plant, now.Stage, since,
                 [.. stored.Where(p => p.Pollen.FromPlantId != plant.Id && SameGenus(p.Pollen.Genus ?? p.From.Plant?.Genus, plant.Genus))
                           .OrderByDescending(p => p.Pollen.CollectedOn)]);

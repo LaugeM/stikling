@@ -172,6 +172,20 @@ public class PollenTests
     }
 
     [Fact]
+    public void Once_a_cross_is_recorded_in_this_flowering_the_card_goes_away()
+    {
+        var mum = Hoya("Mum");
+        var dad = Hoya("Dad");
+        var marks = new[] { Mark(mum, FloweringStage.Buds, 10) };
+        var before = new Cross { PodParentPlantId = mum.Id, PollenParentPlantId = dad.Id, PollinatedOn = Today.AddDays(-30) };
+        var during = new Cross { PodParentPlantId = mum.Id, PollenParentPlantId = dad.Id, PollinatedOn = Today.AddDays(-2) };
+        var asPollen = new Cross { PodParentPlantId = dad.Id, PollenParentPlantId = mum.Id, PollinatedOn = Today.AddDays(-2) };
+
+        Assert.Single(PollenMatches.For([mum, dad], marks, [Stored(dad)], PutOffs.Empty(), Today, [before, asPollen]));
+        Assert.Empty(PollenMatches.For([mum, dad], marks, [Stored(dad)], PutOffs.Empty(), Today, [before, during]));
+    }
+
+    [Fact]
     public void The_newest_pollen_comes_first()
     {
         var mum = Hoya("Mum");

@@ -353,7 +353,7 @@ else
 
             <FormSection Title="@Strings.Crosses.TraitsHeading" Summary="@(propagation.Traits.Count > 0 ? string.Join(", ", propagation.Traits) : null)" Open="@(!form!.IsNew && propagation.Traits.Count > 0)">
                 <div class="mb-3">
-                    <TagPicker @bind-Value="propagation.Traits" Suggestions="traitSuggestions" />
+                    <TagPicker @bind-Value="propagation.Traits" Suggestions="traitSuggestions" Label="@Strings.Crosses.TraitsHeading" />
                     <div class="form-text">@Strings.Crosses.TraitsHint</div>
                 </div>
             </FormSection>

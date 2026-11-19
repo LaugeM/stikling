@@ -131,7 +131,7 @@ else
                     Strings.Crosses.CompareKindPlant,
                     plant.CoverPhotoId ?? (newest.TryGetValue(plant.Id, out var photo) ? photo.Id : null),
                     plant.Traits,
-                    plant.AcquiredOn is { } acquired ? PollenService.Age(acquired.Start, today) : "–",
+                    PollenService.Age(plant.AcquiredOn?.Start ?? DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime), today),
                     Labels.StatusOf(plant),
                     LeafLine(leaf),
                     await MeasurementLines(plant.Id)));

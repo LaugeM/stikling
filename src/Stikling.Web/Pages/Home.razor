@@ -14,6 +14,7 @@
 @inject PutOffService PutOffService
 @inject NavigationManager Navigation
 @inject PollenService PollenBook
+@inject CrossService CrossBook
 @inject IFloweringMarkRepository FloweringMarkRepository
 @inject ICareLogRepository CareLogs
 @inject AwayService AwayService
@@ -487,7 +488,7 @@ else
                                 </div>
                                 @foreach (var stored in match.Pollen)
                                 {
-                                    <div class="item-sub">@F(Strings.Crosses.TodayPollenLine, stored.Title, PollenService.Line(stored.Pollen, Today))</div>
+                                    <div class="item-sub item-sub-wrap">@F(Strings.Crosses.TodayPollenLine, stored.Title, PollenService.Line(stored.Pollen, Today))</div>
                                 }
                             </div>
                         </a>
@@ -1255,6 +1256,7 @@ else
         WatchOuterPot();
         allPollen = await PollenBook.GetAllAsync();
         flowerMarks = await FloweringMarkRepository.GetAllAsync();
+        flowerCrosses = (await CrossBook.GetBookAsync()).Crosses;
         flowerMatches = FindFlowerMatches();
 
         upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);
@@ -1470,10 +1472,11 @@ else
     private IReadOnlyList<PollenView> allPollen = [];
     private IReadOnlyList<FloweringMark> flowerMarks = [];
     private IReadOnlyList<FlowerMatch> flowerMatches = [];
+    private IReadOnlyList<Cross> flowerCrosses = [];
 
     // Plants coming into flower with the stored pollen of their genus, unless put off for this flowering
     private IReadOnlyList<FlowerMatch> FindFlowerMatches() =>
-        PollenMatches.For(plants, flowerMarks, allPollen, data.PutOffs, Today);
+        PollenMatches.For(plants, flowerMarks, allPollen, data.PutOffs, Today, flowerCrosses);
 
     // The flowering plant is the pod parent, and the newest pollen of its genus is the one to start with
     private void RecordCrossFor(FlowerMatch match) =>
