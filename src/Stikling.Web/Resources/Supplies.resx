@@ -1056,4 +1056,20 @@
   <data name="PotFitNoneFree" xml:space="preserve">
     <value>None of your outer pots are free.</value>
   </data>
+  <data name="CanMixed" xml:space="preserve">
+    <value>Mixed a can</value>
+    <comment>Button on a feed that saves that a can of it was mixed with some water.</comment>
+  </data>
+  <data name="CanLastMixed" xml:space="preserve">
+    <value>Last mixed {0}</value>
+    <comment>Line on a feed. {0} is the day a can of it was last mixed.</comment>
+  </data>
+  <data name="CanRemove" xml:space="preserve">
+    <value>Remove</value>
+    <comment>Button that removes a can that was saved as mixed, and puts back what it took off the stock.</comment>
+  </data>
+  <data name="CanSaved" xml:space="preserve">
+    <value>Saved a can of {0} with {1} of water.</value>
+    <comment>Confirmation after saving that a can of a feed was mixed. {0} is the feed&apos;s name, {1} is the amount of water.</comment>
+  </data>
 </root>

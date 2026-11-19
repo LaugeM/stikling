@@ -346,4 +346,32 @@
     <value>On the shopping list</value>
     <comment>Shown instead of the link when the pot is already on the list.</comment>
   </data>
+  <data name="TakeoffTitle" xml:space="preserve">
+    <value>Take it off the stock?</value>
+    <comment>Title of the sheet after mixing a batch of soil or a can of feed, listing what comes off each supply.</comment>
+  </data>
+  <data name="TakeoffIntro" xml:space="preserve">
+    <value>This is what the mix used, from the supplies you linked. Change an amount or untick a line. Nothing comes off until you confirm.</value>
+    <comment>Explanation at the top of the sheet that lists what comes off the supplies stock.</comment>
+  </data>
+  <data name="TakeoffAmountFor" xml:space="preserve">
+    <value>Amount of {0} to take off</value>
+    <comment>Screen reader label of an amount on the sheet. {0} is the name of a supply.</comment>
+  </data>
+  <data name="TakeoffFillIn" xml:space="preserve">
+    <value>Fill in</value>
+    <comment>Placeholder of an amount that could not be worked out.</comment>
+  </data>
+  <data name="TakeoffNotWorkedOut" xml:space="preserve">
+    <value>This can&apos;t be worked out in this unit. Fill it in, or untick it.</value>
+    <comment>Shown under a line whose amount could not be worked out, for example soil counted in volume and a supply counted in kilograms.</comment>
+  </data>
+  <data name="TakeoffConfirm" xml:space="preserve">
+    <value>Take off the stock</value>
+    <comment>Button that takes the ticked lines off the supplies stock.</comment>
+  </data>
+  <data name="TakeoffSkip" xml:space="preserve">
+    <value>Leave the stock as it is</value>
+    <comment>Button that closes the sheet without taking anything off the stock.</comment>
+  </data>
 </root>
