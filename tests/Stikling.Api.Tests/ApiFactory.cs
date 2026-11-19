@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Stikling.Api.Collections;
 using Stikling.Api.Data;
 using Stikling.Api.Identification;
 using Stikling.Api.Notifications;
@@ -34,6 +35,9 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
     public const string AppOrigin = "http://localhost:5170";
     public const string ShareBaseUrl = "https://share.stikling.test";
     public const string PlantNetKey = "test-plantnet-key-9f3a";
+
+    /// <summary>The key invite tokens are encrypted with in the tests: 32 bytes as base64.</summary>
+    public const string InviteTokenKey = "dGVzdC1pbnZpdGUtdG9rZW4ta2V5LXN0aWtsaW5nLTE=";
 
     public static readonly JsonSerializerOptions Json = new(JsonSerializerDefaults.Web)
     {
@@ -77,7 +81,10 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         await Task.WhenAll(_sql.StartAsync(), _storage.StartAsync());
 
         await using var scope = Services.CreateAsyncScope();
-        await scope.ServiceProvider.GetRequiredService<StiklingDbContext>().Database.MigrateAsync();
+        await DatabaseStartup.MigrateAsync(
+            scope.ServiceProvider.GetRequiredService<StiklingDbContext>(),
+            scope.ServiceProvider.GetRequiredService<InviteTokens>(),
+            TimeProvider.System);
     }
 
     async Task IAsyncLifetime.DisposeAsync()
@@ -127,6 +134,7 @@ public sealed class ApiFactory : WebApplicationFactory<Program>, IAsyncLifetime
         ["Notifications:VapidPublicKey"] = Vapid.Public,
         ["Notifications:VapidPrivateKey"] = Vapid.Private,
         ["Identification:PlantNetApiKey"] = PlantNetKey,
+        [InviteTokens.KeySetting] = InviteTokenKey,
     };
 
     /// <summary>
