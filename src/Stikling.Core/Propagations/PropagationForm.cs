@@ -1,6 +1,7 @@
 using Stikling.Core.Text;
 using Strings = Stikling.Core.Resources;
 using Stikling.Core.Models;
+using Stikling.Core.SoilMixes;
 using Stikling.Core.Names;
 using Stikling.Core.Plants;
 using Stikling.Core.Pots;
@@ -69,6 +70,7 @@ public sealed class PropagationForm
         Propagations = data.Propagations;
         Places = data.Places;
         Mixes = data.Mixes;
+        Batches = data.Batches;
         PotUses = data.PotUses;
         ContainerList = data.ContainerList;
         SellerList = data.Sellers;
@@ -145,6 +147,9 @@ public sealed class PropagationForm
     public Places Places { get; }
 
     public IReadOnlyList<SoilMix> Mixes { get; }
+
+    /// <summary>The batches of soil, for picking one beside the mix.</summary>
+    public IReadOnlyList<BatchOption> Batches { get; }
 
     public IReadOnlyList<PotUse> PotUses { get; }
 

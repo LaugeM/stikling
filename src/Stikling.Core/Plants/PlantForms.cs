@@ -20,6 +20,7 @@ internal sealed record PlantFormData(
     Places Places,
     IReadOnlyList<Pot> Pots,
     IReadOnlyList<SoilMix> Mixes,
+    IReadOnlyList<BatchOption> Batches,
     IReadOnlyList<Feed> Feeds,
     SellerList Sellers,
     IReadOnlyList<OwnField> OwnFields,
@@ -43,7 +44,8 @@ public sealed class PlantForms(
     SellerService sellerService,
     OwnFieldService ownFieldService,
     TimeProvider time,
-    Lights.GrowLightService? growLights = null)
+    Lights.GrowLightService? growLights = null,
+    SoilBatchService? batchService = null)
 {
     internal PlantService PlantService => plantService;
 
@@ -86,6 +88,7 @@ public sealed class PlantForms(
             places,
             await pots.GetAllAsync(),
             await mixes.GetAllAsync(),
+            batchService is null ? [] : await batchService.GetOptionsAsync(),
             [.. (await feeds.GetAllAsync()).OrderBy(f => f.Name, StringComparer.CurrentCultureIgnoreCase)],
             await sellerService.GetSellersAsync(),
             await ownFieldService.GetAllAsync(),

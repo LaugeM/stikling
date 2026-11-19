@@ -7,6 +7,7 @@
 @inject IPlantRepository PlantRepository
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
+@inject SoilBatchService BatchService
 @inject PropagationService PropagationService
 @inject LeafService LeafBook
 @inject ITimelineRepository TimelineRepository
@@ -385,6 +386,10 @@ else
                                 @if (!string.IsNullOrWhiteSpace(mix.Recipe))
                                 {
                                     <div class="detail-sub">@mix.Recipe</div>
+                                }
+                                @if (Batch is { } batch)
+                                {
+                                    <div class="detail-sub">@F(Strings.PlantDetail.MixBatch, Labels.Date(batch.Batch.MixedOn))</div>
                                 }
                             }
                         </dd>
@@ -846,7 +851,7 @@ else
                             @if (up.Medium == GrowingMedium.Soil)
                             {
                                 <div class="mb-2">
-                                    <MixPicker @bind-Value="up.SoilMixId" Mixes="mixes" />
+                                    <MixPicker @bind-Value="up.SoilMixId" @bind-BatchValue="up.SoilBatchId" Mixes="mixes" Batches="batches" />
                                 </div>
                             }
                         }
@@ -1171,8 +1176,11 @@ else
     private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
+    private IReadOnlyList<BatchOption> batches = [];
 
     private SoilMix? Mix => propagation?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id && !m.IsDeleted) : null;
+
+    private BatchOption? Batch => propagation?.SoilBatchId is { } id ? batches.FirstOrDefault(b => b.Id == id) : null;
 
     private void AddPot(Pot pot) => pots = [.. pots, pot];
 
@@ -1465,6 +1473,7 @@ else
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();
         mixes = await MixRepository.GetAllAsync();
+        batches = await BatchService.GetOptionsAsync();
         var everyCareLog = await CareService.GetAllAsync();
         careLogs = PropagationCareService.For(everyCareLog, Id);
         differed = propagation is null ? null : FailedComparisons.For(propagation, propagations, everyCareLog);

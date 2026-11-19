@@ -16,6 +16,7 @@
 @inject IPotRepository PotRepository
 @inject PotService PotService
 @inject ISoilMixRepository MixRepository
+@inject SoilBatchService BatchService
 @inject IFeedRepository FeedRepository
 @inject PlantService PlantService
 @inject RoomService RoomService
@@ -535,6 +536,10 @@ else
                                 @if (!string.IsNullOrWhiteSpace(mix.Recipe))
                                 {
                                     <div class="detail-sub">@mix.Recipe</div>
+                                }
+                                @if (Batch is { } batch)
+                                {
+                                    <div class="detail-sub">@F(Strings.PlantDetail.MixBatch, Labels.Date(batch.Batch.MixedOn))</div>
                                 }
                             }
                         </dd>
@@ -1860,6 +1865,7 @@ else
     };
     private IReadOnlyDictionary<Guid, Photo> potCovers = new Dictionary<Guid, Photo>();
     private IReadOnlyList<SoilMix> mixes = [];
+    private IReadOnlyList<BatchOption> batches = [];
 
     private string? wateringLine;
 
@@ -1871,6 +1877,8 @@ else
     private Feed? WateringFeed => plant?.WateringFeedId is { } id ? feeds.FirstOrDefault(f => f.Id == id) : null;
 
     private SoilMix? Mix => plant?.SoilMixId is { } id ? mixes.FirstOrDefault(m => m.Id == id) : null;
+
+    private BatchOption? Batch => plant?.SoilBatchId is { } id ? batches.FirstOrDefault(b => b.Id == id) : null;
 
     private string? PotName(Guid? id) =>
         id is { } potId ? pots.FirstOrDefault(p => p.Id == potId)?.DisplayName : null;
@@ -2126,6 +2134,7 @@ else
             pots = await PotRepository.GetAllAsync();
             potCovers = await PotService.GetCoversAsync();
             mixes = await MixRepository.GetAllAsync();
+            batches = await BatchService.GetOptionsAsync();
             feeds = await FeedRepository.GetAllAsync();
 
             await ReloadCareAsync();

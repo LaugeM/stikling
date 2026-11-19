@@ -1051,4 +1051,20 @@
     <value>Filters ({0})</value>
     <comment>Same button while filters narrow the list. {0} is how many.</comment>
   </data>
+  <data name="BatchLabel" xml:space="preserve">
+    <value>Batch</value>
+    <comment>Label above the batches of soil to pick from, under the soil mix, when a plant or cutting is in a mix that has batches.</comment>
+  </data>
+  <data name="BatchNone" xml:space="preserve">
+    <value>No batch</value>
+    <comment>Chip for not saying which batch of the mix it was potted in.</comment>
+  </data>
+  <data name="BatchChip" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>Chip for a batch of soil: the day it was mixed and how much there is. {0} is a date, {1} is a volume like 4 L.</comment>
+  </data>
+  <data name="BatchUsedUp" xml:space="preserve">
+    <value>{0}, {1}, used up</value>
+    <comment>Chip for a batch of soil that is marked used up but is still the one a plant is in. {0} is a date, {1} is a volume.</comment>
+  </data>
 </root>

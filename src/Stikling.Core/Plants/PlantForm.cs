@@ -1,5 +1,6 @@
 using Stikling.Core.Fields;
 using Stikling.Core.Models;
+using Stikling.Core.SoilMixes;
 using Stikling.Core.Names;
 using Stikling.Core.Pests;
 using Stikling.Core.Pots;
@@ -79,6 +80,7 @@ public sealed class PlantForm
         Places = data.Places;
         pots = [.. data.Pots];
         Mixes = data.Mixes;
+        Batches = data.Batches;
         Feeds = data.Feeds;
         SellerList = data.Sellers;
         Settings = data.Settings;
@@ -165,6 +167,9 @@ public sealed class PlantForm
     public IReadOnlyList<Pot> Pots => pots;
 
     public IReadOnlyList<SoilMix> Mixes { get; }
+
+    /// <summary>The batches of soil, for picking one beside the mix.</summary>
+    public IReadOnlyList<BatchOption> Batches { get; }
 
     /// <summary>The feeds by name.</summary>
     public IReadOnlyList<Feed> Feeds { get; }
