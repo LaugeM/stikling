@@ -72,4 +72,8 @@
     <value>Seed lot</value>
     <comment>Name of a seed lot that has no name, source or cross to call it by.</comment>
   </data>
+  <data name="NameAndTitle" xml:space="preserve">
+    <value>{0} ({1})</value>
+    <comment>A cross with a working name, followed by its title. {0} is the working name and {1} the parents.</comment>
+  </data>
 </root>

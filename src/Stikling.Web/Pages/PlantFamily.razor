@@ -3,6 +3,7 @@
 @inject CoverPhotos Covers
 @inject IPlantRepository Repository
 @inject IPropagationRepository PropagationRepository
+@inject CrossService CrossService
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, plant is null ? Strings.Plants.FamilyTitle : F(Strings.Plants.FamilyTitleOf, plant.DisplayName))</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -49,6 +50,10 @@ else
                                 <span class="badge text-bg-secondary">@Labels.StatusOf(ancestor)</span>
                             }
                         </a>
+                        @if (CrossOf(ancestor) is { } ancestorCross)
+                        {
+                            <a class="family-pollen" href="crosses/@ancestorCross.Cross.Id">@F(Strings.Crosses.FamilyPollenLine, ancestorCross.Pollen.Name)</a>
+                        }
                     </li>
                 }
             </ul>
@@ -88,10 +93,39 @@ else
         {
             <p class="profile-facts">@focusGen</p>
         }
+        @if (CrossOf(plant) is { } focusCross)
+        {
+            <p class="profile-facts"><a class="link-action" href="crosses/@focusCross.Cross.Id">@F(Strings.Crosses.FamilyCrossLine, focusCross.FullName)</a></p>
+        }
         <a class="btn btn-outline-primary" href="plants/@plant.Id">@Strings.Plants.FamilyOpenPlant</a>
     </section>
 
-    @if (tree.IsEmpty)
+    @if (pollenPlants.Count > 0 || pollenGrowing.Count > 0)
+    {
+        <section class="family-section">
+            <h2 class="section-label">@F(Strings.Crosses.FamilyAsPollen, pollenPlants.Count + pollenGrowing.Count)</h2>
+            @if (pollenPlants.Count > 0)
+            {
+                <ul class="plant-grid">
+                    @foreach (var child in pollenPlants)
+                    {
+                        <li><PlantTile Plant="child" Href="@($"plants/{child.Id}/family")" Faded="Left(child)" /></li>
+                    }
+                </ul>
+            }
+            @if (pollenGrowing.Count > 0)
+            {
+                <ul class="item-list">
+                    @foreach (var propagation in pollenGrowing)
+                    {
+                        <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+
+    @if (tree.IsEmpty && pollenPlants.Count == 0 && pollenGrowing.Count == 0)
     {
         <div class="empty-state family-empty">
             <p>@F(Strings.Plants.FamilyEmpty, plant.DisplayName)</p>
@@ -160,6 +194,12 @@ else
     private FamilyTree? tree;
     private bool loaded;
     private IReadOnlyList<Plant> everyPlant = [];
+    private CrossBook? crossBook;
+    private IReadOnlyList<Plant> pollenPlants = [];
+    private IReadOnlyList<Propagation> pollenGrowing = [];
+
+    // The cross a plant came from, so the pollen parent shows beside the pod parent
+    private CrossView? CrossOf(Plant p) => crossBook?.OriginOf(p);
 
     // Moving the tree is a navigation to this page with another id
     protected override async Task OnParametersSetAsync()
@@ -182,8 +222,9 @@ else
         var all = await Repository.GetAllAsync();
         everyPlant = all;
         plant = all.FirstOrDefault(p => p.Id == Id);
-        tree = plant is null
-            ? null
-            : PlantLineage.Tree(plant, all, await PropagationRepository.GetAllAsync());
+        var propagations = await PropagationRepository.GetAllAsync();
+        tree = plant is null ? null : PlantLineage.Tree(plant, all, propagations);
+        crossBook = await CrossService.GetBookAsync();
+        (pollenPlants, pollenGrowing) = plant is null ? ([], []) : crossBook.PollenChildrenOf(plant);
     }
 }

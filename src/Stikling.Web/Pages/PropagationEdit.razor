@@ -554,6 +554,10 @@ else
     [SupplyParameterFromQuery(Name = "parent")]
     public Guid? ParentId { get; set; }
 
+    /// <summary>The seed lot to sow from.</summary>
+    [SupplyParameterFromQuery(Name = "lot")]
+    public Guid? LotId { get; set; }
+
     /// <summary>Starts from a wish on the wishlist, from Got it. Once the cutting is saved the wish moves to Got.</summary>
     [SupplyParameterFromQuery(Name = "wish")]
     public Guid? WishId { get; set; }
@@ -584,7 +588,7 @@ else
     private bool keepToday;
 
     private PropagationForm? form;
-    private (Guid? Id, Guid? ParentId, Guid? WishId) formFor;
+    private (Guid? Id, Guid? ParentId, Guid? WishId, Guid? LotId) formFor;
     private Propagation? propagation;
     private bool notFound;
     private bool saving;
@@ -620,6 +624,7 @@ else
 
     private string BackUrl =>
         !IsNew ? $"propagations/{Id}"
+        : LotId is { } lotId ? $"seedlots/{lotId}"
         : ParentId is { } parentId ? $"plants/{parentId}"
         : "propagations";
 
@@ -695,12 +700,12 @@ else
         googleOn = await Google.IsEnabledAsync();
 
         // A new form only when the page was opened for something else, so a re-render never resets a draft
-        var key = (Id, ParentId, WishId);
+        var key = (Id, ParentId, WishId, LotId);
         if (form is not null && formFor == key)
             return;
 
         formFor = key;
-        form = Id is { } id ? await Forms.EditAsync(id, Labels.For) : await Forms.NewAsync(ParentId, WishId, Labels.For);
+        form = Id is { } id ? await Forms.EditAsync(id, Labels.For) : await Forms.NewAsync(ParentId, WishId, Labels.For, LotId);
         propagation = form?.Propagation;
         notFound = form is null;
         if (form is null || propagation is null)

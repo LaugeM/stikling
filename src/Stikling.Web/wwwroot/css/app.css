@@ -4556,3 +4556,30 @@ tr.drop-target {
     min-height: 2.75rem;
     margin-top: 0.5rem;
 }
+
+/* An amount with its unit beside it, like 100 seeds or 1 g */
+.amount-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.amount-row .form-control {
+    flex: 1 1 8rem;
+    min-width: 0;
+}
+
+.amount-row .form-select {
+    flex: 0 1 8rem;
+}
+
+.lot-actions {
+    margin-bottom: 1rem;
+}
+
+/* The pollen parent of a cross, under a plant in the family tree */
+.family-pollen {
+    display: block;
+    margin: 0.1rem 0 0 0.25rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}

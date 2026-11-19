@@ -33,7 +33,8 @@ public sealed class PropagationForms(
     SellerService sellerService,
     PotService potService,
     TimeProvider time,
-    Lights.GrowLightService? growLights = null)
+    Lights.GrowLightService? growLights = null,
+    Crosses.CrossService? crosses = null)
 {
     internal PropagationService PropagationService => propagationService;
 
@@ -82,18 +83,23 @@ public sealed class PropagationForms(
     }
 
     /// <summary>
-    /// A form for a new propagation: taken from a plant, or started from a wish, or empty. A parent
-    /// wins over a wish.
+    /// A form for a new propagation: sown from a seed lot, taken from a plant, or started from a wish,
+    /// or empty. A lot wins over a parent, and a parent over a wish.
     /// </summary>
     /// <param name="label">Gives the labels for a propagation. It reads the type when called, so the form builds it once.</param>
-    public async Task<PropagationForm> NewAsync(Guid? parentId, Guid? wishId, Func<Propagation, Func<Enum, string>> label)
+    public async Task<PropagationForm> NewAsync(Guid? parentId, Guid? wishId, Func<Propagation, Func<Enum, string>> label, Guid? lotId = null)
     {
         var data = await LoadAsync(forNew: true);
         var today = time.Today();
 
         var wish = wishId is { } id ? data.Wishes.FirstOrDefault(w => w.Id == id && !w.IsGot) : null;
         Propagation propagation;
-        if (parentId is { } parentKey && data.Plants.FirstOrDefault(p => p.Id == parentKey) is { } parent)
+        if (lotId is { } lotKey && crosses is not null && await crosses.GetLotAsync(lotKey) is { } lot)
+        {
+            // Sowing from a seed lot: the seedlings keep the lot, and the pod parent when it is a plant here
+            propagation = await crosses.SowingFromAsync(lot, today);
+        }
+        else if (parentId is { } parentKey && data.Plants.FirstOrDefault(p => p.Id == parentKey) is { } parent)
         {
             propagation = propagationService.StartFrom(parent);
         }

@@ -5,6 +5,7 @@
 @inject PropagationCareService CareService
 @inject ILogger<PropagationDetail> Logger
 @inject IPlantRepository PlantRepository
+@inject CrossService CrossService
 @inject IPotRepository PotRepository
 @inject ISoilMixRepository MixRepository
 @inject PropagationService PropagationService
@@ -315,6 +316,20 @@ else
                                 @(string.IsNullOrWhiteSpace(propagation.Source) ? Strings.Propagations.DetNoParent : propagation.Source)
                             }
                         </dd>
+
+                        @if (crossOrigin is { } fromCross)
+                        {
+                            <dt>@Strings.Crosses.CrossLabel</dt>
+                            <dd>
+                                <a href="crosses/@fromCross.Cross.Id">@fromCross.FullName</a>
+                                <div class="text-body-secondary small">@F(Strings.Crosses.PollenParentIs, fromCross.Pollen.Name)</div>
+                            </dd>
+                        }
+                        @if (seedLot is { } lot)
+                        {
+                            <dt>@Strings.Crosses.LotLabel</dt>
+                            <dd><a href="seedlots/@lot.Lot.Id">@lot.Title</a></dd>
+                        }
 
                         @if (!string.IsNullOrWhiteSpace(propagation.Experiment))
                         {
@@ -1168,6 +1183,8 @@ else
     private PlaceConditions? standing;
     private Guid? standingPlace;
     private SellerList sellers = SellerList.None;
+    private CrossView? crossOrigin;
+    private LotView? seedLot;
     private PropagationOutcome? outcome;
     private IReadOnlyList<Pot> pots = [];
     private IReadOnlyList<SoilMix> mixes = [];
@@ -1461,6 +1478,14 @@ else
         standingPlace = propagation is null ? null : places.Find(propagation.PlaceId)?.Id;
         standing = standingPlace is { } standsAt ? await ReadingService.ConditionsForAsync(standsAt) : null;
         sellers = await SellerService.GetSellersAsync();
+        crossOrigin = null;
+        seedLot = null;
+        if (propagation?.SeedLotId is not null)
+        {
+            var crossBook = await CrossService.GetBookAsync();
+            crossOrigin = crossBook.OriginOf(propagation);
+            seedLot = crossBook.FindLot(propagation.SeedLotId.Value) is { } found ? crossBook.LotView(found) : null;
+        }
         rooms = Room.List(places, plants, propagations);
         outcome = propagation is null ? null : PropagationOutcome.For(propagation, plants, places);
         pots = await PotRepository.GetAllAsync();

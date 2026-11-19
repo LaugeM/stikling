@@ -34,6 +34,9 @@ public sealed record CrossView(Cross Cross, ParentRef Pod, ParentRef Pollen)
     /// <summary>The working name, or the title when it has none.</summary>
     public string DisplayName => string.IsNullOrWhiteSpace(Cross.Name) ? Title : Cross.Name.Trim();
 
+    /// <summary>The working name with the title after it, or just the title when it has no name: "Dark Star (A × B)".</summary>
+    public string FullName => HasWorkingName ? F(Strings.Crosses.NameAndTitle, DisplayName, Title) : Title;
+
     public bool HasWorkingName => !string.IsNullOrWhiteSpace(Cross.Name);
 }
 
@@ -60,6 +63,9 @@ public sealed record CrossSeedlings(
     public static readonly CrossSeedlings None = new([], [], [], 0, 0, 0, 0);
 
     public bool Any => Propagations.Count > 0 || Lots.Count > 0;
+
+    /// <summary>The first day anything was sown from the cross's lots. Worked out here, not stored on the cross.</summary>
+    public DateOnly? FirstSown => Propagations.Count == 0 ? null : Propagations.Min(p => p.StartedOn);
 }
 
 /// <summary>A cross in the log with what came of it.</summary>
