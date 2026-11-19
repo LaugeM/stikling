@@ -43,7 +43,7 @@
     <value>Krydsningslog · Stikling</value>
   </data>
   <data name="LogEmpty" xml:space="preserve">
-    <value>Ingen krydsninger endnu. Registrer en bestøvning den dag du laver den, med begge forældre, så fylder loggen op med hvad der kom ud af hver enkelt.</value>
+    <value>Ingen krydsninger endnu. Registrer bestøvningen samme dag som du laver den, med begge forældre, så viser loggen efterhånden hvad der kom ud af hver enkelt.</value>
   </data>
   <data name="FilterLabel" xml:space="preserve">
     <value>Vis krydsninger</value>
@@ -52,10 +52,10 @@
     <value>Alle</value>
   </data>
   <data name="FilterTook" xml:space="preserve">
-    <value>Tog</value>
+    <value>Lykkedes</value>
   </data>
   <data name="FilterDidNotTake" xml:space="preserve">
-    <value>Tog ikke</value>
+    <value>Lykkedes ikke</value>
   </data>
   <data name="FilterNotKnown" xml:space="preserve">
     <value>Ukendt endnu</value>
@@ -76,10 +76,10 @@
     <value>Forældre</value>
   </data>
   <data name="EditHow" xml:space="preserve">
-    <value>Hvordan det blev gjort</value>
+    <value>Sådan gjorde du</value>
   </data>
   <data name="EditOutcome" xml:space="preserve">
-    <value>Hvad der kom ud af det</value>
+    <value>Det kom der ud af</value>
   </data>
   <data name="PodParent" xml:space="preserve">
     <value>Frøforælder</value>
@@ -112,7 +112,7 @@
     <value>For eksempel: Mørk Stjerne</value>
   </data>
   <data name="WorkingNameHint" xml:space="preserve">
-    <value>Vises på frøplanterne, indtil de får et kaldenavn eller et sortsnavn.</value>
+    <value>Vises på frøplanterne indtil de får et kaldenavn eller et kultivarnavn.</value>
   </data>
   <data name="PollinatedOn" xml:space="preserve">
     <value>Bestøvet den</value>
@@ -142,7 +142,7 @@
     <value>Opbevaret</value>
   </data>
   <data name="Bagged" xml:space="preserve">
-    <value>Blomst med pose</value>
+    <value>Pose over blomsten</value>
   </data>
   <data name="FlowersPollinated" xml:space="preserve">
     <value>Bestøvede blomster</value>
@@ -151,7 +151,7 @@
     <value>Note</value>
   </data>
   <data name="NotePlaceholder" xml:space="preserve">
-    <value>Alt andet om hvordan det blev gjort</value>
+    <value>Andet om hvordan du gjorde det</value>
   </data>
   <data name="Outcome" xml:space="preserve">
     <value>Resultat</value>
@@ -160,13 +160,13 @@
     <value>Ukendt endnu</value>
   </data>
   <data name="OutcomeTook" xml:space="preserve">
-    <value>Tog</value>
+    <value>Lykkedes</value>
   </data>
   <data name="OutcomeDidNotTake" xml:space="preserve">
-    <value>Tog ikke</value>
+    <value>Lykkedes ikke</value>
   </data>
   <data name="PodsSet" xml:space="preserve">
-    <value>Frøstande der satte</value>
+    <value>Antal frøkapsler</value>
   </data>
   <data name="SeedRipeOn" xml:space="preserve">
     <value>Frø modne den</value>
@@ -184,10 +184,10 @@
     <value>gram</value>
   </data>
   <data name="AmountIsAbout" xml:space="preserve">
-    <value>Det er en cirkamængde</value>
+    <value>Mængden er cirka</value>
   </data>
   <data name="DeleteConfirm" xml:space="preserve">
-    <value>Slet denne krydsning? Frøpartier og frøplanter fra den bliver, men viser ikke længere hvor de kom fra.</value>
+    <value>Slet denne krydsning? Frøpartier og frøplanter fra den bliver ikke slettet, men viser ikke længere hvor de kom fra.</value>
   </data>
   <data name="DeleteError" xml:space="preserve">
     <value>Krydsningen kunne ikke slettes: {0}</value>
@@ -211,10 +211,10 @@
     <value>Krydsningen</value>
   </data>
   <data name="OutcomeHeading" xml:space="preserve">
-    <value>Resultat</value>
+    <value>Hvad der kom ud af det</value>
   </data>
   <data name="OutcomeEmpty" xml:space="preserve">
-    <value>Intet er registreret endnu. Rediger krydsningen, når du ved om den tog.</value>
+    <value>Der er ikke registreret noget endnu. Rediger krydsningen når du ved om den lykkedes.</value>
   </data>
   <data name="SownOn" xml:space="preserve">
     <value>Sået</value>
@@ -241,7 +241,7 @@
     <value>Lav endnu et parti fra denne krydsning</value>
   </data>
   <data name="NoLotYet" xml:space="preserve">
-    <value>Når frøene er modne, så noter dagen og hvor mange der er, og lav et frøparti af dem.</value>
+    <value>Når frøene er modne, noterer du dagen og mængden og laver et frøparti af dem.</value>
   </data>
   <data name="SeedlingsHeading" xml:space="preserve">
     <value>Frøplanter</value>
@@ -256,7 +256,7 @@
     <value>{0} sået</value>
   </data>
   <data name="CountCameUp" xml:space="preserve">
-    <value>{0} er kommet op</value>
+    <value>{0} spiret</value>
   </data>
   <data name="CountAlive" xml:space="preserve">
     <value>{0} i live</value>
@@ -271,7 +271,7 @@
     <value>Frøpartier · Stikling</value>
   </data>
   <data name="LotsEmpty" xml:space="preserve">
-    <value>Ingen frøpartier endnu. Et frøparti er frø du har, før de bliver sået, fra en krydsning, et bytte eller en butik.</value>
+    <value>Ingen frøpartier endnu. Et frøparti er frø du endnu ikke har sået, fra en krydsning, et bytte eller en butik.</value>
   </data>
   <data name="UsedUpHeading" xml:space="preserve">
     <value>Brugt op ({0})</value>
@@ -301,7 +301,7 @@
     <value>Hvad det er</value>
   </data>
   <data name="LotNameHint" xml:space="preserve">
-    <value>Frø fra en krydsning får frøforælderens navn, når du laver partiet fra krydsningen.</value>
+    <value>Frø fra en krydsning får frøforælderens navn når du laver partiet fra krydsningen.</value>
   </data>
   <data name="LotCross" xml:space="preserve">
     <value>Krydsning</value>
@@ -310,16 +310,16 @@
     <value>Ikke fra en krydsning jeg har registreret</value>
   </data>
   <data name="LotCrossHint" xml:space="preserve">
-    <value>Købte frø kan også have forældre: registrer en krydsning med forældrene skrevet ind.</value>
+    <value>Du kan også angive forældrene til købte frø: registrer en krydsning, og skriv forældrene ind.</value>
   </data>
   <data name="LotWhere" xml:space="preserve">
-    <value>Hvor det kom fra og hvor meget</value>
+    <value>Kilde og mængde</value>
   </data>
   <data name="LotSource" xml:space="preserve">
     <value>Kilde</value>
   </data>
   <data name="LotSourcePlaceholder" xml:space="preserve">
-    <value>En sælger, et bytte, en frøstand fra en ven</value>
+    <value>En sælger, et bytte, en frøkapsel fra en ven</value>
   </data>
   <data name="LotCollectedOn" xml:space="preserve">
     <value>Indsamlet eller købt den</value>
@@ -334,10 +334,10 @@
     <value>Brugt op den</value>
   </data>
   <data name="LotUsedUpHint" xml:space="preserve">
-    <value>Lad den stå tom, mens der er frø tilbage.</value>
+    <value>Lad feltet stå tomt så længe der er frø tilbage.</value>
   </data>
   <data name="LotDeleteConfirm" xml:space="preserve">
-    <value>Slet dette frøparti? Det der er sået fra det, bliver.</value>
+    <value>Slet dette frøparti? Det du har sået fra det, bliver ikke slettet.</value>
   </data>
   <data name="BackToLot" xml:space="preserve">
     <value>Tilbage til frøpartiet</value>
@@ -385,7 +385,7 @@
     <value>Registrer en krydsning, som frøforælder</value>
   </data>
   <data name="MenuAsPodHint" xml:space="preserve">
-    <value>Denne plante bærer frøstanden</value>
+    <value>Denne plante bærer frøkapslen</value>
   </data>
   <data name="MenuAsPollen" xml:space="preserve">
     <value>Registrer en krydsning, som pollenforælder</value>
