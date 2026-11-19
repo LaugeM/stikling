@@ -118,7 +118,7 @@ else
                 <ul class="item-list">
                     @foreach (var propagation in pollenGrowing)
                     {
-                        <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                        <li><PropagationCard Propagation="propagation" ShowStage="true" ParentName="@crossBook?.OriginOf(propagation)?.FullName" /></li>
                     }
                 </ul>
             }

@@ -16,7 +16,11 @@
     <value>Crosses</value>
     <comment>Heading of the section on the Propagations page that holds crosses and seed lots. It only shows once there is a cross or a seed lot.</comment>
   </data>
-  <data name="SectionAllCrosses" xml:space="preserve">
+  <data name="SectionAllCrosses_One" xml:space="preserve">
+    <value>All {0} cross</value>
+    <comment>Link from the Crosses section to the cross log. {0} is how many crosses there are.</comment>
+  </data>
+  <data name="SectionAllCrosses_Other" xml:space="preserve">
     <value>All {0} crosses</value>
     <comment>Link from the Crosses section to the cross log. {0} is how many crosses there are.</comment>
   </data>
