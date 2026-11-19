@@ -37,7 +37,7 @@ else if (book is { Any: true } || pollenCount > 0)
             </ul>
         }
         <p class="crosses-links">
-            <a class="link-action" href="crosses">@F(Strings.Crosses.SectionAllCrosses, book!.Crosses.Count)</a>
+            <a class="link-action" href="crosses">@Plural.Of(book!.Crosses.Count, Strings.Crosses.SectionAllCrosses_One, Strings.Crosses.SectionAllCrosses_Other)</a>
             <span aria-hidden="true"> · </span>
             <a class="link-action" href="seedlots">@LotsText</a>
             <span aria-hidden="true"> · </span>
