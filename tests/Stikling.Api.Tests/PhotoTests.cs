@@ -93,6 +93,8 @@ public class PhotoTests(ApiFactory api)
         Assert.Equal(HttpStatusCode.OK, fetched.StatusCode);
         Assert.Equal("image/jpeg", fetched.Content.Headers.ContentType?.MediaType);
         Assert.Equal(image, await fetched.Content.ReadAsByteArrayAsync());
+        Assert.Equal("attachment", fetched.Content.Headers.ContentDisposition?.DispositionType);
+        Assert.Equal("nosniff", Assert.Single(fetched.Headers.GetValues("X-Content-Type-Options")));
     }
 
     [Fact]

@@ -44,10 +44,13 @@ public static class PhotoEndpoints
             new PhotoUsage(await UsedAsync(db, collectionId), options.Value.MaxBytesPerCollection))
         .RequireAuthorization(CollectionPolicies.View);
 
-        photos.MapGet("/{photoId:guid}/{size}", async (Guid collectionId, Guid photoId, string size, StiklingDbContext db, PhotoStorage storage) =>
+        photos.MapGet("/{photoId:guid}/{size}", async (Guid collectionId, Guid photoId, string size, HttpContext http, StiklingDbContext db, PhotoStorage storage) =>
         {
             if (ParseSize(size) is not { } which)
                 return Results.NotFound();
+
+            // Only the app reads these, with a token. The share and public pages serve theirs inline, to be opened in a tab.
+            http.Response.Headers.ContentDisposition = "attachment";
 
             return await ImageAsync(db, storage, collectionId, photoId, which);
         })

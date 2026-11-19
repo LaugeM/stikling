@@ -154,6 +154,8 @@ public class AccountDeletionTests(ApiFactory api)
 
         Assert.Equal(HttpStatusCode.Gone, response.StatusCode);
         Assert.Equal(ApiFactory.AppOrigin, Assert.Single(response.Headers.GetValues("Access-Control-Allow-Origin")));
+        // The exception handler writes this reply, and nosniff survives it
+        Assert.Equal("nosniff", Assert.Single(response.Headers.GetValues("X-Content-Type-Options")));
     }
 
     [Fact]

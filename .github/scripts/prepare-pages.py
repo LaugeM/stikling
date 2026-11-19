@@ -205,7 +205,85 @@ def make_page(code, name, title, description, body):
     return page
 
 
+# The Content Security Policy every page gets, as a meta tag since GitHub Pages can't send headers. It lists the
+# origins the app talks to and a hash of each inline script, so a script someone manages to put in the page doesn't run.
+# A meta tag can't set frame-ancestors or report violations; that needs a server in front of Pages.
+settings = json.loads((root / "appsettings.Production.json").read_text(encoding="utf-8"))
+
+
+def origin(address):
+    match = re.match(r"https://(?:[^@/]*@)?([^/]+)", address or "")
+    if not match:
+        sys.exit(f"Expected an https address in appsettings.Production.json: {address}")
+    return "https://" + match.group(1)
+
+
+CLERK = origin(settings["Clerk"]["FrontendApi"])
+API = origin(settings["Api"]["Address"])
+SENTRY = origin(settings["Sentry"]["Dsn"])
+# Clerk's bot check on sign-up runs in a Cloudflare Turnstile frame
+TURNSTILE = "https://challenges.cloudflare.com"
+# Google's sign-in for the Photos picker (googlephotos.js), its API, and the photos it hands out
+GOOGLE_SIGN_IN = "https://accounts.google.com/gsi/"
+GOOGLE_PHOTOS = "https://photospicker.googleapis.com https://www.googleapis.com https://*.googleusercontent.com"
+PLANTNET = "https://my-api.plantnet.org"
+# The stylesheets load with media="print" and switch to all with this handler, which 'unsafe-hashes' lets run
+LINK_ONLOAD = "this.media='all'"
+
+
+def sha256(text):
+    return "'sha256-" + base64.b64encode(hashlib.sha256(text.encode("utf-8")).digest()).decode() + "'"
+
+
+# The inline scripts the browser runs. JSON and structured data aren't run, but an import map is checked like a script.
+def inline_scripts(page):
+    for match in re.finditer(r"<script(?P<attrs>[^>]*)>(?P<body>.*?)</script>", page, flags=re.S):
+        attrs = match.group("attrs")
+        if "src=" in attrs:
+            continue
+        kind = re.search(r'type="([^"]*)"', attrs)
+        if kind and kind.group(1) not in ("importmap", "module", "text/javascript"):
+            continue
+        yield match.group("body")
+
+
+def content_security_policy(page):
+    scripts = " ".join(sorted({sha256(body) for body in inline_scripts(page)}))
+    if 'onload="' + LINK_ONLOAD + '"' not in page:
+        sys.exit("Expected the stylesheets' onload handler in index.html; update LINK_ONLOAD in prepare-pages.py")
+    directives = [
+        "default-src 'self'",
+        # .NET runs as WebAssembly. 'unsafe-eval' is for h264-mp4-encoder, the time-lapse encoder for browsers without
+        # WebCodecs like Firefox on Android, whose Emscripten bindings are made with new Function.
+        f"script-src 'self' 'wasm-unsafe-eval' 'unsafe-eval' {scripts} 'unsafe-hashes' {sha256(LINK_ONLOAD)} "
+        f"{CLERK} {TURNSTILE} {GOOGLE_SIGN_IN}client",
+        # Blazor, Clerk and the app set styles on elements
+        f"style-src 'self' 'unsafe-inline' {GOOGLE_SIGN_IN}style",
+        "img-src 'self' data: blob: https://img.clerk.com",
+        "font-src 'self' data:",
+        "media-src 'self' blob:",
+        f"connect-src 'self' {API} {CLERK} {SENTRY} {PLANTNET} {GOOGLE_PHOTOS} {GOOGLE_SIGN_IN}",
+        f"frame-src {TURNSTILE} {GOOGLE_SIGN_IN}",
+        "worker-src 'self' blob:",
+        "manifest-src 'self'",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self'",
+    ]
+    return "; ".join(directives)
+
+
+# The tag goes first in <head>, so it covers everything after it
+def with_policy(page):
+    tag = f'<meta http-equiv="Content-Security-Policy" content="{content_security_policy(page)}" />'
+    page, count = re.subn(r'(<meta charset="utf-8" />)', lambda m: m.group(1) + "\n    " + tag, page, count=1)
+    if count != 1:
+        sys.exit('Expected exactly one <meta charset="utf-8" /> in index.html')
+    return page
+
+
 def write_page(code, name, page):
+    page = with_policy(page)
     folder = root / prefix(code).rstrip("/")
     folder.mkdir(exist_ok=True)
     (folder / ("index.html" if name == "" else f"{name}.html")).write_text(page, encoding="utf-8", newline="\n")

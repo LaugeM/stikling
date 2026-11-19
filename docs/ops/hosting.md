@@ -30,6 +30,16 @@ While the API is stopped, a new version can't be checked after it's deployed, so
 
 Merging to main does it. The workflow pushes the API's image and moves the Container App to it, then the notification job too if there is one, and GitHub Pages gets the app.
 
+## Security headers
+
+GitHub Pages can't send headers, so the app's Content Security Policy is a meta tag that `.github/scripts/prepare-pages.py` adds to every page at deploy. It allows the app's own files and the outside services it talks to: Clerk, the API and Sentry (taken from `appsettings.Production.json`), Cloudflare Turnstile for Clerk's bot check, Google's sign-in and Photos picker, and Pl@ntNet. Inline scripts are allowed by their hash, worked out at deploy. Locally there is no policy, since the dev server adds scripts of its own.
+
+A feature that loads a script, a frame or an image from a new place, or calls a new service from the browser, has to add it there. Otherwise it works locally and is blocked on stikling.app. To check, publish, run the two steps from the workflow, serve `release/wwwroot` and look for "Content Security Policy" in the console.
+
+`'unsafe-eval'` is in the policy for h264-mp4-encoder, the time-lapse encoder for browsers without WebCodecs, like Firefox on Android, which can't load without it. A meta tag can't set `frame-ancestors`, so another site can still put the app in a frame.
+
+The API sends HSTS for a year and `X-Content-Type-Options: nosniff` on everything. Attached files and the photos the app fetches come with `Content-Disposition: attachment`, so a PDF opened from its API address is downloaded rather than shown on the API's origin. The photos of the share and public pages stay inline, since people open them in a tab.
+
 ## Changing the Azure resources
 
 The Bicep isn't deployed by the workflow, since that would need the right to hand out roles. Deploy it from your own machine after `az login`:
