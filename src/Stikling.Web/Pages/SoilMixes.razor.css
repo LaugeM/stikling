@@ -192,15 +192,21 @@
 
 .mix-batch-head {
     display: flex;
+    justify-content: flex-start;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.4rem;
 }
 
-.mix-batch-head {
-    justify-content: flex-start;
-}
-
 .mix-batch-head .mix-count-button {
     text-align: left;
+    margin-left: 0;
+}
+
+/* Tap targets on the forms: the inputs and buttons are 44px high on a phone */
+.mix-batch-form ::deep .form-control,
+.mix-batch-form ::deep .form-select,
+.mix-batch-form .btn,
+.mix-link .btn {
+    min-height: 44px;
 }

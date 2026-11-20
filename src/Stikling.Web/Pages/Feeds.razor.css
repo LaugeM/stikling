@@ -146,3 +146,8 @@
 .feed-can .btn {
     min-height: 44px;
 }
+
+.feed-water ::deep .form-control,
+.feed-water ::deep .form-select {
+    min-height: 44px;
+}
