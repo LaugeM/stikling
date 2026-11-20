@@ -37,7 +37,7 @@
     <comment>Link from the Crosses section to the seed lots when there are none yet.</comment>
   </data>
   <data name="StartLine" xml:space="preserve">
-    <value>Cross your own plants or keep seed?</value>
+    <value>Pollinating your own plants for seed?</value>
     <comment>Quiet line at the end of the Propagations page, before there is a cross or a seed lot, followed by two links.</comment>
   </data>
   <data name="RecordCross" xml:space="preserve">
@@ -277,7 +277,7 @@
     <comment>Page title word while a cross loads.</comment>
   </data>
   <data name="ParentsHeading" xml:space="preserve">
-    <value>The cross</value>
+    <value>Parents and pollination</value>
     <comment>Heading of the card with the parents and how the cross was done.</comment>
   </data>
   <data name="OutcomeHeading" xml:space="preserve">
@@ -711,5 +711,21 @@
   <data name="CompareBack" xml:space="preserve">
     <value>Back to the cross</value>
     <comment>Back link on the comparison page.</comment>
+  </data>
+  <data name="QuickTook" xml:space="preserve">
+    <value>It took</value>
+    <comment>Button on a cross with no outcome yet that records that it took.</comment>
+  </data>
+  <data name="QuickDidNotTake" xml:space="preserve">
+    <value>It didn't take</value>
+    <comment>Button on a cross with no outcome yet that records that it did not take.</comment>
+  </data>
+  <data name="EditMore" xml:space="preserve">
+    <value>More about how it was done</value>
+    <comment>Heading of the folded group on the cross form with method, pollen, bagging, flowers and note.</comment>
+  </data>
+  <data name="EditIntro" xml:space="preserve">
+    <value>A cross is a pollination: the pollen of one plant put on the flower of another. Write it down the day you do it, and add what came of it later.</value>
+    <comment>Line at the top of the form for a new cross that says what a cross is.</comment>
   </data>
 </root>

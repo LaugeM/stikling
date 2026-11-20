@@ -21,6 +21,16 @@ else
         <h1>@view.DisplayName</h1>
         <IfCan Edit><a class="btn btn-link btn-sm link-action" href="crosses/@cross.Id/edit">@Strings.Common.Edit</a></IfCan>
     </div>
+    <IfCan Edit>
+        @if (cross.Outcome is null)
+        {
+            @* The thing done again and again: say how it went without opening the whole form *@
+            <div class="form-actions cross-actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SetOutcomeAsync(CrossOutcome.Took)">@Strings.Crosses.QuickTook</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SetOutcomeAsync(CrossOutcome.DidNotTake)">@Strings.Crosses.QuickDidNotTake</button>
+            </div>
+        }
+    </IfCan>
     @if (view.HasWorkingName)
     {
         <p class="detail-sub">@view.Title</p>
@@ -92,8 +102,11 @@ else
     <section class="detail-card">
         <h2>@Strings.Crosses.OutcomeHeading</h2>
         <dl class="detail-list">
-            <dt>@Strings.Crosses.Outcome</dt>
-            <dd>@CrossLabels.Outcome(cross.Outcome)</dd>
+            @if (cross.Outcome is not null)
+            {
+                <dt>@Strings.Crosses.Outcome</dt>
+                <dd>@CrossLabels.Outcome(cross.Outcome)</dd>
+            }
             @if (cross.PodsSet is { } pods)
             {
                 <dt>@Strings.Crosses.PodsSet</dt>
@@ -200,6 +213,7 @@ else
     private bool comparing;
     private readonly HashSet<Guid> picked = [];
     private PollenView? usedPollen;
+    private bool busy;
 
     private DateOnly Today => Time.Today();
 
@@ -232,6 +246,25 @@ else
     private void GoCompare() =>
         Navigation.NavigateTo($"crosses/{Id}/compare?ids={string.Join(",", picked)}");
 
+    private async Task SetOutcomeAsync(CrossOutcome outcome)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            var cross = view.Cross.Copy();
+            cross.Outcome = outcome;
+            await Crosses.SaveAsync(cross);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
     private static bool Edited(Cross cross) =>
         cross.Outcome is not null || cross.PodsSet is not null || cross.SeedRipeOn is not null || cross.SeedAmount is not null;
 
@@ -249,7 +282,8 @@ else
             parts.Add(F(Strings.Crosses.CountSown, seedlings.Sown));
         if (seedlings.CameUp > 0)
             parts.Add(F(Strings.Crosses.CountCameUp, seedlings.CameUp));
-        parts.Add(F(Strings.Crosses.CountAlive, seedlings.Alive));
+        if (seedlings.Alive > 0 || seedlings.Sown == 0)
+            parts.Add(F(Strings.Crosses.CountAlive, seedlings.Alive));
         return string.Join(" · ", parts);
     }
 }

@@ -8,7 +8,14 @@
         }
         <div class="item-meta">
             <span>@Labels.Date(Row.View.Cross.PollinatedOn)</span>
-            <span class="@(Row.View.Cross.Outcome == CrossOutcome.Took ? "cross-took" : null)">@CrossLabels.Outcome(Row.View.Cross.Outcome)</span>
+            @if (Row.View.Cross.Outcome is null)
+            {
+                <span>@DaysAgo()</span>
+            }
+            else
+            {
+                <span class="@(Row.View.Cross.Outcome == CrossOutcome.Took ? "cross-took" : null)">@CrossLabels.Outcome(Row.View.Cross.Outcome)</span>
+            }
             @if (Row.Seedlings.Sown > 0)
             {
                 <span>@F(Strings.Crosses.CountSown, Row.Seedlings.Sown)</span>
@@ -22,6 +29,15 @@
 </a>
 
 @code {
+    [Inject]
+    private TimeProvider Time { get; set; } = default!;
+
+    private string DaysAgo()
+    {
+        var days = Time.Today().DayNumber - Row.View.Cross.PollinatedOn.DayNumber;
+        return days <= 0 ? Strings.Crosses.Today : Plural.Of(days, Strings.Crosses.DaysAgo_One, Strings.Crosses.DaysAgo_Other);
+    }
+
     [Parameter, EditorRequired]
     public required CrossRow Row { get; set; }
 }

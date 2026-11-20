@@ -24,7 +24,7 @@ else
     <EditForm Model="cross" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
-            <div class="alert alert-danger" role="alert">
+            <div class="alert alert-danger" role="alert" tabindex="-1" @ref="errorBox">
                 @foreach (var error in errors)
                 {
                     <div>@error</div>
@@ -34,6 +34,10 @@ else
 
         <fieldset>
             <legend>@Strings.Crosses.EditParents</legend>
+            @if (IsNew)
+            {
+                <p class="form-text">@Strings.Crosses.EditIntro</p>
+            }
             <ParentPicker Id="pod-parent" Label="@Strings.Crosses.PodParent" Plants="plants"
                           @bind-PlantId="cross.PodParentPlantId" @bind-Name="cross.PodParentName" />
             <ParentPicker Id="pollen-parent" Label="@Strings.Crosses.PollenParent" Plants="plants"
@@ -55,6 +59,7 @@ else
                 <label class="form-label" for="pollinated-on">@Strings.Crosses.PollinatedOn</label>
                 <InputDate id="pollinated-on" class="form-control" @bind-Value="cross.PollinatedOn" max="@Time.Today().ToString("yyyy-MM-dd")" />
             </div>
+            <FormSection Title="@Strings.Crosses.EditMore" Summary="@MoreSummary" Open="@(!IsNew && HasMore)">
             <div class="mb-3">
                 <label class="form-label" for="cross-method">@Strings.Crosses.Method</label>
                 <select id="cross-method" class="form-select" value="@(cross.Method?.ToString() ?? "")" @onchange="e => SetMethod(e.Value?.ToString())">
@@ -101,8 +106,11 @@ else
                 <label class="form-label" for="cross-note">@Strings.Crosses.Note</label>
                 <InputTextArea id="cross-note" class="form-control" rows="3" @bind-Value="cross.Note" placeholder="@Strings.Crosses.NotePlaceholder" />
             </div>
+            </FormSection>
         </fieldset>
 
+        @if (!IsNew)
+        {
         <fieldset>
             <legend>@Strings.Crosses.EditOutcome</legend>
             <div class="mb-3">
@@ -141,6 +149,7 @@ else
                 </div>
             </div>
         </fieldset>
+        }
 
         <div class="form-actions">
             <button type="submit" class="btn btn-primary" disabled="@saving">@Strings.Common.Save</button>
@@ -189,9 +198,35 @@ else
     private bool confirmDelete;
     private List<string> errors = [];
     private (Guid?, Guid?, Guid?, Guid?) loadedFor;
+    private ElementReference errorBox;
+    private bool focusErrors;
+
+    // After a failed check the alert is far from the Save button on a phone, so it takes focus and scrolls into view
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusErrors && errors.Count > 0)
+        {
+            focusErrors = false;
+            try
+            {
+                await errorBox.FocusAsync();
+            }
+            catch (Exception)
+            {
+                // The box is gone or the page is closing; nothing to focus
+            }
+        }
+    }
     private bool loaded;
 
     private bool IsNew => Id is null;
+
+    private bool HasMore =>
+        cross is { } c && (c.Method is not null || c.PollenIsStored || c.Bagged is not null || c.FlowersPollinated is not null || !string.IsNullOrWhiteSpace(c.Note));
+
+    private string? MoreSummary => cross is { } c && HasMore
+        ? string.Join(" · ", new[] { c.Method is { } m ? CrossLabels.Method(m) : null, c.PollenIsStored ? Strings.Crosses.PollenStored : null }.OfType<string>())
+        : null;
 
     private string BackHref => IsNew
         ? (PodId ?? PollenId) is { } plantId ? $"plants/{plantId}" : "crosses"
@@ -298,7 +333,10 @@ else
 
         errors = [.. cross.Validate(Time.Today())];
         if (errors.Count > 0)
+        {
+            focusErrors = true;
             return;
+        }
 
         saving = true;
         try
