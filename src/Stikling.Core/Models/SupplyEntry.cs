@@ -11,7 +11,13 @@ public enum SupplyEntryKind
     Out,
 
     /// <summary>Counted what is left.</summary>
-    Counted
+    Counted,
+
+    /// <summary>
+    /// Used up some: mixing a batch of soil or a can of feed took it off. An older version of the app
+    /// doesn't know the name, so it ignores these and shows a higher level until it updates.
+    /// </summary>
+    Used
 }
 
 /// <summary>
@@ -35,6 +41,12 @@ public sealed class SupplyEntry : Entity
 
     /// <summary>Bought only.</summary>
     public Guid? SellerId { get; set; }
+
+    /// <summary>
+    /// Used only: the batch mixing or can of feed it was taken off for. When that record is deleted, the
+    /// entry is deleted with it and the level goes back up.
+    /// </summary>
+    public Guid? UsedForId { get; set; }
 
     public SupplyEntry Copy() => (SupplyEntry)MemberwiseClone();
 

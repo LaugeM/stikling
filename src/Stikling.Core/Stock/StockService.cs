@@ -19,7 +19,9 @@ public sealed class StockService(
     IShoppingItemRepository items,
     IProductRepository products,
     IPotRepository pots,
-    TimeProvider time)
+    TimeProvider time,
+    SoilMixes.IBatchMixingRepository? batchMixings = null,
+    Feeds.IFeedMixingRepository? feedMixings = null)
 {
     public async Task<StockView> GetAsync() => StockView.Build(
         await supplies.GetAllAsync(),
@@ -28,7 +30,68 @@ public sealed class StockService(
         await products.GetAllAsync(),
         await pots.GetAllAsync(),
         time.LocalDay,
-        time.Today());
+        time.Today(),
+        await GoneSourcesAsync());
+
+    /// <summary>
+    /// Takes what a batch or a can used off the supplies: one Used entry for each line that has an amount,
+    /// pointing at the mixing it was for. A line with no amount, or none left after unticking, adds
+    /// nothing. Taking off again for the same mixing replaces the earlier entries, so confirming twice
+    /// doesn't count it twice.
+    /// </summary>
+    public async Task<IReadOnlyList<SupplyEntry>> TakeOffAsync(Guid sourceId, IEnumerable<TakeoffLine> lines)
+    {
+        await ReturnAsync(sourceId);
+
+        var saved = new List<SupplyEntry>();
+        foreach (var line in lines.Where(l => l.Amount is > 0))
+        {
+            var entry = new SupplyEntry
+            {
+                SupplyId = line.SupplyId,
+                At = time.GetLocalNow(),
+                Kind = SupplyEntryKind.Used,
+                Amount = line.Amount,
+                UsedForId = sourceId
+            };
+            await entries.SaveAsync(entry);
+            saved.Add(entry);
+        }
+        return saved;
+    }
+
+    /// <summary>Takes back everything a mixing took off, so the levels go back up. The entries are soft deleted.</summary>
+    public async Task ReturnAsync(Guid sourceId)
+    {
+        foreach (var entry in (await entries.GetAllAsync()).Where(e => e.UsedForId == sourceId && !e.IsDeleted))
+            await entries.DeleteAsync(entry.Id);
+    }
+
+    /// <summary>
+    /// The batch mixings and cans of feed that are deleted. Their Used entries are ignored too, which
+    /// covers an entry that arrives from another device after the mixing was deleted here.
+    /// </summary>
+    private async Task<HashSet<Guid>> GoneSourcesAsync()
+    {
+        var live = new HashSet<Guid>();
+        var known = false;
+        if (batchMixings is not null)
+        {
+            live.UnionWith((await batchMixings.GetAllAsync()).Select(m => m.Id));
+            known = true;
+        }
+        if (feedMixings is not null)
+        {
+            live.UnionWith((await feedMixings.GetAllAsync()).Select(m => m.Id));
+            known = true;
+        }
+
+        // The repositories only list what isn't deleted, so a source that isn't live is gone or never
+        // seen. Both mean the entry should not count.
+        return known
+            ? [.. (await entries.GetAllAsync()).Where(e => e.UsedForId is { } id && !live.Contains(id)).Select(e => e.UsedForId!.Value)]
+            : [];
+    }
 
     /// <summary>
     /// Saves a supply. One for a product always gets the product's fixed id, so a second device making

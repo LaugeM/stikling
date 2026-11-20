@@ -64,6 +64,9 @@ public sealed class BackupData
     public List<Cross> Crosses { get; set; } = [];
     public List<SeedLot> SeedLots { get; set; } = [];
     public List<Pollen> Pollen { get; set; } = [];
+    public List<SoilBatch> SoilBatches { get; set; } = [];
+    public List<BatchMixing> BatchMixings { get; set; } = [];
+    public List<FeedMixing> FeedMixings { get; set; } = [];
 
     /// <summary>The photos' list on its own, since their images are saved and restored after the records.</summary>
     // Before Lists, which uses it: static fields are set in the order they are written
@@ -123,6 +126,9 @@ public sealed class BackupData
         List(RecordKinds.Crosses, d => d.Crosses, (d, l) => d.Crosses = l),
         List(RecordKinds.SeedLots, d => d.SeedLots, (d, l) => d.SeedLots = l),
         List(RecordKinds.Pollen, d => d.Pollen, (d, l) => d.Pollen = l),
+        List(RecordKinds.SoilBatches, d => d.SoilBatches, (d, l) => d.SoilBatches = l),
+        List(RecordKinds.BatchMixings, d => d.BatchMixings, (d, l) => d.BatchMixings = l),
+        List(RecordKinds.FeedMixings, d => d.FeedMixings, (d, l) => d.FeedMixings = l),
     ];
 
     private static BackupList<T> List<T>(RecordKind<T> kind, Func<BackupData, List<T>> get, Action<BackupData, List<T>> set)
@@ -177,7 +183,10 @@ public sealed class BackupData
         Files.Count(f => !f.IsDeleted),
         Crosses.Count(c => !c.IsDeleted),
         SeedLots.Count(l => !l.IsDeleted),
-        Pollen.Count(p => !p.IsDeleted));
+        Pollen.Count(p => !p.IsDeleted),
+        SoilBatches.Count(b => !b.IsDeleted),
+        BatchMixings.Count(m => !m.IsDeleted),
+        FeedMixings.Count(m => !m.IsDeleted));
 }
 
 public sealed record BackupCounts(
@@ -225,4 +234,7 @@ public sealed record BackupCounts(
     int Files,
     int Crosses,
     int SeedLots,
-    int Pollen);
+    int Pollen,
+    int SoilBatches,
+    int BatchMixings,
+    int FeedMixings);

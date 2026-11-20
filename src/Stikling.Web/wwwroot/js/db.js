@@ -9,7 +9,7 @@
 const MAIN_DB = "stikling";
 const OPEN_KEY = "stikling-open-collection";
 const GUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/;
-const DB_VERSION = 35;
+const DB_VERSION = 36;
 
 // The stores the first version created. Later versions add theirs in their own
 // upgrade block below, so don't add to this list.
@@ -200,6 +200,13 @@ function openNamed(name) {
             if (event.oldVersion < 35) {
                 // Pollen kept for crosses, one record each
                 db.createObjectStore("pollen", { keyPath: "id" });
+            }
+            if (event.oldVersion < 36) {
+                // Batches of soil mixed from a mix, each mixing and top-up as a record of its own, and
+                // the cans of feed that were mixed. Mixing takes supplies off the stock with entries
+                db.createObjectStore("soilBatches", { keyPath: "id" });
+                db.createObjectStore("batchMixings", { keyPath: "id" });
+                db.createObjectStore("feedMixings", { keyPath: "id" });
             }
         };
 

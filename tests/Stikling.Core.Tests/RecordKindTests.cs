@@ -124,7 +124,7 @@ public class RecordKindTests
         foreach (var list in BackupData.Lists)
             first += await list.RestoreAsync(data, empty);
 
-        Assert.Equal(new MergeCounts(45, 0, 0, 0), first);
+        Assert.Equal(new MergeCounts(48, 0, 0, 0), first);
         foreach (var kind in RecordKinds.All)
             Assert.Equal([ids[kind.Name]], empty.IdsOf(kind));
 
@@ -132,7 +132,7 @@ public class RecordKindTests
         foreach (var list in BackupData.Lists)
             second += await list.RestoreAsync(data, empty);
 
-        Assert.Equal(new MergeCounts(0, 0, 0, 45), second);
+        Assert.Equal(new MergeCounts(0, 0, 0, 48), second);
     }
 
     [Fact]
@@ -156,7 +156,7 @@ public class RecordKindTests
             "plants,propagations,propagationCareLogs,timeline,photos,careLogs,pestCases,pestTreatments,pots,soilMixes,"
             + "products,feeds,treatmentRecipes,places,putOffs,growLights,receivedHistories,awayStretches,sitterSheets,"
             + "floweringMarks,problems,problemUpdates,wishes,sellers,ownCareKinds,ownFields,careIntervals,treatmentPlans,"
-            + "orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots,pollen,settings",
+            + "orders,orderItems,leaves,photoMarks,supplies,supplyEntries,shoppingItems,measurements,ownMeasureKinds,photoMarkups,placeReadings,nameNotes,files,crosses,seedLots,pollen,soilBatches,batchMixings,feedMixings,settings",
             string.Join(",", SyncKinds.All));
     }
 

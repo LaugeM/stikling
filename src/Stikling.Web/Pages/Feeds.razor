@@ -3,6 +3,9 @@
 @inject IFeedRepository Repository
 @inject FeedService FeedService
 @inject IProductRepository ProductRepository
+@inject FeedMixingService CanService
+@inject StockService StockService
+@inject TimeProvider Time
 
 <PageTitle>@Strings.Supplies.FeedsPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -23,6 +26,11 @@
             <div>@error</div>
         }
     </div>
+}
+
+@if (savedNote is not null)
+{
+    <p class="settings-hint" role="status">@savedNote</p>
 }
 
 @if (draft is not null)
@@ -176,6 +184,29 @@ else
                                 @Given(use)
                             }
                         </div>
+                        @if (lastMixed.TryGetValue(use.Feed.Id, out var lastCan))
+                        {
+                            <div class="feed-use">
+                                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(cansFor == use.Feed.Id)"
+                                        @onclick="() => ToggleCansAsync(use.Feed)">@F(Strings.Supplies.CanLastMixed, Labels.Date(lastCan))</button>
+                            </div>
+                        }
+                        @if (cansFor == use.Feed.Id)
+                        {
+                            <ul class="feed-plants">
+                                @foreach (var can in cans)
+                                {
+                                    <li>
+                                        <span>@Labels.Date(can.MixedOn)</span>
+                                        <span class="feed-plant-dates">· @Doses.Water(can.Litres)</span>
+                                        <IfCan Edit>
+                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" aria-label="@($"{Strings.Supplies.CanRemove}, {Labels.Date(can.MixedOn)}")"
+                                                @onclick="() => RemoveCanAsync(use.Feed, can)">@Strings.Supplies.CanRemove</button>
+                                        </IfCan>
+                                    </li>
+                                }
+                            </ul>
+                        }
 
                         @if (showing == use.Feed.Id)
                         {
@@ -201,6 +232,12 @@ else
                                 <label for="@id">@Strings.Supplies.FeedsWater</label>
                                 <WaterInput Id="@id" Placeholder="@Strings.Supplies.FeedsWaterPlaceholder" @bind-Litres="litres" />
                             </div>
+                            <IfCan Edit>
+                            <div class="feed-can">
+                                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@(busy || litres is not > 0)"
+                                        @onclick="() => MixedCanAsync(use.Feed)">@Strings.Common.Save</button>
+                            </div>
+                            </IfCan>
                         }
 
                         <ol class="feed-recipe">
@@ -226,6 +263,10 @@ else
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => ToggleMixing(use.Feed)">@(measuring ? Strings.Common.Done : Strings.Supplies.FeedsMixBatch)</button>
                             <IfCan Edit>
+                            <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@measuring"
+                                    @onclick="() => OpenMixing(use.Feed)">@Strings.Supplies.CanMixed</button>
+                            </IfCan>
+                            <IfCan Edit>
                             <button type="button" class="btn btn-link btn-sm link-action"
                                     @onclick="() => StartEdit(use.Feed)">@Strings.Common.Edit</button>
                             <button type="button" class="btn btn-link btn-sm link-action"
@@ -238,6 +279,13 @@ else
         </ul>
     </section>
 }
+
+<Sheet Title="@Strings.Stock.TakeoffTitle" Open="takeoffOpen" OpenChanged="open => { takeoffOpen = open; }">
+    @if (takeoffFor is not null)
+    {
+        <TakeoffSheet Lines="takeoffLines" Subtitle="@($"{takeoffFor.FeedName} · {Labels.Date(takeoffFor.MixedOn)} · {Doses.Water(takeoffFor.Litres)}")" OnConfirm="ConfirmTakeoffAsync" OnSkip="SkipTakeoff" />
+    }
+</Sheet>
 
 @code {
     [CascadingParameter]
@@ -268,6 +316,17 @@ else
     private Guid? mixing;
     private decimal? litres;
 
+    // When each feed was last mixed, and the cans of the feed whose list is open
+    private IReadOnlyDictionary<Guid, DateOnly> lastMixed = new Dictionary<Guid, DateOnly>();
+    private string? savedNote;
+    private Guid? cansFor;
+    private IReadOnlyList<FeedMixing> cans = [];
+
+    // The check sheet after a can: what comes off the stock, once it is confirmed
+    private bool takeoffOpen;
+    private FeedMixing? takeoffFor;
+    private IReadOnlyList<TakeoffLine> takeoffLines = [];
+
     protected override Task OnInitializedAsync() => LoadAsync();
 
     private async Task LoadAsync()
@@ -276,6 +335,7 @@ else
             .OrderBy(p => p.Name, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
         uses = await FeedService.GetAllAsync();
+        lastMixed = await CanService.GetLastMixedAsync();
         loading = false;
     }
 
@@ -321,6 +381,88 @@ else
     {
         mixing = mixing == feed.Id ? null : feed.Id;
         confirming = null;
+    }
+
+    private void OpenMixing(Feed feed)
+    {
+        savedNote = null;
+        mixing = feed.Id;
+        confirming = null;
+    }
+
+    /// <summary>Saves a can with the water in it, then asks what comes off the stock when any product has a supply.</summary>
+    private async Task MixedCanAsync(Feed feed)
+    {
+        if (litres is not > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            var can = await CanService.MixAsync(feed, litres.Value, Time.Today());
+            lastMixed = await CanService.GetLastMixedAsync();
+            if (cansFor == feed.Id)
+                cans = await CanService.GetForFeedAsync(feed.Id);
+            savedNote = F(Strings.Supplies.CanSaved, feed.Name, Doses.Water(litres.Value));
+
+            takeoffLines = await CanService.TakeoffAsync(can);
+            if (takeoffLines.Count > 0)
+            {
+                takeoffFor = can;
+                takeoffOpen = true;
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ConfirmTakeoffAsync(IReadOnlyList<TakeoffLine> lines)
+    {
+        if (takeoffFor is { } can)
+            await StockService.TakeOffAsync(can.Id, lines);
+        SkipTakeoff();
+    }
+
+    private void SkipTakeoff()
+    {
+        takeoffOpen = false;
+        takeoffFor = null;
+    }
+
+    private async Task ToggleCansAsync(Feed feed)
+    {
+        if (cansFor == feed.Id)
+        {
+            cansFor = null;
+            return;
+        }
+
+        cans = await CanService.GetForFeedAsync(feed.Id);
+        cansFor = feed.Id;
+    }
+
+    /// <summary>Takes a can back, with what it took off the stock, so the levels go up again.</summary>
+    private async Task RemoveCanAsync(Feed feed, FeedMixing can)
+    {
+        busy = true;
+        try
+        {
+            await CanService.DeleteAsync(can.Id);
+            cans = await CanService.GetForFeedAsync(feed.Id);
+            lastMixed = await CanService.GetLastMixedAsync();
+            if (cans.Count == 0)
+                cansFor = null;
+        }
+        finally
+        {
+            busy = false;
+        }
     }
 
     private void StartNew()

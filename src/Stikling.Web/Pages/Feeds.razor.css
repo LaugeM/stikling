@@ -138,3 +138,16 @@
     margin-left: 0.3rem;
     font-size: 0.85rem;
 }
+
+.feed-can {
+    margin-top: 0.5rem;
+}
+
+.feed-can .btn {
+    min-height: 44px;
+}
+
+.feed-water ::deep .form-control,
+.feed-water ::deep .form-select {
+    min-height: 44px;
+}

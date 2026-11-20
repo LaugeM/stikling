@@ -22,6 +22,12 @@ public sealed class MixIngredient
     public string Name { get; set; } = "";
 
     public decimal? Amount { get; set; }
+
+    /// <summary>
+    /// The supply this ingredient comes out of, set once on the mix. It doesn't change the recipe, so
+    /// linking one is not an edit of the mix. A supply that is gone is ignored.
+    /// </summary>
+    public Guid? SupplyId { get; set; }
 }
 
 /// <summary>One ingredient and how many litres of it go into a batch.</summary>
@@ -96,6 +102,18 @@ public sealed class SoilMix : Entity
         return [.. named.Select(i => new MixShare(i.Name.Trim(), litres * i.Amount!.Value / total))];
     }
 
+    /// <summary>
+    /// Every named ingredient with the litres of it in a batch of that size, or null for the litres when
+    /// that can't be worked out (see <see cref="Batch"/>). The ingredient is the mix's own, so its
+    /// supply link comes along.
+    /// </summary>
+    public IReadOnlyList<(MixIngredient Ingredient, decimal? Litres)> Portions(decimal litres)
+    {
+        var named = Named().ToList();
+        var shares = Batch(litres);
+        return [.. named.Select((ingredient, index) => (ingredient, shares?[index].Litres))];
+    }
+
     /// <summary>True when a batch can be worked out, which is when the calculator is worth showing.</summary>
     [JsonIgnore]
     public bool CanMeasureOut => Batch(1) is not null;
@@ -112,7 +130,7 @@ public sealed class SoilMix : Entity
     public SoilMix Copy()
     {
         var copy = (SoilMix)MemberwiseClone();
-        copy.Ingredients = [.. Ingredients.Select(i => new MixIngredient { Name = i.Name, Amount = i.Amount })];
+        copy.Ingredients = [.. Ingredients.Select(i => new MixIngredient { Name = i.Name, Amount = i.Amount, SupplyId = i.SupplyId })];
         return copy;
     }
 
@@ -149,7 +167,8 @@ public sealed class SoilMix : Entity
         Ingredients = [.. Named().Select(i => new MixIngredient
         {
             Name = i.Name.Trim(),
-            Amount = Unit == MixUnit.None ? null : i.Amount
+            Amount = Unit == MixUnit.None ? null : i.Amount,
+            SupplyId = i.SupplyId
         })];
     }
 

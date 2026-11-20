@@ -99,6 +99,9 @@ public static class RecordKinds
     public static readonly RecordKind<Cross> Crosses = new("crosses");
     public static readonly RecordKind<SeedLot> SeedLots = new("seedLots");
     public static readonly RecordKind<Pollen> Pollen = new("pollen");
+    public static readonly RecordKind<SoilBatch> SoilBatches = new("soilBatches");
+    public static readonly RecordKind<BatchMixing> BatchMixings = new("batchMixings");
+    public static readonly RecordKind<FeedMixing> FeedMixings = new("feedMixings");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -152,6 +155,9 @@ public static class RecordKinds
         Crosses,
         SeedLots,
         Pollen,
+        SoilBatches,
+        BatchMixings,
+        FeedMixings,
         Settings,
     ];
 }

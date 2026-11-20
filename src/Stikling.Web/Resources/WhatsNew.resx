@@ -37,9 +37,6 @@
   <data name="ComingNextHint" xml:space="preserve">
     <value>In the order they are planned. Plans can change, so there are no dates.</value>
   </data>
-  <data name="ComingNextBatches" xml:space="preserve">
-    <value>Batches of soil mixed from a recipe, so a plant shows what it was actually potted in, and mixing takes it off your supplies.</value>
-  </data>
   <data name="ComingNextTranslating" xml:space="preserve">
     <value>A way for others to help translate Stikling.</value>
     <comment>The planned items are listed in the order they are planned.</comment>
@@ -360,6 +357,10 @@
   </data>
   <data name="Nov2026Pollen" xml:space="preserve">
     <value>Crossbreeding is complete. Keep pollen with where it came from, when you collected it and where it is kept. Today shows a plant coming into flower with the pollen you have stored from other plants of its genus, add traits to plants and seedlings, and compare the seedlings from one cross side by side.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026Batches" xml:space="preserve">
+    <value>Mix a dated batch of soil from a mix and top it up as it runs low, and pick the batch a plant was potted in. Mixing a batch of soil or a can of feed can take what went into it off your stock, once you have checked the amounts.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
   </data>
 </root>

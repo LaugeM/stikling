@@ -1424,7 +1424,7 @@
     <comment>Question in the "Pots, mixes and fertilisers" part of the Help page.</comment>
   </data>
   <data name="SuppliesStockShoppingA1" xml:space="preserve">
-    <value>Under Supplies, Stock keeps the loose things you use, like LECA, perlite, fertiliser and sticky traps. Mark one as running low or out, and it lands on the Shopping list. In the shop, tick things off as they go in the basket, and the app writes down that you bought them. Tap a ticked line afterwards to add how much, what it cost and where it came from, if you want to, or tap Undo to take the tick back. Pots are counted on the Pots page, and Add to shopping list there puts one on the list. A fertiliser you saved as a product can be marked as running low on the Products page.</value>
+    <value>Under Supplies, Stock keeps the loose things you use, like LECA, perlite, fertiliser and sticky traps. Mark one as running low or out, and it lands on the Shopping list. In the shop, tick things off as they go in the basket, and the app writes down that you bought them. Tap a ticked line afterwards to add how much, what it cost and where it came from, if you want to, or tap Undo to take the tick back. When you mix a batch of soil or a can of feed, the app can take what went into it off the stock, after you check the amounts. The Stock page shows the new amount once you have counted that supply. Pots are counted on the Pots page, and Add to shopping list there puts one on the list. A fertiliser you saved as a product can be marked as running low on the Products page.</value>
     <comment>Answer to "How do I keep track of supplies and what to buy?" on the Help page.</comment>
   </data>
   <data name="WithSoilMixQ" xml:space="preserve">
@@ -1432,7 +1432,7 @@
     <comment>Question in the "Pots, mixes and fertilisers" part of the Help page.</comment>
   </data>
   <data name="WithSoilMixA1" xml:space="preserve">
-    <value>Save it under a name with what is in it. On the Soil mixes page, tap the number of plants next to a mix to see which plants are in it, and tap a plant to open it. If every ingredient has an amount, tap Measure out, type how much mix you want, and the app says how much of each ingredient to use.</value>
+    <value>Save it under a name with what is in it. On the Soil mixes page, tap the number of plants next to a mix to see which plants are in it, and tap a plant to open it. If every ingredient has an amount, tap Measure out, type how much mix you want, and the app says how much of each ingredient to use. Mix a batch saves a dated batch of that mix, and Top up mixes more into the same one. When you add a plant or pot up, the newest batch that is not used up is filled in, and you can pick another.</value>
     <comment>Answer to "What can I do with a soil mix?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="DifferenceBetweenProductFeedQ" xml:space="preserve">
@@ -2202,5 +2202,21 @@
   <data name="OutsidePagesA1" xml:space="preserve">
     <value>A few. At the end of Guides there is a short list of pages from the Royal Horticultural Society, universities and plant societies, for what the guides don't cover: a page for each pest, one for each plant group, taking cuttings and potting mixes. A pest case, a plant in one of the plant groups and the genus in the dictionary link to the one that fits, beside the guide. Each was read before it was added, and the list is kept short. They open in a new tab and need a connection, unlike the guides. In Danish a Danish page is shown instead where a good one was found, and the rest are in English.</value>
     <comment>Answer to "Do the guides link to pages on other sites?" on the Help page.</comment>
+  </data>
+  <data name="MixedCanQ" xml:space="preserve">
+    <value>How do I take a fertiliser off the stock when I mix a feed?</value>
+    <comment>Question in the &quot;Pots, mixes and fertilisers&quot; part of the Help page.</comment>
+  </data>
+  <data name="MixedCanA1" xml:space="preserve">
+    <value>Under Feeds, tap Mixed a can on the feed and say how much water is in the can. The app works out how much of each product went in, from the doses, and lists what comes off each product&apos;s supply under Stock. Change an amount or untick a line, then confirm. Nothing comes off until you do. A product that is counted in something the dose can&apos;t be turned into, like pieces, is left empty for you to fill in. Giving the feed to a plant doesn&apos;t change the stock, so watering ten plants from one can counts once. Under the feed you can see when it was last mixed, and Remove on a can puts back what it took off.</value>
+    <comment>Answer to &quot;How do I take a fertiliser off the stock when I mix a feed?&quot; on the Help page.</comment>
+  </data>
+  <data name="SoilBatchQ" xml:space="preserve">
+    <value>Can I keep track of the soil I mixed?</value>
+    <comment>Question in the &quot;Pots, mixes and fertilisers&quot; part of the Help page.</comment>
+  </data>
+  <data name="SoilBatchA1" xml:space="preserve">
+    <value>Yes. On the Soil mixes page, tap Mix a batch on a mix and say how much you mixed. It becomes a dated batch, and Top up mixes more into the same one as it runs low. Mark a batch as Used up when it is gone. A plant or cutting can say which batch it was potted in, and its page shows the date. To take what went into a batch off the stock, tap Link to stock on the mix once and say which supply each ingredient comes out of. This doesn&apos;t change the recipe. After a batch or a top-up the app lists what comes off each supply, from the recipe and the amount. Change an amount or untick a line, then confirm. If a supply is counted in kilograms or pieces and the recipe is in parts of a volume, the line is left empty for you to fill in.</value>
+    <comment>Answer to &quot;Can I keep track of the soil I mixed?&quot; on the Help page.</comment>
   </data>
 </root>

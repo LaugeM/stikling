@@ -236,6 +236,9 @@ public sealed class Plant : Entity
     /// <summary>The soil mix it was potted in, when it is one you have saved.</summary>
     public Guid? SoilMixId { get; set; }
 
+    /// <summary>The batch of that mix it was potted in, when one was picked.</summary>
+    public Guid? SoilBatchId { get; set; }
+
     /// <summary>
     /// The saved feed given with the water, so ticking Watered logs it too. Null means off, which
     /// is what every plant from before this existed reads as. A feed that is deleted counts as off.
@@ -528,6 +531,7 @@ public sealed class Plant : Entity
         PricePaid = PricePaid,
         Medium = Medium,
         SoilMixId = SoilMixId,
+        SoilBatchId = SoilBatchId,
         WateringFeedId = WateringFeedId,
         WateringFeedEvery = WateringFeedEvery,
         WaterBy = WaterBy,

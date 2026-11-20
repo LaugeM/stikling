@@ -1,0 +1,94 @@
+@* The check sheet after mixing a batch of soil or a can of feed: what comes off each linked supply, worked
+   out from the recipe and the size. Each line can be changed or unticked, and nothing comes off until
+   it is confirmed. A line that couldn't be worked out is empty, for the person to fill in or untick. The page that shows it
+   owns the Sheet and its title. *@
+
+<div class="takeoff-sheet">
+    @if (!string.IsNullOrWhiteSpace(Subtitle))
+    {
+        <p class="takeoff-for">@Subtitle</p>
+    }
+    <p class="settings-hint">@Strings.Stock.TakeoffIntro</p>
+
+    <ul class="takeoff-lines">
+        @foreach (var row in rows)
+        {
+            var tick = $"{idPrefix}-tick-{row.Index}";
+            var amount = $"{idPrefix}-amount-{row.Index}";
+            <li class="takeoff-line @(row.Ticked ? null : "off")">
+                <div class="form-check">
+                    <input class="form-check-input" type="checkbox" id="@tick" @bind="row.Ticked" />
+                    <label class="form-check-label" for="@tick">
+                        <span class="takeoff-supply">@row.Line.SupplyName</span>
+                        @if (!string.Equals(row.Line.What, row.Line.SupplyName, StringComparison.CurrentCultureIgnoreCase))
+                        {
+                            <span class="takeoff-what">@row.Line.What</span>
+                        }
+                    </label>
+                </div>
+                <div class="input-group input-group-sm takeoff-amount">
+                    <input id="@amount" class="form-control" type="number" inputmode="decimal" min="0" step="any"
+                           aria-label="@F(Strings.Stock.TakeoffAmountFor, row.Line.SupplyName)"
+                           disabled="@(!row.Ticked)" placeholder="@(row.Line.IsWorkedOut ? null : Strings.Stock.TakeoffFillIn)"
+                           @bind="row.Amount" />
+                    @if (row.Line.Unit is { } unit)
+                    {
+                        <span class="input-group-text">@Labels.Short(unit)</span>
+                    }
+                </div>
+                @if (!row.Line.IsWorkedOut && row.Ticked && row.Amount is null)
+                {
+                    <div class="form-text takeoff-note" role="status">@Strings.Stock.TakeoffNotWorkedOut</div>
+                }
+            </li>
+        }
+    </ul>
+
+    <div class="form-actions">
+        <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ConfirmAsync">@Strings.Stock.TakeoffConfirm</button>
+        <button type="button" class="btn btn-link" @onclick="() => OnSkip.InvokeAsync()">@Strings.Stock.TakeoffSkip</button>
+    </div>
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<TakeoffLine> Lines { get; set; } = [];
+
+    /// <summary>What was mixed, e.g. the day and size, so the lines can be read against it.</summary>
+    [Parameter]
+    public string? Subtitle { get; set; }
+
+    /// <summary>The ticked lines with the amounts as they were left. A line with no amount comes through empty.</summary>
+    [Parameter, EditorRequired]
+    public EventCallback<IReadOnlyList<TakeoffLine>> OnConfirm { get; set; }
+
+    [Parameter, EditorRequired]
+    public EventCallback OnSkip { get; set; }
+
+    private sealed class Row(int index, TakeoffLine line)
+    {
+        public int Index { get; } = index;
+        public TakeoffLine Line { get; } = line;
+        public bool Ticked { get; set; } = true;
+        public decimal? Amount { get; set; } = line.Amount;
+    }
+
+    private readonly string idPrefix = $"takeoff-{Guid.NewGuid():N}";
+    private List<Row> rows = [];
+    private bool busy;
+
+    protected override void OnInitialized() => rows = [.. Lines.Select((line, index) => new Row(index, line))];
+
+    private async Task ConfirmAsync()
+    {
+        busy = true;
+        try
+        {
+            await OnConfirm.InvokeAsync([.. rows.Where(r => r.Ticked).Select(r => r.Line with { Amount = r.Amount })]);
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

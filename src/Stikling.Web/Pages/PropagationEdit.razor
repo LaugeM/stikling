@@ -281,7 +281,7 @@ else
                 @if (propagation.Medium == GrowingMedium.Soil)
                 {
                     <div class="mb-3">
-                        <MixPicker @bind-Value="propagation.SoilMixId" Mixes="form!.Mixes" />
+                        <MixPicker @bind-Value="propagation.SoilMixId" @bind-BatchValue="propagation.SoilBatchId" Mixes="form!.Mixes" Batches="form!.Batches" />
                     </div>
                 }
                 <div class="mb-3">

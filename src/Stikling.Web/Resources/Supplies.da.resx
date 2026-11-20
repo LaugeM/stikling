@@ -664,7 +664,7 @@
     <value>Jordblandinger · Stikling</value>
   </data>
   <data name="MixesIntro" xml:space="preserve">
-    <value>De blandinger du selv laver, gemt under et navn. Mængder er valgfrie, så en blanding du laver på øjemål, er stadig værd at skrive ned. Skriv den ingrediens der er mest af, først.</value>
+    <value>De blandinger du selv laver, gemt under et navn. Mængder er valgfrie, så en blanding du laver på øjemål, er stadig værd at skrive ned. Skriv den ingrediens der er mest af, først. Med "Bland en batch" gemmer du en batch med dato, og kobler du ingredienserne til dine varer, bliver de trukket fra lageret.</value>
   </data>
   <data name="MixesAdd" xml:space="preserve">
     <value>Tilføj en blanding</value>
@@ -790,7 +790,7 @@
     <value>Gødninger · Stikling</value>
   </data>
   <data name="FeedsIntro" xml:space="preserve">
-    <value>De gødninger du blander, gemt under et navn, med hvert produkts dosis i den rækkefølge de kommer i vandet. Når du logger en gødning, kopieres indholdet over på plejeposten, så når du retter en gødning her, ændrer det ikke det du allerede har logget.</value>
+    <value>De gødninger du blander, gemt under et navn, med hvert produkts dosis i den rækkefølge de kommer i vandet. Når du logger en gødning, kopieres indholdet over på plejeposten, så når du retter en gødning her, ændrer det ikke det du allerede har logget. Tryk på Blandet en kande, når du har blandet en, så trækkes produkterne fra dit lager.</value>
   </data>
   <data name="FeedsEdit" xml:space="preserve">
     <value>Rediger gødning</value>
@@ -932,5 +932,71 @@
   </data>
   <data name="PotFitNoneFree" xml:space="preserve">
     <value>Ingen af dine yderpotter er ledige.</value>
+  </data>
+  <data name="CanMixed" xml:space="preserve">
+    <value>Blandet en kande</value>
+  </data>
+  <data name="CanLastMixed" xml:space="preserve">
+    <value>Sidst blandet {0}</value>
+  </data>
+  <data name="CanRemove" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="CanSaved" xml:space="preserve">
+    <value>Gemte en kande {0} med {1} vand.</value>
+  </data>
+  <data name="BatchesHeading" xml:space="preserve">
+    <value>Batches</value>
+  </data>
+  <data name="BatchMix" xml:space="preserve">
+    <value>Bland en batch</value>
+  </data>
+  <data name="BatchVolume" xml:space="preserve">
+    <value>Mængde</value>
+  </data>
+  <data name="BatchDay" xml:space="preserve">
+    <value>Blandet den</value>
+  </data>
+  <data name="BatchSave" xml:space="preserve">
+    <value>Gem batchen</value>
+  </data>
+  <data name="BatchTopUpSave" xml:space="preserve">
+    <value>Gem påfyldningen</value>
+  </data>
+  <data name="BatchTopUp" xml:space="preserve">
+    <value>Fyld på</value>
+  </data>
+  <data name="BatchLine" xml:space="preserve">
+    <value>{0}, {1}</value>
+  </data>
+  <data name="BatchUsedUpTag" xml:space="preserve">
+    <value>brugt op</value>
+  </data>
+  <data name="BatchMarkUsedUp" xml:space="preserve">
+    <value>Brugt op</value>
+  </data>
+  <data name="BatchUseAgain" xml:space="preserve">
+    <value>Brug igen</value>
+  </data>
+  <data name="BatchRemoveMixing" xml:space="preserve">
+    <value>Fjern</value>
+  </data>
+  <data name="BatchDeleteConfirm" xml:space="preserve">
+    <value>Slet batchen fra {0}? Planter og stiklinger i den står stadig i blandingen, men ikke længere i en bestemt batch. Det den trak fra lageret, bliver lagt tilbage.</value>
+  </data>
+  <data name="LinkAction" xml:space="preserve">
+    <value>Kobl til lager</value>
+  </data>
+  <data name="LinkHint" xml:space="preserve">
+    <value>Vælg hvilken vare hver ingrediens kommer fra, så den kan trækkes fra lageret, når du blander en batch. Det ændrer ikke opskriften.</value>
+  </data>
+  <data name="LinkNone" xml:space="preserve">
+    <value>Ikke koblet</value>
+  </data>
+  <data name="LinkSave" xml:space="preserve">
+    <value>Gem koblinger</value>
+  </data>
+  <data name="LinkNoSupplies" xml:space="preserve">
+    <value>Du har ingen varer endnu. Tilføj dem først på siden Lager.</value>
   </data>
 </root>

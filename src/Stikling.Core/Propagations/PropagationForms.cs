@@ -15,6 +15,7 @@ internal sealed record PropagationFormData(
     IReadOnlyList<Propagation> Propagations,
     Places Places,
     IReadOnlyList<SoilMix> Mixes,
+    IReadOnlyList<BatchOption> Batches,
     IReadOnlyList<PotUse> PotUses,
     ContainerList ContainerList,
     SellerList Sellers,
@@ -34,7 +35,8 @@ public sealed class PropagationForms(
     PotService potService,
     TimeProvider time,
     Lights.GrowLightService? growLights = null,
-    Crosses.CrossService? crosses = null)
+    Crosses.CrossService? crosses = null,
+    SoilBatchService? batchService = null)
 {
     internal PropagationService PropagationService => propagationService;
 
@@ -75,6 +77,7 @@ public sealed class PropagationForms(
             allPropagations,
             await roomService.GetPlacesAsync(),
             await mixes.GetAllAsync(),
+            batchService is null ? [] : await batchService.GetOptionsAsync(),
             potUses,
             new ContainerList(potUses.Select(u => u.Pot)),
             await sellerService.GetSellersAsync(),

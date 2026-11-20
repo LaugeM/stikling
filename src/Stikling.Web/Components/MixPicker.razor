@@ -1,5 +1,6 @@
 @* Picking a saved soil mix. Chips again, and no way out of the form: leaving a new plant's
-   form throws away the draft and any photos taken on it. *@
+   form throws away the draft and any photos taken on it. A mix with batches also offers them, and
+   picking the mix fills in the newest batch that isn't used up. *@
 
 <div class="mix-picker">
     <div class="form-label">@Label</div>
@@ -23,6 +24,21 @@
         {
             <div class="form-text">@picked.Recipe</div>
         }
+
+        @if (Value is { } mixId && BatchChoices(mixId) is { Count: > 0 } batches)
+        {
+            <div class="batch-pick">
+                <div class="form-label">@Strings.Plants.BatchLabel</div>
+                <div class="chip-row" role="group" aria-label="@Strings.Plants.BatchLabel">
+                    <button type="button" class="chip @Picked(BatchValue is null)" @onclick="() => PickBatchAsync(null)">@Strings.Plants.BatchNone</button>
+                    @foreach (var option in batches)
+                    {
+                        <button type="button" class="chip @Picked(BatchValue == option.Id)"
+                                @onclick="() => PickBatchAsync(option.Id)">@BatchText(option)</button>
+                    }
+                </div>
+            </div>
+        }
     }
 </div>
 
@@ -40,6 +56,16 @@
     [Parameter]
     public string Label { get; set; } = Strings.Plants.MixLabel;
 
+    /// <summary>The batches of soil. Left empty where batches aren't offered.</summary>
+    [Parameter]
+    public IReadOnlyList<BatchOption> Batches { get; set; } = [];
+
+    [Parameter]
+    public Guid? BatchValue { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> BatchValueChanged { get; set; }
+
     private static string? Picked(bool picked) => picked ? "picked" : null;
 
     private SoilMix? Picked() => Value is { } id ? Mixes.FirstOrDefault(m => m.Id == id) : null;
@@ -51,9 +77,26 @@
     private IReadOnlyList<SoilMix> Choices =>
         [.. Mixes.Where(mix => !mix.IsRetired || mix.Id == Value)];
 
-    private Task PickAsync(Guid? id)
+    private IReadOnlyList<BatchOption> BatchChoices(Guid mixId) => SoilBatches.Choices(mixId, BatchValue, Batches);
+
+    private static string BatchText(BatchOption option) =>
+        option.Batch.IsUsedUp
+            ? F(Strings.Plants.BatchUsedUp, Labels.Date(option.Batch.MixedOn), SoilMix.Volume(option.Litres))
+            : F(Strings.Plants.BatchChip, Labels.Date(option.Batch.MixedOn), SoilMix.Volume(option.Litres));
+
+    /// <summary>Picking a mix picks its newest open batch too, and none when it has none or no mix is picked.</summary>
+    private async Task PickAsync(Guid? id)
     {
         Value = id;
-        return ValueChanged.InvokeAsync(id);
+        await ValueChanged.InvokeAsync(id);
+
+        if (Batches.Count > 0 || BatchValue is not null)
+            await PickBatchAsync(id is { } mixId ? SoilBatches.Newest(mixId, Batches)?.Id : null);
+    }
+
+    private Task PickBatchAsync(Guid? id)
+    {
+        BatchValue = id;
+        return BatchValueChanged.InvokeAsync(id);
     }
 }

@@ -1072,13 +1072,13 @@
     <value>Hvordan holder jeg styr på mine varer og hvad jeg skal købe?</value>
   </data>
   <data name="SuppliesStockShoppingA1" xml:space="preserve">
-    <value>Under Udstyr holder Lager styr på de løse ting du bruger, som LECA, perlite, gødning og limfælder. Markér noget som ved at løbe tør eller brugt op, så havner det på indkøbslisten. I butikken sætter du flueben, når tingene kommer i kurven, og så skriver appen at du har købt dem. Tryk på en linje med flueben bagefter for at tilføje hvor meget, hvad det kostede og hvor det kom fra, hvis du har lyst, eller tryk på Fortryd for at tage fluebenet af. Potter tæller du på siden Potter, og Læg på indkøbslisten der sætter en på listen. En gødning du har gemt som produkt kan du markere som ved at løbe tør på siden Produkter.</value>
+    <value>Under Udstyr holder Lager styr på de løse ting du bruger, som LECA, perlite, gødning og limfælder. Markér noget som ved at løbe tør eller brugt op, så havner det på indkøbslisten. I butikken sætter du flueben, når tingene kommer i kurven, og så skriver appen at du har købt dem. Tryk på en linje med flueben bagefter for at tilføje hvor meget, hvad det kostede og hvor det kom fra, hvis du har lyst, eller tryk på Fortryd for at tage fluebenet af. Når du blander en batch jord eller en kande gødning, kan appen trække det du brugte fra lageret, når du har set mængderne efter. Lagersiden viser den nye mængde, når du har talt den vare op. Potter tæller du på siden Potter, og Læg på indkøbslisten der sætter en på listen. En gødning du har gemt som produkt kan du markere som ved at løbe tør på siden Produkter.</value>
   </data>
   <data name="WithSoilMixQ" xml:space="preserve">
     <value>Hvad kan jeg bruge en jordblanding til?</value>
   </data>
   <data name="WithSoilMixA1" xml:space="preserve">
-    <value>Gem den under et navn med det der er i den. På siden Jordblandinger trykker du på antallet af planter ved en blanding for at se hvilke planter der står i den, og på en plante for at åbne den. Har alle ingredienser en mængde, kan du trykke på Mål op og skrive hvor meget blanding du vil have, så siger appen hvor meget du skal bruge af hver ingrediens.</value>
+    <value>Gem den under et navn med det der er i den. På siden Jordblandinger trykker du på antallet af planter ved en blanding for at se hvilke planter der står i den, og på en plante for at åbne den. Har alle ingredienser en mængde, kan du trykke på Mål op og skrive hvor meget blanding du vil have, så siger appen hvor meget du skal bruge af hver ingrediens. Med "Bland en batch" gemmer du en batch af blandingen med dato, og med "Fyld på" blander du mere i den samme. Når du tilføjer en plante eller potter op, er den nyeste batch der ikke er brugt op, valgt på forhånd, og du kan vælge en anden.</value>
   </data>
   <data name="DifferenceBetweenProductFeedQ" xml:space="preserve">
     <value>Hvad er forskellen på et produkt og en gødning?</value>
@@ -1670,5 +1670,17 @@
   </data>
   <data name="OutsidePagesA1" xml:space="preserve">
     <value>Nogle få. Nederst på siden Guider er der en kort liste med sider fra Royal Horticultural Society, universiteter og planteforeninger om det guiderne ikke dækker: en side om hvert skadedyr, en om hver plantegruppe og sider om stiklinger og jordblandinger. En sag om skadedyr, en plante i en af plantegrupperne og slægten i planteordbogen linker til den der passer, ved siden af guiden. Hver side er læst før den kom med, og listen holdes kort. Modsat guiderne åbner de i en ny fane og kræver forbindelse. På dansk får du en dansk side hvor der findes en god, og ellers den engelske.</value>
+  </data>
+  <data name="MixedCanQ" xml:space="preserve">
+    <value>Hvordan trækker jeg gødning fra lageret, når jeg blander en kande?</value>
+  </data>
+  <data name="MixedCanA1" xml:space="preserve">
+    <value>Under Gødninger trykker du på Blandet en kande ved gødningen og skriver hvor meget vand der er i kanden. Ud fra doserne regner appen ud hvor meget af hvert produkt der kom i, og viser hvad der skal trækkes fra hver vare på lageret. Ret en mængde eller fjern et flueben, og bekræft. Intet bliver trukket fra før du gør det. Tælles et produkt i noget dosen ikke kan regnes om til, fx stk., står linjen tom, så du selv kan skrive mængden. Når du gøder en plante med gødningen, ændrer det ikke lageret, så ti planter fra én kande tæller kun én gang. Under gødningen kan du se hvornår du sidst blandede den, og med Fjern ved en kande kommer det den trak fra, tilbage på lageret.</value>
+  </data>
+  <data name="SoilBatchQ" xml:space="preserve">
+    <value>Kan jeg holde styr på den jord jeg har blandet?</value>
+  </data>
+  <data name="SoilBatchA1" xml:space="preserve">
+    <value>Ja. På siden Jordblandinger trykker du på Bland en batch ved en blanding og skriver hvor meget du blandede. Det bliver en batch med dato, og med Fyld på blander du mere i den samme, når den er ved at slippe op. Markér en batch som Brugt op, når den er væk. Ved en plante eller stikling kan du vælge hvilken batch den står i, og så viser dens side datoen. Skal det du blander, trækkes fra lageret, trykker du én gang på Kobl til lager ved blandingen og vælger hvilken vare hver ingrediens kommer fra. Det ændrer ikke opskriften. Når du har blandet en batch eller fyldt på, viser appen hvad der skal trækkes fra hver vare, ud fra opskriften og mængden. Ret en mængde eller fjern et flueben, og bekræft. Tælles en vare i kilo eller stk., mens opskriften måler i rumfang, står linjen tom, så du selv kan skrive mængden.</value>
   </data>
 </root>

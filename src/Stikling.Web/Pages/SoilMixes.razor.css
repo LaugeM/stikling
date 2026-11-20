@@ -128,3 +128,85 @@
     color: var(--pa-green-dark);
     font-variant-numeric: tabular-nums;
 }
+
+.mix-link,
+.mix-batch-form,
+.mix-batches {
+    margin-top: 0.6rem;
+}
+
+.mix-link-row {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr);
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.4rem;
+}
+
+.mix-link-row label {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.mix-link-row select {
+    min-height: 44px;
+}
+
+.mix-batch-form {
+    display: grid;
+    gap: 0.6rem;
+}
+
+.mix-batch-field label {
+    display: block;
+    margin-bottom: 0.2rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.mix-batch-field input[type="date"] {
+    min-height: 44px;
+    max-width: 14rem;
+}
+
+.mix-batches-title {
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+    margin-bottom: 0.2rem;
+}
+
+.mix-batch-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.mix-batch-item {
+    padding: 0.4rem 0;
+    border-top: 1px solid var(--pa-border);
+}
+
+.mix-batch-item.used .mix-count-button {
+    color: var(--pa-muted);
+}
+
+.mix-batch-head {
+    display: flex;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.4rem;
+}
+
+.mix-batch-head .mix-count-button {
+    text-align: left;
+    margin-left: 0;
+}
+
+/* Tap targets on the forms: the inputs and buttons are 44px high on a phone */
+.mix-batch-form ::deep .form-control,
+.mix-batch-form ::deep .form-select,
+.mix-batch-form .btn,
+.mix-link .btn {
+    min-height: 44px;
+}

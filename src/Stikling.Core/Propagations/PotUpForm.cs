@@ -39,6 +39,7 @@ public sealed class PotUpForm
         // Soil is the usual place for a potted up plant. Only a default, it's a select.
         Medium = propagation.InPlantMedium ? propagation.Medium : GrowingMedium.Soil;
         SoilMixId = propagation.Medium == GrowingMedium.Soil ? propagation.SoilMixId : null;
+        SoilBatchId = propagation.Medium == GrowingMedium.Soil ? propagation.SoilBatchId : null;
         // Already in a plant medium, it stays there whatever pot is picked, unless the person says otherwise
         mediumChosen = propagation.InPlantMedium;
     }
@@ -81,6 +82,9 @@ public sealed class PotUpForm
     public string? Location { get; set; }
 
     public Guid? SoilMixId { get; set; }
+
+    /// <summary>The batch of that mix, filled in by the picker.</summary>
+    public Guid? SoilBatchId { get; set; }
 
     /// <summary>
     /// Locked like <see cref="Count"/> once a save has failed with nothing counted.
@@ -177,6 +181,7 @@ public sealed class PotUpForm
                 var placeId = await deps.RoomService.PlaceIdAsync(Location);
                 return await deps.PropagationService.PotUpAsync(on, new PotUpRequest(
                     Count, Date, Nickname, placeId, Medium, PotId, Medium == GrowingMedium.Soil ? SoilMixId : null,
+                    SoilBatchId: Medium == GrowingMedium.Soil ? SoilBatchId : null,
                     OnePot: EffectiveMode == PotUpKind.OnePot,
                     IntoPlantId: EffectiveMode == PotUpKind.Into ? IntoPlantId : null,
                     PlantIds: plantIds), label);

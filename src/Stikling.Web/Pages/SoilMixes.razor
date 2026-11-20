@@ -4,6 +4,9 @@
 @inject ISoilMixRepository Repository
 @inject SoilMixService MixService
 @inject TimeProvider Time
+@inject SoilBatchService BatchService
+@inject ISupplyRepository SupplyRepository
+@inject StockService StockService
 
 <PageTitle>@Strings.Supplies.MixesPageTitle</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -224,6 +227,117 @@ else
                                     </ol>
                                 }
                             }
+                            @if (linking == use.Mix.Id)
+                            {
+                                <div class="mix-link">
+                                    <p class="settings-hint">@Strings.Supplies.LinkHint</p>
+                                    @if (supplies.Count == 0)
+                                    {
+                                        <p class="mix-recipe">@Strings.Supplies.LinkNoSupplies</p>
+                                    }
+                                    else
+                                    {
+                                        @for (var i = 0; i < use.Mix.Ingredients.Count; i++)
+                                        {
+                                            var index = i;
+                                            var ingredient = use.Mix.Ingredients[index];
+                                            var linkId = $"mix-link-{use.Mix.Id}-{index}";
+                                            <div class="mix-link-row">
+                                                <label for="@linkId">@ingredient.Name</label>
+                                                <select id="@linkId" class="form-select form-select-sm" value="@(linkDraft[index]?.ToString() ?? "")"
+                                                        @onchange="e => linkDraft[index] = Guid.TryParse(e.Value?.ToString(), out var picked) ? picked : null">
+                                                    <option value="">@Strings.Supplies.LinkNone</option>
+                                                    @foreach (var supply in supplies)
+                                                    {
+                                                        <option value="@supply.Id">@supply.Name</option>
+                                                    }
+                                                </select>
+                                            </div>
+                                        }
+                                        <div class="care-actions">
+                                            <button type="button" class="btn btn-primary btn-sm" disabled="@busy"
+                                                    @onclick="() => SaveLinksAsync(use.Mix)">@Strings.Supplies.LinkSave</button>
+                                            <button type="button" class="btn btn-link btn-sm" @onclick="() => linking = null">@Strings.Common.Cancel</button>
+                                        </div>
+                                    }
+                                </div>
+                            }
+                            @if (batching == use.Mix.Id || toppingUp is { } topped && BatchesOf(use.Mix).Any(b => b.Id == topped))
+                            {
+                                var topUp = toppingUp is not null;
+                                var id = $"mix-batch-volume-{use.Mix.Id}";
+                                var dayId = $"mix-batch-day-{use.Mix.Id}";
+                                <div class="mix-batch-form">
+                                    <div class="mix-batch-field">
+                                        <label for="@id">@Strings.Supplies.BatchVolume</label>
+                                        <WaterInput Id="@id" Placeholder="@Strings.Supplies.MixesBatchPlaceholder" @bind-Litres="batchLitres" />
+                                    </div>
+                                    <div class="mix-batch-field">
+                                        <label for="@dayId">@Strings.Supplies.BatchDay</label>
+                                        <input id="@dayId" type="date" class="form-control form-control-sm" @bind="batchDay" max="@Today.ToString("yyyy-MM-dd")" />
+                                    </div>
+                                    <div class="care-actions">
+                                        <button type="button" class="btn btn-primary btn-sm" disabled="@(busy || batchLitres is not > 0 || batchDay > Today)"
+                                                @onclick="() => SaveBatchAsync(use.Mix)">@(topUp ? Strings.Supplies.BatchTopUpSave : Strings.Supplies.BatchSave)</button>
+                                        <button type="button" class="btn btn-link btn-sm" @onclick="CloseBatchForm">@Strings.Common.Cancel</button>
+                                    </div>
+                                </div>
+                            }
+                            @if (BatchesOf(use.Mix) is { Count: > 0 } mixBatches)
+                            {
+                                <div class="mix-batches">
+                                    <div class="mix-batches-title">@Strings.Supplies.BatchesHeading</div>
+                                    <ul class="mix-batch-list">
+                                        @foreach (var option in mixBatches)
+                                        {
+                                            <li class="mix-batch-item @(option.Batch.IsUsedUp ? "used" : null)">
+                                                @if (confirmingBatch == option.Id)
+                                                {
+                                                    <p>@F(Strings.Supplies.BatchDeleteConfirm, Labels.Date(option.Batch.MixedOn))</p>
+                                                    <div class="care-actions">
+                                                        <button type="button" class="btn btn-danger btn-sm" disabled="@busy"
+                                                                @onclick="() => DeleteBatchAsync(option)">@Strings.Common.Delete</button>
+                                                        <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmingBatch = null">@Strings.Common.Cancel</button>
+                                                    </div>
+                                                }
+                                                else
+                                                {
+                                                    <div class="mix-batch-head">
+                                                        <button type="button" class="mix-count mix-count-button" aria-expanded="@(openBatch == option.Id)"
+                                                                @onclick="() => ToggleBatchAsync(option)">@F(Strings.Supplies.BatchLine, Labels.Date(option.Batch.MixedOn), SoilMix.Volume(option.Litres))</button>
+                                                        @if (option.Batch.IsUsedUp)
+                                                        {
+                                                            <span class="mix-count">@Strings.Supplies.BatchUsedUpTag</span>
+                                                        }
+                                                    </div>
+                                                    @if (openBatch == option.Id)
+                                                    {
+                                                        <ul class="mix-plants">
+                                                            @foreach (var mixing in openMixings)
+                                                            {
+                                                                <li>
+                                                                    <span>@Labels.Date(mixing.MixedOn)</span>
+                                                                    <span class="mix-measure">@SoilMix.Volume(mixing.Litres)</span>
+                                                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" aria-label="@($"{Strings.Supplies.BatchRemoveMixing}, {Labels.Date(mixing.MixedOn)}")"
+                                                                            @onclick="() => RemoveMixingAsync(option, mixing)">@Strings.Supplies.BatchRemoveMixing</button>
+                                                                </li>
+                                                            }
+                                                        </ul>
+                                                    }
+                                                    <div class="care-actions">
+                                                        <button type="button" class="btn btn-link btn-sm link-action"
+                                                                @onclick="() => StartTopUp(option)">@Strings.Supplies.BatchTopUp</button>
+                                                        <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                                @onclick="() => SetUsedUpAsync(option)">@(option.Batch.IsUsedUp ? Strings.Supplies.BatchUseAgain : Strings.Supplies.BatchMarkUsedUp)</button>
+                                                        <button type="button" class="btn btn-link btn-sm link-action"
+                                                                @onclick="() => confirmingBatch = option.Id">@Strings.Common.Delete</button>
+                                                    </div>
+                                                }
+                                            </li>
+                                        }
+                                    </ul>
+                                </div>
+                            }
                             @if (use.Mix.RetiredOn is { } retired)
                             {
                                 <div class="mix-recipe">@F(Strings.Supplies.MixesLastMixed, Labels.Date(retired))</div>
@@ -234,6 +348,10 @@ else
                                     <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(measuring == use.Mix.Id)"
                                             @onclick="() => ToggleMeasuring(use.Mix)">@Strings.Supplies.MixesMeasureOut</button>
                                 }
+                                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(batching == use.Mix.Id)"
+                                        @onclick="() => StartBatch(use.Mix)">@Strings.Supplies.BatchMix</button>
+                                <button type="button" class="btn btn-link btn-sm link-action" aria-expanded="@(linking == use.Mix.Id)"
+                                        @onclick="() => StartLinking(use.Mix)">@Strings.Supplies.LinkAction</button>
                                 <button type="button" class="btn btn-link btn-sm link-action"
                                         @onclick="() => StartEditAsync(use)">@Strings.Common.Edit</button>
                                 <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
@@ -250,6 +368,13 @@ else
         </section>
     }
 }
+
+<Sheet Title="@Strings.Stock.TakeoffTitle" Open="takeoffOpen" OpenChanged="open => { takeoffOpen = open; }">
+    @if (takeoffFor is not null)
+    {
+        <TakeoffSheet Lines="takeoffLines" Subtitle="@($"{Labels.Date(takeoffFor.MixedOn)} · {SoilMix.Volume(takeoffFor.Litres)}")" OnConfirm="ConfirmTakeoffAsync" OnSkip="SkipTakeoff" />
+    }
+</Sheet>
 
 @code {
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
@@ -285,6 +410,8 @@ else
     {
         all = await Repository.GetAllAsync();
         uses = await MixService.GetAllAsync();
+        batches = await BatchService.GetOptionsAsync();
+        supplies = [.. (await SupplyRepository.GetAllAsync()).Where(s => !string.IsNullOrWhiteSpace(s.Name)).OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase)];
         loading = false;
     }
 
@@ -435,6 +562,201 @@ else
             if (editing?.Id == mix.Id)
                 Cancel();
             await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    // Batches of soil. Each mixing and top-up is a record of its own, and the stock only changes when
+    // the check sheet is confirmed.
+    private IReadOnlyList<BatchOption> batches = [];
+    private IReadOnlyList<Supply> supplies = [];
+    private Guid? batching;
+    private Guid? toppingUp;
+    private decimal? batchLitres;
+    private DateOnly batchDay;
+    private Guid? openBatch;
+    private IReadOnlyList<BatchMixing> openMixings = [];
+    private Guid? confirmingBatch;
+
+    // Which supply each ingredient of a mix comes out of
+    private Guid? linking;
+    private List<Guid?> linkDraft = [];
+
+    private bool takeoffOpen;
+    private BatchMixing? takeoffFor;
+    private IReadOnlyList<TakeoffLine> takeoffLines = [];
+
+    private IReadOnlyList<BatchOption> BatchesOf(SoilMix mix) => SoilBatches.Of(mix.Id, batches);
+
+    private void StartBatch(SoilMix mix)
+    {
+        if (batching == mix.Id)
+        {
+            CloseBatchForm();
+            return;
+        }
+
+        CloseBatchForm();
+        linking = null;
+        batching = mix.Id;
+        batchDay = Today;
+    }
+
+    private void StartTopUp(BatchOption option)
+    {
+        CloseBatchForm();
+        linking = null;
+        toppingUp = option.Id;
+        batchDay = Today;
+    }
+
+    private void CloseBatchForm()
+    {
+        batchLitres = null;
+        batching = null;
+        toppingUp = null;
+    }
+
+    private async Task SaveBatchAsync(SoilMix mix)
+    {
+        if (batchLitres is not > 0)
+            return;
+
+        busy = true;
+        try
+        {
+            var litres = batchLitres.Value;
+            var mixing = toppingUp is { } batchId
+                ? await BatchService.TopUpAsync(batchId, litres, batchDay)
+                : await BatchService.MixAsync(mix, litres, batchDay);
+            CloseBatchForm();
+            await LoadAsync();
+
+            takeoffLines = await BatchService.TakeoffAsync(mix, litres);
+            if (takeoffLines.Count > 0)
+            {
+                takeoffFor = mixing;
+                takeoffOpen = true;
+            }
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task ConfirmTakeoffAsync(IReadOnlyList<TakeoffLine> lines)
+    {
+        if (takeoffFor is { } mixing)
+            await StockService.TakeOffAsync(mixing.Id, lines);
+        SkipTakeoff();
+    }
+
+    private void SkipTakeoff()
+    {
+        takeoffOpen = false;
+        takeoffFor = null;
+    }
+
+    private async Task ToggleBatchAsync(BatchOption option)
+    {
+        if (openBatch == option.Id)
+        {
+            openBatch = null;
+            return;
+        }
+
+        openMixings = await BatchService.GetMixingsAsync(option.Id);
+        openBatch = option.Id;
+    }
+
+    private async Task RemoveMixingAsync(BatchOption option, BatchMixing mixing)
+    {
+        busy = true;
+        try
+        {
+            await BatchService.DeleteMixingAsync(mixing.Id);
+            openMixings = await BatchService.GetMixingsAsync(option.Id);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task SetUsedUpAsync(BatchOption option)
+    {
+        busy = true;
+        try
+        {
+            await BatchService.SetUsedUpAsync(option.Batch, !option.Batch.IsUsedUp);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task DeleteBatchAsync(BatchOption option)
+    {
+        busy = true;
+        try
+        {
+            await BatchService.DeleteBatchAsync(option.Id);
+            confirmingBatch = null;
+            if (openBatch == option.Id)
+                openBatch = null;
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    /// <summary>
+    /// Opens the links of a mix. An ingredient that isn't linked yet starts on the supply with the same name,
+    /// if there is one. That is only a suggestion until the links are saved.
+    /// </summary>
+    private void StartLinking(SoilMix mix)
+    {
+        if (linking == mix.Id)
+        {
+            linking = null;
+            return;
+        }
+
+        CloseBatchForm();
+        linkDraft =
+        [
+            .. mix.Ingredients.Select(i =>
+                i.SupplyId is { } id && supplies.Any(s => s.Id == id) ? id : Takeoff.Suggest(i.Name, supplies)?.Id)
+        ];
+        linking = mix.Id;
+    }
+
+    /// <summary>Linking a supply doesn't change the recipe, so it never asks about the plants in the mix.</summary>
+    private async Task SaveLinksAsync(SoilMix mix)
+    {
+        busy = true;
+        try
+        {
+            await BatchService.LinkSuppliesAsync(mix, linkDraft);
+            linking = null;
+            await LoadAsync();
+        }
+        catch (InvalidOperationException e)
+        {
+            errors = [e.Message];
         }
         finally
         {

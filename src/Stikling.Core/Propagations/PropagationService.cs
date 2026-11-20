@@ -21,7 +21,8 @@ public sealed record PotUpRequest(
     Guid? SoilMixId = null,
     bool OnePot = false,
     Guid? IntoPlantId = null,
-    IReadOnlyList<Guid>? PlantIds = null);
+    IReadOnlyList<Guid>? PlantIds = null,
+    Guid? SoilBatchId = null);
 
 /// <summary>
 /// Propagation operations that keep the counts, the new plants and the history of both in step.
@@ -300,6 +301,7 @@ public sealed class PropagationService(
             Medium = request.Medium,
             InnerPotId = request.PotId,
             SoilMixId = request.Medium == GrowingMedium.Soil ? request.SoilMixId : null,
+            SoilBatchId = request.Medium == GrowingMedium.Soil ? request.SoilBatchId : null,
             ParentPlantId = propagation.ParentPlantId,
             ParentIsGuess = propagation.ParentIsGuess,
             FromPropagationId = propagation.Id,
@@ -502,6 +504,7 @@ public sealed class PropagationService(
             Type = source.Type,
             Medium = source.Medium,
             SoilMixId = source.SoilMixId,
+            SoilBatchId = source.SoilBatchId,
             Container = source.Container,
             ContainerPotId = source.ContainerPotId,
             PlaceId = source.PlaceId,

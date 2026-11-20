@@ -1,0 +1,85 @@
+.takeoff-for {
+    margin: 0 0 0.25rem;
+    font-weight: 600;
+}
+
+.takeoff-lines {
+    list-style: none;
+    margin: 0 0 1rem;
+    padding: 0;
+}
+
+.takeoff-line {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 9rem;
+    align-items: center;
+    gap: 0.25rem 0.75rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.takeoff-line:last-child {
+    border-bottom: 0;
+}
+
+.takeoff-line.off .takeoff-supply,
+.takeoff-line.off .takeoff-what {
+    color: var(--pa-muted);
+}
+
+.takeoff-supply {
+    display: block;
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.takeoff-what {
+    display: block;
+    color: var(--pa-muted);
+    font-size: 0.85rem;
+}
+
+.takeoff-amount input {
+    min-height: 44px;
+    font-variant-numeric: tabular-nums;
+}
+
+.takeoff-amount .input-group-text {
+    min-width: 2.5rem;
+    justify-content: center;
+}
+
+.takeoff-note {
+    grid-column: 1 / -1;
+    margin: 0;
+}
+
+@media (max-width: 380px) {
+    .takeoff-line {
+        grid-template-columns: minmax(0, 1fr);
+    }
+}
+
+.takeoff-sheet .form-actions .btn {
+    min-height: 44px;
+}
+
+.takeoff-line .form-check {
+    min-height: 44px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding-left: 0;
+    margin: 0;
+}
+
+.takeoff-line .form-check-input {
+    float: none;
+    margin: 0;
+    flex: 0 0 auto;
+}
+
+.takeoff-line .form-check-label {
+    flex: 1 1 auto;
+    padding: 0.4rem 0;
+}
