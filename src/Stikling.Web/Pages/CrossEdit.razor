@@ -2,6 +2,7 @@
 @page "/crosses/{Id:guid}/edit"
 @attribute [NeedsAccess(AccessLevel.Edit)]
 @inject CrossService Crosses
+@inject PollenService Pollens
 @inject IPlantRepository PlantRepository
 @inject ILogger<CrossEdit> Logger
 @inject NavigationManager Navigation
@@ -77,6 +78,19 @@ else
                     <option value="stored">@Strings.Crosses.PollenStored</option>
                 </select>
             </div>
+            @if (cross.PollenIsStored && storedPollen.Count > 0)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="cross-pollen-pick">@Strings.Crosses.WhichPollen</label>
+                    <select id="cross-pollen-pick" class="form-select" value="@(cross.PollenId?.ToString() ?? "")" @onchange="e => PickPollen(e.Value?.ToString())">
+                        <option value="">@Strings.Crosses.NotFromStore</option>
+                        @foreach (var item in storedPollen)
+                        {
+                            <option value="@item.Pollen.Id">@item.Title · @PollenService.Line(item.Pollen, Time.Today())</option>
+                        }
+                    </select>
+                </div>
+            }
             <div class="mb-3">
                 <label class="form-label" for="cross-bagged">@Strings.Crosses.Bagged</label>
                 <select id="cross-bagged" class="form-select" value="@(cross.Bagged is { } b ? (b ? "yes" : "no") : "")" @onchange="e => SetBagged(e.Value?.ToString())">
@@ -173,12 +187,18 @@ else
     [SupplyParameterFromQuery(Name = "pollen")]
     public Guid? PollenId { get; set; }
 
+    /// <summary>Stored pollen to start a new cross with, from the card on Today.</summary>
+    [SupplyParameterFromQuery(Name = "stored")]
+    public Guid? StoredId { get; set; }
+
     private Cross? cross;
+    private IReadOnlyList<PollenView> storedPollen = [];
     private IReadOnlyList<Plant> plants = [];
     private bool notFound;
     private bool saving;
     private bool confirmDelete;
     private List<string> errors = [];
+    private (Guid?, Guid?, Guid?, Guid?) loadedFor;
     private bool focusErrors;
 
     // After a failed check the alert is far from the Save button on a phone, so it takes focus and scrolls into view
@@ -197,7 +217,6 @@ else
             }
         }
     }
-    private (Guid?, Guid?, Guid?) loadedFor;
     private bool loaded;
 
     private bool IsNew => Id is null;
@@ -219,7 +238,7 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var key = (Id, PodId, PollenId);
+        var key = (Id, PodId, PollenId, StoredId);
         if (loaded && loadedFor == key)
             return;
 
@@ -230,6 +249,7 @@ else
         confirmDelete = false;
         cross = null;
 
+        storedPollen = [];
         plants = [.. (await PlantRepository.GetAllAsync()).OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
 
         if (IsNew)
@@ -245,12 +265,41 @@ else
                 cross.PollenParentPlantId = pollen;
                 cross.PollenParentName = pollenPlant.DisplayName;
             }
+            await LoadPollenAsync();
+            if (StoredId is { } storedId && storedPollen.Any(p => p.Pollen.Id == storedId))
+            {
+                cross.PollenIsStored = true;
+                PickPollen(storedId.ToString());
+            }
+
             return;
         }
 
         // A copy, so leaving without saving changes nothing
         cross = (await Crosses.GetAsync(Id!.Value))?.Copy();
         notFound = cross is null;
+        await LoadPollenAsync();
+    }
+
+    // The pollen that is not used up, and the one this cross already names even if it is used up now
+    private async Task LoadPollenAsync() =>
+        storedPollen = [.. (await Pollens.GetAllAsync()).Where(p => !p.Pollen.IsUsedUp || p.Pollen.Id == cross?.PollenId)];
+
+    // Picking stored pollen fills in the pollen parent from where it was collected
+    private void PickPollen(string? value)
+    {
+        if (!Guid.TryParse(value, out var id) || storedPollen.FirstOrDefault(p => p.Pollen.Id == id) is not { } picked)
+        {
+            cross!.PollenId = null;
+            return;
+        }
+
+        cross!.PollenId = id;
+        if (picked.Pollen.FromPlantId is { } plantId || !string.IsNullOrWhiteSpace(picked.Pollen.FromName))
+        {
+            cross.PollenParentPlantId = picked.Pollen.FromPlantId;
+            cross.PollenParentName = picked.Pollen.FromName;
+        }
     }
 
     private void SetMethod(string? value) =>
@@ -259,7 +308,12 @@ else
     private void SetOutcome(string? value) =>
         cross!.Outcome = Enum.TryParse<CrossOutcome>(value, out var outcome) ? outcome : null;
 
-    private void SetPollen(string? value) => cross!.PollenIsStored = value == "stored";
+    private void SetPollen(string? value)
+    {
+        cross!.PollenIsStored = value == "stored";
+        if (!cross.PollenIsStored)
+            cross.PollenId = null;
+    }
 
     private void SetBagged(string? value) =>
         cross!.Bagged = value switch { "yes" => true, "no" => false, _ => null };

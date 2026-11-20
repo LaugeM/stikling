@@ -528,6 +528,194 @@
     <value>This plant gives the pollen</value>
     <comment>Hint under the menu action that records a cross with this plant as pollen parent.</comment>
   </data>
+  <data name="AddPollen" xml:space="preserve">
+    <value>Add pollen</value>
+    <comment>Button and link that start adding pollen to the pollen store.</comment>
+  </data>
+  <data name="PollenTitle" xml:space="preserve">
+    <value>Pollen</value>
+    <comment>Title of the page that lists the pollen you keep.</comment>
+  </data>
+  <data name="PollenPageTitle" xml:space="preserve">
+    <value>Pollen · Stikling</value>
+    <comment>Browser tab title of the pollen page.</comment>
+  </data>
+  <data name="PollenEmpty" xml:space="preserve">
+    <value>No pollen kept yet. Write down pollen you collect, from which plant, when, and where you keep it, so you can find it when another plant flowers.</value>
+    <comment>Empty pollen page.</comment>
+  </data>
+  <data name="PollenEditNewTitle" xml:space="preserve">
+    <value>Add pollen</value>
+    <comment>Title of the form for new pollen.</comment>
+  </data>
+  <data name="PollenEditTitle" xml:space="preserve">
+    <value>Edit pollen</value>
+    <comment>Title of the form for changing pollen.</comment>
+  </data>
+  <data name="PollenNotFound" xml:space="preserve">
+    <value>This pollen isn't here. It may have been deleted.</value>
+    <comment>Shown when the page of pollen that does not exist is opened.</comment>
+  </data>
+  <data name="PollenWhat" xml:space="preserve">
+    <value>The pollen</value>
+    <comment>Heading of the group of fields on the pollen form.</comment>
+  </data>
+  <data name="PollenFrom" xml:space="preserve">
+    <value>Collected from</value>
+    <comment>Label of the plant the pollen was collected from.</comment>
+  </data>
+  <data name="PollenGenus" xml:space="preserve">
+    <value>Genus</value>
+    <comment>Label of the genus of the pollen, filled in from the plant.</comment>
+  </data>
+  <data name="PollenGenusHint" xml:space="preserve">
+    <value>Today uses it to show this pollen when another plant of the same genus comes into flower.</value>
+    <comment>Line under the genus box on the pollen form.</comment>
+  </data>
+  <data name="PollenCollectedOn" xml:space="preserve">
+    <value>Collected on</value>
+    <comment>Label of the day pollen was collected.</comment>
+  </data>
+  <data name="PollenKeptIn" xml:space="preserve">
+    <value>Kept in</value>
+    <comment>Label of where pollen is kept: freezer, fridge or room temperature.</comment>
+  </data>
+  <data name="PollenAmount" xml:space="preserve">
+    <value>Amount</value>
+    <comment>Label of how much pollen there is, in your own words.</comment>
+  </data>
+  <data name="PollenAmountPlaceholder" xml:space="preserve">
+    <value>For example: a small tube</value>
+    <comment>Hint in the amount box of pollen.</comment>
+  </data>
+  <data name="PollenUsedUpHint" xml:space="preserve">
+    <value>Leave it empty while there is pollen left.</value>
+    <comment>Line under the used up day of pollen.</comment>
+  </data>
+  <data name="PollenDeleteConfirm" xml:space="preserve">
+    <value>Delete this pollen? Crosses that used it stay.</value>
+    <comment>Question before deleting pollen.</comment>
+  </data>
+  <data name="SectionPollen_One" xml:space="preserve">
+    <value>{0} pollen kept</value>
+    <comment>Link from the Crosses section to the pollen, exactly one piece not used up. {0} is the number.</comment>
+  </data>
+  <data name="SectionPollen_Other" xml:space="preserve">
+    <value>{0} pollen kept</value>
+    <comment>Link from the Crosses section to the pollen. {0} is how many pieces are not used up, including none.</comment>
+  </data>
+  <data name="WhichPollen" xml:space="preserve">
+    <value>Which pollen</value>
+    <comment>Label of the choice of stored pollen on the cross form.</comment>
+  </data>
+  <data name="NotFromStore" xml:space="preserve">
+    <value>Not one I have in the store</value>
+    <comment>First choice in the list of stored pollen on the cross form.</comment>
+  </data>
+  <data name="MenuCollectPollen" xml:space="preserve">
+    <value>Collect pollen</value>
+    <comment>Action on a plant's page menu that adds pollen collected from this plant.</comment>
+  </data>
+  <data name="MenuCollectPollenHint" xml:space="preserve">
+    <value>Keep it for a later cross</value>
+    <comment>Hint under the menu action that adds pollen from this plant.</comment>
+  </data>
+  <data name="TraitsHeading" xml:space="preserve">
+    <value>Traits</value>
+    <comment>Heading and label for short texts on what a plant or seedling shows, like dark new leaves.</comment>
+  </data>
+  <data name="TraitsHint" xml:space="preserve">
+    <value>Short texts for what it shows, like dark new leaves or silver splash. They are suggested again on other plants and seedlings.</value>
+    <comment>Line under the traits box.</comment>
+  </data>
+  <data name="NoTraits" xml:space="preserve">
+    <value>none noted</value>
+    <comment>Shown where a plant has no traits.</comment>
+  </data>
+  <data name="TodayHeading" xml:space="preserve">
+    <value>In flower, with pollen to hand</value>
+    <comment>Heading on Today over plants coming into flower that have stored pollen of the same genus.</comment>
+  </data>
+  <data name="TodayBuds" xml:space="preserve">
+    <value>Buds</value>
+    <comment>A plant is at the buds stage, on the Today card for pollen.</comment>
+  </data>
+  <data name="TodayInFlower" xml:space="preserve">
+    <value>In flower</value>
+    <comment>A plant is in flower, on the Today card for pollen.</comment>
+  </data>
+  <data name="TodayPollenLine" xml:space="preserve">
+    <value>Pollen from {0}. {1}</value>
+    <comment>A line on the Today card. {0} is the plant the pollen came from and {1} is how long ago and where it is kept.</comment>
+  </data>
+  <data name="TodayNotThisFlowering" xml:space="preserve">
+    <value>Not this flowering</value>
+    <comment>Button on the Today card that hides it for this flowering.</comment>
+  </data>
+  <data name="CompareStart" xml:space="preserve">
+    <value>Compare seedlings</value>
+    <comment>Button on a cross that lets you pick seedlings to compare.</comment>
+  </data>
+  <data name="CompareDone" xml:space="preserve">
+    <value>Done</value>
+    <comment>Button that ends picking seedlings to compare.</comment>
+  </data>
+  <data name="CompareGo" xml:space="preserve">
+    <value>Compare {0}</value>
+    <comment>Button that opens the comparison. {0} is how many seedlings are picked.</comment>
+  </data>
+  <data name="CompareTitle" xml:space="preserve">
+    <value>Comparing seedlings</value>
+    <comment>Title of the page that shows seedlings from one cross side by side.</comment>
+  </data>
+  <data name="ComparePageTitle" xml:space="preserve">
+    <value>Compare seedlings · Stikling</value>
+    <comment>Browser tab title of the seedling comparison.</comment>
+  </data>
+  <data name="CompareNeedTwo" xml:space="preserve">
+    <value>Pick two or more seedlings on the cross to compare them.</value>
+    <comment>Shown on the comparison page when fewer than two seedlings are picked.</comment>
+  </data>
+  <data name="CompareNoPhoto" xml:space="preserve">
+    <value>No photo yet</value>
+    <comment>Shown in a column of the comparison for a seedling with no photo.</comment>
+  </data>
+  <data name="CompareKindPlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Small label over a seedling in the comparison that has been potted up.</comment>
+  </data>
+  <data name="CompareKindSeedling" xml:space="preserve">
+    <value>Still in its propagation</value>
+    <comment>Small label over a seedling in the comparison that has not been potted up.</comment>
+  </data>
+  <data name="CompareAge" xml:space="preserve">
+    <value>Age</value>
+    <comment>Row label in the comparison for how old the seedling is.</comment>
+  </data>
+  <data name="CompareStatus" xml:space="preserve">
+    <value>Status</value>
+    <comment>Row label in the comparison for where the seedling is.</comment>
+  </data>
+  <data name="CompareLeaf" xml:space="preserve">
+    <value>Latest leaf</value>
+    <comment>Row label in the comparison for the latest leaf logged.</comment>
+  </data>
+  <data name="CompareMeasure" xml:space="preserve">
+    <value>Measurements</value>
+    <comment>Row label in the comparison for the latest measurements.</comment>
+  </data>
+  <data name="CompareNothing" xml:space="preserve">
+    <value>nothing logged</value>
+    <comment>Shown in the comparison where a seedling has no leaf or measurement logged.</comment>
+  </data>
+  <data name="CompareLeafLine" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>The latest leaf in the comparison. {0} is the day and {1} is how variegated it was.</comment>
+  </data>
+  <data name="CompareBack" xml:space="preserve">
+    <value>Back to the cross</value>
+    <comment>Back link on the comparison page.</comment>
+  </data>
   <data name="QuickTook" xml:space="preserve">
     <value>It took</value>
     <comment>Button on a cross with no outcome yet that records that it took.</comment>
@@ -543,5 +731,9 @@
   <data name="EditIntro" xml:space="preserve">
     <value>A cross is a pollination: the pollen of one plant put on the flower of another. Write it down the day you do it, and add what came of it later.</value>
     <comment>Line at the top of the form for a new cross that says what a cross is.</comment>
+  </data>
+  <data name="PollenMore" xml:space="preserve">
+    <value>More about this pollen</value>
+    <comment>Heading of the folded group on the pollen form with amount, used up day and note.</comment>
   </data>
 </root>

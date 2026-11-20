@@ -1,0 +1,154 @@
+@page "/crosses/{Id:guid}/compare"
+@layout WideLayout
+@inject CrossService Crosses
+@inject IPhotoRepository PhotoRepository
+@inject LeafService LeafBook
+@inject MeasurementService MeasureService
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Crosses.ComparePageTitle</PageTitle>
+
+<a class="back-link" href="crosses/@Id">@Strings.Crosses.CompareBack</a>
+<div class="page-heading page-full">
+    <h1>@Strings.Crosses.CompareTitle</h1>
+    @if (view is not null)
+    {
+        <span class="text-body-secondary">@view.DisplayName</span>
+    }
+</div>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (columns.Count < 2)
+{
+    <div class="empty-state">
+        <p>@Strings.Crosses.CompareNeedTwo</p>
+        <a class="btn btn-primary" href="crosses/@Id">@Strings.Crosses.CompareBack</a>
+    </div>
+}
+else
+{
+    @* Side by side from 64rem; on a phone each seedling is a card and they stack *@
+    <div class="compare-grid" style="--compare-columns:@columns.Count">
+        @foreach (var column in columns)
+        {
+            <article class="compare-card">
+                <a class="compare-photo @(column.PhotoId is null ? "empty" : null)" href="@column.Href" tabindex="-1" aria-hidden="true">
+                    @if (column.PhotoId is { } photoId)
+                    {
+                        <PhotoImage PhotoId="photoId" Thumbnail="false" Alt="@column.Name" />
+                    }
+                    else
+                    {
+                        <span class="compare-nophoto">@Strings.Crosses.CompareNoPhoto</span>
+                    }
+                </a>
+                <h2 class="compare-name"><a href="@column.Href">@column.Name</a></h2>
+                <p class="compare-kind">@column.Kind</p>
+                <dl class="compare-facts">
+                    <dt>@Strings.Crosses.TraitsHeading</dt>
+                    <dd><TraitLine Traits="column.Traits" /></dd>
+                    <dt>@Strings.Crosses.CompareAge</dt>
+                    <dd>@column.Age</dd>
+                    <dt>@Strings.Crosses.CompareStatus</dt>
+                    <dd>@column.Status</dd>
+                    <dt>@Strings.Crosses.CompareLeaf</dt>
+                    <dd>@(column.Leaf ?? Strings.Crosses.CompareNothing)</dd>
+                    <dt>@Strings.Crosses.CompareMeasure</dt>
+                    <dd>
+                        @if (column.Measurements.Count == 0)
+                        {
+                            <span class="text-body-secondary">@Strings.Crosses.CompareNothing</span>
+                        }
+                        else
+                        {
+                            @foreach (var line in column.Measurements)
+                            {
+                                <div>@line</div>
+                            }
+                        }
+                    </dd>
+                </dl>
+            </article>
+        }
+    </div>
+}
+
+@code {
+    private sealed record Column(
+        string Name, string Href, string Kind, Guid? PhotoId, IReadOnlyList<string> Traits,
+        string Age, string Status, string? Leaf, IReadOnlyList<string> Measurements);
+
+    [Parameter]
+    public Guid Id { get; set; }
+
+    /// <summary>The seedlings picked on the cross: plant and propagation ids, comma separated.</summary>
+    [SupplyParameterFromQuery(Name = "ids")]
+    public string? Ids { get; set; }
+
+    private CrossView? view;
+    private List<Column> columns = [];
+    private bool loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        loaded = false;
+        columns = [];
+        var book = await Crosses.GetBookAsync();
+        view = book.ViewOf(Id);
+        if (view is not null)
+        {
+            // Only seedlings of this cross can be picked, whatever the address says
+            var seedlings = book.SeedlingsOf(view.Cross);
+            var wanted = (Ids ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .Select(s => Guid.TryParse(s, out var id) ? id : (Guid?)null).OfType<Guid>().ToHashSet();
+            var newest = await PhotoRepository.GetNewestPerSubjectAsync();
+            var today = Time.Today();
+
+            foreach (var propagation in seedlings.Propagations.Where(p => wanted.Contains(p.Id)))
+            {
+                var leaf = (await LeafBook.ForPropagationAsync(propagation.Id)).FirstOrDefault()?.Leaf;
+                columns.Add(new Column(
+                    book.WorkingNameFor(propagation) is { } working ? $"{working} · {propagation.ListName}" : propagation.ListName,
+                    $"propagations/{propagation.Id}",
+                    Strings.Crosses.CompareKindSeedling,
+                    propagation.CoverPhotoId ?? (newest.TryGetValue(propagation.Id, out var photo) ? photo.Id : null),
+                    propagation.Traits,
+                    Labels.Age(propagation, today),
+                    Labels.Stage(propagation.Stage, propagation.Type),
+                    LeafLine(leaf),
+                    await MeasurementLines(propagation.Id)));
+            }
+
+            foreach (var plant in seedlings.Plants.Where(p => wanted.Contains(p.Id)))
+            {
+                var leaf = (await LeafBook.ForPlantAsync(plant)).FirstOrDefault()?.Leaf;
+                columns.Add(new Column(
+                    plant.DisplayName,
+                    $"plants/{plant.Id}",
+                    Strings.Crosses.CompareKindPlant,
+                    plant.CoverPhotoId ?? (newest.TryGetValue(plant.Id, out var photo) ? photo.Id : null),
+                    plant.Traits,
+                    PollenService.Age(plant.AcquiredOn?.Start ?? DateOnly.FromDateTime(plant.CreatedAt.LocalDateTime), today),
+                    Labels.StatusOf(plant),
+                    LeafLine(leaf),
+                    await MeasurementLines(plant.Id)));
+            }
+        }
+
+        loaded = true;
+    }
+
+    private static string? LeafLine(Leaf? leaf) =>
+        leaf is null ? null : F(Strings.Crosses.CompareLeafLine, Labels.Date(leaf.On), LeafText.Rating(leaf.Rating ?? Variegation.Medium));
+
+    // The newest value of each kind that was measured
+    private async Task<IReadOnlyList<string>> MeasurementLines(Guid subjectId) =>
+        [.. (await MeasureService.ForSubjectAsync(subjectId))
+            .Where(m => m.HasKind)
+            .GroupBy(m => m.Kind is { } kind ? kind.ToString() : m.OwnKindId.ToString())
+            .Select(g => g.OrderByDescending(m => m.MeasuredAt).First())
+            .Select(m => MeasureText.Phrase(m))];
+}

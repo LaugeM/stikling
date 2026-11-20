@@ -277,6 +277,9 @@ public sealed class Plant : Entity
     /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
     public List<string> Tags { get; set; } = [];
 
+    /// <summary>Short texts for what the plant shows, like "dark new leaves" or "silver splash", to see what a cross passes on. See <see cref="Plants.Traits"/>.</summary>
+    public List<string> Traits { get; set; } = [];
+
     /// <summary>
     /// The day it went into quarantine, kept apart from the other plants. Null when it isn't in
     /// quarantine, so there is no flag that can disagree with the date.
@@ -493,6 +496,7 @@ public sealed class Plant : Entity
     {
         var copy = (Plant)MemberwiseClone();
         copy.Tags = [.. Tags];
+        copy.Traits = [.. Traits];
         copy.ArrivalProblems = [.. ArrivalProblems];
         copy.OwnFields = new(OwnFields);
         return copy;
@@ -529,6 +533,7 @@ public sealed class Plant : Entity
         WaterBy = WaterBy,
         WaterType = WaterType,
         Tags = [.. Tags],
+        Traits = [.. Traits],
         OwnFields = new(OwnFields),
         ParentPlantId = ParentPlantId,
         ParentIsGuess = ParentIsGuess

@@ -60,4 +60,52 @@
   <data name="NameAndTitle" xml:space="preserve">
     <value>{0} ({1})</value>
   </data>
+  <data name="ErrPollenNeedsPlant" xml:space="preserve">
+    <value>Vælg planten pollenet kommer fra, eller skriv et navn.</value>
+  </data>
+  <data name="ErrUsedBeforeCollected" xml:space="preserve">
+    <value>Pollenet kan ikke være brugt op før det blev samlet.</value>
+  </data>
+  <data name="ErrAmountTooLong" xml:space="preserve">
+    <value>Mængden er for lang. Hold den under 80 tegn.</value>
+  </data>
+  <data name="PollenAgeToday" xml:space="preserve">
+    <value>i dag</value>
+  </data>
+  <data name="PollenAgeDays_One" xml:space="preserve">
+    <value>for {0} dag siden</value>
+  </data>
+  <data name="PollenAgeDays_Other" xml:space="preserve">
+    <value>for {0} dage siden</value>
+  </data>
+  <data name="PollenAgeWeeks_Other" xml:space="preserve">
+    <value>for {0} uger siden</value>
+  </data>
+  <data name="PollenAgeMonths_Other" xml:space="preserve">
+    <value>for {0} måneder siden</value>
+  </data>
+  <data name="PollenAgeYears_Other" xml:space="preserve">
+    <value>for {0} år siden</value>
+  </data>
+  <data name="PollenCollected" xml:space="preserve">
+    <value>Samlet {0}</value>
+  </data>
+  <data name="KeptFreezer" xml:space="preserve">
+    <value>fryser</value>
+  </data>
+  <data name="KeptFridge" xml:space="preserve">
+    <value>køleskab</value>
+  </data>
+  <data name="KeptRoom" xml:space="preserve">
+    <value>stuetemperatur</value>
+  </data>
+  <data name="PollenAgeWeeks_One" xml:space="preserve">
+    <value>for {0} uge siden</value>
+  </data>
+  <data name="PollenAgeMonths_One" xml:space="preserve">
+    <value>for {0} måned siden</value>
+  </data>
+  <data name="PollenAgeYears_One" xml:space="preserve">
+    <value>for {0} år siden</value>
+  </data>
 </root>

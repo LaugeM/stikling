@@ -1,6 +1,9 @@
 @page "/crosses/{Id:guid}"
 @inject CrossService Crosses
+@inject PollenService Pollens
 @inject TimeProvider Time
+@inject NavigationManager Navigation
+@using Stikling.Core.Selection
 
 <PageTitle>@F(Strings.PlantDetail.PageTitle, view?.DisplayName ?? Strings.Crosses.CrossFallback)</PageTitle>
 <ReloadOnSync Reload="LoadAsync" />
@@ -54,7 +57,14 @@ else
                 <dd>@CrossLabels.Method(method)</dd>
             }
             <dt>@Strings.Crosses.PollenKind</dt>
-            <dd>@(cross.PollenIsStored ? Strings.Crosses.PollenStored : Strings.Crosses.PollenFresh)</dd>
+            <dd>
+                @(cross.PollenIsStored ? Strings.Crosses.PollenStored : Strings.Crosses.PollenFresh)
+                @if (usedPollen is { } used)
+                {
+                    @* What was recorded when the pollen was stored, as it stands now. No advice on how long it lasts. *@
+                    <div class="text-body-secondary small"><a href="pollen/@used.Pollen.Id/edit">@used.Title</a> · @PollenService.Line(used.Pollen, Today)</div>
+                }
+            </dd>
             @if (cross.Bagged is { } bagged)
             {
                 <dt>@Strings.Crosses.Bagged</dt>
@@ -72,6 +82,22 @@ else
             }
         </dl>
     </section>
+
+    @if (view.Pod.Plant is { Traits.Count: > 0 } || view.Pollen.Plant is { Traits.Count: > 0 })
+    {
+        <section class="detail-card">
+            <h2>@Strings.Crosses.TraitsHeading</h2>
+            <dl class="detail-list">
+                <dt>@view.Pod.Name</dt>
+                <dd><TraitLine Traits="view.Pod.Plant?.Traits" /></dd>
+                @if (!view.IsSelf)
+                {
+                    <dt>@view.Pollen.Name</dt>
+                    <dd><TraitLine Traits="view.Pollen.Plant?.Traits" /></dd>
+                }
+            </dl>
+        </section>
+    }
 
     <section class="detail-card">
         <h2>@Strings.Crosses.OutcomeHeading</h2>
@@ -142,13 +168,23 @@ else
         <section class="detail-card" id="cross-seedlings">
             <h2>@Strings.Crosses.SeedlingsHeading</h2>
             <p class="family-hint">@SeedlingsLine()</p>
+            @if (seedlings.Propagations.Count + seedlings.Plants.Count >= 2)
+            {
+                <div class="form-actions compare-bar">
+                    <button type="button" class="btn btn-outline-primary btn-sm" aria-pressed="@(comparing ? "true" : "false")" @onclick="ToggleComparing">@(comparing ? Strings.Crosses.CompareDone : Strings.Crosses.CompareStart)</button>
+                    @if (comparing)
+                    {
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@(picked.Count < 2)" @onclick="GoCompare">@F(Strings.Crosses.CompareGo, picked.Count)</button>
+                    }
+                </div>
+            }
             @if (seedlings.Propagations.Count > 0)
             {
                 <h3>@F(Strings.Crosses.SownHeading, seedlings.Propagations.Count)</h3>
                 <ul class="item-list">
                     @foreach (var propagation in seedlings.Propagations)
                     {
-                        <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                        <li><PropagationCard Propagation="propagation" ShowStage="true" Selectable="comparing" Selected="picked.Contains(propagation.Id)" OnToggle="Toggle" /></li>
                     }
                 </ul>
             }
@@ -158,7 +194,7 @@ else
                 <ul class="plant-grid">
                     @foreach (var plant in seedlings.Plants)
                     {
-                        <li><PlantTile Plant="plant" /></li>
+                        <li><PlantTile Plant="plant" Selectable="comparing" Selected="picked.Contains(plant.Id)" OnToggle="Toggle" /></li>
                     }
                 </ul>
             }
@@ -174,6 +210,9 @@ else
     private CrossView? view;
     private CrossSeedlings? seedlings;
     private bool loaded;
+    private bool comparing;
+    private readonly HashSet<Guid> picked = [];
+    private PollenView? usedPollen;
     private bool busy;
 
     private DateOnly Today => Time.Today();
@@ -189,7 +228,23 @@ else
         book = await Crosses.GetBookAsync();
         view = book.ViewOf(Id);
         seedlings = view is null ? null : book.SeedlingsOf(view.Cross);
+        usedPollen = view?.Cross.PollenId is { } pollenId ? (await Pollens.GetAllAsync()).FirstOrDefault(p => p.Pollen.Id == pollenId) : null;
     }
+
+    private void ToggleComparing()
+    {
+        comparing = !comparing;
+        picked.Clear();
+    }
+
+    private void Toggle(SelectClick click)
+    {
+        if (!picked.Remove(click.Id))
+            picked.Add(click.Id);
+    }
+
+    private void GoCompare() =>
+        Navigation.NavigateTo($"crosses/{Id}/compare?ids={string.Join(",", picked)}");
 
     private async Task SetOutcomeAsync(CrossOutcome outcome)
     {

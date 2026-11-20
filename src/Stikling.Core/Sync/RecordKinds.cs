@@ -98,6 +98,7 @@ public static class RecordKinds
     public static readonly RecordKind<AttachedFile> Files = new(SyncKinds.Files);
     public static readonly RecordKind<Cross> Crosses = new("crosses");
     public static readonly RecordKind<SeedLot> SeedLots = new("seedLots");
+    public static readonly RecordKind<Pollen> Pollen = new("pollen");
 
     public static readonly RecordKind<UserSettings> Settings = new(SyncKinds.Settings, RecordOwner.Person, isContent: false);
 
@@ -150,6 +151,7 @@ public static class RecordKinds
         Files,
         Crosses,
         SeedLots,
+        Pollen,
         Settings,
     ];
 }

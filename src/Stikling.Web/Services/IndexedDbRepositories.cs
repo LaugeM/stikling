@@ -327,3 +327,9 @@ public sealed class IndexedDbSeedLotRepository(IndexedDb db, TimeProvider time)
 {
     protected override IReadOnlyList<string> Validate(SeedLot lot) => lot.Validate(Today);
 }
+
+public sealed class IndexedDbPollenRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Pollen>(db, time, RecordKinds.Pollen), IPollenRepository
+{
+    protected override IReadOnlyList<string> Validate(Pollen pollen) => pollen.Validate(Today);
+}

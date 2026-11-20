@@ -4592,6 +4592,17 @@ tr.drop-target {
     color: var(--pa-muted);
 }
 
+/* A line under a name that may be long and must not be cut off, like the pollen on the Today card */
+.item-sub.item-sub-wrap {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.today-cross {
+    margin: 0.35rem 0 0.1rem 0.25rem;
+}
+
 /* Tap targets of the cross and seed lot pages, and the alert that takes focus after a failed save */
 .cross-actions .btn,
 .lot-actions .btn {
@@ -4610,4 +4621,22 @@ dd > a[href^="plants/"] {
     display: inline-block;
     padding-block: 0.7rem;
     margin-block: -0.7rem;
+}
+
+/* The cross button on Today sits on a line of its own, so the plant name keeps the row */
+.today-row-main:has(.today-cross) {
+    flex-wrap: wrap;
+}
+
+.today-row-main > .today-cross {
+    order: 9;
+    flex: 0 0 auto;
+    margin: 0 0 0.25rem 0.25rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.compare-bar .btn {
+    min-height: 2.75rem;
 }

@@ -101,6 +101,7 @@ builder.Services.AddScoped<IPlaceReadingRepository, IndexedDbPlaceReadingReposit
 builder.Services.AddScoped<INameNoteRepository, IndexedDbNameNoteRepository>();
 builder.Services.AddScoped<ICrossRepository, IndexedDbCrossRepository>();
 builder.Services.AddScoped<ISeedLotRepository, IndexedDbSeedLotRepository>();
+builder.Services.AddScoped<IPollenRepository, IndexedDbPollenRepository>();
 builder.Services.AddScoped<IFileRepository, IndexedDbFileRepository>();
 builder.Services.AddScoped<ISupplyRepository, IndexedDbSupplyRepository>();
 builder.Services.AddScoped<ISupplyEntryRepository, IndexedDbSupplyEntryRepository>();
@@ -142,6 +143,7 @@ builder.Services.AddScoped<PhotoMarkupService>();
 builder.Services.AddScoped<PlaceReadingService>();
 builder.Services.AddScoped<NameNoteService>();
 builder.Services.AddScoped<CrossService>();
+builder.Services.AddScoped<PollenService>();
 builder.Services.AddScoped<FileService>();
 builder.Services.AddScoped<ShelfPage>();
 builder.Services.AddScoped<CareIntervalService>();

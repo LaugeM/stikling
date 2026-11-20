@@ -351,6 +351,13 @@ else
                 </FormSection>
             }
 
+            <FormSection Title="@Strings.Crosses.TraitsHeading" Summary="@(propagation.Traits.Count > 0 ? string.Join(", ", propagation.Traits) : null)" Open="@(!form!.IsNew && propagation.Traits.Count > 0)">
+                <div class="mb-3">
+                    <TagPicker @bind-Value="propagation.Traits" Suggestions="traitSuggestions" Label="@Strings.Crosses.TraitsHeading" />
+                    <div class="form-text">@Strings.Crosses.TraitsHint</div>
+                </div>
+            </FormSection>
+
             <FormSection Title="@Strings.Propagations.EditSitter" Summary="@SitterSummary" Open="openSitter">
                 <div class="mb-3">
                     <label class="form-label" for="sitter-note">@Strings.Propagations.EditSitterNote</label>
@@ -615,6 +622,8 @@ else
     // Set by "Change name", or by a name error, and kept for the rest of the visit
     private bool nameExpanded;
 
+    private IReadOnlyList<string> traitSuggestions = [];
+
     private bool IsNew => Id is null;
 
     private DateOnly Today => Time.Today();
@@ -718,6 +727,7 @@ else
         var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
         sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
 
+        traitSuggestions = Traits.Suggestions(form.Plants, form.Propagations);
         var isNew = form.IsNew;
         openArrival = !isNew && (propagation.ArrivedIn is not null || propagation.ArrivalProblems.Count > 0 || !string.IsNullOrWhiteSpace(propagation.ArrivalNote));
         openWhere = !isNew && !string.IsNullOrWhiteSpace(form.Location);

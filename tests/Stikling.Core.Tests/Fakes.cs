@@ -1409,3 +1409,14 @@ internal sealed class FakeSeedLotRepository() : FakeRepository<SeedLot>(stampsDa
             throw new InvalidOperationException(error);
     }
 }
+
+internal sealed class FakePollenRepository() : FakeRepository<Pollen>(stampsDates: true), IPollenRepository
+{
+    public Dictionary<Guid, Pollen> Pollen => Records;
+
+    protected override void Check(Pollen pollen)
+    {
+        if (pollen.Validate(new DateOnly(2100, 1, 1)).FirstOrDefault() is { } error)
+            throw new InvalidOperationException(error);
+    }
+}

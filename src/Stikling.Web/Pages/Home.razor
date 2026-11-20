@@ -12,6 +12,10 @@
 @inject AccountService Account
 @inject SettingsService SettingsService
 @inject PutOffService PutOffService
+@inject NavigationManager Navigation
+@inject PollenService PollenBook
+@inject CrossService CrossBook
+@inject IFloweringMarkRepository FloweringMarkRepository
 @inject ICareLogRepository CareLogs
 @inject AwayService AwayService
 @inject SitterSheetService SitterSheets
@@ -459,6 +463,38 @@ else
                                 </div>
                             </div>
                         </a>
+                    </TodayRow>
+                }
+            </ul>
+        </section>
+    }
+
+    @if (!sections.Away && !sections.Holding && flowerMatches.Count > 0)
+    {
+        <section class="today-section">
+            <h2>@Strings.Crosses.TodayHeading</h2>
+            <ul class="item-list">
+                @foreach (var match in flowerMatches)
+                {
+                    <TodayRow @key="match.Plant.Id"
+                              OnPutOff="days => PutOffAsync(match.PutOffKey, Today.AddDays(days))"
+                              SkipLabel="@Strings.Crosses.TodayNotThisFlowering" OnSkip="() => PutOffAsync(match.PutOffKey, Today.AddYears(1))">
+                        <a class="item-card" href="plants/@match.Plant.Id">
+                            <SubjectThumb Subject="match.Plant" />
+                            <div class="item-text">
+                                <div class="item-name">@match.Plant.DisplayName</div>
+                                <div class="item-meta">
+                                    <span>@(match.Stage == FloweringStage.InFlower ? Strings.Crosses.TodayInFlower : Strings.Crosses.TodayBuds)</span>
+                                </div>
+                                @foreach (var stored in match.Pollen)
+                                {
+                                    <div class="item-sub item-sub-wrap">@F(Strings.Crosses.TodayPollenLine, stored.Title, PollenService.Line(stored.Pollen, Today))</div>
+                                }
+                            </div>
+                        </a>
+                        <IfCan Edit>
+                            <a class="btn btn-outline-primary btn-sm today-cross" href="@CrossHref(match)">@Strings.Crosses.RecordCross</a>
+                        </IfCan>
                     </TodayRow>
                 }
             </ul>
@@ -1221,6 +1257,10 @@ else
         careDone.Clear();
         sections = TodaySections.For(data, Today, Time);
         WatchOuterPot();
+        allPollen = await PollenBook.GetAllAsync();
+        flowerMarks = await FloweringMarkRepository.GetAllAsync();
+        flowerCrosses = (await CrossBook.GetBookAsync()).Crosses;
+        flowerMatches = FindFlowerMatches();
 
         upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);
         backSpan = sections.BackDay is { } day ? AwayTime.Spans(data.Stretches).LastOrDefault(s => s.Until == day) : null;
@@ -1432,10 +1472,24 @@ else
         await WateringAnsweredAsync();
     }
 
+    private IReadOnlyList<PollenView> allPollen = [];
+    private IReadOnlyList<FloweringMark> flowerMarks = [];
+    private IReadOnlyList<FlowerMatch> flowerMatches = [];
+    private IReadOnlyList<Cross> flowerCrosses = [];
+
+    // Plants coming into flower with the stored pollen of their genus, unless put off for this flowering
+    private IReadOnlyList<FlowerMatch> FindFlowerMatches() =>
+        PollenMatches.For(plants, flowerMarks, allPollen, data.PutOffs, Today, flowerCrosses);
+
+    // The flowering plant is the pod parent, and the newest pollen of its genus is the one to start with
+    private static string CrossHref(FlowerMatch match) =>
+        $"crosses/new?pod={match.Plant.Id}&stored={match.Pollen[0].Pollen.Id}";
+
     private async Task PutOffAsync(string key, DateOnly until)
     {
         data.PutOffs.PutOff(key, until);
         await PutOffService.PutOffAsync(key, until);
+        flowerMatches = FindFlowerMatches();
         // Putting off a room, or the round, moves it on to the next room or takes it away
         Recompute();
         await Badge.SetAsync(DueCount);

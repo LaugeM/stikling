@@ -76,4 +76,68 @@
     <value>{0} ({1})</value>
     <comment>A cross with a working name, followed by its title. {0} is the working name and {1} the parents.</comment>
   </data>
+  <data name="ErrPollenNeedsPlant" xml:space="preserve">
+    <value>Say which plant the pollen came from, or type a name.</value>
+    <comment>Error when saving pollen with no plant or name.</comment>
+  </data>
+  <data name="ErrUsedBeforeCollected" xml:space="preserve">
+    <value>It cannot be used up before it was collected.</value>
+    <comment>Error when the used up day of pollen is before the day it was collected.</comment>
+  </data>
+  <data name="ErrAmountTooLong" xml:space="preserve">
+    <value>The amount is too long. Keep it under 80 characters.</value>
+    <comment>Error when the amount of pollen is longer than 80 characters.</comment>
+  </data>
+  <data name="PollenAgeToday" xml:space="preserve">
+    <value>today</value>
+    <comment>How long ago pollen was collected, for today.</comment>
+  </data>
+  <data name="PollenAgeDays_One" xml:space="preserve">
+    <value>{0} day ago</value>
+    <comment>How long ago pollen was collected, exactly one day.</comment>
+  </data>
+  <data name="PollenAgeDays_Other" xml:space="preserve">
+    <value>{0} days ago</value>
+    <comment>How long ago pollen was collected, up to two weeks. {0} is the number of days.</comment>
+  </data>
+  <data name="PollenAgeWeeks_Other" xml:space="preserve">
+    <value>{0} weeks ago</value>
+    <comment>How long ago pollen was collected, in weeks. {0} is the number, always two or more.</comment>
+  </data>
+  <data name="PollenAgeMonths_Other" xml:space="preserve">
+    <value>{0} months ago</value>
+    <comment>How long ago pollen was collected, in months. {0} is the number, always two or more.</comment>
+  </data>
+  <data name="PollenAgeYears_Other" xml:space="preserve">
+    <value>{0} years ago</value>
+    <comment>How long ago pollen was collected, in years. {0} is the number, always two or more.</comment>
+  </data>
+  <data name="PollenCollected" xml:space="preserve">
+    <value>Collected {0}</value>
+    <comment>Line on pollen. {0} is how long ago, like 3 weeks ago.</comment>
+  </data>
+  <data name="KeptFreezer" xml:space="preserve">
+    <value>freezer</value>
+    <comment>Where pollen is kept.</comment>
+  </data>
+  <data name="KeptFridge" xml:space="preserve">
+    <value>fridge</value>
+    <comment>Where pollen is kept.</comment>
+  </data>
+  <data name="KeptRoom" xml:space="preserve">
+    <value>room temperature</value>
+    <comment>Where pollen is kept.</comment>
+  </data>
+  <data name="PollenAgeWeeks_One" xml:space="preserve">
+    <value>{0} week ago</value>
+    <comment>How long ago pollen was collected, exactly one week. Not reached today, kept so the pair is complete.</comment>
+  </data>
+  <data name="PollenAgeMonths_One" xml:space="preserve">
+    <value>{0} month ago</value>
+    <comment>How long ago pollen was collected, exactly one month. Not reached today, kept so the pair is complete.</comment>
+  </data>
+  <data name="PollenAgeYears_One" xml:space="preserve">
+    <value>{0} year ago</value>
+    <comment>How long ago pollen was collected, exactly one year. Not reached today, kept so the pair is complete.</comment>
+  </data>
 </root>
