@@ -5,9 +5,9 @@ max_score: 40
 na_heuristics: 
 p0_count: 0
 p1_count: 2
-target_identity: "file:C://Users//lauge//Desktop//Privat//Fritidsprojekter//Claude//stikling//.claude//worktrees//awesome-goldwasser-76ab3e//src//Stikling.Web//Pages//SoilMixes.razor"
+target_identity: "file:src/Stikling.Web/Pages/SoilMixes.razor"
 target_fingerprint: "sha256:1513c2cf5d8cfa5c1d2dc17ec4a7643b843c721d0656c46dec3ad44d4f96f146"
-target_path: "C://Users//lauge//Desktop//Privat//Fritidsprojekter//Claude//stikling//.claude//worktrees//awesome-goldwasser-76ab3e//src//Stikling.Web//Pages//SoilMixes.razor"
+target_path: "src/Stikling.Web/Pages/SoilMixes.razor"
 timestamp: 2026-11-20T01-42-54Z
 slug: src-stikling-web-pages-soilmixes-razor
 ---
