@@ -4583,3 +4583,23 @@ tr.drop-target {
     font-size: 0.85rem;
     color: var(--pa-muted);
 }
+
+/* Tap targets of the cross and seed lot pages, and the alert that takes focus after a failed save */
+.cross-actions .btn,
+.lot-actions .btn {
+    min-height: 2.75rem;
+}
+
+.cross-actions {
+    margin-bottom: 1rem;
+}
+
+.edit-form .alert[role="alert"] {
+    scroll-margin-top: 4.5rem;
+}
+
+dd > a[href^="plants/"] {
+    display: inline-block;
+    padding-block: 0.7rem;
+    margin-block: -0.7rem;
+}
