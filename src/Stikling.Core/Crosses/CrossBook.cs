@@ -73,16 +73,21 @@ public sealed class CrossBook
             .ToList();
 
         // Seedlings that came up and haven't left their propagation. A unit that failed is not taken
-        // off, since the count can't say whether a seed or a seedling failed.
+        // off, since the count can't say whether a seed or a seedling failed. Units split off a sowing
+        // came up there: the sowing takes them off its own, and the split counts them as up.
         var growing = sown.Where(p => p.IsActive)
-            .Sum(p => Math.Max(0, Math.Min(p.RemainingCount, (p.SeedsGerminated ?? 0) - p.PottedUpCount - p.GivenAwayCount - p.SplitOffCount)));
+            .Sum(p => Math.Max(0, Math.Min(p.RemainingCount,
+                (SowingSummary.IsSplitOfAnother(p, sownIds) ? p.SeedsGerminated ?? p.InitialCount : p.SeedsGerminated ?? 0)
+                - p.PottedUpCount - p.GivenAwayCount - p.SplitOffCount)));
 
+        // A split's seeds were sown and came up in the sowing it was split from, so only the sowings count
+        var sowings = sown.Where(p => !SowingSummary.IsSplitOfAnother(p, sownIds)).ToList();
         return new CrossSeedlings(
             madeLots,
             sown,
             made,
-            sown.Sum(p => p.InitialCount),
-            sown.Sum(p => p.SeedsGerminated ?? 0),
+            sowings.Sum(p => p.InitialCount),
+            sowings.Sum(p => p.SeedsGerminated ?? 0),
             growing,
             made.Count(p => p.Status == PlantStatus.Active) + growing);
     }

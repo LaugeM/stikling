@@ -150,6 +150,43 @@ public class CrossTests
     }
 
     [Fact]
+    public void Seedlings_split_off_a_sowing_are_not_counted_as_sown_twice()
+    {
+        var mum = Hoya("Mum");
+        var dad = Hoya("Dad");
+        var cross = Pair(mum, dad);
+        var lot = new SeedLot { CrossId = cross.Id };
+        // 20 sown, 10 came up, and 4 of them split off because they got ahead
+        var sown = new Propagation
+        {
+            Type = PropagationType.Seed,
+            SeedLotId = lot.Id,
+            StartedOn = new DateOnly(2026, 9, 1),
+            InitialCount = 20,
+            SeedsGerminated = 10,
+            SplitOffCount = 4
+        };
+        var split = new Propagation
+        {
+            Type = PropagationType.Seed,
+            SeedLotId = lot.Id,
+            StartedOn = sown.StartedOn,
+            InitialCount = 4,
+            SplitFromId = sown.Id,
+            Stage = PropagationStage.Rooted
+        };
+
+        var book = Book([cross], [lot], [sown, split], [mum, dad]);
+        var seedlings = book.SeedlingsOf(cross);
+
+        Assert.Equal(20, seedlings.Sown);
+        Assert.Equal(10, seedlings.CameUp);
+        // 6 still in the sowing and the 4 in the split
+        Assert.Equal(10, seedlings.Growing);
+        Assert.Equal(20, book.SowingsOf(lot).SeedsSown);
+    }
+
+    [Fact]
     public void A_cross_with_no_lot_has_no_seedlings()
     {
         var mum = Hoya("Mum");

@@ -425,7 +425,7 @@ else
     private async Task ConfirmTakeoffAsync(IReadOnlyList<TakeoffLine> lines)
     {
         if (takeoffFor is { } can)
-            await StockService.TakeOffAsync(can.Id, lines);
+            await StockService.TakeOffAsync(can.Id, lines, can.MixedOn);
         SkipTakeoff();
     }
 

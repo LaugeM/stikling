@@ -1257,9 +1257,18 @@ else
         careDone.Clear();
         sections = TodaySections.For(data, Today, Time);
         WatchOuterPot();
+        // The pollen card needs the flowerings and crosses only when there is pollen to offer
         allPollen = await PollenBook.GetAllAsync();
-        flowerMarks = await FloweringMarkRepository.GetAllAsync();
-        flowerCrosses = (await CrossBook.GetBookAsync()).Crosses;
+        if (allPollen.Any(p => !p.Pollen.IsUsedUp))
+        {
+            flowerMarks = await FloweringMarkRepository.GetAllAsync();
+            flowerCrosses = await CrossBook.GetCrossesAsync();
+        }
+        else
+        {
+            flowerMarks = [];
+            flowerCrosses = [];
+        }
         flowerMatches = FindFlowerMatches();
 
         upcoming = sections.Away ? null : AwayTime.Upcoming(data.Stretches, Today);

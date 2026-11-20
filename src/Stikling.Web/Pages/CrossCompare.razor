@@ -7,6 +7,7 @@
 @inject TimeProvider Time
 
 <PageTitle>@Strings.Crosses.ComparePageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
 
 <a class="back-link" href="crosses/@Id">@Strings.Crosses.CompareBack</a>
 <div class="page-heading page-full">
@@ -96,6 +97,14 @@ else
     {
         loaded = false;
         columns = [];
+        await LoadAsync();
+        loaded = true;
+    }
+
+    // Built into a list of its own and put in place at the end, so a reload after a sync doesn't empty the page first
+    private async Task LoadAsync()
+    {
+        var columns = new List<Column>();
         var book = await Crosses.GetBookAsync();
         view = book.ViewOf(Id);
         if (view is not null)
@@ -138,7 +147,7 @@ else
             }
         }
 
-        loaded = true;
+        this.columns = columns;
     }
 
     private static string? LeafLine(Leaf? leaf) =>
