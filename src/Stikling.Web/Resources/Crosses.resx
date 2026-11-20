@@ -705,7 +705,7 @@
     <comment>Shown in the comparison where a seedling has no leaf or measurement logged.</comment>
   </data>
   <data name="CompareLeafLine" xml:space="preserve">
-    <value>{0}, {1}</value>
+    <value>{0} · {1}</value>
     <comment>The latest leaf in the comparison. {0} is the day and {1} is how variegated it was.</comment>
   </data>
   <data name="CompareBack" xml:space="preserve">
@@ -727,5 +727,9 @@
   <data name="EditIntro" xml:space="preserve">
     <value>A cross is a pollination: the pollen of one plant put on the flower of another. Write it down the day you do it, and add what came of it later.</value>
     <comment>Line at the top of the form for a new cross that says what a cross is.</comment>
+  </data>
+  <data name="PollenMore" xml:space="preserve">
+    <value>More about this pollen</value>
+    <comment>Heading of the folded group on the pollen form with amount, used up day and note.</comment>
   </data>
 </root>

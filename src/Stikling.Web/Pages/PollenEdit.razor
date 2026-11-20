@@ -55,6 +55,7 @@ else
                     }
                 </select>
             </div>
+            <FormSection Title="@Strings.Crosses.PollenMore" Summary="@MoreSummary" Open="@(!IsNew && HasMore)">
             <div class="mb-3">
                 <label class="form-label" for="pollen-amount">@Strings.Crosses.PollenAmount</label>
                 <InputText id="pollen-amount" class="form-control" maxlength="80" @bind-Value="pollen.Amount" placeholder="@Strings.Crosses.PollenAmountPlaceholder" />
@@ -68,6 +69,7 @@ else
                 <label class="form-label" for="pollen-note">@Strings.Crosses.Note</label>
                 <InputTextArea id="pollen-note" class="form-control" rows="3" @bind-Value="pollen.Note" />
             </div>
+            </FormSection>
         </fieldset>
 
         <div class="form-actions">
@@ -111,6 +113,11 @@ else
     private bool loaded;
 
     private bool IsNew => Id is null;
+
+    private bool HasMore =>
+        pollen is { } p && (!string.IsNullOrWhiteSpace(p.Amount) || p.UsedUpOn is not null || !string.IsNullOrWhiteSpace(p.Note));
+
+    private string? MoreSummary => pollen is { } p && HasMore ? p.Amount : null;
 
     private string BackHref => IsNew && PlantId is { } plantId ? $"plants/{plantId}" : "pollen";
 

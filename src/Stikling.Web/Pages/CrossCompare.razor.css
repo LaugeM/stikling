@@ -2,14 +2,23 @@
 .compare-grid {
     display: grid;
     gap: 1rem;
-    grid-template-columns: 1fr;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+}
+
+.compare-card {
+    scroll-snap-align: start;
 }
 
 @media (min-width: 64rem) {
     .compare-grid {
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
         grid-template-columns: repeat(var(--compare-columns), minmax(15rem, 1fr));
-        overflow-x: auto;
-        padding-bottom: 0.5rem;
+        scroll-snap-type: none;
     }
 }
 

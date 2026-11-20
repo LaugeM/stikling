@@ -35,7 +35,7 @@ else
         @foreach (var column in columns)
         {
             <article class="compare-card">
-                <a class="compare-photo @(column.PhotoId is null ? "empty" : null)" href="@column.Href">
+                <a class="compare-photo @(column.PhotoId is null ? "empty" : null)" href="@column.Href" tabindex="-1" aria-hidden="true">
                     @if (column.PhotoId is { } photoId)
                     {
                         <PhotoImage PhotoId="photoId" Thumbnail="false" Alt="@column.Name" />

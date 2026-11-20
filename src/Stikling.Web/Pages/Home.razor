@@ -476,7 +476,7 @@ else
             <ul class="item-list">
                 @foreach (var match in flowerMatches)
                 {
-                    <TodayRow @key="match.Plant.Id" DoneLabel="@Strings.Crosses.RecordCross" OnDone="() => RecordCrossFor(match)"
+                    <TodayRow @key="match.Plant.Id"
                               OnPutOff="days => PutOffAsync(match.PutOffKey, Today.AddDays(days))"
                               SkipLabel="@Strings.Crosses.TodayNotThisFlowering" OnSkip="() => PutOffAsync(match.PutOffKey, Today.AddYears(1))">
                         <a class="item-card" href="plants/@match.Plant.Id">
@@ -492,6 +492,9 @@ else
                                 }
                             </div>
                         </a>
+                        <IfCan Edit>
+                            <a class="btn btn-outline-primary btn-sm today-cross" href="@CrossHref(match)">@Strings.Crosses.RecordCross</a>
+                        </IfCan>
                     </TodayRow>
                 }
             </ul>
@@ -1479,8 +1482,8 @@ else
         PollenMatches.For(plants, flowerMarks, allPollen, data.PutOffs, Today, flowerCrosses);
 
     // The flowering plant is the pod parent, and the newest pollen of its genus is the one to start with
-    private void RecordCrossFor(FlowerMatch match) =>
-        Navigation.NavigateTo($"crosses/new?pod={match.Plant.Id}&stored={match.Pollen[0].Pollen.Id}");
+    private static string CrossHref(FlowerMatch match) =>
+        $"crosses/new?pod={match.Plant.Id}&stored={match.Pollen[0].Pollen.Id}";
 
     private async Task PutOffAsync(string key, DateOnly until)
     {

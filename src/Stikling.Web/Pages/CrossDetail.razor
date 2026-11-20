@@ -171,7 +171,7 @@ else
             @if (seedlings.Propagations.Count + seedlings.Plants.Count >= 2)
             {
                 <div class="form-actions compare-bar">
-                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="ToggleComparing">@(comparing ? Strings.Crosses.CompareDone : Strings.Crosses.CompareStart)</button>
+                    <button type="button" class="btn btn-outline-primary btn-sm" aria-pressed="@(comparing ? "true" : "false")" @onclick="ToggleComparing">@(comparing ? Strings.Crosses.CompareDone : Strings.Crosses.CompareStart)</button>
                     @if (comparing)
                     {
                         <button type="button" class="btn btn-primary btn-sm" disabled="@(picked.Count < 2)" @onclick="GoCompare">@F(Strings.Crosses.CompareGo, picked.Count)</button>
