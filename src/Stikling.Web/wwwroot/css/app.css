@@ -4640,3 +4640,10 @@ dd > a[href^="plants/"] {
 .compare-bar .btn {
     min-height: 2.75rem;
 }
+
+/* Buttons that stand alone in a row of actions keep a 44px tap area */
+.form-actions > .btn,
+.reminder > .btn,
+.stock-confirm .btn {
+    min-height: 2.75rem;
+}

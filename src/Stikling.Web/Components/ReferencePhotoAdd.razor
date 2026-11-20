@@ -4,7 +4,7 @@
 @inject ILogger<ReferencePhotoAdd> Logger
 
 <label class="btn btn-link btn-sm link-action reference-add" for="@inputId">@Strings.Plants.ReferencePhotoAdd</label>
-<input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+<input id="@inputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1" aria-label="@Strings.Plants.ReferencePhotoAdd"
        @ref="input" @onchange="AddAsync" disabled="@busy" />
 @if (message is not null)
 {

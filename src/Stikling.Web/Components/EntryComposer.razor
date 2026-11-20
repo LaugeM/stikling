@@ -12,7 +12,7 @@
 @implements IAsyncDisposable
 
 @* Outside the sheet, so the Photo button on the page can open it while the sheet is closed *@
-<input id="@PhotoInputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1"
+<input id="@PhotoInputId" type="file" accept="image/*" multiple class="visually-hidden" tabindex="-1" aria-label="@Strings.Propagations.TlKindPhoto"
        @ref="pageInput" @onchange="() => AddPhotosAsync(pageInput)" disabled="@busy" />
 
 <Sheet Title="@SheetTitle" Open="open" OpenChanged="SheetClosedAsync">
