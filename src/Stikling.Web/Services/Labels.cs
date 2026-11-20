@@ -136,6 +136,7 @@ public static class Labels
         GrowingMedium.Soil => Strings.Labels.MediumSoil,
         GrowingMedium.Perlite => Strings.Labels.MediumPerlite,
         GrowingMedium.Water => Strings.Labels.MediumWater,
+        GrowingMedium.Other => Strings.Labels.MediumOther,
         _ => medium.ToString()
     };
 
@@ -189,6 +190,7 @@ public static class Labels
     {
         RootingAid.RootingPowder => Strings.Labels.AidRootingPowder,
         RootingAid.RootingGel => Strings.Labels.AidRootingGel,
+        RootingAid.Cinnamon => Strings.Labels.AidCinnamon,
         RootingAid.WillowWater => Strings.Labels.AidWillowWater,
         RootingAid.HumidityDome => Strings.Labels.AidHumidityDome,
         RootingAid.HeatMat => Strings.Labels.AidHeatMat,

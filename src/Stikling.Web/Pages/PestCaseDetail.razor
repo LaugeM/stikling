@@ -503,7 +503,7 @@ else
                     var seen = PestService.IsFoundOn(view.Case, plant.Id);
                     <li @key="plant.Id">
                         <div class="neighbour-text">
-                            <a href="plants/@plant.Id">@plant.DisplayName</a>
+                            <a class="link-action" href="plants/@plant.Id">@plant.DisplayName</a>
                             @if (seen)
                             {
                                 <span class="badge pest-badge ms-1">@Strings.Pests.CaseSeenHere</span>
@@ -544,7 +544,7 @@ else
                 {
                     <li @key="neighbour.Plant.Id">
                         <div class="neighbour-text">
-                            <a href="plants/@neighbour.Plant.Id">@neighbour.Plant.DisplayName</a>
+                            <a class="link-action" href="plants/@neighbour.Plant.Id">@neighbour.Plant.DisplayName</a>
                             <div class="text-body-secondary small">@(neighbour.LastChecked is { } day ? F(Strings.Pests.CaseChecked, Labels.DaysAgo(Math.Max(0, Today.DayNumber - day.DayNumber))) : Strings.Pests.CaseNeverChecked)</div>
                         </div>
                         <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="() => CleanAsync(neighbour.Plant)">@Strings.Pests.CaseClean</button>

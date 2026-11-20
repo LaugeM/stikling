@@ -12,7 +12,7 @@
 
 @if (CanEdit)
 {
-    <input id="@InputId" type="file" accept="image/*,application/pdf,.pdf" multiple class="visually-hidden" tabindex="-1"
+    <input id="@InputId" type="file" accept="image/*,application/pdf,.pdf" multiple class="visually-hidden" tabindex="-1" aria-label="@Strings.Files.Add"
            @ref="input" @onchange="AddAsync" disabled="@busy" />
 }
 
