@@ -1,0 +1,36 @@
+@* One seed lot as a row in a list. *@
+@inject TimeProvider Time
+
+<a class="item-card @(Lot.Lot.IsUsedUp ? "faded" : null)" href="seedlots/@Lot.Lot.Id">
+    <div class="item-text">
+        <div class="item-name">@Lot.Title</div>
+        @if (Lot.Cross is { } cross && !string.IsNullOrWhiteSpace(Lot.Lot.Genus) )
+        {
+            <div class="item-sub">@F(Strings.Crosses.LotFrom, cross.DisplayName)</div>
+        }
+        <div class="item-meta">
+            @foreach (var part in Parts())
+            {
+                <span>@part</span>
+            }
+        </div>
+    </div>
+</a>
+
+@code {
+    [Parameter, EditorRequired]
+    public required LotView Lot { get; set; }
+
+    private IEnumerable<string> Parts()
+    {
+        var lot = Lot.Lot;
+        if (lot.IsUsedUp)
+            yield return Strings.Crosses.UsedUp;
+        else if (SeedAmounts.Describe(lot) is { } amount)
+            yield return amount;
+        if (!lot.IsUsedUp && lot.SowBy is { } by)
+            yield return F(Strings.Crosses.SowByDate, Labels.Date(by));
+        if (Lot.Sowings.Count > 0)
+            yield return Plural.Of(Lot.Sowings.Count, Strings.Crosses.SownCount_One, Strings.Crosses.SownCount_Other);
+    }
+}

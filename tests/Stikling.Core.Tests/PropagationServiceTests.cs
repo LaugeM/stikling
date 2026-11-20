@@ -409,8 +409,10 @@ public class PropagationServiceTests
         corms.RootingAids = [RootingAid.Cinnamon];
         corms.Notes = "stays";
         corms.StartedOn = Today.AddDays(-10);
+        corms.SeedLotId = Guid.NewGuid();
 
         var split = await service.SplitOffAsync(corms, 1, PropagationStage.Rooting);
+        Assert.Equal(corms.SeedLotId, split.SeedLotId);
 
         Assert.Equal(1, corms.RemainingCount);
         Assert.Equal(1, corms.SplitOffCount);

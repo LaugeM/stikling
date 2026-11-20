@@ -1,0 +1,14 @@
+@* A parent of a cross: a link when it is a plant in the app, else its name as text. *@
+@if (Parent.Plant is { } plant)
+{
+    <a href="plants/@plant.Id">@Parent.Name</a>
+}
+else
+{
+    <span class="@(Parent.Known ? null : "text-body-secondary")">@Parent.Name</span>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public required ParentRef Parent { get; set; }
+}

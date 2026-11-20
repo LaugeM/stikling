@@ -1,0 +1,153 @@
+@page "/seedlots/{Id:guid}"
+@inject CrossService Crosses
+@inject TimeProvider Time
+@inject ILogger<SeedLotDetail> Logger
+
+<PageTitle>@F(Strings.PlantDetail.PageTitle, view?.Title ?? Strings.Crosses.LotUnnamedTitle)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="seedlots">@Strings.Crosses.LotsTitle</a>
+
+@if (view is null || book is null)
+{
+    <p class="text-body-secondary">@(loaded ? Strings.Crosses.LotNotFound : Strings.Shared.Loading)</p>
+}
+else
+{
+    var lot = view.Lot;
+    <div class="page-heading">
+        <h1>@view.Title</h1>
+        <IfCan Edit><a class="btn btn-link btn-sm link-action" href="seedlots/@lot.Id/edit">@Strings.Common.Edit</a></IfCan>
+    </div>
+
+    <IfCan Edit>
+        <div class="form-actions lot-actions">
+            @if (!lot.IsUsedUp)
+            {
+                <a class="btn btn-primary" href="propagations/new?lot=@lot.Id">@Strings.Crosses.SowFromLot</a>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SetUsedUpAsync(true)">@Strings.Crosses.MarkUsedUp</button>
+            }
+            else
+            {
+                <a class="btn btn-outline-primary" href="propagations/new?lot=@lot.Id">@Strings.Crosses.SowFromLot</a>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SetUsedUpAsync(false)">@Strings.Crosses.MarkNotUsedUp</button>
+            }
+        </div>
+    </IfCan>
+
+    <section class="detail-card">
+        <dl class="detail-list">
+            @if (SeedAmounts.Describe(lot) is { } amount)
+            {
+                <dt>@Strings.Crosses.LotAmount</dt>
+                <dd>@amount</dd>
+            }
+            @if (view.Cross is { } cross)
+            {
+                <dt>@Strings.Crosses.LotCross</dt>
+                <dd><a href="crosses/@cross.Cross.Id">@cross.DisplayName</a>@(cross.HasWorkingName ? $" · {cross.Title}" : "")</dd>
+            }
+            @if (sellerName is not null || !string.IsNullOrWhiteSpace(lot.Source))
+            {
+                <dt>@Strings.Crosses.LotSource</dt>
+                <dd>
+                    @if (lot.SellerId is { } sellerId && sellerName is not null)
+                    {
+                        <a href="sellers/@sellerId">@sellerName</a>
+                    }
+                    else
+                    {
+                        @lot.Source
+                    }
+                </dd>
+            }
+            @if (lot.CollectedOn is { } collected)
+            {
+                <dt>@Strings.Crosses.LotCollectedOn</dt>
+                <dd>@Labels.Date(collected)</dd>
+            }
+            @if (lot.SowBy is { } by)
+            {
+                <dt>@Strings.Crosses.LotSowBy</dt>
+                <dd>@Labels.Date(by)</dd>
+            }
+            @if (lot.UsedUpOn is { } used)
+            {
+                <dt>@Strings.Crosses.LotUsedUpOn</dt>
+                <dd>@Labels.Date(used)</dd>
+            }
+            @if (!string.IsNullOrWhiteSpace(lot.Note))
+            {
+                <dt>@Strings.Crosses.Note</dt>
+                <dd class="pre-line">@lot.Note</dd>
+            }
+        </dl>
+    </section>
+
+    <section class="detail-card" id="lot-sowings">
+        <h2>@Strings.Crosses.SowingsHeading</h2>
+        @if (view.Sowings.Count == 0)
+        {
+            <p class="family-hint">@Strings.Crosses.SowingsEmpty</p>
+        }
+        else
+        {
+            <ul class="item-list">
+                @foreach (var propagation in view.Sowings.Propagations)
+                {
+                    <li><PropagationCard Propagation="propagation" ShowStage="true" /></li>
+                }
+            </ul>
+        }
+    </section>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private CrossBook? book;
+    private LotView? view;
+    private string? sellerName;
+    private bool loaded;
+    private bool busy;
+
+    [Inject]
+    private SellerService Sellers { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        loaded = true;
+    }
+
+    private async Task LoadAsync()
+    {
+        book = await Crosses.GetBookAsync();
+        view = book.FindLot(Id) is { } lot ? book.LotView(lot) : null;
+        sellerName = view?.Lot.SellerId is { } sellerId ? (await Sellers.GetSellersAsync()).Find(sellerId)?.Name : null;
+    }
+
+    private async Task SetUsedUpAsync(bool used)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            var lot = view.Lot.Copy();
+            lot.UsedUpOn = used ? Time.Today() : null;
+            await Crosses.SaveLotAsync(lot);
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Marking the seed lot failed");
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

@@ -1,0 +1,77 @@
+@page "/crosses"
+@layout WideLayout
+@inject CrossService Crosses
+
+<PageTitle>@Strings.Crosses.LogPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+<div class="page-heading page-full">
+    <h1>@Strings.Crosses.LogTitle</h1>
+    <div class="d-flex align-items-baseline gap-2">
+        <a class="btn btn-link btn-sm link-action" href="seedlots">@Strings.Crosses.SeedLotsLink</a>
+        <IfCan Edit>
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="crosses/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
+                @Strings.Crosses.RecordCross
+            </a>
+        </IfCan>
+    </div>
+</div>
+
+@if (book is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (book.Crosses.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Crosses.LogEmpty</p>
+        <IfCan Edit><a class="btn btn-primary" href="crosses/new">@Strings.Crosses.RecordCross</a></IfCan>
+    </div>
+}
+else
+{
+    <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Crosses.FilterLabel">
+        @foreach (var option in Enum.GetValues<CrossLogFilter>())
+        {
+            var id = $"cross-filter-{option}";
+            <input type="radio" class="btn-check" name="cross-filter" id="@id" checked="@(filter == option)" @onchange="() => SetFilter(option)" />
+            <label class="btn btn-outline-primary" for="@id">@CrossLabels.Filter(option)</label>
+        }
+    </div>
+
+    @if (rows.Count == 0)
+    {
+        <p class="text-body-secondary">@Strings.Crosses.FilterNone</p>
+    }
+    else
+    {
+        <ul class="item-list list-grid">
+            @foreach (var row in rows)
+            {
+                <li><CrossRowCard Row="row" /></li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private CrossBook? book;
+    private CrossLogFilter filter;
+    private IReadOnlyList<CrossRow> rows = [];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        book = await Crosses.GetBookAsync();
+        rows = book.Log(filter);
+    }
+
+    private void SetFilter(CrossLogFilter value)
+    {
+        filter = value;
+        rows = book!.Log(filter);
+    }
+}

@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="ErrNeedPodParent" xml:space="preserve">
+    <value>Vælg planten frøkapslen voksede på, eller skriv et navn.</value>
+  </data>
+  <data name="ErrNeedPollenParent" xml:space="preserve">
+    <value>Vælg planten som pollenet kom fra, eller skriv et navn.</value>
+  </data>
+  <data name="ErrFuture" xml:space="preserve">
+    <value>Den dag er ikke kommet endnu.</value>
+  </data>
+  <data name="ErrRipeBeforePollinated" xml:space="preserve">
+    <value>Frøene kan ikke være modne før blomsten blev bestøvet.</value>
+  </data>
+  <data name="ErrCount" xml:space="preserve">
+    <value>Blomster og frøkapsler skal være hele tal, og der skal være mindst én blomst.</value>
+  </data>
+  <data name="ErrLotNeedsName" xml:space="preserve">
+    <value>Skriv hvad frøene er, hvor de kommer fra, eller hvilken krydsning de er fra.</value>
+  </data>
+  <data name="ErrAmount" xml:space="preserve">
+    <value>Mængden skal være større end nul.</value>
+  </data>
+  <data name="AmountGrams" xml:space="preserve">
+    <value>{0} g</value>
+  </data>
+  <data name="AmountSeeds_One" xml:space="preserve">
+    <value>{0} frø</value>
+  </data>
+  <data name="AmountSeeds_Other" xml:space="preserve">
+    <value>{0} frø</value>
+  </data>
+  <data name="AmountAbout" xml:space="preserve">
+    <value>omkring {0}</value>
+  </data>
+  <data name="ParentGone" xml:space="preserve">
+    <value>en plante du ikke har mere</value>
+  </data>
+  <data name="TitleOf" xml:space="preserve">
+    <value>{0} × {1}</value>
+  </data>
+  <data name="TitleSelf" xml:space="preserve">
+    <value>{0} selvbestøvet</value>
+  </data>
+  <data name="LotUnnamed" xml:space="preserve">
+    <value>Frøparti</value>
+  </data>
+  <data name="NameAndTitle" xml:space="preserve">
+    <value>{0} ({1})</value>
+  </data>
+</root>
