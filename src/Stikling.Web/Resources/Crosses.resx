@@ -376,9 +376,13 @@
     <value>sow by {0}</value>
     <comment>Small note on a seed lot. {0} is the date.</comment>
   </data>
-  <data name="SownCount" xml:space="preserve">
+  <data name="SownCount_One" xml:space="preserve">
+    <value>sown once</value>
+    <comment>Small note on a seed lot sown exactly once.</comment>
+  </data>
+  <data name="SownCount_Other" xml:space="preserve">
     <value>sown {0} times</value>
-    <comment>Small note on a seed lot that has been sown. {0} is how many sowings.</comment>
+    <comment>Small note on a seed lot sown more than once. {0} is how many sowings.</comment>
   </data>
   <data name="LotUnnamedTitle" xml:space="preserve">
     <value>Seed lot</value>

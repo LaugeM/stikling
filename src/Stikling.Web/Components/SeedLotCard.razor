@@ -31,6 +31,6 @@
         if (!lot.IsUsedUp && lot.SowBy is { } by)
             yield return F(Strings.Crosses.SowByDate, Labels.Date(by));
         if (Lot.Sowings.Count > 0)
-            yield return F(Strings.Crosses.SownCount, Lot.Sowings.Count);
+            yield return Plural.Of(Lot.Sowings.Count, Strings.Crosses.SownCount_One, Strings.Crosses.SownCount_Other);
     }
 }
