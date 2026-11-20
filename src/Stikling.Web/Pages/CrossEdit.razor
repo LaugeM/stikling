@@ -1,0 +1,380 @@
+@page "/crosses/new"
+@page "/crosses/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
+@inject CrossService Crosses
+@inject PollenService Pollens
+@inject IPlantRepository PlantRepository
+@inject ILogger<CrossEdit> Logger
+@inject NavigationManager Navigation
+@inject PageScripts Scripts
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? Strings.Crosses.EditNewTitle : Strings.Crosses.EditTitle) · Stikling</PageTitle>
+
+@* No ReloadOnSync: like other edit pages, nothing changes under someone filling in the form *@
+
+<a class="back-link" href="@BackHref">@BackText</a>
+<h1>@(IsNew ? Strings.Crosses.EditNewTitle : Strings.Crosses.EditTitle)</h1>
+
+@if (cross is null)
+{
+    <p class="text-body-secondary">@(notFound ? Strings.Crosses.NotFound : Strings.Shared.Loading)</p>
+}
+else
+{
+    <EditForm Model="cross" OnSubmit="SaveAsync" class="edit-form" novalidate>
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" id="cross-errors" role="alert" tabindex="-1">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>@Strings.Crosses.EditParents</legend>
+            @if (IsNew)
+            {
+                <p class="form-text">@Strings.Crosses.EditIntro</p>
+            }
+            <ParentPicker Id="pod-parent" Label="@Strings.Crosses.PodParent" Plants="plants"
+                          @bind-PlantId="cross.PodParentPlantId" @bind-Name="cross.PodParentName" />
+            <ParentPicker Id="pollen-parent" Label="@Strings.Crosses.PollenParent" Plants="plants"
+                          @bind-PlantId="cross.PollenParentPlantId" @bind-Name="cross.PollenParentName" />
+            @if (cross.IsSelf)
+            {
+                <p class="form-text">@Strings.Crosses.SelfNote</p>
+            }
+            <div class="mb-1">
+                <label class="form-label" for="cross-name">@Strings.Crosses.WorkingName</label>
+                <InputText id="cross-name" class="form-control" maxlength="80" @bind-Value="cross.Name" placeholder="@Strings.Crosses.WorkingNamePlaceholder" />
+                <div class="form-text">@Strings.Crosses.WorkingNameHint</div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>@Strings.Crosses.EditHow</legend>
+            <div class="mb-3">
+                <label class="form-label" for="pollinated-on">@Strings.Crosses.PollinatedOn</label>
+                <InputDate id="pollinated-on" class="form-control" @bind-Value="cross.PollinatedOn" max="@Time.Today().ToString("yyyy-MM-dd")" />
+            </div>
+            <FormSection Title="@Strings.Crosses.EditMore" Summary="@MoreSummary" Open="@(!IsNew && HasMore)">
+            <div class="mb-3">
+                <label class="form-label" for="cross-method">@Strings.Crosses.Method</label>
+                <select id="cross-method" class="form-select" value="@(cross.Method?.ToString() ?? "")" @onchange="e => SetMethod(e.Value?.ToString())">
+                    <option value="">@Strings.Crosses.NotSaid</option>
+                    @foreach (var method in Enum.GetValues<CrossMethod>())
+                    {
+                        <option value="@method">@CrossLabels.Method(method)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cross-pollen">@Strings.Crosses.PollenKind</label>
+                <select id="cross-pollen" class="form-select" value="@(cross.PollenIsStored ? "stored" : "fresh")" @onchange="e => SetPollen(e.Value?.ToString())">
+                    <option value="fresh">@Strings.Crosses.PollenFresh</option>
+                    <option value="stored">@Strings.Crosses.PollenStored</option>
+                </select>
+            </div>
+            @if (cross.PollenIsStored && storedPollen.Count > 0)
+            {
+                <div class="mb-3">
+                    <label class="form-label" for="cross-pollen-pick">@Strings.Crosses.WhichPollen</label>
+                    <select id="cross-pollen-pick" class="form-select" value="@(cross.PollenId?.ToString() ?? "")" @onchange="e => PickPollen(e.Value?.ToString())">
+                        <option value="">@Strings.Crosses.NotFromStore</option>
+                        @foreach (var item in storedPollen)
+                        {
+                            <option value="@item.Pollen.Id">@item.Title · @PollenService.Line(item.Pollen, Time.Today())</option>
+                        }
+                    </select>
+                </div>
+            }
+            <div class="mb-3">
+                <label class="form-label" for="cross-bagged">@Strings.Crosses.Bagged</label>
+                <select id="cross-bagged" class="form-select" value="@(cross.Bagged is { } b ? (b ? "yes" : "no") : "")" @onchange="e => SetBagged(e.Value?.ToString())">
+                    <option value="">@Strings.Crosses.NotSaid</option>
+                    <option value="yes">@Strings.Common.Yes</option>
+                    <option value="no">@Strings.Common.No</option>
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cross-flowers">@Strings.Crosses.FlowersPollinated</label>
+                <InputNumber id="cross-flowers" class="form-control" @bind-Value="cross.FlowersPollinated" min="1" step="1" inputmode="numeric" />
+            </div>
+            <div class="mb-1">
+                <label class="form-label" for="cross-note">@Strings.Crosses.Note</label>
+                <InputTextArea id="cross-note" class="form-control" rows="3" @bind-Value="cross.Note" placeholder="@Strings.Crosses.NotePlaceholder" />
+            </div>
+            </FormSection>
+        </fieldset>
+
+        @if (!IsNew)
+        {
+        <fieldset>
+            <legend>@Strings.Crosses.EditOutcome</legend>
+            <div class="mb-3">
+                <label class="form-label" for="cross-outcome">@Strings.Crosses.Outcome</label>
+                <select id="cross-outcome" class="form-select" value="@(cross.Outcome?.ToString() ?? "")" @onchange="e => SetOutcome(e.Value?.ToString())">
+                    <option value="">@CrossLabels.Outcome(null)</option>
+                    @foreach (var outcome in Enum.GetValues<CrossOutcome>())
+                    {
+                        <option value="@outcome">@CrossLabels.Outcome(outcome)</option>
+                    }
+                </select>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cross-pods">@Strings.Crosses.PodsSet</label>
+                <InputNumber id="cross-pods" class="form-control" @bind-Value="cross.PodsSet" min="0" step="1" inputmode="numeric" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cross-ripe">@Strings.Crosses.SeedRipeOn</label>
+                <InputDate id="cross-ripe" class="form-control" @bind-Value="cross.SeedRipeOn" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="cross-amount">@Strings.Crosses.SeedAmount</label>
+                <div class="amount-row">
+                    <InputNumber id="cross-amount" class="form-control" @bind-Value="cross.SeedAmount" min="0" step="any" inputmode="decimal" />
+                    <select class="form-select" aria-label="@Strings.Crosses.Unit" value="@((cross.SeedAmountUnit ?? SeedUnit.Seeds).ToString())"
+                            @onchange="e => cross.SeedAmountUnit = Enum.TryParse<SeedUnit>(e.Value?.ToString(), out var unit) ? unit : SeedUnit.Seeds">
+                        @foreach (var unit in Enum.GetValues<SeedUnit>())
+                        {
+                            <option value="@unit">@CrossLabels.Unit(unit)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-check mt-2">
+                    <InputCheckbox id="cross-about" class="form-check-input" @bind-Value="cross.SeedAmountIsAbout" />
+                    <label class="form-check-label" for="cross-about">@Strings.Crosses.AmountIsAbout</label>
+                </div>
+            </div>
+        </fieldset>
+        }
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@Strings.Common.Save</button>
+            <a class="btn btn-link" href="@BackHref">@Strings.Common.Cancel</a>
+        </div>
+    </EditForm>
+
+    @if (!IsNew)
+    {
+        <section class="danger-zone">
+            @if (confirmDelete)
+            {
+                <p class="mb-2">@Strings.Crosses.DeleteConfirm</p>
+                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
+            }
+            else
+            {
+                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Common.Delete</button>
+            }
+        </section>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The plant to start a new cross with as pod parent.</summary>
+    [SupplyParameterFromQuery(Name = "pod")]
+    public Guid? PodId { get; set; }
+
+    /// <summary>The plant to start a new cross with as pollen parent.</summary>
+    [SupplyParameterFromQuery(Name = "pollen")]
+    public Guid? PollenId { get; set; }
+
+    /// <summary>Stored pollen to start a new cross with, from the card on Today.</summary>
+    [SupplyParameterFromQuery(Name = "stored")]
+    public Guid? StoredId { get; set; }
+
+    private Cross? cross;
+    private IReadOnlyList<PollenView> storedPollen = [];
+    private IReadOnlyList<Plant> plants = [];
+    private bool notFound;
+    private bool saving;
+    private bool confirmDelete;
+    private List<string> errors = [];
+    private (Guid?, Guid?, Guid?, Guid?) loadedFor;
+    private bool focusErrors;
+
+    // After a failed check the alert is far from the Save button on a phone, so it takes focus and scrolls into view
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusErrors && errors.Count > 0)
+        {
+            focusErrors = false;
+            try
+            {
+                await Scripts.ShowAlertAsync("cross-errors");
+            }
+            catch (Exception)
+            {
+                // The box is gone or the page is closing; nothing to focus
+            }
+        }
+    }
+    private bool loaded;
+
+    private bool IsNew => Id is null;
+
+    private bool HasMore =>
+        cross is { } c && (c.Method is not null || c.PollenIsStored || c.Bagged is not null || c.FlowersPollinated is not null || !string.IsNullOrWhiteSpace(c.Note));
+
+    private string? MoreSummary => cross is { } c && HasMore
+        ? string.Join(" · ", new[] { c.Method is { } m ? CrossLabels.Method(m) : null, c.PollenIsStored ? Strings.Crosses.PollenStored : null }.OfType<string>())
+        : null;
+
+    private string BackHref => IsNew
+        ? (PodId ?? PollenId) is { } plantId ? $"plants/{plantId}" : "crosses"
+        : $"crosses/{Id}";
+
+    private string BackText => IsNew
+        ? (PodId ?? PollenId) is not null ? Strings.Crosses.BackToPlant : Strings.Crosses.LogTitle
+        : Strings.Crosses.BackToCross;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var key = (Id, PodId, PollenId, StoredId);
+        if (loaded && loadedFor == key)
+            return;
+
+        loaded = true;
+        loadedFor = key;
+        notFound = false;
+        errors = [];
+        confirmDelete = false;
+        cross = null;
+
+        storedPollen = [];
+        plants = [.. (await PlantRepository.GetAllAsync()).OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+
+        if (IsNew)
+        {
+            cross = new Cross { PollinatedOn = Time.Today() };
+            if (PodId is { } pod && plants.FirstOrDefault(p => p.Id == pod) is { } podPlant)
+            {
+                cross.PodParentPlantId = pod;
+                cross.PodParentName = podPlant.DisplayName;
+            }
+            if (PollenId is { } pollen && plants.FirstOrDefault(p => p.Id == pollen) is { } pollenPlant)
+            {
+                cross.PollenParentPlantId = pollen;
+                cross.PollenParentName = pollenPlant.DisplayName;
+            }
+            await LoadPollenAsync();
+            if (StoredId is { } storedId && storedPollen.Any(p => p.Pollen.Id == storedId))
+            {
+                cross.PollenIsStored = true;
+                PickPollen(storedId.ToString());
+            }
+
+            return;
+        }
+
+        // A copy, so leaving without saving changes nothing
+        cross = (await Crosses.GetAsync(Id!.Value))?.Copy();
+        notFound = cross is null;
+        await LoadPollenAsync();
+    }
+
+    // The pollen that is not used up, and the one this cross already names even if it is used up now
+    private async Task LoadPollenAsync() =>
+        storedPollen = [.. (await Pollens.GetAllAsync()).Where(p => !p.Pollen.IsUsedUp || p.Pollen.Id == cross?.PollenId)];
+
+    // Picking stored pollen fills in the pollen parent from where it was collected
+    private void PickPollen(string? value)
+    {
+        if (!Guid.TryParse(value, out var id) || storedPollen.FirstOrDefault(p => p.Pollen.Id == id) is not { } picked)
+        {
+            cross!.PollenId = null;
+            return;
+        }
+
+        cross!.PollenId = id;
+        if (picked.Pollen.FromPlantId is { } plantId || !string.IsNullOrWhiteSpace(picked.Pollen.FromName))
+        {
+            cross.PollenParentPlantId = picked.Pollen.FromPlantId;
+            cross.PollenParentName = picked.Pollen.FromName;
+        }
+    }
+
+    private void SetMethod(string? value) =>
+        cross!.Method = Enum.TryParse<CrossMethod>(value, out var method) ? method : null;
+
+    private void SetOutcome(string? value) =>
+        cross!.Outcome = Enum.TryParse<CrossOutcome>(value, out var outcome) ? outcome : null;
+
+    private void SetPollen(string? value)
+    {
+        cross!.PollenIsStored = value == "stored";
+        if (!cross.PollenIsStored)
+            cross.PollenId = null;
+    }
+
+    private void SetBagged(string? value) =>
+        cross!.Bagged = value switch { "yes" => true, "no" => false, _ => null };
+
+    private async Task SaveAsync()
+    {
+        if (cross is null)
+            return;
+
+        cross.Name = string.IsNullOrWhiteSpace(cross.Name) ? null : cross.Name.Trim();
+        cross.PodParentName = string.IsNullOrWhiteSpace(cross.PodParentName) ? null : cross.PodParentName.Trim();
+        cross.PollenParentName = string.IsNullOrWhiteSpace(cross.PollenParentName) ? null : cross.PollenParentName.Trim();
+        cross.Note = string.IsNullOrWhiteSpace(cross.Note) ? null : cross.Note.Trim();
+        // An amount in no unit is a count of seeds
+        if (cross.SeedAmount is not null)
+            cross.SeedAmountUnit ??= SeedUnit.Seeds;
+
+        errors = [.. cross.Validate(Time.Today())];
+        if (errors.Count > 0)
+        {
+            focusErrors = true;
+            return;
+        }
+
+        saving = true;
+        try
+        {
+            await Crosses.SaveAsync(cross);
+            Navigation.NavigateTo($"crosses/{cross.Id}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the cross failed");
+            errors = [F(Strings.Crosses.SaveError, ex.Message)];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (cross is null)
+            return;
+
+        saving = true;
+        try
+        {
+            await Crosses.DeleteAsync(cross.Id);
+            Navigation.NavigateTo("crosses");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the cross failed");
+            errors = [F(Strings.Crosses.DeleteError, ex.Message)];
+            confirmDelete = false;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+}

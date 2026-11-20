@@ -2139,6 +2139,70 @@
     <value>The people you share a collection with, next to what you log, like &lt;em&gt;by Sam&lt;/em&gt;. You're asked for a name before you invite someone or join a collection, and you can change it under &lt;em&gt;People&lt;/em&gt; on the Account page.</value>
     <comment>Answer to "Who can see my name?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="RecordCrossQ" xml:space="preserve">
+    <value>How do I record a cross?</value>
+    <comment>Question on the Help page about recording a pollination.</comment>
+  </data>
+  <data name="RecordCrossA1" xml:space="preserve">
+    <value>Open the plant that carries the pod, tap More and choose &lt;em&gt;Record a cross, as pod parent&lt;/em&gt;. Pick the pollen parent from your plants, or type a name if it is not one of them. Fill in the day, how you did it, and later what came of it. After the first cross, a &lt;em&gt;Crosses&lt;/em&gt; section shows on the Propagations page.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="RecordCrossA2" xml:space="preserve">
+    <value>Give the cross a working name, like Dark Star. It shows on the seedlings until they get a nickname or a cultivar name of their own. The cross log lists every cross with whether it took and how many seedlings are alive.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
+  <data name="SeedLotQ" xml:space="preserve">
+    <value>What is a seed lot, and how do I sow from it?</value>
+    <comment>Question on the Help page about seed lots.</comment>
+  </data>
+  <data name="SeedLotA1" xml:space="preserve">
+    <value>A seed lot is seed you have before it is sown: from a cross, a swap or a shop. Write down where it came from, when it was collected or bought, a sow-by day and how much there is. The amount can be rough, like about 100 seeds or 1 g. When a cross has ripe seed, &lt;em&gt;Make a seed lot&lt;/em&gt; on the cross fills it in for you.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
+  <data name="SeedLotA2" xml:space="preserve">
+    <value>Choose &lt;em&gt;Sow from this lot&lt;/em&gt; on the lot. It starts a seed propagation that remembers the lot. The pod parent becomes the plant it came from, and the family tree shows the pollen parent beside it.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
+  <data name="HybridParentsQ" xml:space="preserve">
+    <value>How do I see where a hybrid came from?</value>
+    <comment>Question on the Help page about the two parents of a seedling.</comment>
+  </data>
+  <data name="HybridParentsA1" xml:space="preserve">
+    <value>A plant that grew from a cross says so on its page, with the cross and its pollen parent. In the family tree the pollen parent is shown beside the pod parent, and a plant that gave pollen lists the seedlings from the crosses it gave pollen to, under &lt;em&gt;As pollen parent&lt;/em&gt;.</value>
+    <comment>Answer on the Help page.</comment>
+  </data>
+  <data name="PollenStoreQ" xml:space="preserve">
+    <value>How do I keep track of pollen?</value>
+    <comment>Question on the Help page about the pollen store.</comment>
+  </data>
+  <data name="PollenStoreA1" xml:space="preserve">
+    <value>Open the plant, tap &lt;em&gt;More&lt;/em&gt; and choose &lt;em&gt;Collect pollen&lt;/em&gt;, or use &lt;em&gt;Add pollen&lt;/em&gt; on the pollen page, which you reach from the Crosses section on the Propagations page. Write down when you collected it, where you keep it (freezer, fridge or room temperature) and roughly how much. The list shows how long ago each was collected and where it is kept. Stikling does not say how long pollen lasts, since that depends on the plant. It only shows what you wrote down.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="PollenTodayQ" xml:space="preserve">
+    <value>Why does Today show a plant in flower with pollen?</value>
+    <comment>Question on the Help page about the Today card for plants coming into flower.</comment>
+  </data>
+  <data name="PollenTodayA1" xml:space="preserve">
+    <value>When a plant has buds or is in flower and you keep pollen that is not used up from another plant of the same genus, Today shows both. &lt;em&gt;Record a cross&lt;/em&gt; starts a cross with that plant as pod parent and the newest pollen filled in. &lt;em&gt;Not this flowering&lt;/em&gt; hides the card until the plant flowers again. Mark the pollen as used up when it is gone, and it stops showing.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="TraitsQ" xml:space="preserve">
+    <value>What are traits, and how do I compare seedlings?</value>
+    <comment>Question on the Help page about traits and comparing seedlings.</comment>
+  </data>
+  <data name="TraitsA1" xml:space="preserve">
+    <value>Traits are short texts for what a plant or seedling shows, like dark new leaves or silver splash. Add them in the edit form, and the ones you have used are suggested again. On a cross, the traits of both parents show side by side. Choose &lt;em&gt;Compare seedlings&lt;/em&gt; on the cross, pick two or more, and they sit next to each other with their newest photo, traits, age, status, latest leaf and measurements.</value>
+    <comment>Answer on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="OutsidePagesQ" xml:space="preserve">
+    <value>Do the guides link to pages on other sites?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="OutsidePagesA1" xml:space="preserve">
+    <value>A few. At the end of Guides there is a short list of pages from the Royal Horticultural Society, universities and plant societies, for what the guides don't cover: a page for each pest, one for each plant group, taking cuttings and potting mixes. A pest case, a plant in one of the plant groups and the genus in the dictionary link to the one that fits, beside the guide. Each was read before it was added, and the list is kept short. They open in a new tab and need a connection, unlike the guides. In Danish a Danish page is shown instead where a good one was found, and the rest are in English.</value>
+    <comment>Answer to "Do the guides link to pages on other sites?" on the Help page.</comment>
+  </data>
   <data name="MixedCanQ" xml:space="preserve">
     <value>How do I take a fertiliser off the stock when I mix a feed?</value>
     <comment>Question in the &quot;Pots, mixes and fertilisers&quot; part of the Help page.</comment>

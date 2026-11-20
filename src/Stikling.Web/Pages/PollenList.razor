@@ -1,0 +1,66 @@
+@page "/pollen"
+@inject PollenService Pollens
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Crosses.PollenPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+<div class="page-heading">
+    <h1>@Strings.Crosses.PollenTitle</h1>
+    <div class="d-flex align-items-baseline gap-2">
+        <a class="btn btn-link btn-sm link-action" href="crosses">@Strings.Crosses.LogTitle</a>
+        <IfCan Edit>
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="pollen/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
+                @Strings.Crosses.AddPollen
+            </a>
+        </IfCan>
+    </div>
+</div>
+
+@if (items is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (items.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Crosses.PollenEmpty</p>
+        <IfCan Edit><a class="btn btn-primary" href="pollen/new">@Strings.Crosses.AddPollen</a></IfCan>
+    </div>
+}
+else
+{
+    <ul class="item-list">
+        @foreach (var item in items)
+        {
+            <li>
+                <a class="item-card @(item.Pollen.IsUsedUp ? "faded" : null)" href="pollen/@item.Pollen.Id/edit">
+                    <div class="item-text">
+                        <div class="item-name">@item.Title</div>
+                        <div class="item-meta">
+                            @if (item.Pollen.IsUsedUp)
+                            {
+                                <span>@Strings.Crosses.UsedUp</span>
+                            }
+                            <span>@PollenService.Line(item.Pollen, Time.Today())</span>
+                            @if (!string.IsNullOrWhiteSpace(item.Pollen.Amount))
+                            {
+                                <span>@item.Pollen.Amount</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    private IReadOnlyList<PollenView>? items;
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync() => items = await Pollens.GetAllAsync();
+}

@@ -3,6 +3,7 @@ using Stikling.Core.Care;
 using Stikling.Core.Feeds;
 using Stikling.Core.Files;
 using Stikling.Core.Fields;
+using Stikling.Core.Crosses;
 using Stikling.Core.Flowering;
 using Stikling.Core.Leaves;
 using Stikling.Core.Lights;
@@ -313,6 +314,24 @@ public sealed class IndexedDbFileRepository(IndexedDb db, TimeProvider time)
     : IndexedDbEntityRepository<AttachedFile>(db, time, RecordKinds.Files), IFileRepository
 {
     protected override IReadOnlyList<string> Validate(AttachedFile file) => file.Validate();
+}
+
+public sealed class IndexedDbCrossRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Cross>(db, time, RecordKinds.Crosses), ICrossRepository
+{
+    protected override IReadOnlyList<string> Validate(Cross cross) => cross.Validate(Today);
+}
+
+public sealed class IndexedDbSeedLotRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<SeedLot>(db, time, RecordKinds.SeedLots), ISeedLotRepository
+{
+    protected override IReadOnlyList<string> Validate(SeedLot lot) => lot.Validate(Today);
+}
+
+public sealed class IndexedDbPollenRepository(IndexedDb db, TimeProvider time)
+    : IndexedDbEntityRepository<Pollen>(db, time, RecordKinds.Pollen), IPollenRepository
+{
+    protected override IReadOnlyList<string> Validate(Pollen pollen) => pollen.Validate(Today);
 }
 
 public sealed class IndexedDbSoilBatchRepository(IndexedDb db, TimeProvider time)

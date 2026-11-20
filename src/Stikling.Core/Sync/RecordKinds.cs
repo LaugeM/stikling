@@ -96,6 +96,9 @@ public static class RecordKinds
     public static readonly RecordKind<PlaceReading> PlaceReadings = new("placeReadings");
     public static readonly RecordKind<NameNote> NameNotes = new("nameNotes");
     public static readonly RecordKind<AttachedFile> Files = new(SyncKinds.Files);
+    public static readonly RecordKind<Cross> Crosses = new("crosses");
+    public static readonly RecordKind<SeedLot> SeedLots = new("seedLots");
+    public static readonly RecordKind<Pollen> Pollen = new("pollen");
     public static readonly RecordKind<SoilBatch> SoilBatches = new("soilBatches");
     public static readonly RecordKind<BatchMixing> BatchMixings = new("batchMixings");
     public static readonly RecordKind<FeedMixing> FeedMixings = new("feedMixings");
@@ -149,6 +152,9 @@ public static class RecordKinds
         PlaceReadings,
         NameNotes,
         Files,
+        Crosses,
+        SeedLots,
+        Pollen,
         SoilBatches,
         BatchMixings,
         FeedMixings,

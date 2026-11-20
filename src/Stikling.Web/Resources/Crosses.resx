@@ -1,0 +1,739 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="SectionTitle" xml:space="preserve">
+    <value>Crosses</value>
+    <comment>Heading of the section on the Propagations page that holds crosses and seed lots. It only shows once there is a cross or a seed lot.</comment>
+  </data>
+  <data name="SectionAllCrosses_One" xml:space="preserve">
+    <value>All {0} cross</value>
+    <comment>Link from the Crosses section to the cross log. {0} is how many crosses there are.</comment>
+  </data>
+  <data name="SectionAllCrosses_Other" xml:space="preserve">
+    <value>All {0} crosses</value>
+    <comment>Link from the Crosses section to the cross log. {0} is how many crosses there are.</comment>
+  </data>
+  <data name="SectionLots_One" xml:space="preserve">
+    <value>{0} seed lot</value>
+    <comment>Link from the Crosses section to the seed lots, exactly one in stock. {0} is the number.</comment>
+  </data>
+  <data name="SectionLots_Other" xml:space="preserve">
+    <value>{0} seed lots</value>
+    <comment>Link from the Crosses section to the seed lots. {0} is how many are in stock, including none.</comment>
+  </data>
+  <data name="SectionNoLots" xml:space="preserve">
+    <value>Seed lots</value>
+    <comment>Link from the Crosses section to the seed lots when there are none yet.</comment>
+  </data>
+  <data name="StartLine" xml:space="preserve">
+    <value>Pollinating your own plants for seed?</value>
+    <comment>Quiet line at the end of the Propagations page, before there is a cross or a seed lot, followed by two links.</comment>
+  </data>
+  <data name="RecordCross" xml:space="preserve">
+    <value>Record a cross</value>
+    <comment>Button and link that start recording a pollination.</comment>
+  </data>
+  <data name="AddLot" xml:space="preserve">
+    <value>Add a seed lot</value>
+    <comment>Button and link that start adding seeds you have before sowing.</comment>
+  </data>
+  <data name="LogTitle" xml:space="preserve">
+    <value>Cross log</value>
+    <comment>Title of the page that lists every cross with what came of it.</comment>
+  </data>
+  <data name="LogPageTitle" xml:space="preserve">
+    <value>Cross log · Stikling</value>
+    <comment>Browser tab title of the cross log.</comment>
+  </data>
+  <data name="LogEmpty" xml:space="preserve">
+    <value>No crosses yet. Record a pollination on the day you do it, with both parents, and the log fills in with what came of each one.</value>
+    <comment>Empty cross log.</comment>
+  </data>
+  <data name="FilterLabel" xml:space="preserve">
+    <value>Show crosses</value>
+    <comment>Screen reader name of the filter on the cross log.</comment>
+  </data>
+  <data name="FilterAll" xml:space="preserve">
+    <value>All</value>
+    <comment>Cross log filter showing every cross.</comment>
+  </data>
+  <data name="FilterTook" xml:space="preserve">
+    <value>Took</value>
+    <comment>Cross log filter for crosses that took.</comment>
+  </data>
+  <data name="FilterDidNotTake" xml:space="preserve">
+    <value>Didn't take</value>
+    <comment>Cross log filter for crosses that did not take.</comment>
+  </data>
+  <data name="FilterNotKnown" xml:space="preserve">
+    <value>Not known yet</value>
+    <comment>Cross log filter for crosses whose outcome is not known yet.</comment>
+  </data>
+  <data name="FilterNone" xml:space="preserve">
+    <value>No crosses match.</value>
+    <comment>Shown when the filter on the cross log matches no cross.</comment>
+  </data>
+  <data name="SeedLotsLink" xml:space="preserve">
+    <value>Seed lots</value>
+    <comment>Link from the cross log to the seed lots.</comment>
+  </data>
+  <data name="EditNewTitle" xml:space="preserve">
+    <value>Record a cross</value>
+    <comment>Title of the form for a new cross.</comment>
+  </data>
+  <data name="EditTitle" xml:space="preserve">
+    <value>Edit cross</value>
+    <comment>Title of the form for changing a cross.</comment>
+  </data>
+  <data name="EditParents" xml:space="preserve">
+    <value>Parents</value>
+    <comment>Heading of the group for the two parents and the working name on the cross form.</comment>
+  </data>
+  <data name="EditHow" xml:space="preserve">
+    <value>How it was done</value>
+    <comment>Heading of the group for the day and method on the cross form.</comment>
+  </data>
+  <data name="EditOutcome" xml:space="preserve">
+    <value>What came of it</value>
+    <comment>Heading of the group for the outcome and the seed on the cross form.</comment>
+  </data>
+  <data name="PodParent" xml:space="preserve">
+    <value>Pod parent</value>
+    <comment>The plant that carries the pod and the seed. Label of a field and a line.</comment>
+  </data>
+  <data name="PollenParent" xml:space="preserve">
+    <value>Pollen parent</value>
+    <comment>The plant the pollen came from. Label of a field and a line.</comment>
+  </data>
+  <data name="NotInApp" xml:space="preserve">
+    <value>Not one of my plants</value>
+    <comment>First choice in a list of plants for a parent of a cross. Choosing it shows a box to type a name.</comment>
+  </data>
+  <data name="TypedNamePlaceholder" xml:space="preserve">
+    <value>Type a name</value>
+    <comment>Hint in the box for a parent of a cross that is not in the app.</comment>
+  </data>
+  <data name="TypedNameLabel" xml:space="preserve">
+    <value>Name of the {0}</value>
+    <comment>Screen reader name of the box for a parent that is not in the app. {0} is the label, like Pod parent.</comment>
+  </data>
+  <data name="ParentGone" xml:space="preserve">
+    <value>a plant you no longer have</value>
+    <comment>Name of a parent of a cross when the plant is gone and no name was kept.</comment>
+  </data>
+  <data name="SelfNote" xml:space="preserve">
+    <value>Both parents are the same plant, so this is recorded as a self.</value>
+    <comment>Note on the cross form when the pod parent and the pollen parent are the same.</comment>
+  </data>
+  <data name="SelfShort" xml:space="preserve">
+    <value>self</value>
+    <comment>Small note after the pollen parent when both parents are the same plant.</comment>
+  </data>
+  <data name="WorkingName" xml:space="preserve">
+    <value>Working name</value>
+    <comment>Label of the name given to a cross, used on its seedlings until they get a name of their own.</comment>
+  </data>
+  <data name="WorkingNamePlaceholder" xml:space="preserve">
+    <value>For example: Dark Star</value>
+    <comment>Hint in the working name box of a cross.</comment>
+  </data>
+  <data name="WorkingNameHint" xml:space="preserve">
+    <value>Shows on the seedlings until they get a nickname or a cultivar name of their own.</value>
+    <comment>Line under the working name box.</comment>
+  </data>
+  <data name="PollinatedOn" xml:space="preserve">
+    <value>Pollinated on</value>
+    <comment>Label of the day a flower was pollinated.</comment>
+  </data>
+  <data name="Method" xml:space="preserve">
+    <value>Method</value>
+    <comment>Label of how the pollen was put on the flower.</comment>
+  </data>
+  <data name="NotSaid" xml:space="preserve">
+    <value>Not said</value>
+    <comment>Choice for a field of a cross that is left empty.</comment>
+  </data>
+  <data name="MethodBrush" xml:space="preserve">
+    <value>Brush</value>
+    <comment>Method of pollinating with a brush.</comment>
+  </data>
+  <data name="MethodByHand" xml:space="preserve">
+    <value>By hand</value>
+    <comment>Method of pollinating by hand, like touching the flowers together.</comment>
+  </data>
+  <data name="MethodOther" xml:space="preserve">
+    <value>Other</value>
+    <comment>Another method of pollinating. The note says how.</comment>
+  </data>
+  <data name="PollenKind" xml:space="preserve">
+    <value>Pollen</value>
+    <comment>Label of whether the pollen was fresh or stored.</comment>
+  </data>
+  <data name="PollenFresh" xml:space="preserve">
+    <value>Fresh</value>
+    <comment>The pollen was fresh when it was used.</comment>
+  </data>
+  <data name="PollenStored" xml:space="preserve">
+    <value>Stored</value>
+    <comment>The pollen had been stored when it was used.</comment>
+  </data>
+  <data name="Bagged" xml:space="preserve">
+    <value>Flower bagged</value>
+    <comment>Label of whether the pollinated flower was covered with a bag.</comment>
+  </data>
+  <data name="FlowersPollinated" xml:space="preserve">
+    <value>Flowers pollinated</value>
+    <comment>Label of how many flowers were pollinated.</comment>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Note</value>
+    <comment>Label of a free text note on a cross or a seed lot.</comment>
+  </data>
+  <data name="NotePlaceholder" xml:space="preserve">
+    <value>Anything else about how it was done</value>
+    <comment>Hint in the note box of a cross.</comment>
+  </data>
+  <data name="Outcome" xml:space="preserve">
+    <value>Outcome</value>
+    <comment>Label of whether a cross took.</comment>
+  </data>
+  <data name="OutcomeNotKnown" xml:space="preserve">
+    <value>Not known yet</value>
+    <comment>Outcome of a cross that has not been decided.</comment>
+  </data>
+  <data name="OutcomeTook" xml:space="preserve">
+    <value>Took</value>
+    <comment>Outcome of a cross that took.</comment>
+  </data>
+  <data name="OutcomeDidNotTake" xml:space="preserve">
+    <value>Didn't take</value>
+    <comment>Outcome of a cross that did not take.</comment>
+  </data>
+  <data name="PodsSet" xml:space="preserve">
+    <value>Pods that set</value>
+    <comment>Label of how many seed pods grew from a cross.</comment>
+  </data>
+  <data name="SeedRipeOn" xml:space="preserve">
+    <value>Seed ripe on</value>
+    <comment>Label of the day the seed was ripe.</comment>
+  </data>
+  <data name="SeedAmount" xml:space="preserve">
+    <value>How much seed</value>
+    <comment>Label of the amount of seed from a cross.</comment>
+  </data>
+  <data name="Unit" xml:space="preserve">
+    <value>Unit</value>
+    <comment>Screen reader name of the choice between seeds and grams.</comment>
+  </data>
+  <data name="UnitSeeds" xml:space="preserve">
+    <value>seeds</value>
+    <comment>Unit for an amount of seed, counted.</comment>
+  </data>
+  <data name="UnitGrams" xml:space="preserve">
+    <value>grams</value>
+    <comment>Unit for an amount of seed, by weight.</comment>
+  </data>
+  <data name="AmountIsAbout" xml:space="preserve">
+    <value>It is a rough amount</value>
+    <comment>Tick box that marks an amount of seed as about that much.</comment>
+  </data>
+  <data name="DeleteConfirm" xml:space="preserve">
+    <value>Delete this cross? Seed lots and seedlings from it stay, but no longer show where they came from.</value>
+    <comment>Question before deleting a cross.</comment>
+  </data>
+  <data name="DeleteError" xml:space="preserve">
+    <value>The cross could not be deleted: {0}</value>
+    <comment>Error when deleting a cross fails. {0} is the reason.</comment>
+  </data>
+  <data name="SaveError" xml:space="preserve">
+    <value>Could not save: {0}</value>
+    <comment>Error when saving a cross or seed lot fails. {0} is the reason.</comment>
+  </data>
+  <data name="NotFound" xml:space="preserve">
+    <value>This cross isn't here. It may have been deleted.</value>
+    <comment>Shown when the page of a cross that does not exist is opened.</comment>
+  </data>
+  <data name="BackToPlant" xml:space="preserve">
+    <value>Back to the plant</value>
+    <comment>Back link on the cross form when it was started from a plant.</comment>
+  </data>
+  <data name="BackToCross" xml:space="preserve">
+    <value>Back to the cross</value>
+    <comment>Back link to a cross.</comment>
+  </data>
+  <data name="CrossFallback" xml:space="preserve">
+    <value>Cross</value>
+    <comment>Page title word while a cross loads.</comment>
+  </data>
+  <data name="ParentsHeading" xml:space="preserve">
+    <value>Parents and pollination</value>
+    <comment>Heading of the card with the parents and how the cross was done.</comment>
+  </data>
+  <data name="OutcomeHeading" xml:space="preserve">
+    <value>What came of it</value>
+    <comment>Heading of the card with what came of the cross.</comment>
+  </data>
+  <data name="OutcomeEmpty" xml:space="preserve">
+    <value>Nothing is recorded yet. Edit the cross when you know whether it took.</value>
+    <comment>Hint on a cross with no outcome, pods, seed day or seed amount.</comment>
+  </data>
+  <data name="SownOn" xml:space="preserve">
+    <value>Sown</value>
+    <comment>Label of the first day seed from the cross was sown.</comment>
+  </data>
+  <data name="DaysAgo_One" xml:space="preserve">
+    <value>{0} day ago</value>
+    <comment>How long ago, exactly one day.</comment>
+  </data>
+  <data name="DaysAgo_Other" xml:space="preserve">
+    <value>{0} days ago</value>
+    <comment>How long ago, any other number of days.</comment>
+  </data>
+  <data name="Today" xml:space="preserve">
+    <value>today</value>
+    <comment>How long ago, for today.</comment>
+  </data>
+  <data name="LotsHeading" xml:space="preserve">
+    <value>Seed lots</value>
+    <comment>Heading of the card on a cross with the seed lots made from it.</comment>
+  </data>
+  <data name="MakeLot" xml:space="preserve">
+    <value>Make a seed lot</value>
+    <comment>Button on a cross with ripe seed that fills in a seed lot from the cross.</comment>
+  </data>
+  <data name="MakeLotHint" xml:space="preserve">
+    <value>The seed is ripe. Make a seed lot to keep track of it and sow from it.</value>
+    <comment>Line over the button that makes a seed lot from a cross.</comment>
+  </data>
+  <data name="AnotherLot" xml:space="preserve">
+    <value>Make another lot from this cross</value>
+    <comment>Link on a cross that has a seed lot already.</comment>
+  </data>
+  <data name="NoLotYet" xml:space="preserve">
+    <value>When the seed is ripe, note the day and how much there is, and make a seed lot from it.</value>
+    <comment>Line on a cross with no seed yet.</comment>
+  </data>
+  <data name="SeedlingsHeading" xml:space="preserve">
+    <value>Seedlings</value>
+    <comment>Heading of the card with what has been sown from the cross.</comment>
+  </data>
+  <data name="SownHeading" xml:space="preserve">
+    <value>Sown ({0})</value>
+    <comment>Heading over the propagations sown from a cross. {0} is how many.</comment>
+  </data>
+  <data name="PlantsHeading" xml:space="preserve">
+    <value>Plants ({0})</value>
+    <comment>Heading over the plants potted up from a cross. {0} is how many.</comment>
+  </data>
+  <data name="CountSown" xml:space="preserve">
+    <value>{0} sown</value>
+    <comment>Number of seeds sown from a cross.</comment>
+  </data>
+  <data name="CountCameUp" xml:space="preserve">
+    <value>{0} came up</value>
+    <comment>Number of seeds from a cross that came up.</comment>
+  </data>
+  <data name="CountAlive" xml:space="preserve">
+    <value>{0} alive</value>
+    <comment>Number of seedlings from a cross that are alive.</comment>
+  </data>
+  <data name="LotFrom" xml:space="preserve">
+    <value>from {0}</value>
+    <comment>Under a seed lot's name in a list. {0} is the cross it is from.</comment>
+  </data>
+  <data name="LotsTitle" xml:space="preserve">
+    <value>Seed lots</value>
+    <comment>Title of the page that lists seed lots.</comment>
+  </data>
+  <data name="LotsPageTitle" xml:space="preserve">
+    <value>Seed lots · Stikling</value>
+    <comment>Browser tab title of the seed lots page.</comment>
+  </data>
+  <data name="LotsEmpty" xml:space="preserve">
+    <value>No seed lots yet. A seed lot is seed you have before it is sown, from a cross, a swap or a shop.</value>
+    <comment>Empty seed lots page.</comment>
+  </data>
+  <data name="UsedUpHeading" xml:space="preserve">
+    <value>Used up ({0})</value>
+    <comment>Heading over the seed lots that are used up. {0} is how many.</comment>
+  </data>
+  <data name="UsedUp" xml:space="preserve">
+    <value>Used up</value>
+    <comment>Small note on a seed lot with nothing left.</comment>
+  </data>
+  <data name="SowByDate" xml:space="preserve">
+    <value>sow by {0}</value>
+    <comment>Small note on a seed lot. {0} is the date.</comment>
+  </data>
+  <data name="SownCount_One" xml:space="preserve">
+    <value>sown once</value>
+    <comment>Small note on a seed lot sown exactly once.</comment>
+  </data>
+  <data name="SownCount_Other" xml:space="preserve">
+    <value>sown {0} times</value>
+    <comment>Small note on a seed lot sown more than once. {0} is how many sowings.</comment>
+  </data>
+  <data name="LotUnnamedTitle" xml:space="preserve">
+    <value>Seed lot</value>
+    <comment>Page title while a seed lot loads.</comment>
+  </data>
+  <data name="LotNotFound" xml:space="preserve">
+    <value>This seed lot isn't here. It may have been deleted.</value>
+    <comment>Shown when the page of a seed lot that does not exist is opened.</comment>
+  </data>
+  <data name="LotEditNewTitle" xml:space="preserve">
+    <value>Add a seed lot</value>
+    <comment>Title of the form for a new seed lot.</comment>
+  </data>
+  <data name="LotEditTitle" xml:space="preserve">
+    <value>Edit seed lot</value>
+    <comment>Title of the form for changing a seed lot.</comment>
+  </data>
+  <data name="LotWhat" xml:space="preserve">
+    <value>What it is</value>
+    <comment>Heading of the group for the name and the cross on the seed lot form.</comment>
+  </data>
+  <data name="LotNameHint" xml:space="preserve">
+    <value>Seed from a cross is named after the pod parent when you make the lot from the cross.</value>
+    <comment>Line under the name fields of the seed lot form.</comment>
+  </data>
+  <data name="LotCross" xml:space="preserve">
+    <value>Cross</value>
+    <comment>Label of the cross a seed lot is from.</comment>
+  </data>
+  <data name="LotNoCross" xml:space="preserve">
+    <value>Not from a cross I recorded</value>
+    <comment>First choice in the list of crosses on the seed lot form.</comment>
+  </data>
+  <data name="LotCrossHint" xml:space="preserve">
+    <value>Bought seed can name its parents too: record a cross with the parents typed in.</value>
+    <comment>Line under the cross choice on the seed lot form.</comment>
+  </data>
+  <data name="LotWhere" xml:space="preserve">
+    <value>Where it came from and how much</value>
+    <comment>Heading of the group for source, dates and amount on the seed lot form.</comment>
+  </data>
+  <data name="LotSource" xml:space="preserve">
+    <value>Source</value>
+    <comment>Label of where a seed lot came from, a seller or a person.</comment>
+  </data>
+  <data name="LotSourcePlaceholder" xml:space="preserve">
+    <value>A seller, a swap, a pod from a friend</value>
+    <comment>Hint in the source box of a seed lot.</comment>
+  </data>
+  <data name="LotCollectedOn" xml:space="preserve">
+    <value>Collected or bought on</value>
+    <comment>Label of the day a seed lot was collected or bought.</comment>
+  </data>
+  <data name="LotSowBy" xml:space="preserve">
+    <value>Sow by</value>
+    <comment>Label of the day a seed lot is best sown by.</comment>
+  </data>
+  <data name="LotAmount" xml:space="preserve">
+    <value>Amount</value>
+    <comment>Label of how much seed a lot holds.</comment>
+  </data>
+  <data name="LotUsedUpOn" xml:space="preserve">
+    <value>Used up on</value>
+    <comment>Label of the day a seed lot had no seed left.</comment>
+  </data>
+  <data name="LotUsedUpHint" xml:space="preserve">
+    <value>Leave it empty while there is seed left.</value>
+    <comment>Line under the used up day of a seed lot.</comment>
+  </data>
+  <data name="LotDeleteConfirm" xml:space="preserve">
+    <value>Delete this seed lot? What was sown from it stays.</value>
+    <comment>Question before deleting a seed lot.</comment>
+  </data>
+  <data name="BackToLot" xml:space="preserve">
+    <value>Back to the seed lot</value>
+    <comment>Back link to a seed lot.</comment>
+  </data>
+  <data name="SowFromLot" xml:space="preserve">
+    <value>Sow from this lot</value>
+    <comment>Button on a seed lot that starts a seed propagation from it.</comment>
+  </data>
+  <data name="MarkUsedUp" xml:space="preserve">
+    <value>Mark as used up</value>
+    <comment>Button on a seed lot that has no seed left.</comment>
+  </data>
+  <data name="MarkNotUsedUp" xml:space="preserve">
+    <value>There is seed left</value>
+    <comment>Button on a used up seed lot that undoes it.</comment>
+  </data>
+  <data name="SowingsHeading" xml:space="preserve">
+    <value>Sown from this lot</value>
+    <comment>Heading over the propagations sown from a seed lot.</comment>
+  </data>
+  <data name="SowingsEmpty" xml:space="preserve">
+    <value>Nothing has been sown from this lot yet.</value>
+    <comment>Shown on a seed lot with no sowings.</comment>
+  </data>
+  <data name="CrossLabel" xml:space="preserve">
+    <value>Cross</value>
+    <comment>Label on a propagation of the cross it was sown from.</comment>
+  </data>
+  <data name="LotLabel" xml:space="preserve">
+    <value>Seed lot</value>
+    <comment>Label on a propagation of the seed lot it was sown from.</comment>
+  </data>
+  <data name="FromCross" xml:space="preserve">
+    <value>From the cross {0}</value>
+    <comment>On a plant that grew from a cross. {0} is the cross.</comment>
+  </data>
+  <data name="PollenParentIs" xml:space="preserve">
+    <value>Pollen parent: {0}</value>
+    <comment>Line on a plant or propagation that came from a cross. {0} is the pollen parent.</comment>
+  </data>
+  <data name="PlantCrossesHeading" xml:space="preserve">
+    <value>Crosses ({0})</value>
+    <comment>Heading on a plant's page over the crosses it was a parent in. {0} is how many.</comment>
+  </data>
+  <data name="FamilyPollenLine" xml:space="preserve">
+    <value>× {0}</value>
+    <comment>Under a plant in the family tree, after its pod parent. {0} is the pollen parent.</comment>
+  </data>
+  <data name="FamilyCrossLine" xml:space="preserve">
+    <value>From the cross {0}</value>
+    <comment>Line on the focus plant in the family tree. {0} is the cross.</comment>
+  </data>
+  <data name="FamilyAsPollen" xml:space="preserve">
+    <value>As pollen parent ({0})</value>
+    <comment>Heading in the family tree over the seedlings of crosses where the plant gave the pollen. {0} is how many.</comment>
+  </data>
+  <data name="MenuAsPod" xml:space="preserve">
+    <value>Record a cross, as pod parent</value>
+    <comment>Action on a plant's page menu that starts a cross with this plant as the pod parent.</comment>
+  </data>
+  <data name="MenuAsPodHint" xml:space="preserve">
+    <value>This plant carries the pod</value>
+    <comment>Hint under the menu action that records a cross with this plant as pod parent.</comment>
+  </data>
+  <data name="MenuAsPollen" xml:space="preserve">
+    <value>Record a cross, as pollen parent</value>
+    <comment>Action on a plant's page menu that starts a cross with this plant as the pollen parent.</comment>
+  </data>
+  <data name="MenuAsPollenHint" xml:space="preserve">
+    <value>This plant gives the pollen</value>
+    <comment>Hint under the menu action that records a cross with this plant as pollen parent.</comment>
+  </data>
+  <data name="AddPollen" xml:space="preserve">
+    <value>Add pollen</value>
+    <comment>Button and link that start adding pollen to the pollen store.</comment>
+  </data>
+  <data name="PollenTitle" xml:space="preserve">
+    <value>Pollen</value>
+    <comment>Title of the page that lists the pollen you keep.</comment>
+  </data>
+  <data name="PollenPageTitle" xml:space="preserve">
+    <value>Pollen · Stikling</value>
+    <comment>Browser tab title of the pollen page.</comment>
+  </data>
+  <data name="PollenEmpty" xml:space="preserve">
+    <value>No pollen kept yet. Write down pollen you collect, from which plant, when, and where you keep it, so you can find it when another plant flowers.</value>
+    <comment>Empty pollen page.</comment>
+  </data>
+  <data name="PollenEditNewTitle" xml:space="preserve">
+    <value>Add pollen</value>
+    <comment>Title of the form for new pollen.</comment>
+  </data>
+  <data name="PollenEditTitle" xml:space="preserve">
+    <value>Edit pollen</value>
+    <comment>Title of the form for changing pollen.</comment>
+  </data>
+  <data name="PollenNotFound" xml:space="preserve">
+    <value>This pollen isn't here. It may have been deleted.</value>
+    <comment>Shown when the page of pollen that does not exist is opened.</comment>
+  </data>
+  <data name="PollenWhat" xml:space="preserve">
+    <value>The pollen</value>
+    <comment>Heading of the group of fields on the pollen form.</comment>
+  </data>
+  <data name="PollenFrom" xml:space="preserve">
+    <value>Collected from</value>
+    <comment>Label of the plant the pollen was collected from.</comment>
+  </data>
+  <data name="PollenGenus" xml:space="preserve">
+    <value>Genus</value>
+    <comment>Label of the genus of the pollen, filled in from the plant.</comment>
+  </data>
+  <data name="PollenGenusHint" xml:space="preserve">
+    <value>Today uses it to show this pollen when another plant of the same genus comes into flower.</value>
+    <comment>Line under the genus box on the pollen form.</comment>
+  </data>
+  <data name="PollenCollectedOn" xml:space="preserve">
+    <value>Collected on</value>
+    <comment>Label of the day pollen was collected.</comment>
+  </data>
+  <data name="PollenKeptIn" xml:space="preserve">
+    <value>Kept in</value>
+    <comment>Label of where pollen is kept: freezer, fridge or room temperature.</comment>
+  </data>
+  <data name="PollenAmount" xml:space="preserve">
+    <value>Amount</value>
+    <comment>Label of how much pollen there is, in your own words.</comment>
+  </data>
+  <data name="PollenAmountPlaceholder" xml:space="preserve">
+    <value>For example: a small tube</value>
+    <comment>Hint in the amount box of pollen.</comment>
+  </data>
+  <data name="PollenUsedUpHint" xml:space="preserve">
+    <value>Leave it empty while there is pollen left.</value>
+    <comment>Line under the used up day of pollen.</comment>
+  </data>
+  <data name="PollenDeleteConfirm" xml:space="preserve">
+    <value>Delete this pollen? Crosses that used it stay.</value>
+    <comment>Question before deleting pollen.</comment>
+  </data>
+  <data name="SectionPollen_One" xml:space="preserve">
+    <value>{0} pollen kept</value>
+    <comment>Link from the Crosses section to the pollen, exactly one piece not used up. {0} is the number.</comment>
+  </data>
+  <data name="SectionPollen_Other" xml:space="preserve">
+    <value>{0} pollen kept</value>
+    <comment>Link from the Crosses section to the pollen. {0} is how many pieces are not used up, including none.</comment>
+  </data>
+  <data name="WhichPollen" xml:space="preserve">
+    <value>Which pollen</value>
+    <comment>Label of the choice of stored pollen on the cross form.</comment>
+  </data>
+  <data name="NotFromStore" xml:space="preserve">
+    <value>Not one I have in the store</value>
+    <comment>First choice in the list of stored pollen on the cross form.</comment>
+  </data>
+  <data name="MenuCollectPollen" xml:space="preserve">
+    <value>Collect pollen</value>
+    <comment>Action on a plant's page menu that adds pollen collected from this plant.</comment>
+  </data>
+  <data name="MenuCollectPollenHint" xml:space="preserve">
+    <value>Keep it for a later cross</value>
+    <comment>Hint under the menu action that adds pollen from this plant.</comment>
+  </data>
+  <data name="TraitsHeading" xml:space="preserve">
+    <value>Traits</value>
+    <comment>Heading and label for short texts on what a plant or seedling shows, like dark new leaves.</comment>
+  </data>
+  <data name="TraitsHint" xml:space="preserve">
+    <value>Short texts for what it shows, like dark new leaves or silver splash. They are suggested again on other plants and seedlings.</value>
+    <comment>Line under the traits box.</comment>
+  </data>
+  <data name="NoTraits" xml:space="preserve">
+    <value>none noted</value>
+    <comment>Shown where a plant has no traits.</comment>
+  </data>
+  <data name="TodayHeading" xml:space="preserve">
+    <value>In flower, with pollen to hand</value>
+    <comment>Heading on Today over plants coming into flower that have stored pollen of the same genus.</comment>
+  </data>
+  <data name="TodayBuds" xml:space="preserve">
+    <value>Buds</value>
+    <comment>A plant is at the buds stage, on the Today card for pollen.</comment>
+  </data>
+  <data name="TodayInFlower" xml:space="preserve">
+    <value>In flower</value>
+    <comment>A plant is in flower, on the Today card for pollen.</comment>
+  </data>
+  <data name="TodayPollenLine" xml:space="preserve">
+    <value>Pollen from {0}. {1}</value>
+    <comment>A line on the Today card. {0} is the plant the pollen came from and {1} is how long ago and where it is kept.</comment>
+  </data>
+  <data name="TodayNotThisFlowering" xml:space="preserve">
+    <value>Not this flowering</value>
+    <comment>Button on the Today card that hides it for this flowering.</comment>
+  </data>
+  <data name="CompareStart" xml:space="preserve">
+    <value>Compare seedlings</value>
+    <comment>Button on a cross that lets you pick seedlings to compare.</comment>
+  </data>
+  <data name="CompareDone" xml:space="preserve">
+    <value>Done</value>
+    <comment>Button that ends picking seedlings to compare.</comment>
+  </data>
+  <data name="CompareGo" xml:space="preserve">
+    <value>Compare {0}</value>
+    <comment>Button that opens the comparison. {0} is how many seedlings are picked.</comment>
+  </data>
+  <data name="CompareTitle" xml:space="preserve">
+    <value>Comparing seedlings</value>
+    <comment>Title of the page that shows seedlings from one cross side by side.</comment>
+  </data>
+  <data name="ComparePageTitle" xml:space="preserve">
+    <value>Compare seedlings · Stikling</value>
+    <comment>Browser tab title of the seedling comparison.</comment>
+  </data>
+  <data name="CompareNeedTwo" xml:space="preserve">
+    <value>Pick two or more seedlings on the cross to compare them.</value>
+    <comment>Shown on the comparison page when fewer than two seedlings are picked.</comment>
+  </data>
+  <data name="CompareNoPhoto" xml:space="preserve">
+    <value>No photo yet</value>
+    <comment>Shown in a column of the comparison for a seedling with no photo.</comment>
+  </data>
+  <data name="CompareKindPlant" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Small label over a seedling in the comparison that has been potted up.</comment>
+  </data>
+  <data name="CompareKindSeedling" xml:space="preserve">
+    <value>Still in its propagation</value>
+    <comment>Small label over a seedling in the comparison that has not been potted up.</comment>
+  </data>
+  <data name="CompareAge" xml:space="preserve">
+    <value>Age</value>
+    <comment>Row label in the comparison for how old the seedling is.</comment>
+  </data>
+  <data name="CompareStatus" xml:space="preserve">
+    <value>Status</value>
+    <comment>Row label in the comparison for where the seedling is.</comment>
+  </data>
+  <data name="CompareLeaf" xml:space="preserve">
+    <value>Latest leaf</value>
+    <comment>Row label in the comparison for the latest leaf logged.</comment>
+  </data>
+  <data name="CompareMeasure" xml:space="preserve">
+    <value>Measurements</value>
+    <comment>Row label in the comparison for the latest measurements.</comment>
+  </data>
+  <data name="CompareNothing" xml:space="preserve">
+    <value>nothing logged</value>
+    <comment>Shown in the comparison where a seedling has no leaf or measurement logged.</comment>
+  </data>
+  <data name="CompareLeafLine" xml:space="preserve">
+    <value>{0} · {1}</value>
+    <comment>The latest leaf in the comparison. {0} is the day and {1} is how variegated it was.</comment>
+  </data>
+  <data name="CompareBack" xml:space="preserve">
+    <value>Back to the cross</value>
+    <comment>Back link on the comparison page.</comment>
+  </data>
+  <data name="QuickTook" xml:space="preserve">
+    <value>It took</value>
+    <comment>Button on a cross with no outcome yet that records that it took.</comment>
+  </data>
+  <data name="QuickDidNotTake" xml:space="preserve">
+    <value>It didn't take</value>
+    <comment>Button on a cross with no outcome yet that records that it did not take.</comment>
+  </data>
+  <data name="EditMore" xml:space="preserve">
+    <value>More about how it was done</value>
+    <comment>Heading of the folded group on the cross form with method, pollen, bagging, flowers and note.</comment>
+  </data>
+  <data name="EditIntro" xml:space="preserve">
+    <value>A cross is a pollination: the pollen of one plant put on the flower of another. Write it down the day you do it, and add what came of it later.</value>
+    <comment>Line at the top of the form for a new cross that says what a cross is.</comment>
+  </data>
+  <data name="PollenMore" xml:space="preserve">
+    <value>More about this pollen</value>
+    <comment>Heading of the folded group on the pollen form with amount, used up day and note.</comment>
+  </data>
+</root>

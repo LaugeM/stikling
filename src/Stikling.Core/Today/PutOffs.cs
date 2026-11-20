@@ -76,6 +76,12 @@ public sealed class PutOffs
     /// </summary>
     public static string Anniversary(Guid plantId, int year) => $"anniversary:{plantId}:{year}";
 
+    /// <summary>
+    /// The key for stored pollen offered to a plant in flower. The day the flowering started is part of it, so
+    /// putting it off for this flowering doesn't hide the next one.
+    /// </summary>
+    public static string Pollen(Guid plantId, DateOnly floweringStart) => $"pollen:{plantId}:{floweringStart:yyyy-MM-dd}";
+
     /// <summary>The key for a pest case whose plan has run its last step, so Today can wait with asking.</summary>
     public static string PlanDone(Guid caseId) => $"plandone:{caseId}";
 

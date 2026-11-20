@@ -1,0 +1,43 @@
+@* One cross as a row: the name, the day, what came of it and how many seedlings are alive. *@
+<a class="item-card" href="crosses/@Row.View.Cross.Id">
+    <div class="item-text">
+        <div class="item-name">@Row.View.DisplayName</div>
+        @if (Row.View.HasWorkingName)
+        {
+            <div class="item-sub">@Row.View.Title</div>
+        }
+        <div class="item-meta">
+            <span>@Labels.Date(Row.View.Cross.PollinatedOn)</span>
+            @if (Row.View.Cross.Outcome is null)
+            {
+                <span>@DaysAgo()</span>
+            }
+            else
+            {
+                <span class="@(Row.View.Cross.Outcome == CrossOutcome.Took ? "cross-took" : null)">@CrossLabels.Outcome(Row.View.Cross.Outcome)</span>
+            }
+            @if (Row.Seedlings.Sown > 0)
+            {
+                <span>@F(Strings.Crosses.CountSown, Row.Seedlings.Sown)</span>
+            }
+            @if (Row.Seedlings.Alive > 0)
+            {
+                <span>@F(Strings.Crosses.CountAlive, Row.Seedlings.Alive)</span>
+            }
+        </div>
+    </div>
+</a>
+
+@code {
+    [Inject]
+    private TimeProvider Time { get; set; } = default!;
+
+    private string DaysAgo()
+    {
+        var days = Time.Today().DayNumber - Row.View.Cross.PollinatedOn.DayNumber;
+        return days <= 0 ? Strings.Crosses.Today : Plural.Of(days, Strings.Crosses.DaysAgo_One, Strings.Crosses.DaysAgo_Other);
+    }
+
+    [Parameter, EditorRequired]
+    public required CrossRow Row { get; set; }
+}

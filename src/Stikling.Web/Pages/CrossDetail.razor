@@ -1,0 +1,289 @@
+@page "/crosses/{Id:guid}"
+@inject CrossService Crosses
+@inject PollenService Pollens
+@inject TimeProvider Time
+@inject NavigationManager Navigation
+@using Stikling.Core.Selection
+
+<PageTitle>@F(Strings.PlantDetail.PageTitle, view?.DisplayName ?? Strings.Crosses.CrossFallback)</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="crosses">@Strings.Crosses.LogTitle</a>
+
+@if (view is null || seedlings is null || book is null)
+{
+    <p class="text-body-secondary">@(loaded ? Strings.Crosses.NotFound : Strings.Shared.Loading)</p>
+}
+else
+{
+    var cross = view.Cross;
+    <div class="page-heading">
+        <h1>@view.DisplayName</h1>
+        <IfCan Edit><a class="btn btn-link btn-sm link-action" href="crosses/@cross.Id/edit">@Strings.Common.Edit</a></IfCan>
+    </div>
+    <IfCan Edit>
+        @if (cross.Outcome is null)
+        {
+            @* The thing done again and again: say how it went without opening the whole form *@
+            <div class="form-actions cross-actions">
+                <button type="button" class="btn btn-primary" disabled="@busy" @onclick="() => SetOutcomeAsync(CrossOutcome.Took)">@Strings.Crosses.QuickTook</button>
+                <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => SetOutcomeAsync(CrossOutcome.DidNotTake)">@Strings.Crosses.QuickDidNotTake</button>
+            </div>
+        }
+    </IfCan>
+    @if (view.HasWorkingName)
+    {
+        <p class="detail-sub">@view.Title</p>
+    }
+
+    <section class="detail-card">
+        <h2>@Strings.Crosses.ParentsHeading</h2>
+        <dl class="detail-list">
+            <dt>@Strings.Crosses.PodParent</dt>
+            <dd><ParentLine Parent="view.Pod" /></dd>
+            <dt>@Strings.Crosses.PollenParent</dt>
+            <dd>
+                <ParentLine Parent="view.Pollen" />
+                @if (view.IsSelf)
+                {
+                    <span class="text-body-secondary small"> · @Strings.Crosses.SelfShort</span>
+                }
+            </dd>
+            <dt>@Strings.Crosses.PollinatedOn</dt>
+            <dd>@Labels.Date(cross.PollinatedOn) · @DaysAgo(cross.PollinatedOn)</dd>
+            @if (cross.Method is { } method)
+            {
+                <dt>@Strings.Crosses.Method</dt>
+                <dd>@CrossLabels.Method(method)</dd>
+            }
+            <dt>@Strings.Crosses.PollenKind</dt>
+            <dd>
+                @(cross.PollenIsStored ? Strings.Crosses.PollenStored : Strings.Crosses.PollenFresh)
+                @if (usedPollen is { } used)
+                {
+                    @* What was recorded when the pollen was stored, as it stands now. No advice on how long it lasts. *@
+                    <div class="text-body-secondary small"><a href="pollen/@used.Pollen.Id/edit">@used.Title</a> · @PollenService.Line(used.Pollen, Today)</div>
+                }
+            </dd>
+            @if (cross.Bagged is { } bagged)
+            {
+                <dt>@Strings.Crosses.Bagged</dt>
+                <dd>@(bagged ? Strings.Common.Yes : Strings.Common.No)</dd>
+            }
+            @if (cross.FlowersPollinated is { } flowers)
+            {
+                <dt>@Strings.Crosses.FlowersPollinated</dt>
+                <dd>@flowers</dd>
+            }
+            @if (!string.IsNullOrWhiteSpace(cross.Note))
+            {
+                <dt>@Strings.Crosses.Note</dt>
+                <dd class="pre-line">@cross.Note</dd>
+            }
+        </dl>
+    </section>
+
+    @if (view.Pod.Plant is { Traits.Count: > 0 } || view.Pollen.Plant is { Traits.Count: > 0 })
+    {
+        <section class="detail-card">
+            <h2>@Strings.Crosses.TraitsHeading</h2>
+            <dl class="detail-list">
+                <dt>@view.Pod.Name</dt>
+                <dd><TraitLine Traits="view.Pod.Plant?.Traits" /></dd>
+                @if (!view.IsSelf)
+                {
+                    <dt>@view.Pollen.Name</dt>
+                    <dd><TraitLine Traits="view.Pollen.Plant?.Traits" /></dd>
+                }
+            </dl>
+        </section>
+    }
+
+    <section class="detail-card">
+        <h2>@Strings.Crosses.OutcomeHeading</h2>
+        <dl class="detail-list">
+            @if (cross.Outcome is not null)
+            {
+                <dt>@Strings.Crosses.Outcome</dt>
+                <dd>@CrossLabels.Outcome(cross.Outcome)</dd>
+            }
+            @if (cross.PodsSet is { } pods)
+            {
+                <dt>@Strings.Crosses.PodsSet</dt>
+                <dd>@pods</dd>
+            }
+            @if (cross.SeedRipeOn is { } ripe)
+            {
+                <dt>@Strings.Crosses.SeedRipeOn</dt>
+                <dd>@Labels.Date(ripe)</dd>
+            }
+            @if (SeedAmounts.Describe(cross) is { } amount)
+            {
+                <dt>@Strings.Crosses.SeedAmount</dt>
+                <dd>@amount</dd>
+            }
+            @if (seedlings.FirstSown is { } sown)
+            {
+                @* Worked out from the propagations sown from its lots, not stored on the cross *@
+                <dt>@Strings.Crosses.SownOn</dt>
+                <dd>@Labels.Date(sown)</dd>
+            }
+        </dl>
+        @if (!Edited(cross))
+        {
+            <p class="family-hint">@Strings.Crosses.OutcomeEmpty</p>
+        }
+    </section>
+
+    <section class="detail-card" id="cross-lots">
+        <h2>@Strings.Crosses.LotsHeading</h2>
+        @if (seedlings.Lots.Count > 0)
+        {
+            <ul class="item-list">
+                @foreach (var lot in seedlings.Lots)
+                {
+                    <li><SeedLotCard Lot="book.LotView(lot)" /></li>
+                }
+            </ul>
+        }
+        <IfCan Edit>
+            @if (cross.HasSeed && seedlings.Lots.Count == 0)
+            {
+                <p class="family-hint">@Strings.Crosses.MakeLotHint</p>
+                <a class="btn btn-outline-primary btn-sm" href="seedlots/new?cross=@cross.Id">@Strings.Crosses.MakeLot</a>
+            }
+            else if (seedlings.Lots.Count > 0)
+            {
+                <a class="btn btn-link btn-sm link-action" href="seedlots/new?cross=@cross.Id&another=true">@Strings.Crosses.AnotherLot</a>
+            }
+            else
+            {
+                <p class="family-hint">@Strings.Crosses.NoLotYet</p>
+            }
+        </IfCan>
+    </section>
+
+    @if (seedlings.Any)
+    {
+        <section class="detail-card" id="cross-seedlings">
+            <h2>@Strings.Crosses.SeedlingsHeading</h2>
+            <p class="family-hint">@SeedlingsLine()</p>
+            @if (seedlings.Propagations.Count + seedlings.Plants.Count >= 2)
+            {
+                <div class="form-actions compare-bar">
+                    <button type="button" class="btn btn-outline-primary btn-sm" aria-pressed="@(comparing ? "true" : "false")" @onclick="ToggleComparing">@(comparing ? Strings.Crosses.CompareDone : Strings.Crosses.CompareStart)</button>
+                    @if (comparing)
+                    {
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@(picked.Count < 2)" @onclick="GoCompare">@F(Strings.Crosses.CompareGo, picked.Count)</button>
+                    }
+                </div>
+            }
+            @if (seedlings.Propagations.Count > 0)
+            {
+                <h3>@F(Strings.Crosses.SownHeading, seedlings.Propagations.Count)</h3>
+                <ul class="item-list">
+                    @foreach (var propagation in seedlings.Propagations)
+                    {
+                        <li><PropagationCard Propagation="propagation" ShowStage="true" Selectable="comparing" Selected="picked.Contains(propagation.Id)" OnToggle="Toggle" /></li>
+                    }
+                </ul>
+            }
+            @if (seedlings.Plants.Count > 0)
+            {
+                <h3>@F(Strings.Crosses.PlantsHeading, seedlings.Plants.Count)</h3>
+                <ul class="plant-grid">
+                    @foreach (var plant in seedlings.Plants)
+                    {
+                        <li><PlantTile Plant="plant" Selectable="comparing" Selected="picked.Contains(plant.Id)" OnToggle="Toggle" /></li>
+                    }
+                </ul>
+            }
+        </section>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private CrossBook? book;
+    private CrossView? view;
+    private CrossSeedlings? seedlings;
+    private bool loaded;
+    private bool comparing;
+    private readonly HashSet<Guid> picked = [];
+    private PollenView? usedPollen;
+    private bool busy;
+
+    private DateOnly Today => Time.Today();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        loaded = true;
+    }
+
+    private async Task LoadAsync()
+    {
+        book = await Crosses.GetBookAsync();
+        view = book.ViewOf(Id);
+        seedlings = view is null ? null : book.SeedlingsOf(view.Cross);
+        usedPollen = view?.Cross.PollenId is { } pollenId ? (await Pollens.GetAllAsync()).FirstOrDefault(p => p.Pollen.Id == pollenId) : null;
+    }
+
+    private void ToggleComparing()
+    {
+        comparing = !comparing;
+        picked.Clear();
+    }
+
+    private void Toggle(SelectClick click)
+    {
+        if (!picked.Remove(click.Id))
+            picked.Add(click.Id);
+    }
+
+    private void GoCompare() =>
+        Navigation.NavigateTo($"crosses/{Id}/compare?ids={string.Join(",", picked)}");
+
+    private async Task SetOutcomeAsync(CrossOutcome outcome)
+    {
+        if (view is null)
+            return;
+
+        busy = true;
+        try
+        {
+            var cross = view.Cross.Copy();
+            cross.Outcome = outcome;
+            await Crosses.SaveAsync(cross);
+            await LoadAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private static bool Edited(Cross cross) =>
+        cross.Outcome is not null || cross.PodsSet is not null || cross.SeedRipeOn is not null || cross.SeedAmount is not null;
+
+    private string DaysAgo(DateOnly day)
+    {
+        var days = Today.DayNumber - day.DayNumber;
+        return days <= 0 ? Strings.Crosses.Today : Plural.Of(days, Strings.Crosses.DaysAgo_One, Strings.Crosses.DaysAgo_Other);
+    }
+
+    // "10 sown, 6 came up, 4 alive", leaving out what is not known
+    private string SeedlingsLine()
+    {
+        var parts = new List<string>();
+        if (seedlings!.Sown > 0)
+            parts.Add(F(Strings.Crosses.CountSown, seedlings.Sown));
+        if (seedlings.CameUp > 0)
+            parts.Add(F(Strings.Crosses.CountCameUp, seedlings.CameUp));
+        if (seedlings.Alive > 0 || seedlings.Sown == 0)
+            parts.Add(F(Strings.Crosses.CountAlive, seedlings.Alive));
+        return string.Join(" · ", parts);
+    }
+}

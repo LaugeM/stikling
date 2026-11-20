@@ -11,6 +11,9 @@ public static class Icons
     public static readonly MarkupString ArrowToStart = new(
         """<path d="M20 12H8M12 7l-5 5 5 5" /><path d="M4 5v14" />""");
 
+    public static readonly MarkupString External = new(
+        """<path d="M7 17 17 7M8 7h9v9" />""");
+
     public static readonly MarkupString Book = new(
         """<path d="M12 6.500C10.500 5 8 4.500 4.500 4.500v13c3.500 0 6 .5 7.500 2 1.500-1.500 4-2 7.500-2v-13c-3.500 0-6 .5-7.500 2Z" /><path d="M12 6.500v13" />""");
 

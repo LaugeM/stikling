@@ -1,0 +1,77 @@
+@* The Crosses section at the top of the Propagations page. Hidden until there is a cross or a seed lot. *@
+@inject CrossService Crosses
+@inject PollenService Pollens
+@inject TimeProvider Time
+<ReloadOnSync Reload="LoadAsync" />
+
+@if (OnlyStart)
+{
+    @* Before the first cross or seed lot, a quiet line at the end of the page is the way in. The section itself stays hidden. *@
+    @if (book is { Any: false } && pollenCount == 0)
+    {
+        <IfCan Edit>
+            <p class="crosses-start">
+                @Strings.Crosses.StartLine
+                <a class="link-action" href="crosses/new">@Strings.Crosses.RecordCross</a>
+                <span aria-hidden="true"> · </span>
+                <a class="link-action" href="seedlots/new">@Strings.Crosses.AddLot</a>
+            </p>
+        </IfCan>
+    }
+}
+else if (book is { Any: true } || pollenCount > 0)
+{
+    <section class="crosses-section" aria-labelledby="crosses-title">
+        <div class="crosses-heading">
+            <h2 id="crosses-title">@Strings.Crosses.SectionTitle</h2>
+            <IfCan Edit><a class="btn btn-link btn-sm link-action" href="crosses/new">@Strings.Crosses.RecordCross</a></IfCan>
+        </div>
+
+        @if (recent.Count > 0)
+        {
+            <ul class="item-list list-grid">
+                @foreach (var row in recent)
+                {
+                    <li><CrossRowCard Row="row" /></li>
+                }
+            </ul>
+        }
+        <p class="crosses-links">
+            <a class="link-action" href="crosses">@Plural.Of(book!.Crosses.Count, Strings.Crosses.SectionAllCrosses_One, Strings.Crosses.SectionAllCrosses_Other)</a>
+            <span aria-hidden="true"> · </span>
+            <a class="link-action" href="seedlots">@LotsText</a>
+            <span aria-hidden="true"> · </span>
+            <a class="link-action" href="pollen">@Plural.Of(pollenCount, Strings.Crosses.SectionPollen_One, Strings.Crosses.SectionPollen_Other)</a>
+        </p>
+    </section>
+}
+
+@code {
+    /// <summary>Show only the quiet line that starts the first cross, and only while there is none.</summary>
+    [Parameter]
+    public bool OnlyStart { get; set; }
+
+    private CrossBook? book;
+    private int pollenCount;
+    private IReadOnlyList<CrossRow> recent = [];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        book = await Crosses.GetBookAsync();
+        pollenCount = (await Pollens.GetAllAsync()).Count(p => !p.Pollen.IsUsedUp);
+        recent = [.. book.Log().Take(3)];
+    }
+
+    private string LotsText
+    {
+        get
+        {
+            var inStock = book!.Lots.Count(l => !l.IsUsedUp);
+            return inStock == 0 && book.Lots.Count == 0
+                ? Strings.Crosses.SectionNoLots
+                : Plural.Of(inStock, Strings.Crosses.SectionLots_One, Strings.Crosses.SectionLots_Other);
+        }
+    }
+}

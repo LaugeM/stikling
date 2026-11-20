@@ -19,3 +19,29 @@
         }
     </div>
 }
+
+<h2 class="mt-5">@OutsideText.Text("PageHeading")</h2>
+<p class="settings-hint">@OutsideText.Text("Intro")</p>
+
+@foreach (var group in OutsideGroups)
+{
+    <h3 class="section-label mt-4">@OutsideText.Text(group.Heading)</h3>
+    <div class="settings-rows">
+        @foreach (var link in OutsidePages.All.Where(p => group.Kinds.Contains(p.Kind)))
+        {
+            <SettingsRow Href="@link.UrlFor(OutsideText.Language)" Title="@OutsideText.Title(link)" External="true">
+                @OutsideText.Line(link)<br />@OutsideText.Site(link)
+            </SettingsRow>
+        }
+    </div>
+}
+
+@code {
+    private static readonly (string Heading, OutsideKind[] Kinds)[] OutsideGroups =
+    [
+        ("GroupPests", [OutsideKind.Pest]),
+        ("GroupPlantGroups", [OutsideKind.PlantGroup]),
+        ("GroupPropagating", [OutsideKind.Cuttings]),
+        ("GroupGrowingMedia", [OutsideKind.Soil])
+    ];
+}

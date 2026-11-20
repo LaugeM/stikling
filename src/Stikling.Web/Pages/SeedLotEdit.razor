@@ -1,0 +1,320 @@
+@page "/seedlots/new"
+@page "/seedlots/{Id:guid}/edit"
+@attribute [NeedsAccess(AccessLevel.Edit)]
+@inject CrossService Crosses
+@inject SellerService Sellers
+@inject ILogger<SeedLotEdit> Logger
+@inject NavigationManager Navigation
+@inject PageScripts Scripts
+@inject TimeProvider Time
+
+<PageTitle>@(IsNew ? Strings.Crosses.LotEditNewTitle : Strings.Crosses.LotEditTitle) · Stikling</PageTitle>
+
+@* No ReloadOnSync: like other edit pages, nothing changes under someone filling in the form *@
+
+<a class="back-link" href="@BackHref">@BackText</a>
+<h1>@(IsNew ? Strings.Crosses.LotEditNewTitle : Strings.Crosses.LotEditTitle)</h1>
+
+@if (lot is null)
+{
+    <p class="text-body-secondary">@(notFound ? Strings.Crosses.LotNotFound : Strings.Shared.Loading)</p>
+}
+else
+{
+    <EditForm Model="lot" OnSubmit="SaveAsync" class="edit-form" novalidate>
+        @if (errors.Count > 0)
+        {
+            <div class="alert alert-danger" id="lot-errors" role="alert" tabindex="-1">
+                @foreach (var error in errors)
+                {
+                    <div>@error</div>
+                }
+            </div>
+        }
+
+        <fieldset>
+            <legend>@Strings.Crosses.LotWhat</legend>
+            <PlantNameFields IdPrefix="lot" @bind-Genus="lot.Genus" @bind-Species="lot.Species" @bind-Cultivar="lot.Cultivar" />
+            <div class="form-text">@Strings.Crosses.LotNameHint</div>
+            <div class="mt-3">
+                <label class="form-label" for="lot-cross">@Strings.Crosses.LotCross</label>
+                <select id="lot-cross" class="form-select" value="@(lot.CrossId?.ToString() ?? "")" @onchange="e => SetCross(e.Value?.ToString())">
+                    <option value="">@Strings.Crosses.LotNoCross</option>
+                    @foreach (var option in crossOptions)
+                    {
+                        <option value="@option.Cross.Id">@option.DisplayName</option>
+                    }
+                </select>
+                <div class="form-text">@Strings.Crosses.LotCrossHint</div>
+            </div>
+        </fieldset>
+
+        <fieldset>
+            <legend>@Strings.Crosses.LotWhere</legend>
+            <div class="mb-3">
+                <label class="form-label" for="lot-source">@Strings.Crosses.LotSource</label>
+                <input id="lot-source" class="form-control" list="lot-sellers" maxlength="100" @bind="sourceText"
+                       placeholder="@Strings.Crosses.LotSourcePlaceholder" />
+                <datalist id="lot-sellers">
+                    @foreach (var name in sellerNames)
+                    {
+                        <option value="@name"></option>
+                    }
+                </datalist>
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="lot-collected">@Strings.Crosses.LotCollectedOn</label>
+                <InputDate id="lot-collected" class="form-control" @bind-Value="lot.CollectedOn" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="lot-sowby">@Strings.Crosses.LotSowBy</label>
+                <InputDate id="lot-sowby" class="form-control" @bind-Value="lot.SowBy" />
+            </div>
+            <div class="mb-3">
+                <label class="form-label" for="lot-amount">@Strings.Crosses.LotAmount</label>
+                <div class="amount-row">
+                    <InputNumber id="lot-amount" class="form-control" @bind-Value="lot.Amount" min="0" step="any" inputmode="decimal" />
+                    <select class="form-select" aria-label="@Strings.Crosses.Unit" value="@((lot.AmountUnit ?? SeedUnit.Seeds).ToString())"
+                            @onchange="e => lot.AmountUnit = Enum.TryParse<SeedUnit>(e.Value?.ToString(), out var unit) ? unit : SeedUnit.Seeds">
+                        @foreach (var unit in Enum.GetValues<SeedUnit>())
+                        {
+                            <option value="@unit">@CrossLabels.Unit(unit)</option>
+                        }
+                    </select>
+                </div>
+                <div class="form-check mt-2">
+                    <InputCheckbox id="lot-about" class="form-check-input" @bind-Value="lot.AmountIsAbout" />
+                    <label class="form-check-label" for="lot-about">@Strings.Crosses.AmountIsAbout</label>
+                </div>
+            </div>
+            @if (!IsNew)
+            {
+            <div class="mb-3">
+                <label class="form-label" for="lot-used">@Strings.Crosses.LotUsedUpOn</label>
+                <InputDate id="lot-used" class="form-control" @bind-Value="lot.UsedUpOn" />
+                <div class="form-text">@Strings.Crosses.LotUsedUpHint</div>
+            </div>
+            }
+            <div class="mb-1">
+                <label class="form-label" for="lot-note">@Strings.Crosses.Note</label>
+                <InputTextArea id="lot-note" class="form-control" rows="3" @bind-Value="lot.Note" />
+            </div>
+        </fieldset>
+
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary" disabled="@saving">@Strings.Common.Save</button>
+            <a class="btn btn-link" href="@BackHref">@Strings.Common.Cancel</a>
+        </div>
+    </EditForm>
+
+    @if (!IsNew)
+    {
+        <section class="danger-zone">
+            @if (confirmDelete)
+            {
+                <p class="mb-2">@Strings.Crosses.LotDeleteConfirm</p>
+                <button class="btn btn-danger btn-sm" disabled="@saving" @onclick="DeleteAsync">@Strings.Common.Delete</button>
+                <button class="btn btn-link btn-sm" @onclick="() => confirmDelete = false">@Strings.Common.Cancel</button>
+            }
+            else
+            {
+                <button class="btn btn-link btn-sm text-danger link-action" @onclick="() => confirmDelete = true">@Strings.Common.Delete</button>
+            }
+        </section>
+    }
+}
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    /// <summary>The cross a new lot is made from.</summary>
+    [SupplyParameterFromQuery(Name = "cross")]
+    public Guid? CrossId { get; set; }
+
+    /// <summary>Make one more lot from the cross even though it has made one.</summary>
+    [SupplyParameterFromQuery(Name = "another")]
+    public bool Another { get; set; }
+
+    private SeedLot? lot;
+    private IReadOnlyList<CrossView> crossOptions = [];
+    private IReadOnlyList<string> sellerNames = [];
+    private string? sourceText;
+    private bool notFound;
+    private bool saving;
+    private bool confirmDelete;
+    private List<string> errors = [];
+    private bool focusErrors;
+
+    // After a failed check the alert is far from the Save button on a phone, so it takes focus and scrolls into view
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusErrors && errors.Count > 0)
+        {
+            focusErrors = false;
+            try
+            {
+                await Scripts.ShowAlertAsync("lot-errors");
+            }
+            catch (Exception)
+            {
+                // The box is gone or the page is closing; nothing to focus
+            }
+        }
+    }
+    private (Guid?, Guid?, bool) loadedFor;
+    private bool loaded;
+
+    private bool IsNew => Id is null;
+
+    private string BackHref => !IsNew ? $"seedlots/{Id}" : CrossId is { } cross ? $"crosses/{cross}" : "seedlots";
+
+    private string BackText => !IsNew ? Strings.Crosses.BackToLot : CrossId is not null ? Strings.Crosses.BackToCross : Strings.Crosses.LotsTitle;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var key = (Id, CrossId, Another);
+        if (loaded && loadedFor == key)
+            return;
+
+        loaded = true;
+        loadedFor = key;
+        notFound = false;
+        errors = [];
+        confirmDelete = false;
+        lot = null;
+
+        var book = await Crosses.GetBookAsync();
+        crossOptions = [.. book.Crosses.OrderByDescending(c => c.PollinatedOn).Select(book.ViewOf)];
+        var sellerList = await Sellers.GetSellersAsync();
+        sellerNames = [.. sellerList.Live.OrderBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name)];
+
+        if (IsNew)
+        {
+            if (CrossId is { } crossId && book.Find(crossId) is { } cross)
+            {
+                var made = await Crosses.LotFromCrossAsync(cross);
+                if (!Another && book.FindLot(made.Id) is not null)
+                {
+                    // The cross has made its lot already: go to that one instead of making a second
+                    Navigation.NavigateTo($"seedlots/{made.Id}", replace: true);
+                    return;
+                }
+
+                lot = Another ? Fresh(made) : made.Copy();
+            }
+            else
+            {
+                lot = new SeedLot { CollectedOn = Time.Today() };
+            }
+
+            sourceText = lot.Source;
+            return;
+        }
+
+        // A copy, so leaving without saving changes nothing
+        lot = (await Crosses.GetLotAsync(Id!.Value))?.Copy();
+        notFound = lot is null;
+        sourceText = lot is null ? null : sellerList.For(lot.SellerId, lot.Source)?.Name ?? lot.Source;
+    }
+
+    // One more lot from the same cross: filled in the same, with an id of its own
+    private static SeedLot Fresh(SeedLot from)
+    {
+        var copy = from.Copy();
+        copy.Id = Guid.NewGuid();
+        copy.CreatedAt = default;
+        copy.UpdatedAt = default;
+        copy.DeletedAt = null;
+        copy.UsedUpOn = null;
+        return copy;
+    }
+
+    private void SetCross(string? value) =>
+        lot!.CrossId = Guid.TryParse(value, out var id) ? id : null;
+
+    private async Task SaveAsync()
+    {
+        if (lot is null)
+            return;
+
+        lot.Genus = Clean(lot.Genus);
+        lot.Species = Clean(lot.Species);
+        lot.Cultivar = Clean(lot.Cultivar);
+        lot.Note = Clean(lot.Note);
+        if (lot.Amount is not null)
+            lot.AmountUnit ??= SeedUnit.Seeds;
+
+        try
+        {
+            // Bought seed with no cross is from a seller. A lot from a cross only takes a seller that is already known.
+            if (lot.CrossId is null)
+            {
+                var choice = await Sellers.ChooseAsync(sourceText, SellerKind.Shop, lot.SellerId);
+                lot.SellerId = choice.SellerId;
+                lot.Source = choice.Source;
+            }
+            else
+            {
+                var all = await Sellers.GetSellersAsync();
+                var known = Clean(sourceText) is { } text ? all.Named(text) : null;
+                lot.SellerId = known?.Id;
+                lot.Source = Clean(sourceText);
+            }
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Finding the seller of a seed lot failed");
+            errors = [F(Strings.Crosses.SaveError, ex.Message)];
+            return;
+        }
+
+        errors = [.. lot.Validate(Time.Today())];
+        if (errors.Count > 0)
+        {
+            focusErrors = true;
+            return;
+        }
+
+        saving = true;
+        try
+        {
+            await Crosses.SaveLotAsync(lot);
+            Navigation.NavigateTo($"seedlots/{lot.Id}");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving the seed lot failed");
+            errors = [F(Strings.Crosses.SaveError, ex.Message)];
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task DeleteAsync()
+    {
+        if (lot is null)
+            return;
+
+        saving = true;
+        try
+        {
+            await Crosses.DeleteLotAsync(lot.Id);
+            Navigation.NavigateTo("seedlots");
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Deleting the seed lot failed");
+            errors = [F(Strings.Crosses.DeleteError, ex.Message)];
+            confirmDelete = false;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private static string? Clean(string? text) => string.IsNullOrWhiteSpace(text) ? null : text.Trim();
+}

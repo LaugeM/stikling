@@ -1,0 +1,71 @@
+@page "/seedlots"
+@inject CrossService Crosses
+
+<PageTitle>@Strings.Crosses.LotsPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="propagations">@Strings.Propagations.ListTitle</a>
+<div class="page-heading">
+    <h1>@Strings.Crosses.LotsTitle</h1>
+    <div class="d-flex align-items-baseline gap-2">
+        <a class="btn btn-link btn-sm link-action" href="crosses">@Strings.Crosses.LogTitle</a>
+        <IfCan Edit>
+            <a class="btn btn-primary btn-sm icon-btn heading-add" href="seedlots/new">
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Plus</svg>
+                @Strings.Crosses.AddLot
+            </a>
+        </IfCan>
+    </div>
+</div>
+
+@if (book is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.Loading</p>
+}
+else if (book.Lots.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Crosses.LotsEmpty</p>
+        <IfCan Edit><a class="btn btn-primary" href="seedlots/new">@Strings.Crosses.AddLot</a></IfCan>
+    </div>
+}
+else
+{
+    @if (have.Count > 0)
+    {
+        <ul class="item-list">
+            @foreach (var lot in have)
+            {
+                <li><SeedLotCard Lot="lot" /></li>
+            }
+        </ul>
+    }
+    @if (usedUp.Count > 0)
+    {
+        <h2 class="section-label">@F(Strings.Crosses.UsedUpHeading, usedUp.Count)</h2>
+        <ul class="item-list">
+            @foreach (var lot in usedUp)
+            {
+                <li><SeedLotCard Lot="lot" /></li>
+            }
+        </ul>
+    }
+}
+
+@code {
+    private CrossBook? book;
+    private IReadOnlyList<LotView> have = [];
+    private IReadOnlyList<LotView> usedUp = [];
+
+    protected override async Task OnInitializedAsync() => await LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        book = await Crosses.GetBookAsync();
+        var views = book.Lots.Select(book.LotView).ToList();
+        // The ones to sow by soonest first, then those with no date
+        have = [.. views.Where(v => !v.Lot.IsUsedUp)
+            .OrderBy(v => v.Lot.SowBy ?? DateOnly.MaxValue).ThenBy(v => v.Title, StringComparer.CurrentCultureIgnoreCase)];
+        usedUp = [.. views.Where(v => v.Lot.IsUsedUp).OrderByDescending(v => v.Lot.UsedUpOn)];
+    }
+}

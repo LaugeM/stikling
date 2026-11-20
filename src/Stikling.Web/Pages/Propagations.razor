@@ -6,6 +6,7 @@
 @inject CollectionsService Collections
 @inject RoomService RoomService
 @inject IPlantRepository PlantRepository
+@inject CrossService CrossService
 @inject TimeProvider Time
 @inject PlantNameService Names
 @inject NavigationManager Navigation
@@ -44,6 +45,8 @@
     }
 </div>
 <OpenCollectionLine />
+
+<CrossesSection />
 
 @if (all is { Count: > 0 })
 {
@@ -284,6 +287,8 @@ else
     </SidePaneScope>
 }
 
+<CrossesSection OnlyStart="true" />
+
 @if (selecting)
 {
     <div class="bulk-bar" role="region" aria-label="@Strings.Propagations.ListBulkLabel">
@@ -406,11 +411,14 @@ else
 
     private EverydayNameBook? everyday;
 
+    private CrossBook? crossBook;
+
     private async Task LoadAsync()
     {
         everyday = await Names.GetEverydayNamesAsync();
         plants = (await PlantRepository.GetAllAsync()).ToDictionary(p => p.Id);
         all = await Repository.GetAllAsync();
+        crossBook = await CrossService.GetBookAsync();
         places = await RoomService.GetPlacesAsync();
         Refresh();
     }
@@ -624,5 +632,6 @@ else
     }
 
     private string? ParentName(Propagation propagation) =>
-        propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null;
+        crossBook?.OriginOf(propagation)?.FullName
+        ?? (propagation.ParentPlantId is { } id && plants.TryGetValue(id, out var parent) ? parent.DisplayName : null);
 }

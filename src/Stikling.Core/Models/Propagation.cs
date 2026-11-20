@@ -38,6 +38,13 @@ public sealed class Propagation : Entity
     /// <summary>The plant it was taken from. Empty for e.g. bought seeds.</summary>
     public Guid? ParentPlantId { get; set; }
 
+    /// <summary>
+    /// The seed lot it was sown from. The pod parent is also the <see cref="ParentPlantId"/> when it is a
+    /// plant in the app, so everything that follows one parent works as before; the other parent is found
+    /// through the lot and its cross. Null for every other propagation.
+    /// </summary>
+    public Guid? SeedLotId { get; set; }
+
     /// <summary>The parent is a guess, so the page says "Probably from" and the family tree draws the line dotted. False on every older record.</summary>
     public bool ParentIsGuess { get; set; }
 
@@ -140,6 +147,9 @@ public sealed class Propagation : Entity
     public PropagationStage Stage { get; set; } = PropagationStage.Started;
 
     public string? Notes { get; set; }
+
+    /// <summary>Short texts for what it shows, like "dark new leaves". See <see cref="Plants.Traits"/>.</summary>
+    public List<string> Traits { get; set; } = [];
 
     /// <summary>A note for whoever looks after it while you are away. Not shared. Older propagations read as null.</summary>
     public string? SitterNote { get; set; }
@@ -342,6 +352,7 @@ public sealed class Propagation : Entity
         var copy = (Propagation)MemberwiseClone();
         copy.RootingAids = [.. RootingAids];
         copy.ArrivalProblems = [.. ArrivalProblems];
+        copy.Traits = [.. Traits];
         return copy;
     }
 

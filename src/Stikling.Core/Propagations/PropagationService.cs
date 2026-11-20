@@ -498,6 +498,7 @@ public sealed class PropagationService(
             NameNote = source.NameNote,
             ParentPlantId = source.ParentPlantId,
             ParentIsGuess = source.ParentIsGuess,
+            SeedLotId = source.SeedLotId,
             Source = source.Source,
             SellerId = source.SellerId,
             Type = source.Type,

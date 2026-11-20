@@ -1,0 +1,63 @@
+@* One side of a cross: a plant from the collection, or a name typed in for one that isn't in the app. *@
+<div class="mb-3">
+    <label class="form-label" for="@Id">@Label</label>
+    <select id="@Id" class="form-select" value="@(PlantId?.ToString() ?? "")" @onchange="PickedAsync">
+        <option value="">@Strings.Crosses.NotInApp</option>
+        @if (PlantId is { } missing && Plants.All(p => p.Id != missing))
+        {
+            @* A plant that is gone: its name stays readable until another is picked *@
+            <option value="@missing">@(string.IsNullOrWhiteSpace(Name) ? Strings.Crosses.ParentGone : Name)</option>
+        }
+        @foreach (var plant in Plants)
+        {
+            <option value="@plant.Id">@PlantLineage.ParentLabel(plant)</option>
+        }
+    </select>
+    @if (PlantId is null)
+    {
+        <input id="@(Id)-name" class="form-control mt-2" type="text" maxlength="100" value="@Name" placeholder="@Strings.Crosses.TypedNamePlaceholder"
+               aria-label="@F(Strings.Crosses.TypedNameLabel, Label)" @onchange="e => NameChanged.InvokeAsync(e.Value?.ToString())" />
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public string Id { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public string Label { get; set; } = "";
+
+    [Parameter, EditorRequired]
+    public IReadOnlyList<Plant> Plants { get; set; } = [];
+
+    [Parameter]
+    public Guid? PlantId { get; set; }
+
+    [Parameter]
+    public EventCallback<Guid?> PlantIdChanged { get; set; }
+
+    [Parameter]
+    public string? Name { get; set; }
+
+    [Parameter]
+    public EventCallback<string?> NameChanged { get; set; }
+
+    private async Task PickedAsync(ChangeEventArgs e)
+    {
+        if (Guid.TryParse(e.Value?.ToString(), out var id) && Plants.FirstOrDefault(p => p.Id == id) is { } plant)
+        {
+            // The plant's name is kept beside its id, so the cross still reads if the plant is gone
+            await PlantIdChanged.InvokeAsync(id);
+            await NameChanged.InvokeAsync(plant.DisplayName);
+        }
+        else if (Guid.TryParse(e.Value?.ToString(), out var same) && same == PlantId)
+        {
+            return;
+        }
+        else
+        {
+            await PlantIdChanged.InvokeAsync(null);
+            await NameChanged.InvokeAsync(null);
+        }
+    }
+}

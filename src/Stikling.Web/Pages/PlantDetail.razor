@@ -2,6 +2,7 @@
 @layout WideLayout
 @using Stikling.Core.Settings
 @inject IPlantRepository Repository
+@inject CrossService CrossService
 @inject CoverPhotos Covers
 @inject IPropagationRepository PropagationRepository
 @inject ICareLogRepository CareLogRepository
@@ -346,13 +347,17 @@ else
                     {
                         @(Html(Strings.PlantDetail.FamilyFromType, Link($"propagations/{fromPropagation.Id}", TypeWithArticle(fromPropagation.Type), "link-action")))
                     }
+                    @if (crossOrigin is { } crossFrom)
+                    {
+                        @(ancestors.Count > 0 || fromPropagation is not null ? " · " : "")<a class="link-action" href="crosses/@crossFrom.Cross.Id">@F(Strings.Crosses.FromCross, crossFrom.FullName)</a>
+                    }
                     @if (propagations.Count > 0)
                     {
-                        @(ancestors.Count > 0 || fromPropagation is not null ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Plural.Of(propagations.Count, Strings.PlantDetail.PropagationCount_One, Strings.PlantDetail.PropagationCount_Other)</a>
+                        @(ancestors.Count > 0 || fromPropagation is not null || crossOrigin is not null ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Plural.Of(propagations.Count, Strings.PlantDetail.PropagationCount_One, Strings.PlantDetail.PropagationCount_Other)</a>
                     }
                     @if (offspring.Count > 0)
                     {
-                        @(ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Plural.Of(offspring.Count, Strings.PlantDetail.OffspringCount_One, Strings.PlantDetail.OffspringCount_Other)</a>
+                        @(ancestors.Count > 0 || fromPropagation is not null || crossOrigin is not null || propagations.Count > 0 ? " · " : "")<a class="link-action" href="plants/@plant.Id?tab=props" @onclick="ShowCuttings" @onclick:preventDefault>@Plural.Of(offspring.Count, Strings.PlantDetail.OffspringCount_One, Strings.PlantDetail.OffspringCount_Other)</a>
                     }
                     · <a class="link-action" href="plants/@plant.Id/family">@Strings.PlantDetail.FamilyTreeLink</a>
                 </p>
@@ -471,7 +476,10 @@ else
                         @if (GuideBook.ForPlant(origin?.Genus ?? plant.Genus, origin?.Family) is { } groupGuide)
                         {
                             <dt>@Strings.PlantDetail.Guide</dt>
-                            <dd><GuideLink Guide="@groupGuide" From="@GuideLinks.FromPlant(plant.Id)" /></dd>
+                            <dd>
+                                <GuideLink Guide="@groupGuide" From="@GuideLinks.FromPlant(plant.Id)" />
+                                <div class="mt-2"><OutsideLinks Pages="OutsidePages.ForPlant(origin?.Genus ?? plant.Genus, origin?.Family)" /></div>
+                            </dd>
                         }
 
                         @if (origin?.Family is { Length: > 0 } family)
@@ -594,6 +602,12 @@ else
                             var settledWeeks = Math.Max(1, (settledOn.DayNumber - movedSince.DayNumber) / 7);
                             <dt>@Strings.PlantDetail.MovedToSemiHydro</dt>
                             <dd>@F(settledWeeks, Strings.PlantDetail.SettledAfter_One, Strings.PlantDetail.SettledAfter_Other, plant.TransitionTo is { } movedTo ? Labels.For(movedTo) : Strings.PlantDetail.SemiHydro, settledWeeks, Labels.Date(settledOn))</dd>
+                        }
+
+                        @if (plant.Traits.Count > 0)
+                        {
+                            <dt>@Strings.Crosses.TraitsHeading</dt>
+                            <dd><TraitLine Traits="plant.Traits" /></dd>
                         }
 
                         @if (plant.Tags.Count > 0)
@@ -722,7 +736,7 @@ else
                     {
                         <p class="family-tree-link"><a class="link-action" href="plants/@plant.Id/family">@Strings.PlantDetail.SeeFamilyTree</a></p>
                     }
-                    @if (ancestors.Count > 0 || fromPropagation is not null)
+                    @if (ancestors.Count > 0 || fromPropagation is not null || crossOrigin is not null)
                     {
                         <h3>@Strings.PlantDetail.CameFrom</h3>
                         <ul class="family-list">
@@ -731,6 +745,13 @@ else
                                 <li>
                                     <a href="propagations/@fromPropagation.Id">@Labels.For(fromPropagation.Type)</a>
                                     <span class="text-body-secondary small"> · @F(Strings.PlantDetail.FamilyStarted, Labels.Date(fromPropagation.StartedOn))</span>
+                                </li>
+                            }
+                            @if (crossOrigin is { } fromCross)
+                            {
+                                <li>
+                                    <a href="crosses/@fromCross.Cross.Id">@F(Strings.Crosses.FromCross, fromCross.FullName)</a>
+                                    <span class="text-body-secondary small"> · @F(Strings.Crosses.PollenParentIs, fromCross.Pollen.Name)</span>
                                 </li>
                             }
                             @foreach (var ancestor in ancestors)
@@ -748,6 +769,19 @@ else
                         {
                             <p class="family-hint">@GenerationLine(there)</p>
                         }
+                    }
+                    @if (plantCrosses.Count > 0)
+                    {
+                        <h3>@F(Strings.Crosses.PlantCrossesHeading, plantCrosses.Count)</h3>
+                        <ul class="family-list">
+                            @foreach (var cross in plantCrosses)
+                            {
+                                <li>
+                                    <a href="crosses/@cross.Cross.Id">@cross.FullName</a>
+                                    <span class="text-body-secondary small"> · @Labels.Date(cross.Cross.PollinatedOn) · @CrossLabels.Outcome(cross.Cross.Outcome)</span>
+                                </li>
+                            }
+                        </ul>
                     }
                     @if (propagations.Count > 0)
                     {
@@ -1073,6 +1107,24 @@ else
                             <a class="sheet-action" href="propagations/new?parent=@plant.Id">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Scissors</svg>
                                 <span class="sheet-action-text"><b>@Strings.PlantDetail.MenuPropagate</b><small>@Strings.PlantDetail.MenuPropagateHint</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sheet-action" href="crosses/new?pod=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
+                                <span class="sheet-action-text"><b>@Strings.Crosses.MenuAsPod</b><small>@Strings.Crosses.MenuAsPodHint</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sheet-action" href="pollen/new?plant=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
+                                <span class="sheet-action-text"><b>@Strings.Crosses.MenuCollectPollen</b><small>@Strings.Crosses.MenuCollectPollenHint</small></span>
+                            </a>
+                        </li>
+                        <li>
+                            <a class="sheet-action" href="crosses/new?pollen=@plant.Id">
+                                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Sprout</svg>
+                                <span class="sheet-action-text"><b>@Strings.Crosses.MenuAsPollen</b><small>@Strings.Crosses.MenuAsPollenHint</small></span>
                             </a>
                         </li>
                         <li>
@@ -1899,7 +1951,10 @@ else
     private MarkupString GenerationLine(Generation g) =>
         Html(Strings.PlantDetail.FamilyGeneration, H(Ordinal.Of(g.Number)), Link($"plants/{g.Oldest.Id}", g.Oldest.DisplayName, "link-action"));
 
-    private bool HasFamily => ancestors.Count > 0 || fromPropagation is not null || propagations.Count > 0 || offspring.Count > 0;
+    private CrossView? crossOrigin;
+    private IReadOnlyList<CrossView> plantCrosses = [];
+
+    private bool HasFamily => ancestors.Count > 0 || fromPropagation is not null || crossOrigin is not null || plantCrosses.Count > 0 || propagations.Count > 0 || offspring.Count > 0;
 
     // The one line under the name: where it is, what it grows in, and when it was last watered
     private IEnumerable<string> Facts
@@ -2116,6 +2171,9 @@ else
                 .Apply(allPropagations.Where(p => p.ParentPlantId == plant.Id))
                 .ToList();
             fromPropagation = allPropagations.FirstOrDefault(p => p.Id == plant.FromPropagationId);
+            var crossBook = await CrossService.GetBookAsync();
+            crossOrigin = crossBook.OriginOf(plant);
+            plantCrosses = [.. crossBook.CrossesOf(plant, asPollenParent: false), .. crossBook.CrossesOf(plant, asPollenParent: true).Where(c => !c.IsSelf)];
             earlierUntil = fromPropagation is null ? null : CarriedPhotos.PotUpDay(plant, await TimelineRepository.GetForAsync(plant.Id), Time);
 
             careFor = careBook.Find(plant.Genus, plant.Species, plant.NameQualifier);

@@ -1,0 +1,86 @@
+/* Seedlings from one cross, side by side. A phone stacks them; from 64rem they sit in columns and scroll sideways past four. */
+.compare-grid {
+    display: grid;
+    gap: 1rem;
+    grid-auto-flow: column;
+    grid-auto-columns: 82%;
+    overflow-x: auto;
+    padding-bottom: 0.5rem;
+    scroll-snap-type: x mandatory;
+}
+
+.compare-card {
+    scroll-snap-align: start;
+}
+
+@media (min-width: 64rem) {
+    .compare-grid {
+        grid-auto-flow: row;
+        grid-auto-columns: auto;
+        grid-template-columns: repeat(var(--compare-columns), minmax(15rem, 1fr));
+        scroll-snap-type: none;
+    }
+}
+
+.compare-card {
+    min-width: 0;
+    padding: 0.85rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.compare-photo {
+    display: block;
+    aspect-ratio: 1;
+    margin-bottom: 0.75rem;
+    overflow: hidden;
+    border-radius: 0.5rem;
+    background: var(--pa-border);
+}
+
+.compare-photo ::deep img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.compare-nophoto {
+    display: grid;
+    height: 100%;
+    place-items: center;
+    color: var(--pa-muted);
+    font-size: 0.875rem;
+}
+
+.compare-name {
+    margin: 0;
+    font-size: 1.1rem;
+}
+
+.compare-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.compare-kind {
+    margin: 0.1rem 0 0.75rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+.compare-facts dt {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--pa-muted);
+}
+
+.compare-facts dd {
+    margin: 0 0 0.6rem;
+}
+
+.compare-photo.empty {
+    aspect-ratio: auto;
+    height: 5rem;
+}

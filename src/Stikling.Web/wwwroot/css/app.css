@@ -2571,6 +2571,14 @@ a.tag-label:hover {
     margin-right: 0.5em;
 }
 
+/* The row is 44px tall, so the label fills it and the whole row answers a tap */
+.room-light .form-check-label {
+    flex: 1;
+    align-self: stretch;
+    display: flex;
+    align-items: center;
+}
+
 /* Spots read as part of the room above them */
 .room-spot {
     margin: 0.4rem 0 0 0.75rem;
@@ -4555,4 +4563,80 @@ tr.drop-target {
 .today-winter-not {
     min-height: 2.75rem;
     margin-top: 0.5rem;
+}
+
+/* An amount with its unit beside it, like 100 seeds or 1 g */
+.amount-row {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.amount-row .form-control {
+    flex: 1 1 8rem;
+    min-width: 0;
+}
+
+.amount-row .form-select {
+    flex: 0 1 8rem;
+}
+
+.lot-actions {
+    margin-bottom: 1rem;
+}
+
+/* The pollen parent of a cross, under a plant in the family tree */
+.family-pollen {
+    display: block;
+    margin: 0.1rem 0 0 0.25rem;
+    font-size: 0.85rem;
+    color: var(--pa-muted);
+}
+
+/* A line under a name that may be long and must not be cut off, like the pollen on the Today card */
+.item-sub.item-sub-wrap {
+    overflow: visible;
+    text-overflow: clip;
+    white-space: normal;
+}
+
+.today-cross {
+    margin: 0.35rem 0 0.1rem 0.25rem;
+}
+
+/* Tap targets of the cross and seed lot pages, and the alert that takes focus after a failed save */
+.cross-actions .btn,
+.lot-actions .btn {
+    min-height: 2.75rem;
+}
+
+.cross-actions {
+    margin-bottom: 1rem;
+}
+
+.edit-form .alert[role="alert"] {
+    scroll-margin-top: 4.5rem;
+}
+
+dd > a[href^="plants/"] {
+    display: inline-block;
+    padding-block: 0.7rem;
+    margin-block: -0.7rem;
+}
+
+/* The cross button on Today sits on a line of its own, so the plant name keeps the row */
+.today-row-main:has(.today-cross) {
+    flex-wrap: wrap;
+}
+
+.today-row-main > .today-cross {
+    order: 9;
+    flex: 0 0 auto;
+    margin: 0 0 0.25rem 0.25rem;
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+.compare-bar .btn {
+    min-height: 2.75rem;
 }
