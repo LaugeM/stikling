@@ -5,6 +5,7 @@
 @inject IPlantRepository PlantRepository
 @inject ILogger<CrossEdit> Logger
 @inject NavigationManager Navigation
+@inject PageScripts Scripts
 @inject TimeProvider Time
 
 <PageTitle>@(IsNew ? Strings.Crosses.EditNewTitle : Strings.Crosses.EditTitle) · Stikling</PageTitle>
@@ -23,7 +24,7 @@ else
     <EditForm Model="cross" OnSubmit="SaveAsync" class="edit-form" novalidate>
         @if (errors.Count > 0)
         {
-            <div class="alert alert-danger" role="alert" tabindex="-1" @ref="errorBox">
+            <div class="alert alert-danger" id="cross-errors" role="alert" tabindex="-1">
                 @foreach (var error in errors)
                 {
                     <div>@error</div>
@@ -178,7 +179,6 @@ else
     private bool saving;
     private bool confirmDelete;
     private List<string> errors = [];
-    private ElementReference errorBox;
     private bool focusErrors;
 
     // After a failed check the alert is far from the Save button on a phone, so it takes focus and scrolls into view
@@ -189,7 +189,7 @@ else
             focusErrors = false;
             try
             {
-                await errorBox.FocusAsync();
+                await Scripts.ShowAlertAsync("cross-errors");
             }
             catch (Exception)
             {
