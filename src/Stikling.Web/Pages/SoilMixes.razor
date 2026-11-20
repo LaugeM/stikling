@@ -655,7 +655,7 @@ else
     private async Task ConfirmTakeoffAsync(IReadOnlyList<TakeoffLine> lines)
     {
         if (takeoffFor is { } mixing)
-            await StockService.TakeOffAsync(mixing.Id, lines);
+            await StockService.TakeOffAsync(mixing.Id, lines, mixing.MixedOn);
         SkipTakeoff();
     }
 

@@ -19,6 +19,9 @@ public sealed class CrossService(
     public async Task<CrossBook> GetBookAsync() =>
         new(await crosses.GetAllAsync(), await lots.GetAllAsync(), await propagations.GetAllAsync(), await plants.GetAllAsync());
 
+    /// <summary>The crosses alone, for a page that doesn't need the rest of the book.</summary>
+    public Task<IReadOnlyList<Cross>> GetCrossesAsync() => crosses.GetAllAsync();
+
     public Task<Cross?> GetAsync(Guid id) => crosses.GetAsync(id);
 
     public Task<SeedLot?> GetLotAsync(Guid id) => lots.GetAsync(id);

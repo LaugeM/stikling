@@ -15,5 +15,20 @@ public sealed record SowingSummary(IReadOnlyList<Propagation> Propagations)
     /// <summary>The latest day anything was sown from the lot.</summary>
     public DateOnly? LastSownOn => Propagations.Count == 0 ? null : Propagations.Max(p => p.StartedOn);
 
-    public int SeedsSown => Propagations.Sum(p => p.InitialCount);
+    /// <summary>
+    /// The seeds sown. A propagation split off another one here holds seeds already counted on the one
+    /// it came from, so it adds none.
+    /// </summary>
+    public int SeedsSown
+    {
+        get
+        {
+            var ids = Propagations.Select(p => p.Id).ToHashSet();
+            return Propagations.Where(p => !IsSplitOfAnother(p, ids)).Sum(p => p.InitialCount);
+        }
+    }
+
+    /// <summary>True when the propagation was split off one of <paramref name="ids"/>, so its seeds are counted there.</summary>
+    public static bool IsSplitOfAnother(Propagation propagation, IReadOnlySet<Guid> ids) =>
+        propagation.SplitFromId is { } from && ids.Contains(from);
 }

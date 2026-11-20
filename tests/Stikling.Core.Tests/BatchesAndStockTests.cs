@@ -46,7 +46,7 @@ public class BatchesAndStockTests
         var mixings = new FakeBatchMixingRepository();
         var cans = new FakeFeedMixingRepository();
         var time = new FixedTime(Now);
-        var stock = new StockService(supplies, entries, new FakeShoppingItemRepository(), products, new FakePotRepository(), time, mixings, cans);
+        var stock = new StockService(supplies, entries, new FakeShoppingItemRepository(), products, new FakePotRepository(), time, mixings, cans, batches);
         return new Setup(
             new SoilBatchService(batches, mixings, mixes, supplies, stock, time),
             new FeedMixingService(cans, products, supplies, stock),
@@ -481,6 +481,45 @@ public class BatchesAndStockTests
         await s.Batches.DeleteBatchAsync(first.BatchId);
 
         Assert.Empty(await s.Batches.GetOptionsAsync());
+        Assert.Equal(10m, (await s.Stock.GetAsync()).Find(leca.Id)!.Amount);
+    }
+
+    [Fact]
+    public async Task A_top_up_of_a_batch_deleted_on_another_device_gives_its_stock_back()
+    {
+        var s = Create();
+        var leca = Supply("LECA", SupplyUnit.Litres);
+        s.Supplies.Supplies[leca.Id] = leca;
+        await s.Stock.MarkAsync(leca.Id, SupplyEntryKind.Counted, 10, null, null, Now.AddDays(-1));
+        var mix = Mix(MixUnit.Parts, ("LECA", 1, leca.Id));
+        var first = await s.Batches.MixAsync(mix, 4, Today);
+        await s.Stock.TakeOffAsync(first.Id, await s.Batches.TakeoffAsync(mix, 4));
+        // This device tops the batch up while another deletes it with the mixing it knew of
+        var topUp = await s.Batches.TopUpAsync(first.BatchId, 2, Today);
+        await s.Stock.TakeOffAsync(topUp.Id, await s.Batches.TakeoffAsync(mix, 2));
+        foreach (var used in s.Entries.Entries.Values.Where(e => e.UsedForId == first.Id).ToList())
+            await s.Entries.DeleteAsync(used.Id);
+        await s.MixingRepo.DeleteAsync(first.Id);
+        await s.BatchRepo.DeleteAsync(first.BatchId);
+
+        Assert.Empty(await s.Batches.GetOptionsAsync());
+        Assert.Equal(10m, (await s.Stock.GetAsync()).Find(leca.Id)!.Amount);
+    }
+
+    [Fact]
+    public async Task A_mixing_saved_for_an_earlier_day_is_taken_off_on_that_day()
+    {
+        var s = Create();
+        var leca = Supply("LECA", SupplyUnit.Litres);
+        s.Supplies.Supplies[leca.Id] = leca;
+        var mix = Mix(MixUnit.Parts, ("LECA", 1, leca.Id));
+        // Mixed three days ago, counted yesterday (the count already shows it), saved today
+        await s.Stock.MarkAsync(leca.Id, SupplyEntryKind.Counted, 10, null, null, Now.AddDays(-1));
+        var mixing = await s.Batches.MixAsync(mix, 4, Today.AddDays(-3));
+
+        var saved = await s.Stock.TakeOffAsync(mixing.Id, await s.Batches.TakeoffAsync(mix, 4), mixing.MixedOn);
+
+        Assert.Equal(Today.AddDays(-3), DayOf(Assert.Single(saved).At));
         Assert.Equal(10m, (await s.Stock.GetAsync()).Find(leca.Id)!.Amount);
     }
 

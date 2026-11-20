@@ -21,35 +21,42 @@ public sealed class StockService(
     IPotRepository pots,
     TimeProvider time,
     SoilMixes.IBatchMixingRepository? batchMixings = null,
-    Feeds.IFeedMixingRepository? feedMixings = null)
+    Feeds.IFeedMixingRepository? feedMixings = null,
+    SoilMixes.ISoilBatchRepository? batches = null)
 {
-    public async Task<StockView> GetAsync() => StockView.Build(
-        await supplies.GetAllAsync(),
-        await entries.GetAllAsync(),
-        await items.GetAllAsync(),
-        await products.GetAllAsync(),
-        await pots.GetAllAsync(),
-        time.LocalDay,
-        time.Today(),
-        await GoneSourcesAsync());
+    public async Task<StockView> GetAsync()
+    {
+        var all = await entries.GetAllAsync();
+        return StockView.Build(
+            await supplies.GetAllAsync(),
+            all,
+            await items.GetAllAsync(),
+            await products.GetAllAsync(),
+            await pots.GetAllAsync(),
+            time.LocalDay,
+            time.Today(),
+            await GoneSourcesAsync(all));
+    }
 
     /// <summary>
     /// Takes what a batch or a can used off the supplies: one Used entry for each line that has an amount,
     /// pointing at the mixing it was for. A line with no amount, or none left after unticking, adds
     /// nothing. Taking off again for the same mixing replaces the earlier entries, so confirming twice
-    /// doesn't count it twice.
+    /// doesn't count it twice. The entries are dated on the day it was mixed, so a count made between
+    /// mixing and saving it, which already shows what was used, isn't lowered again.
     /// </summary>
-    public async Task<IReadOnlyList<SupplyEntry>> TakeOffAsync(Guid sourceId, IEnumerable<TakeoffLine> lines)
+    public async Task<IReadOnlyList<SupplyEntry>> TakeOffAsync(Guid sourceId, IEnumerable<TakeoffLine> lines, DateOnly? mixedOn = null)
     {
         await ReturnAsync(sourceId);
 
+        var at = mixedOn is { } day ? time.MomentOn(day) : time.GetLocalNow();
         var saved = new List<SupplyEntry>();
         foreach (var line in lines.Where(l => l.Amount is > 0))
         {
             var entry = new SupplyEntry
             {
                 SupplyId = line.SupplyId,
-                At = time.GetLocalNow(),
+                At = at,
                 Kind = SupplyEntryKind.Used,
                 Amount = line.Amount,
                 UsedForId = sourceId
@@ -69,15 +76,23 @@ public sealed class StockService(
 
     /// <summary>
     /// The batch mixings and cans of feed that are deleted. Their Used entries are ignored too, which
-    /// covers an entry that arrives from another device after the mixing was deleted here.
+    /// covers an entry that arrives from another device after the mixing was deleted here. A mixing of a
+    /// batch that is deleted counts as gone too: deleting a batch gives back what its mixings took, and a
+    /// top-up saved on another device while the batch was being deleted is given back the same way.
     /// </summary>
-    private async Task<HashSet<Guid>> GoneSourcesAsync()
+    private async Task<HashSet<Guid>> GoneSourcesAsync(IReadOnlyList<SupplyEntry> all)
     {
         var live = new HashSet<Guid>();
         var known = false;
         if (batchMixings is not null)
         {
-            live.UnionWith((await batchMixings.GetAllAsync()).Select(m => m.Id));
+            var mixings = await batchMixings.GetAllAsync();
+            if (batches is not null)
+            {
+                var liveBatches = (await batches.GetAllAsync()).Select(b => b.Id).ToHashSet();
+                mixings = [.. mixings.Where(m => liveBatches.Contains(m.BatchId))];
+            }
+            live.UnionWith(mixings.Select(m => m.Id));
             known = true;
         }
         if (feedMixings is not null)
@@ -89,7 +104,7 @@ public sealed class StockService(
         // The repositories only list what isn't deleted, so a source that isn't live is gone or never
         // seen. Both mean the entry should not count.
         return known
-            ? [.. (await entries.GetAllAsync()).Where(e => e.UsedForId is { } id && !live.Contains(id)).Select(e => e.UsedForId!.Value)]
+            ? [.. all.Where(e => e.UsedForId is { } id && !live.Contains(id)).Select(e => e.UsedForId!.Value)]
             : [];
     }
 
