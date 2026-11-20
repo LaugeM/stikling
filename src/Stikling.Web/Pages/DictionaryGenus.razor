@@ -71,7 +71,10 @@ else
             @if (GuideBook.ForPlant(entry.Name, entry.Family) is { } groupGuide)
             {
                 <dt>@Strings.Dictionary.FactGuide</dt>
-                <dd><GuideLink Guide="@groupGuide" From="@GuideLinks.FromGenus(entry.Name)" /></dd>
+                <dd>
+                    <GuideLink Guide="@groupGuide" From="@GuideLinks.FromGenus(entry.Name)" />
+                    <div class="mt-2"><OutsideLinks Pages="OutsidePages.ForPlant(entry.Name, entry.Family)" /></div>
+                </dd>
             }
             <dt>@Strings.Dictionary.FactGroup</dt>
             <dd><a href="@DictionaryLinks.Group(entry.Group)">@DictionaryLinks.Label(entry.Group)</a></dd>
