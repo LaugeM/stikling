@@ -1,0 +1,18 @@
+@* Quiet links to pages on other sites, from the place they are about. Each opens in a new tab and says whose page it is. *@
+
+@foreach (var entry in Pages)
+{
+    <div class="outside-link-row">
+        <a class="outside-link" href="@entry.UrlFor(Language)" target="_blank" rel="noopener noreferrer">
+            <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.External</svg>
+            <span><span class="outside-link-title">@OutsideText.Title(entry)</span><span class="outside-link-site"> · @OutsideText.Site(entry)</span><span class="visually-hidden"> @Strings.Common.OpensInNewTab</span></span>
+        </a>
+    </div>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<OutsidePage> Pages { get; set; } = [];
+
+    private static string Language => System.Globalization.CultureInfo.CurrentUICulture.TwoLetterISOLanguageName;
+}

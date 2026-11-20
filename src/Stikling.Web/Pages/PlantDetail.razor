@@ -470,7 +470,10 @@ else
                         @if (GuideBook.ForPlant(origin?.Genus ?? plant.Genus, origin?.Family) is { } groupGuide)
                         {
                             <dt>@Strings.PlantDetail.Guide</dt>
-                            <dd><GuideLink Guide="@groupGuide" From="@GuideLinks.FromPlant(plant.Id)" /></dd>
+                            <dd>
+                                <GuideLink Guide="@groupGuide" From="@GuideLinks.FromPlant(plant.Id)" />
+                                <div class="mt-2"><OutsideLinks Pages="OutsidePages.ForPlant(origin?.Genus ?? plant.Genus, origin?.Family)" /></div>
+                            </dd>
                         }
 
                         @if (origin?.Family is { Length: > 0 } family)
