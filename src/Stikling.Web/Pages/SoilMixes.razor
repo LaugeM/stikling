@@ -318,7 +318,7 @@ else
                                                                 <li>
                                                                     <span>@Labels.Date(mixing.MixedOn)</span>
                                                                     <span class="mix-measure">@SoilMix.Volume(mixing.Litres)</span>
-                                                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy"
+                                                                    <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" aria-label="@($"{Strings.Supplies.BatchRemoveMixing}, {Labels.Date(mixing.MixedOn)}")"
                                                                             @onclick="() => RemoveMixingAsync(option, mixing)">@Strings.Supplies.BatchRemoveMixing</button>
                                                                 </li>
                                                             }
@@ -372,7 +372,7 @@ else
 <Sheet Title="@Strings.Stock.TakeoffTitle" Open="takeoffOpen" OpenChanged="open => { takeoffOpen = open; }">
     @if (takeoffFor is not null)
     {
-        <TakeoffSheet Lines="takeoffLines" OnConfirm="ConfirmTakeoffAsync" OnSkip="SkipTakeoff" />
+        <TakeoffSheet Lines="takeoffLines" Subtitle="@($"{Labels.Date(takeoffFor.MixedOn)} · {SoilMix.Volume(takeoffFor.Litres)}")" OnConfirm="ConfirmTakeoffAsync" OnSkip="SkipTakeoff" />
     }
 </Sheet>
 

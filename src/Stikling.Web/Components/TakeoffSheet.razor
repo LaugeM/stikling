@@ -4,6 +4,10 @@
    owns the Sheet and its title. *@
 
 <div class="takeoff-sheet">
+    @if (!string.IsNullOrWhiteSpace(Subtitle))
+    {
+        <p class="takeoff-for">@Subtitle</p>
+    }
     <p class="settings-hint">@Strings.Stock.TakeoffIntro</p>
 
     <ul class="takeoff-lines">
@@ -34,7 +38,7 @@
                 </div>
                 @if (!row.Line.IsWorkedOut && row.Ticked && row.Amount is null)
                 {
-                    <div class="form-text takeoff-note">@Strings.Stock.TakeoffNotWorkedOut</div>
+                    <div class="form-text takeoff-note" role="status">@Strings.Stock.TakeoffNotWorkedOut</div>
                 }
             </li>
         }
@@ -49,6 +53,10 @@
 @code {
     [Parameter, EditorRequired]
     public IReadOnlyList<TakeoffLine> Lines { get; set; } = [];
+
+    /// <summary>What was mixed, e.g. the day and size, so the lines can be read against it.</summary>
+    [Parameter]
+    public string? Subtitle { get; set; }
 
     /// <summary>The ticked lines with the amounts as they were left. A line with no amount comes through empty.</summary>
     [Parameter, EditorRequired]
