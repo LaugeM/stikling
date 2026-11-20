@@ -5,9 +5,9 @@ max_score: 40
 na_heuristics: 
 p0_count: 0
 p1_count: 2
-target_identity: "file:C:\\Users\\lauge\\Desktop\\Privat\\Fritidsprojekter\\Claude\\stikling\\.claude\\worktrees\\elated-heisenberg-0365de\\src\\Stikling.Web\\Pages\\CrossDetail.razor"
+target_identity: "file:src/Stikling.Web/Pages/CrossDetail.razor"
 target_fingerprint: "sha256:fa4731e4e10c3179e81cc14a5bf30c7968c484928d649d1d6bb6b3e926b22cea"
-target_path: "C:\\Users\\lauge\\Desktop\\Privat\\Fritidsprojekter\\Claude\\stikling\\.claude\\worktrees\\elated-heisenberg-0365de\\src\\Stikling.Web\\Pages\\CrossDetail.razor"
+target_path: "src/Stikling.Web/Pages/CrossDetail.razor"
 timestamp: 2026-11-20T01-48-26Z
 slug: src-stikling-web-pages-crossdetail-razor
 ---
