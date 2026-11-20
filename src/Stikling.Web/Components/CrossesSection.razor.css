@@ -28,3 +28,10 @@
     font-size: 0.9rem;
     color: var(--pa-muted);
 }
+
+.crosses-links a,
+.crosses-start a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 2.75rem;
+}
