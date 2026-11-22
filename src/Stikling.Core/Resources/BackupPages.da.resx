@@ -19,7 +19,7 @@
     <value>Lavet af Stikling den {0}. Åbn en plante eller en stikling for at læse om den.</value>
   </data>
   <data name="PartNote" xml:space="preserve">
-    <value>Det her er del {0} af {1} af sikkerhedskopien. Planter og stiklinger i en anden del er markeret med den del.</value>
+    <value>Det her er del {0} af {1} af sikkerhedskopien. Ved planter og stiklinger i en anden del står der hvilken del de ligger i.</value>
   </data>
   <data name="InPart" xml:space="preserve">
     <value>i del {0}</value>
@@ -55,7 +55,7 @@
     <value>Nr. {0}</value>
   </data>
   <data name="ReceivedOn" xml:space="preserve">
-    <value>Modtaget {0}</value>
+    <value>Fået {0}</value>
   </data>
   <data name="StartedOn" xml:space="preserve">
     <value>Startet {0}</value>
@@ -70,7 +70,7 @@
     <value>Samlingsnummer</value>
   </data>
   <data name="Place" xml:space="preserve">
-    <value>Sted</value>
+    <value>Placering</value>
   </data>
   <data name="Status" xml:space="preserve">
     <value>Status</value>
@@ -79,7 +79,7 @@
     <value>Type</value>
   </data>
   <data name="Received" xml:space="preserve">
-    <value>Modtaget</value>
+    <value>Fået</value>
   </data>
   <data name="Started" xml:space="preserve">
     <value>Startet</value>
@@ -100,7 +100,7 @@
     <value>Sandsynligvis fra</value>
   </data>
   <data name="TakenFromIt" xml:space="preserve">
-    <value>Stiklinger taget af den</value>
+    <value>Stiklinger taget fra den</value>
   </data>
   <data name="LastWatered" xml:space="preserve">
     <value>Sidst vandet</value>
@@ -124,6 +124,6 @@
     <value>Den her sikkerhedskopi har kun billederne i lille størrelse.</value>
   </data>
   <data name="ReadMe" xml:space="preserve">
-    <value>Åbn index.html i en browser for at læse din samling. data.json og mappen med billeder er den sikkerhedskopi Stikling gendanner fra.</value>
+    <value>Åbn index.html i en browser for at læse din samling. data.json og mappen photos er den sikkerhedskopi Stikling gendanner fra.</value>
   </data>
 </root>

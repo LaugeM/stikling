@@ -25,19 +25,19 @@
     <value>Den her sikkerhedskopi kan ikke give dig billederne tilbage i fuld størrelse.</value>
   </data>
   <data name="OptionSmallNotLast" xml:space="preserve">
-    <value>Den tæller ikke som din seneste sikkerhedskopi, så påmindelsen tæller videre fra din seneste hele.</value>
+    <value>Den tæller ikke som din seneste sikkerhedskopi, så påmindelsen tæller videre fra den seneste fulde.</value>
   </data>
   <data name="SavedSmall" xml:space="preserve">
     <value>Den har kun billederne i lille størrelse, så den tæller ikke som din seneste sikkerhedskopi.</value>
   </data>
   <data name="SavedParts" xml:space="preserve">
-    <value>Den blev delt i {0} filer, fordi den er stor. Hver fil er en hel sikkerhedskopi, der gendanner det den indeholder.</value>
+    <value>Den er stor, så den er delt i {0} filer. Hver af dem er en hel sikkerhedskopi af det der er i den.</value>
   </data>
   <data name="FolderHeading" xml:space="preserve">
     <value>Gem sikkerhedskopier i en mappe</value>
   </data>
   <data name="FolderIntro" xml:space="preserve">
-    <value>Sikkerhedskopier lægges direkte i en mappe du vælger, så du ikke skal lede i dine downloads. Gamle sikkerhedskopier bliver aldrig slettet eller overskrevet. Browseren spørger om tilladelse igen, når du tager en sikkerhedskopi efter at have lukket Stikling.</value>
+    <value>Sikkerhedskopier lægges direkte i en mappe du vælger, så du ikke skal lede i dine downloads. Gamle sikkerhedskopier bliver aldrig slettet eller overskrevet. Browseren spørger om tilladelse igen når du tager en sikkerhedskopi efter at have lukket Stikling.</value>
   </data>
   <data name="FolderChoose" xml:space="preserve">
     <value>Vælg mappe</value>
@@ -46,15 +46,15 @@
     <value>Skift mappe</value>
   </data>
   <data name="FolderStop" xml:space="preserve">
-    <value>Brug ikke en mappe mere</value>
+    <value>Stop med at bruge mappen</value>
   </data>
   <data name="FolderIn" xml:space="preserve">
     <value>Sikkerhedskopier lægges i mappen {0}.</value>
   </data>
   <data name="SavedInFolder" xml:space="preserve">
-    <value>Gemte en sikkerhedskopi med {0}, {1} og {2} i mappen {3}.</value>
+    <value>Sikkerhedskopien er gemt i mappen {3} med {0}, {1} og {2}.</value>
   </data>
   <data name="FolderFailed" xml:space="preserve">
-    <value>Kunne ikke skrive til mappen, så sikkerhedskopien blev hentet som download i stedet.</value>
+    <value>Den kunne ikke gemmes i mappen, så den er lagt i dine downloads i stedet.</value>
   </data>
 </root>
