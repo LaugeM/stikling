@@ -1784,6 +1784,20 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
+    /// <summary>A photo to open full screen once the history is here, from All photos. Nothing happens if it isn't on this page.</summary>
+    [SupplyParameterFromQuery(Name = "photo")]
+    public Guid? PhotoToOpen { get; set; }
+
+    private Guid? photoOpened;
+
+    private void OpenLinkedPhoto()
+    {
+        if (PhotoToOpen is not { } photoId || photoOpened == photoId || timeline is null)
+            return;
+        photoOpened = photoId;
+        timeline.OpenPhoto(photoId);
+    }
+
     private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, FoundPests, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
     private bool shareOpen;
     private bool shareOnLink;
@@ -2589,6 +2603,8 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        OpenLinkedPhoto();
+
         if (!scrollToFamily || plant is null)
             return;
         scrollToFamily = false;

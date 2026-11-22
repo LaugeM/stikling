@@ -1,0 +1,150 @@
+@page "/photos"
+@layout WideLayout
+@inject IPhotoRepository PhotoRepository
+@inject IPlantRepository PlantRepository
+@inject IPropagationRepository PropagationRepository
+@inject RoomService RoomService
+@inject TimeProvider Time
+@using Stikling.Core.Photos
+@using Stikling.Core.Plants
+@using Stikling.Core.Rooms
+@* The page is a class called AllPhotos too *@
+@using Rules = Stikling.Core.Photos.AllPhotos
+
+<PageTitle>@Strings.Shared.AllPhotosPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="plants">@Strings.Shared.BackToPlants</a>
+<div class="page-heading">
+    <h1>@Strings.Shared.AllPhotosTitle</h1>
+</div>
+
+@if (everything is null)
+{
+    <p class="text-body-secondary">@Strings.Shared.AllPhotosLoading</p>
+}
+else if (everything.Count == 0)
+{
+    <div class="empty-state">
+        <p>@Strings.Shared.AllPhotosEmpty</p>
+        <a class="btn btn-outline-primary" href="plants">@Strings.Shared.AllPhotosEmptyLink</a>
+    </div>
+}
+else
+{
+    <div class="all-photos-filters">
+        <select class="form-select w-auto" aria-label="@Strings.Shared.AllPhotosPlantLabel" @bind="plant" @bind:after="Refresh">
+            <option value="">@Strings.Shared.AllPhotosAllPlants</option>
+            @foreach (var (id, name) in plantChoices)
+            {
+                <option value="@id">@name</option>
+            }
+        </select>
+        @if (roomChoices.Count > 0)
+        {
+            <select class="form-select w-auto" aria-label="@Strings.Shared.AllPhotosRoomLabel" @bind="room" @bind:after="Refresh">
+                <option value="">@Strings.Shared.AllPhotosAllRooms</option>
+                @foreach (var r in roomChoices)
+                {
+                    <option value="@r.Id">@r.Name</option>
+                }
+            </select>
+        }
+        @if (tagChoices.Count > 0)
+        {
+            <select class="form-select w-auto" aria-label="@Strings.Shared.AllPhotosTagLabel" @bind="tag" @bind:after="Refresh">
+                <option value="">@Strings.Shared.AllPhotosAllTags</option>
+                @foreach (var t in tagChoices)
+                {
+                    <option value="@t">@t</option>
+                }
+            </select>
+        }
+    </div>
+
+    @if (months.Count == 0)
+    {
+        <p class="text-body-secondary">@Strings.Shared.AllPhotosNoMatch</p>
+    }
+    else
+    {
+        @foreach (var month in months.Take(shownMonths))
+        {
+            <section class="all-photos-month" aria-labelledby="@($"month-{month.Year}-{month.Month}")">
+                <h2 id="@($"month-{month.Year}-{month.Month}")">@Labels.Date(LooseDate.Of(month.Year, month.Month))</h2>
+                <ul class="all-photos-grid">
+                    @foreach (var tile in month.Photos)
+                    {
+                        var label = F(Strings.Shared.AllPhotosTileLabel, tile.Name, Labels.Date(Time.LocalDay(tile.Photo.TakenAt)));
+                        <li @key="tile.Photo.Id">
+                            <a href="@Href(tile)" aria-label="@label">
+                                <PhotoImage PhotoId="tile.Photo.Id" Framed="false" Class="all-photos-image" />
+                            </a>
+                        </li>
+                    }
+                </ul>
+            </section>
+        }
+
+        @if (shownMonths < months.Count)
+        {
+            <button type="button" class="btn btn-outline-primary" @onclick="() => shownMonths += MonthsPerPage">@Strings.Shared.AllPhotosShowEarlier</button>
+        }
+    }
+}
+
+@code {
+    private const int MonthsPerPage = 12;
+
+    private List<Photo> photos = [];
+    private List<Plant> plants = [];
+    private List<Propagation> propagations = [];
+    private Places places = Places.None;
+    private IReadOnlyList<PhotoTile>? everything;
+    private IReadOnlyList<PhotoMonth> months = [];
+    private IReadOnlyList<(Guid Id, string Name)> plantChoices = [];
+    private IReadOnlyList<Place> roomChoices = [];
+    private IReadOnlyList<string> tagChoices = [];
+    private string? plant;
+    private string? room;
+    private string? tag;
+    private int shownMonths = MonthsPerPage;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync()
+    {
+        photos = [.. (await PhotoRepository.GetOfKindAsync(SubjectType.Plant)).Concat(await PhotoRepository.GetOfKindAsync(SubjectType.Propagation))];
+        plants = [.. await PlantRepository.GetAllAsync()];
+        propagations = [.. await PropagationRepository.GetAllAsync()];
+        places = await RoomService.GetPlacesAsync();
+        everything = Rules.Tiles(photos, plants, propagations, places);
+
+        // The dropdowns only offer what has a photo, and a choice that has gone, like after a sync, is dropped
+        var ownPlants = everything.Where(t => t.Kind == SubjectType.Plant).Select(t => t.SubjectId).ToHashSet();
+        plantChoices = [.. plants.Where(p => ownPlants.Contains(p.Id)).Select(p => (p.Id, p.DisplayName))
+            .OrderBy(p => p.DisplayName, StringComparer.CurrentCultureIgnoreCase)];
+        roomChoices = [.. places.Rooms.Where(r => Rules.Tiles(photos, plants, propagations, places, new AllPhotosFilter(RoomId: r.Id)).Count > 0)
+            .OrderBy(r => r.Name, StringComparer.CurrentCultureIgnoreCase)];
+        tagChoices = PlantTags.Normalize(plants.Where(p => ownPlants.Contains(p.Id)).SelectMany(p => p.Tags))
+            .OrderBy(t => t, StringComparer.CurrentCultureIgnoreCase).ToList();
+
+        if (plant is not null && !plantChoices.Any(p => p.Id.ToString() == plant)) plant = null;
+        if (room is not null && !roomChoices.Any(r => r.Id.ToString() == room)) room = null;
+        if (tag is not null && !tagChoices.Any(t => PlantTags.Same(t, tag))) tag = null;
+        Refresh();
+    }
+
+    private void Refresh()
+    {
+        shownMonths = MonthsPerPage;
+        var filter = new AllPhotosFilter(
+            Guid.TryParse(plant, out var plantId) ? plantId : null,
+            Guid.TryParse(room, out var roomId) ? roomId : null,
+            string.IsNullOrEmpty(tag) ? null : tag);
+        months = Rules.Months(photos, plants, propagations, places, Time, filter);
+    }
+
+    private static string Href(PhotoTile tile) =>
+        $"{(tile.Kind == SubjectType.Plant ? "plants" : "propagations")}/{tile.SubjectId}?photo={tile.Photo.Id}";
+}
