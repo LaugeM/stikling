@@ -10,6 +10,7 @@
 @inject RoomService RoomService
 @inject OwnFieldService OwnFieldBook
 @inject ThemeService Theme
+@inject LookService Look
 @inject LanguageService Language
 @inject DisplayPreferences Display
 @inject ErrorReports ErrorReports
@@ -405,6 +406,7 @@
             file.Zip.Position = 0;
             var summary = await Backup.ImportAsync(file.Zip);
             await Theme.ApplySavedAsync();
+            await Look.ApplySavedAsync();
             await Language.ApplySavedAsync();
             await Display.ApplySavedAsync();
             await ErrorReports.ApplySavedAsync();

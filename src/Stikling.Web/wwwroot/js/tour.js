@@ -45,7 +45,7 @@ function bringIntoView(element) {
     const target = box.height + gap * 2 <= space
         ? top + (space - box.height) / 2
         : top + gap;
-    const calm = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const calm = window.stiklingTheme.reducedMotion();
     window.scrollBy({ top: box.top - target, behavior: calm ? "auto" : "smooth" });
 }
 

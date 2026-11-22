@@ -39,6 +39,59 @@
     // Follow the OS setting live while in "system" mode
     media.addEventListener("change", () => { if (getMode() === "system") apply(); });
 
-    window.stiklingTheme = { getMode, setMode, current: () => resolve(getMode()) };
+    // The look: text size, contrast, motion and large buttons. The person's own switches are kept
+    // in localStorage as {"text","contrast","motion","large"} for the first paint, the same way as the
+    // theme. The saved settings are what count, and the app applies them once it has started.
+    const lookKey = "stikling-look";
+    const contrastMedia = window.matchMedia("(prefers-contrast: more)");
+    const motionMedia = window.matchMedia("(prefers-reduced-motion: reduce)");
+
+    function getLook() {
+        let stored = null;
+        try {
+            stored = JSON.parse(localStorage.getItem(lookKey));
+        } catch { /* nothing stored, or storage blocked */ }
+        const look = stored && typeof stored === "object" ? stored : {};
+        return {
+            text: look.text === "larger" || look.text === "largest" ? look.text : "normal",
+            contrast: look.contrast === true,
+            motion: look.motion === true,
+            large: look.large === true
+        };
+    }
+
+    function applyLook() {
+        const look = getLook();
+        const root = document.documentElement;
+        const set = (name, value) => value === null ? root.removeAttribute(name) : root.setAttribute(name, value);
+        set("data-text-size", look.text === "normal" ? null : look.text);
+        set("data-contrast", look.contrast || contrastMedia.matches ? "more" : null);
+        set("data-motion", look.motion || motionMedia.matches ? "reduce" : null);
+        set("data-large-buttons", look.large ? "" : null);
+    }
+
+    function setLook(look) {
+        try {
+            const value = {
+                text: look?.text === "larger" || look?.text === "largest" ? look.text : "normal",
+                contrast: look?.contrast === true,
+                motion: look?.motion === true,
+                large: look?.large === true
+            };
+            if (value.text === "normal" && !value.contrast && !value.motion && !value.large) localStorage.removeItem(lookKey);
+            else localStorage.setItem(lookKey, JSON.stringify(value));
+        } catch { /* storage blocked: the choice just won't be remembered */ }
+        applyLook();
+    }
+
+    // True when the switch is on or the phone asks for less motion. Scripts that move things on
+    // screen ask this instead of the media query, so the switch counts too.
+    const reducedMotion = () => getLook().motion || motionMedia.matches;
+
+    contrastMedia.addEventListener("change", applyLook);
+    motionMedia.addEventListener("change", applyLook);
+
+    window.stiklingTheme = { getMode, setMode, current: () => resolve(getMode()), getLook, setLook, reducedMotion };
     apply();
+    applyLook();
 })();

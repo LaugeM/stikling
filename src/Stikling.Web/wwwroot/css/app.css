@@ -139,6 +139,75 @@
     --bs-border-color: var(--pa-border);
 }
 
+/* The look settings: theme.js sets these attributes on <html> from the person's switches and from what the
+   phone asks for. Text size is a percent of the browser's own size, so the two add up. */
+html[data-text-size="larger"] {
+    font-size: 115%;
+}
+
+html[data-text-size="largest"] {
+    font-size: 130%;
+}
+
+/* Higher contrast: darker text, clearer edges and stronger colours. The soft tints stay as they are,
+   since the text on them is still well above 4.5:1. Dark comes second and is more specific, so it
+   wins on a dark theme. */
+:root[data-contrast="more"] {
+    --pa-bg: #ffffff;
+    --pa-surface: #ffffff;
+    --pa-border: #6b7a70;
+    --pa-text: #0b110d;
+    --pa-muted: #333d37;
+    --pa-green: #1f6b3f;
+    --pa-green-dark: #123f25;
+    --pa-clay: #8f4026;
+    --pa-alert: #8c1d17;
+
+    --bs-primary-rgb: 31, 107, 63;
+    --bs-link-color-rgb: 18, 63, 37;
+    --bs-link-hover-color-rgb: 18, 63, 37;
+    --bs-danger-rgb: 140, 29, 23;
+    --bs-border-color: var(--pa-border);
+    --bs-secondary-color: var(--pa-muted);
+}
+
+:root[data-bs-theme="dark"][data-contrast="more"] {
+    --pa-bg: #060907;
+    --pa-surface: #111713;
+    --pa-border: #7f9086;
+    --pa-text: #f7faf8;
+    --pa-muted: #cfd8d2;
+    --pa-green: #8fe0b0;
+    --pa-green-dark: #b5f0cc;
+    --pa-clay: #f0a581;
+    --pa-alert: #ffb4aa;
+
+    --bs-primary-rgb: 143, 224, 176;
+    --bs-link-color-rgb: 181, 240, 204;
+    --bs-link-hover-color-rgb: 181, 240, 204;
+    --bs-danger-rgb: 255, 180, 170;
+}
+
+:root[data-contrast="more"] :is(.item-card, .detail-card, .plant-tile, .round-card, .round-tile, .pass-item, .chip, .room-chip, .form-control, .form-select, .btn-outline-primary, .btn-outline-danger, .btn-outline-secondary) {
+    border-width: 2px;
+}
+
+:root[data-contrast="more"] :is(a:not(.btn, .item-card, .plant-tile, .fab, nav a), .btn.link-action) {
+    text-decoration: underline;
+    text-decoration-thickness: 2px;
+}
+
+/* Less motion: nothing slides or fades, everything still ends up where it was going. The cards on Today
+   that celebrate something still show, only without the rise or the fade. */
+:root[data-motion="reduce"] *,
+:root[data-motion="reduce"] *::before,
+:root[data-motion="reduce"] *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+}
+
 .btn-outline-primary {
     --bs-btn-color: var(--pa-green-dark);
     --bs-btn-disabled-color: var(--pa-green-dark);
