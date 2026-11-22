@@ -81,6 +81,14 @@
     border-radius: 999px;
 }
 
+.round-start {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.25rem 1rem;
+    margin-bottom: 0.5rem;
+}
+
 .round-heading {
     margin: 0 0 0.5rem;
 }
