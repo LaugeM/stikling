@@ -31,13 +31,23 @@ public class ReadablePagesTests
     };
 
     private static Dictionary<string, string> Build(BackupData data, int part = 1, BackupPlan? plan = null,
-        IReadOnlyDictionary<Guid, string>? photoPaths = null, IReadOnlyDictionary<Guid, string>? thumbnails = null, bool small = false)
+        IReadOnlyDictionary<Guid, string>? images = null, bool small = false)
     {
         var places = new Places(data.Places);
         plan ??= BackupParts.Plan(data, places, culture: English);
-        photoPaths ??= data.Photos.Where(p => !p.IsDeleted).ToDictionary(p => p.Id, p => $"photos/{p.Id}.webp");
-        return ReadablePages.Build(data, places, Options(small), plan, part, photoPaths, thumbnails ?? new Dictionary<Guid, string>())
+        images ??= data.Photos.Where(p => !p.IsDeleted).ToDictionary(p => p.Id, Uri);
+        return ReadablePages.Build(data, places, Options(small), plan, part, images)
             .ToDictionary(p => p.Path, p => p.Content);
+    }
+
+    private static string Uri(Photo photo) => $"data:image/webp;base64,{photo.Id:N}";
+
+    // The section of one plant or cutting in the file
+    private static string Section(string html, string anchor)
+    {
+        var start = html.IndexOf($"<article class=\"page\" id=\"{anchor}\">", StringComparison.Ordinal);
+        Assert.True(start >= 0, $"No section {anchor}");
+        return html[start..html.IndexOf("</article>", start, StringComparison.Ordinal)];
     }
 
     private static BackupData Collection(out Plant monstera, out Plant gone, out Propagation cutting)
@@ -71,32 +81,28 @@ public class ReadablePagesTests
         Assert.Contains("Kitchen", index);
         Assert.DoesNotContain("Deleted plant", index);
         Assert.DoesNotContain(gone.Id.ToString(), index);
-        Assert.Contains(ReadablePages.PlantPath(monstera.Id), pages.Keys);
-        Assert.Contains(ReadablePages.CuttingPath(cutting.Id), pages.Keys);
-        Assert.DoesNotContain(ReadablePages.PlantPath(gone.Id), pages.Keys);
-        Assert.Contains("READ ME.txt", pages.Keys);
+        Section(index, ReadablePages.PlantAnchor(monstera.Id));
+        Section(index, ReadablePages.CuttingAnchor(cutting.Id));
+        Assert.Equal(["index.html", "READ ME.txt"], pages.Keys);
     }
 
     [Fact]
-    public void Every_link_in_the_index_and_the_pages_goes_to_a_page_in_the_set()
+    public void Every_link_and_picture_stays_inside_the_one_file()
     {
-        var data = Collection(out var monstera, out _, out var cutting);
+        // A phone opens the file on its own, so a link or a picture pointing at another file never loads
+        var data = Collection(out var monstera, out _, out _);
         data.Photos = [PhotoOf(monstera, 3)];
 
-        var pages = Build(data);
+        var html = Build(data)["index.html"];
 
-        foreach (var (path, html) in pages.Where(p => p.Key.EndsWith(".html")))
-        {
-            var folder = Path.GetDirectoryName(path)!.Replace('\\', '/');
-            foreach (Match link in Regex.Matches(html, "href=\"([^\"]+)\""))
-            {
-                var target = link.Groups[1].Value;
-                // The page's own text is HTML, so only the links to other files are checked
-                var resolved = new Uri(new Uri("file:///zip/" + (folder.Length > 0 ? folder + "/" : "")), target).AbsolutePath.Replace("/zip/", "");
-                var all = pages.Keys.Append($"photos/{data.Photos[0].Id}.webp");
-                Assert.Contains(Uri.UnescapeDataString(resolved), all);
-            }
-        }
+        var anchors = Regex.Matches(html, "id=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToHashSet();
+        var links = Regex.Matches(html, "href=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToList();
+        Assert.NotEmpty(links);
+        Assert.All(links, href => Assert.StartsWith("#", href));
+        Assert.All(links, href => Assert.Contains(href[1..], anchors));
+        var sources = Regex.Matches(html, "src=\"([^\"]+)\"").Select(m => m.Groups[1].Value).ToList();
+        Assert.NotEmpty(sources);
+        Assert.All(sources, src => Assert.StartsWith("data:", src));
     }
 
     [Fact]
@@ -106,8 +112,9 @@ public class ReadablePagesTests
 
         var pages = Build(data);
 
-        Assert.Contains($"href=\"../plants/{monstera.Id}.html\"", pages[ReadablePages.CuttingPath(cutting.Id)]);
-        Assert.Contains($"href=\"../propagations/{cutting.Id}.html\"", pages[ReadablePages.PlantPath(monstera.Id)]);
+        var html = pages["index.html"];
+        Assert.Contains($"href=\"#{ReadablePages.PlantAnchor(monstera.Id)}\"", Section(html, ReadablePages.CuttingAnchor(cutting.Id)));
+        Assert.Contains($"href=\"#{ReadablePages.CuttingAnchor(cutting.Id)}\"", Section(html, ReadablePages.PlantAnchor(monstera.Id)));
     }
 
     [Fact]
@@ -129,7 +136,7 @@ public class ReadablePagesTests
             Assert.DoesNotContain("<b>bold</b>", html);
             Assert.DoesNotContain("<img src=x", html);
         }
-        var page = pages[ReadablePages.PlantPath(monstera.Id)];
+        var page = Section(pages["index.html"], ReadablePages.PlantAnchor(monstera.Id));
         Assert.Contains("&lt;script&gt;", page);
         Assert.Contains("Line one &lt;b&gt;bold&lt;/b&gt;<br>Line two", page);
         Assert.Contains("&lt;img src=x onerror=1&gt;", page);
@@ -145,19 +152,14 @@ public class ReadablePagesTests
         deleted.DeletedAt = Now;
         var missing = PhotoOf(monstera, 5);
         data.Photos = [older, newer, deleted, missing];
-        var paths = new Dictionary<Guid, string>
-        {
-            [older.Id] = $"photos/{older.Id}.webp",
-            [newer.Id] = $"photos/{newer.Id}.jpg",
-            [deleted.Id] = $"photos/{deleted.Id}.webp"
-        };
+        var images = new[] { older, newer, deleted }.ToDictionary(p => p.Id, Uri);
 
-        var page = Build(data, photoPaths: paths)[ReadablePages.PlantPath(monstera.Id)];
+        var page = Section(Build(data, images: images)["index.html"], ReadablePages.PlantAnchor(monstera.Id));
 
-        Assert.Contains($"src=\"../../photos/{newer.Id}.jpg\"", page);
-        Assert.True(page.IndexOf(newer.Id.ToString(), StringComparison.Ordinal) < page.IndexOf(older.Id.ToString(), StringComparison.Ordinal));
-        Assert.DoesNotContain(deleted.Id.ToString(), page);
-        Assert.DoesNotContain(missing.Id.ToString(), page);
+        Assert.Contains($"src=\"{Uri(newer)}\"", page);
+        Assert.True(page.IndexOf(Uri(newer), StringComparison.Ordinal) < page.IndexOf(Uri(older), StringComparison.Ordinal));
+        Assert.DoesNotContain(Uri(deleted), page);
+        Assert.DoesNotContain(missing.Id.ToString("N"), page);
     }
 
     [Fact]
@@ -168,7 +170,7 @@ public class ReadablePagesTests
         data.Photos = [photo];
         var thumbs = new Dictionary<Guid, string> { [photo.Id] = "data:image/webp;base64,AAAA" };
 
-        var pages = Build(data, thumbnails: thumbs);
+        var pages = Build(data, images: thumbs);
 
         Assert.Contains("src=\"data:image/webp;base64,AAAA\"", pages["index.html"]);
         Assert.All(pages.Where(p => p.Key.EndsWith(".html")), p => Assert.DoesNotContain("<script", p.Value));
@@ -203,7 +205,7 @@ public class ReadablePagesTests
         var pages = Build(data, small: true);
 
         Assert.Contains("small size only", pages["index.html"]);
-        Assert.Contains("small size only", pages[ReadablePages.PlantPath(monstera.Id)]);
+        Assert.Contains("small size only", Section(pages["index.html"], ReadablePages.PlantAnchor(monstera.Id)));
     }
 
     [Fact]
@@ -296,10 +298,11 @@ public class ReadablePagesTests
         Assert.Contains("Fern", inOther["index.html"]);
         Assert.Contains("Monstera", inFern["index.html"]);
         Assert.Contains($"in part {partOfFern}", inOther["index.html"]);
-        Assert.DoesNotContain(ReadablePages.PlantPath(fern.Id), inOther["index.html"]);
-        Assert.Contains(ReadablePages.PlantPath(fern.Id), inFern["index.html"]);
-        Assert.Contains(ReadablePages.PlantPath(fern.Id), inFern.Keys);
-        Assert.DoesNotContain(ReadablePages.PlantPath(fern.Id), inOther.Keys);
+        var fernLink = $"href=\"#{ReadablePages.PlantAnchor(fern.Id)}\"";
+        Assert.DoesNotContain(fernLink, inOther["index.html"]);
+        Assert.Contains(fernLink, inFern["index.html"]);
+        Section(inFern["index.html"], ReadablePages.PlantAnchor(fern.Id));
+        Assert.DoesNotContain($"id=\"{ReadablePages.PlantAnchor(fern.Id)}\"", inOther["index.html"]);
         Assert.Contains($"part {other} of {plan.Count}", inOther["index.html"]);
     }
 

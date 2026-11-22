@@ -86,7 +86,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
         var culture = CultureInfo.CurrentUICulture;
         var places = new Places(data.Places);
         var plan = BackupParts.Plan(data, places, sizeOf: small ? _ => SmallPhotoBytes : null, culture: culture);
-        var thumbnails = options.Readable ? await IndexThumbnailsAsync(data) : new Dictionary<Guid, string>();
+        var covers = options.Readable ? await ThumbnailUrisAsync(ReadableIndex.CoverPhotoIds(data).Values) : new Dictionary<Guid, string>();
         var today = time.Today();
 
         foreach (var part in plan.Parts)
@@ -97,13 +97,13 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                 await using (var entry = zip.CreateEntry(DataFile, CompressionLevel.SmallestSize).Open())
                     await JsonSerializer.SerializeAsync(entry, data, Json);
 
-                var photoPaths = new Dictionary<Guid, string>();
+                var partPhotoIds = new List<Guid>();
                 foreach (var photo in data.Photos.Where(p => !p.IsDeleted && part.PhotoIds.Contains(p.Id)))
                 {
+                    partPhotoIds.Add(photo.Id);
                     if (small)
                     {
-                        if (await AddPhotoAsync(zip, photo.Id, thumbnail: true) is { } smallPath)
-                            photoPaths[photo.Id] = smallPath;
+                        await AddPhotoAsync(zip, photo.Id, thumbnail: true);
                         continue;
                     }
 
@@ -111,10 +111,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                     if (!await photos.HasBytesAsync(photo.Id))
                         await sync.FetchPhotoAsync(photo.Id, PhotoSize.Full);
 
-                    var full = await AddPhotoAsync(zip, photo.Id, thumbnail: false);
+                    await AddPhotoAsync(zip, photo.Id, thumbnail: false);
                     await AddPhotoAsync(zip, photo.Id, thumbnail: true);
-                    if (full is not null)
-                        photoPaths[photo.Id] = full;
                 }
 
                 foreach (var file in data.Files.Where(f => !f.IsDeleted && part.FileIds.Contains(f.Id)))
@@ -129,6 +127,11 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
 
                 if (options.Readable)
                 {
+                    // The readable file is opened on its own on a phone, so its pictures are inside it
+                    var images = new Dictionary<Guid, string>(covers);
+                    foreach (var (id, uri) in await ThumbnailUrisAsync(partPhotoIds.Where(id => !covers.ContainsKey(id))))
+                        images[id] = uri;
+
                     var pageOptions = new ReadableOptions
                     {
                         Label = Labels.For,
@@ -141,7 +144,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                         Today = today,
                         SmallPhotos = small
                     };
-                    foreach (var page in ReadablePages.Build(data, places, pageOptions, plan, part.Number, photoPaths, thumbnails))
+                    foreach (var page in ReadablePages.Build(data, places, pageOptions, plan, part.Number, images))
                     {
                         await using var entry = zip.CreateEntry(page.Path, CompressionLevel.Optimal).Open();
                         await entry.WriteAsync(new UTF8Encoding(false).GetBytes(page.Content));
@@ -178,11 +181,11 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
     // What a thumbnail is counted as when working out the parts of a backup that only has those
     private const long SmallPhotoBytes = 40_000;
 
-    // The pictures in the index of the readable pages, as data addresses, for the photo each plant and cutting shows
-    private async Task<Dictionary<Guid, string>> IndexThumbnailsAsync(BackupData data)
+    // Thumbnails as data addresses for the readable file. A photo without a thumbnail on this device is left out.
+    private async Task<Dictionary<Guid, string>> ThumbnailUrisAsync(IEnumerable<Guid> photoIds)
     {
         var result = new Dictionary<Guid, string>();
-        foreach (var id in ReadableIndex.CoverPhotoIds(data).Values.Distinct())
+        foreach (var id in photoIds.Distinct())
         {
             if (await photos.GetBytesAsync(id, thumbnail: true) is not { } bytes)
                 continue;
