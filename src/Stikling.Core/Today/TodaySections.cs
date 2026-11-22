@@ -65,6 +65,48 @@ public sealed record TodaySections
 
     public bool Away => AwayNow is not null;
 
+    /// <summary>Easy day was turned on for this day, so Today shows <see cref="EasyDayOnly"/>.</summary>
+    public bool IsEasyDay { get; init; }
+
+    /// <summary>The sections as Today shows them: cut down to <see cref="EasyDayOnly"/> on an easy day.</summary>
+    public TodaySections Shown() => IsEasyDay ? EasyDayOnly() : this;
+
+    /// <summary>
+    /// What Today shows on an easy day: only what is worse for waiting, which is pest treatments due,
+    /// plants flagged Needs attention and water to change on a cutting. The away and quiet block and the
+    /// list on the day back stay as they are. Everything else is left out and not counted.
+    /// </summary>
+    public TodaySections EasyDayOnly() => this with
+    {
+        IsEasyDay = true,
+        RoundSuggestion = null,
+        DueChecks = [],
+        ReadyNow = [],
+        PlanDoneNow = [],
+        LookAgainNow = [],
+        QuarantineNow = [],
+        TransitionNow = [],
+        RestNow = [],
+        WinterLightNow = [],
+        WinterLightSeason = null,
+        OuterPot = OuterPotReminders.None,
+        WateringDue = [],
+        WaterNow = [],
+        WaterComing = [],
+        NextRound = null,
+        CareItems = [],
+        CareNow = [],
+        CareComing = [],
+        CareNextRound = null,
+        OrdersArriving = [],
+        Checks = [],
+        ChecksNow = [],
+        NextRoundChecks = null,
+        PhotosDue = [],
+        PhotoRoundShows = false,
+        DueCount = Away ? 0 : DueTreatments.Count + FlaggedNow.Count + (Holding ? BackRows.Count : WaterChanges.Count)
+    };
+
     /// <summary>Treatments first, then the cases only being watched, each under its own heading when there are any.</summary>
     public IReadOnlyList<DuePestGroup> DuePests =>
         new[] { new DuePestGroup(Strings.Care.TreatmentDue, DueTreatments), new DuePestGroup(Strings.Care.CheckForPests, DueChecks) }
@@ -232,7 +274,8 @@ public sealed record TodaySections
             WaterChanges = waterChanges,
             PhotosDue = photoRound,
             PhotoRoundShows = photoShows,
-            DueCount = dueCount
+            DueCount = dueCount,
+            IsEasyDay = settings.EasyDay == day
         };
     }
 }

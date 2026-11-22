@@ -318,6 +318,10 @@ else
                             Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
 
             <p class="profile-facts">@string.Join(" · ", Facts)</p>
+            @if (NeedsAHand.Line(plant) is { } handLine)
+            {
+                <p class="profile-facts">@F(Strings.Plants.NeedsAHandLine, handLine)</p>
+            }
             @if (wateringLine is not null)
             {
                 <p class="profile-facts">@wateringLine</p>
@@ -326,6 +330,24 @@ else
             {
                 <p class="profile-facts">@wateringSeasonsLine</p>
             }
+            <IfCan Edit>
+                @if (lostTrackSaved)
+                {
+                    <p class="profile-facts" role="status">@Strings.Care.LostTrackSaved</p>
+                }
+                else if (lostTrackOffered && confirmingLostTrack)
+                {
+                    <div class="lost-track">
+                        <p class="profile-facts">@Strings.Care.LostTrackConfirm</p>
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@lostTrackBusy" @onclick="LostTrackAsync">@Strings.Care.LostTrackConfirmButton</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => confirmingLostTrack = false">@Strings.Common.Cancel</button>
+                    </div>
+                }
+                else if (lostTrackOffered)
+                {
+                    <button type="button" class="btn btn-link btn-sm link-action" @onclick="() => confirmingLostTrack = true">@Strings.Care.LostTrackPlant</button>
+                }
+            </IfCan>
 
             @if (!given.IsEmpty || given.HasMoney)
             {
@@ -2448,12 +2470,48 @@ else
         }).OfType<ComesBack>()];
     }
 
+    // I lost track of watering: offered when the last watering is far longer ago than usual
+    private bool lostTrackOffered;
+    private Guid? lostTrackSavedFor;
+    private Guid? confirmingLostTrackFor;
+
+    // Tied to the plant, so moving on to another one never shows the question or the answer of the last
+    private bool lostTrackSaved => plant is not null && lostTrackSavedFor == plant.Id;
+
+    private bool confirmingLostTrack
+    {
+        get => plant is not null && confirmingLostTrackFor == plant.Id;
+        set => confirmingLostTrackFor = value ? plant?.Id : null;
+    }
+    private bool lostTrackBusy;
+
+    private async Task LostTrackAsync()
+    {
+        if (plant is null)
+            return;
+
+        lostTrackBusy = true;
+        try
+        {
+            await PlantService.LostTrackAsync([plant]);
+            lostTrackSavedFor = plant.Id;
+            lostTrackOffered = false;
+            confirmingLostTrack = false;
+            await ReloadCareAsync();
+        }
+        finally
+        {
+            lostTrackBusy = false;
+        }
+    }
+
     private async Task ReloadCareAsync()
     {
         if (plant is null)
             return;
 
         var all = await CareLogRepository.GetAllAsync();
+        lostTrackOffered = LostTrack.Offered(plant, all, await AwayService.GetAllAsync(), Today);
         care = CareSummary.For(all, plant.Id);
         ownKindLookup = CareLabels.Lookup(await OwnKindRepository.GetAllAsync());
         // Always show the headline kinds, even the ones never done, so "never watered" is visible. Flushing only

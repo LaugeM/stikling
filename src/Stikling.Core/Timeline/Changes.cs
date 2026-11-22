@@ -83,6 +83,7 @@ public static class PlantChanges
             changes.Add(Line(shown == PotWatering.Wick ? "OuterPotWick" : "OuterPotSubmerged"));
 
         AddTags(changes, before.Tags, after.Tags);
+        AddNeedsAHand(changes, before.NeedsAHand, after.NeedsAHand);
 
         if (before.InQuarantine != after.InQuarantine)
             changes.Add(Line(after.InQuarantine ? "PutInQuarantine" : "OutOfQuarantine"));
@@ -137,6 +138,16 @@ public static class PlantChanges
 
         changes.AddRange(now.Where(tag => !was.Any(t => PlantTags.Same(t, tag))).Select(tag => Line("Tagged", HistoryArg.Of(tag))));
         changes.AddRange(was.Where(tag => !now.Any(t => PlantTags.Same(t, tag))).Select(tag => Line("Untagged", HistoryArg.Of(tag))));
+    }
+
+    /// <summary>"Needs a hand: high up" and "No longer needs a hand: high up", the same way tags are written.</summary>
+    internal static void AddNeedsAHand(List<HistoryLine> changes, IEnumerable<string> before, IEnumerable<string> after)
+    {
+        var was = NeedsAHand.Normalize(before);
+        var now = NeedsAHand.Normalize(after);
+
+        changes.AddRange(now.Where(m => !was.Any(t => PlantTags.Same(t, m))).Select(m => Line("MarkedNeedsAHand", HistoryArg.Of(m))));
+        changes.AddRange(was.Where(m => !now.Any(t => PlantTags.Same(t, m))).Select(m => Line("NoLongerNeedsAHand", HistoryArg.Of(m))));
     }
 
     internal static HistoryLine DormancyLine(bool dormant) => Line(dormant ? "WentDormant" : "WokeUp");

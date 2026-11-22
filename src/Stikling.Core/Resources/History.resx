@@ -608,4 +608,12 @@
     <value>Corm size: {0}</value>
     <comment>Shown in place of CormSize when lengths are in inches. {0} is the size with its unit.</comment>
   </data>
+  <data name="MarkedNeedsAHand" xml:space="preserve">
+    <value>Needs a hand: {0}</value>
+    <comment>A mark was put on a plant to say it needs a hand. {0} is the mark, like High up.</comment>
+  </data>
+  <data name="NoLongerNeedsAHand" xml:space="preserve">
+    <value>No longer needs a hand: {0}</value>
+    <comment>A mark saying a plant needs a hand was taken off. {0} is the mark.</comment>
+  </data>
 </root>

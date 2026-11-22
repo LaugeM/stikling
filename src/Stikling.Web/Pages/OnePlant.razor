@@ -1,0 +1,165 @@
+@page "/today/one-plant"
+@attribute [NeedsAccess(AccessLevel.Log)]
+@using OnePlantLogic = Stikling.Core.Today.OnePlant
+@inject CoverPhotos Covers
+@inject IPlantRepository Plants
+@inject ITimelineRepository Entries
+@inject AwayService AwayService
+@inject RoomService RoomService
+@inject TimelineService TimelineService
+@inject ILogger<OnePlant> Logger
+@inject TimeProvider Time
+
+<PageTitle>@Strings.Care.OnePlantPageTitle</PageTitle>
+
+@* No ReloadOnSync: like Go round, the card stays put while someone is looking at it *@
+
+<a class="back-link" href="">@Strings.Care.RoundBackToday</a>
+
+@if (!loaded)
+{
+    <p class="text-body-secondary">@Strings.Care.Loading</p>
+}
+else if (away)
+{
+    <h1>@Strings.Care.OnePlantTitle</h1>
+    <div class="empty-state">
+        <p>@Strings.Care.OnePlantAway</p>
+        <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
+    </div>
+}
+else if (plant is null)
+{
+    <h1>@Strings.Care.OnePlantTitle</h1>
+    <div class="empty-state">
+        <p>@(seen.Count == 0 ? Strings.Care.OnePlantNone : Strings.Care.OnePlantAll)</p>
+        <a class="btn btn-primary mt-3" href="">@Strings.Care.RoundBackToTodayButton</a>
+    </div>
+}
+else
+{
+    <h1>@Strings.Care.OnePlantTitle</h1>
+    <article class="one-card" @key="plant.Id" aria-label="@plant.DisplayName">
+        <div class="round-photo">
+            @if (Covers.Shown(plant.CoverPhotoId) is { } coverId)
+            {
+                <PhotoImage PhotoId="coverId" Thumbnail="false" Alt="@(F(Strings.Care.RoundPhotoOf, plant.DisplayName))" />
+            }
+            else
+            {
+                <div class="one-photo-empty" aria-hidden="true">
+                    <svg viewBox="0 0 24 24">@Icons.Feed</svg>
+                </div>
+            }
+        </div>
+        <div class="one-body">
+            <h2 class="one-name"><a href="plants/@plant.Id">@plant.DisplayName</a></h2>
+            @if (plant.BotanicalName is not null && !string.IsNullOrWhiteSpace(plant.Nickname))
+            {
+                <div class="one-species"><BotanicalName Genus="@plant.Genus" Species="@Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier)" Cultivar="@plant.Cultivar" /></div>
+            }
+            @if (places.NameOf(plant.PlaceId) is { } place)
+            {
+                <p class="one-meta">@place</p>
+            }
+            @if (plant.Attention is { } attention)
+            {
+                <p class="one-flag"><span class="section-label">@Strings.Care.TodayNeedsAttention</span> <b>@attention.Reason</b></p>
+            }
+
+            <IfCan Edit>
+            <button type="button" class="btn btn-primary one-looked" aria-pressed="@(looked ? "true" : "false")" disabled="@(busy || looked)" @onclick="LookedOverAsync">
+                @if (looked)
+                {
+                    <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
+                }
+                @Strings.Care.RoundTileLookedOver
+            </button>
+            </IfCan>
+            @if (status is not null)
+            {
+                <p class="today-row-status" role="status">@status</p>
+            }
+        </div>
+    </article>
+
+    <div class="one-actions">
+        <a class="btn btn-outline-primary" href="">@Strings.Care.OnePlantEnough</a>
+        <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="OneMoreAsync">@Strings.Care.OnePlantOneMore</button>
+    </div>
+}
+
+@code {
+    private bool loaded;
+    private bool away;
+    private bool busy;
+    private bool looked;
+    private string? status;
+    private Plant? plant;
+    private Places places = Places.None;
+    private IReadOnlyList<Plant> allPlants = [];
+    private IReadOnlyList<AwayStretch> stretches = [];
+
+    // The plants shown in this visit, held here and nowhere else
+    private readonly HashSet<Guid> seen = [];
+
+    private DateOnly Today => Time.Today();
+
+    protected override async Task OnInitializedAsync()
+    {
+        places = await RoomService.GetPlacesAsync();
+        allPlants = await Plants.GetAllAsync();
+        stretches = await AwayService.GetAllAsync();
+        await Covers.EnsureLoadedAsync();
+        away = AwayTime.Current(stretches, Today) is not null;
+        if (!away)
+            await PickAsync();
+        loaded = true;
+    }
+
+    private async Task PickAsync()
+    {
+        // Looks over made in this visit count too, so a plant just seen goes to the back
+        var lastLooked = await Entries.GetLastActivityBeforeAsync(Time.GetUtcNow().AddDays(1));
+        plant = OnePlantLogic.Pick(allPlants, lastLooked, stretches, Today, Time, seen);
+        looked = false;
+        status = null;
+        if (plant is not null)
+            seen.Add(plant.Id);
+    }
+
+    private async Task OneMoreAsync()
+    {
+        busy = true;
+        try
+        {
+            await PickAsync();
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+
+    private async Task LookedOverAsync()
+    {
+        if (plant is null || busy || looked)
+            return;
+
+        busy = true;
+        status = null;
+        try
+        {
+            await TimelineService.LookedOverAsync(SubjectType.Plant, plant.Id);
+            seen.Add(plant.Id);
+            looked = true;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Looking over one plant failed");
+            status = F(Strings.Care.RoundSaveFailed, ex.Message);
+        }
+
+        busy = false;
+    }
+}

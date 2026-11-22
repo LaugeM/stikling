@@ -1,0 +1,118 @@
+/* Just one plant: a single card, then two ways on */
+
+.one-card {
+    overflow: hidden;
+    max-width: 32rem;
+    background: var(--pa-surface);
+    border: 1px solid var(--pa-border);
+    border-radius: 0.75rem;
+}
+
+.round-photo {
+    aspect-ratio: 4 / 3;
+    max-height: 34vh;
+    width: 100%;
+    overflow: hidden;
+    background: var(--pa-green-soft);
+}
+
+.round-photo ::deep img,
+.round-photo ::deep .photo-placeholder {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* No photo yet: a short band with the same icon the list uses */
+.round-photo:has(.one-photo-empty) {
+    aspect-ratio: auto;
+    height: 5rem;
+}
+
+.one-photo-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    background: var(--pa-clay-soft);
+    color: var(--pa-clay);
+}
+
+.one-photo-empty svg {
+    width: 2.25rem;
+    height: 2.25rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.one-body {
+    padding: 0.85rem;
+}
+
+.one-name {
+    margin: 0;
+    font-family: var(--pa-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.one-name a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.one-species {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+}
+
+.one-meta {
+    margin: 0.2rem 0 0;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+}
+
+.one-flag {
+    margin: 0.5rem 0 0;
+}
+
+.one-looked {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.35rem;
+    width: 100%;
+    min-height: 2.75rem;
+    margin-top: 0.85rem;
+}
+
+.one-looked svg {
+    width: 1.1rem;
+    height: 1.1rem;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+.one-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+
+.one-actions .btn,
+.empty-state .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 2.75rem;
+}

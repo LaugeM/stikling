@@ -10,6 +10,50 @@
     color: var(--pa-muted);
 }
 
+/* Easy day and Just one plant: small outline buttons under the counts, never a card */
+.today-hard {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: -0.25rem 0 1rem;
+}
+
+.today-hard .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
+/* The line that ends an easy day, with the way out */
+/* The mark for a plant that needs a hand, on its own line so the flag row's ellipsis never hides it */
+.hand-line {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
+.easy-end {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem 0.75rem;
+    margin: 0.5rem 0 1.25rem;
+    color: var(--pa-muted);
+}
+
+.easy-end p {
+    margin: 0;
+}
+
+.easy-end .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
 .reminder {
     display: flex;
     flex-wrap: wrap;
@@ -460,6 +504,33 @@
     color: var(--pa-muted);
 }
 
+.back-lost {
+    margin: 0 0 0.75rem;
+}
+
+.back-lost .chip-row {
+    margin-bottom: 0.5rem;
+}
+
+.back-lost-text {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.back-lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-lost .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
 .back-rows {
     list-style: none;
     margin: 0;
@@ -591,6 +662,14 @@
         grid-template-columns: minmax(0, 1fr) minmax(22rem, 28rem);
         gap: 0 2rem;
         align-items: start;
+    }
+}
+
+/* An easy day shows little, so it stays one column on a wide screen */
+@media (min-width: 80rem) {
+    .today-columns.today-easy {
+        display: block;
+        max-width: 60rem;
     }
 }
 

@@ -567,6 +567,13 @@ else
                 </div>
             </FormSection>
 
+            <FormSection Title="@Strings.Plants.NeedsAHandLabel" Summary="@HandSummary" Open="openHand">
+                <div class="mb-3">
+                    <TagPicker @bind-Value="plant.NeedsAHand" Suggestions="handSuggestions" Label="@Strings.Plants.NeedsAHandLabel" />
+                    <div class="form-text">@Strings.Plants.NeedsAHandHint</div>
+                </div>
+            </FormSection>
+
             <FormSection Title="@Strings.Crosses.TraitsHeading" Summary="@TraitsSummary" Open="openTraits">
                 <div class="mb-3">
                     <TagPicker @bind-Value="plant.Traits" Suggestions="traitSuggestions" Label="@Strings.Crosses.TraitsHeading" />
@@ -788,6 +795,7 @@ else
     }
     private IReadOnlyList<Room> rooms = [];
     private IReadOnlyList<string> tagSuggestions = [];
+    private IReadOnlyList<string> handSuggestions = [];
     private IReadOnlyList<string> traitSuggestions = [];
 
     // Which sections start open, worked out when the plant loads. A section only reads this once
@@ -845,6 +853,7 @@ else
         plant.GrowingSeason is { } season ? Labels.For(season) : null);
     private bool openPot;
     private bool openTags;
+    private bool openHand;
     private bool openTraits;
 
     // Your own fields. The text is as typed and is tidied when the plant is saved, so a field added
@@ -905,6 +914,8 @@ else
 
     private string? TraitsSummary => plant is { Traits.Count: > 0 } ? string.Join(", ", plant.Traits) : null;
 
+    private string? HandSummary => plant is { NeedsAHand.Count: > 0 } ? string.Join(", ", plant.NeedsAHand) : null;
+
     private string? TagsSummary => plant is { Tags.Count: > 0 } ? string.Join(", ", plant.Tags) : null;
 
     private string QuarantineSummary => plant is { InQuarantine: true }
@@ -953,6 +964,7 @@ else
         rooms = Room.List(form.Places, all, form.Propagations);
         nextNumber = CollectionNumbers.NextFree(all);
         tagSuggestions = PlantTags.Suggestions(all);
+        handSuggestions = NeedsAHand.Suggestions(all, [Strings.Plants.NeedsAHandHigh, Strings.Plants.NeedsAHandHanging, Strings.Plants.NeedsAHandHeavy]);
         traitSuggestions = Traits.Suggestions(all, await PropagationRepository.GetAllAsync());
         var uses = SellerSummary.CountsBySeller(form.SellerList, all, form.Propagations);
         sellerNames = form.SellerList.Live.OrderByDescending(s => uses.GetValueOrDefault(s.Id)).ThenBy(s => s.Name, StringComparer.CurrentCultureIgnoreCase).Select(s => s.Name).ToList();
@@ -966,6 +978,7 @@ else
         openLikes = !isNew && CareLikes.HasAny(plant);
         openPot = !isNew && (plant.SoilMixId is not null || plant.InnerPotId is not null || plant.OuterPotId is not null);
         openTags = !isNew && plant.Tags.Count > 0;
+        openHand = !isNew && plant.NeedsAHand.Count > 0;
         openTraits = !isNew && plant.Traits.Count > 0;
         openFields = !isNew && plant.OwnFields.Any(v => form.OwnFields.Any(f => f.Id == v.Key) && v.Value.Length > 0);
         openSwap = !isNew && plant.Spare is not null;

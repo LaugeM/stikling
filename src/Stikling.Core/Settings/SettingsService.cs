@@ -250,4 +250,12 @@ public sealed class SettingsService(ISettingsRepository settings)
         current.YearHiddenFor = year;
         await settings.SaveAsync(current);
     }
+
+    /// <summary>Turns Easy day on for the day, or off with null. Nothing else is stored about it.</summary>
+    public async Task SetEasyDayAsync(DateOnly? day)
+    {
+        var current = await GetAsync();
+        current.EasyDay = day;
+        await settings.SaveAsync(current);
+    }
 }

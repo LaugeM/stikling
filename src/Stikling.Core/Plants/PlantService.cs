@@ -24,6 +24,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
 
         plant.Tags = PlantTags.Normalize(plant.Tags);
+        plant.NeedsAHand = NeedsAHand.Normalize(plant.NeedsAHand);
         Normalize(plant);
         // Only a create run again has history to look through, so a first one doesn't read the whole store
         var again = await plants.GetAsync(plant.Id) is not null;
@@ -135,6 +136,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        after.NeedsAHand = NeedsAHand.Normalize(after.NeedsAHand);
         Normalize(after, numberChanged: after.CollectionNumber != before.CollectionNumber);
         // The day it died, left or came back is what the year in review reads
         if (before.Status != after.Status)
@@ -361,6 +363,25 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         plant.Attention = Attention.Change(plant.Attention, reason, time.Today());
         plant.AttentionLater = AttentionLater.For(plant.Attention, from);
         await plants.SaveAsync(plant);
+    }
+
+    /// <summary>
+    /// "I lost track of watering": from today on, watering counts from today for the plants, so the gap isn't
+    /// learned as how long they go without water. The earlier entries stay in the history, and nothing goes on it.
+    /// </summary>
+    /// <returns>How many plants were changed. Plants that already count from today are left as they are.</returns>
+    public async Task<int> LostTrackAsync(IEnumerable<Plant> selected)
+    {
+        var today = time.Today();
+        var changed = 0;
+        foreach (var plant in selected.Where(p => !p.IsDeleted && p.WateringSince != today))
+        {
+            plant.WateringSince = today;
+            await plants.SaveAsync(plant);
+            changed++;
+        }
+
+        return changed;
     }
 
     /// <summary>Pins a plant to the top of the list, or unpins it. Nothing goes on the history.</summary>

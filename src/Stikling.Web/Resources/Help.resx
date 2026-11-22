@@ -937,7 +937,7 @@
     <comment>Answer to "How do I make a sheet for a plant-sitter?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="MakeSheetForPlantSitterA4" xml:space="preserve">
-    <value>Each plant watered from the top can be set to &lt;em&gt;From the bottom&lt;/em&gt;, &lt;em&gt;From the top&lt;/em&gt; or &lt;em&gt;Soak&lt;/em&gt;, in its edit form or in the list at the bottom of the page, and the card only says so when it differs from your usual way. You can write the usual way in your own words instead. Plants in water or on a reservoir are only topped up. A plant's edit form also has a note for a plant-sitter. If a plant gets rain water or demineralised water, its card says so. If you have weighed its pot, the card gives the weights too, as another way to check by lifting it.</value>
+    <value>Each plant watered from the top can be set to &lt;em&gt;From the bottom&lt;/em&gt;, &lt;em&gt;From the top&lt;/em&gt; or &lt;em&gt;Soak&lt;/em&gt;, in its edit form or in the list at the bottom of the page, and the card only says so when it differs from your usual way. You can write the usual way in your own words instead. Plants in water or on a reservoir are only topped up. A plant's edit form also has a note for a plant-sitter, and plants marked as needing a hand say &lt;em&gt;Ask someone to help&lt;/em&gt; with what they need, like high up. If a plant gets rain water or demineralised water, its card says so. If you have weighed its pot, the card gives the weights too, as another way to check by lifting it.</value>
     <comment>Answer to "How do I make a sheet for a plant-sitter?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="MakeSheetForPlantSitterA5" xml:space="preserve">
@@ -1005,11 +1005,11 @@
     <comment>Question in the "Today" part of the Help page.</comment>
   </data>
   <data name="GoRoundRoomA1" xml:space="preserve">
-    <value>Open a room from Today's round, tap &lt;em&gt;Go round these&lt;/em&gt; under Water on Today, filter the Plants list to a room and tap &lt;em&gt;Go round&lt;/em&gt;, or tap &lt;em&gt;Go round&lt;/em&gt; on a room under Rooms and tags. Each plant gets a card with a meter reading, &lt;em&gt;Watered&lt;/em&gt;, &lt;em&gt;Looked over&lt;/em&gt;, a photo, or &lt;em&gt;Skip&lt;/em&gt;. The propagations come after the plants.</value>
+    <value>Open a room from Today's round, tap &lt;em&gt;Go round these&lt;/em&gt; under Water on Today, filter the Plants list to a room and tap &lt;em&gt;Go round&lt;/em&gt;, or tap &lt;em&gt;Go round&lt;/em&gt; on a room under Rooms and tags. Each plant gets a card with a meter reading, &lt;em&gt;Watered&lt;/em&gt;, &lt;em&gt;Looked over&lt;/em&gt;, a photo, or &lt;em&gt;Skip&lt;/em&gt;. The propagations come after the plants. A plant marked as needing a hand says so on its card.</value>
     <comment>Answer to "How do I go round a room?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="GoRoundRoomA2" xml:space="preserve">
-    <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, and tells the watering reminder that the plant isn't ready yet. You can leave halfway. Opening the round again the same day starts at the first one with nothing logged.</value>
+    <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, and tells the watering reminder that the plant isn't ready yet. You can leave halfway. Opening the round again the same day starts at the first one with nothing logged. At the start there is a link to &lt;em&gt;Just one plant&lt;/em&gt;, and a switch to leave out plants that need a hand.</value>
     <comment>Answer to "How do I go round a room?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="WalkingOrderQ" xml:space="preserve">
@@ -2230,6 +2230,54 @@
   <data name="SoilBatchA1" xml:space="preserve">
     <value>Yes. On the Soil mixes page, tap Mix a batch on a mix and say how much you mixed. It becomes a dated batch, and Top up mixes more into the same one as it runs low. Mark a batch as Used up when it is gone. A plant or cutting can say which batch it was potted in, and its page shows the date. To take what went into a batch off the stock, tap Link to stock on the mix once and say which supply each ingredient comes out of. This doesn&apos;t change the recipe. After a batch or a top-up the app lists what comes off each supply, from the recipe and the amount. Change an amount or untick a line, then confirm. If a supply is counted in kilograms or pieces and the recipe is in parts of a volume, the line is left empty for you to fill in.</value>
     <comment>Answer to &quot;Can I keep track of the soil I mixed?&quot; on the Help page.</comment>
+  </data>
+  <data name="WhatIsEasyDayQ" xml:space="preserve">
+    <value>What is Easy day?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="WhatIsEasyDayA1" xml:space="preserve">
+    <value>On a bad morning, tap &lt;em&gt;Easy day&lt;/em&gt; under the counts on Today. Today then only shows what is worse for waiting: a pest treatment that is due, a plant you flagged as &lt;em&gt;Needs attention&lt;/em&gt;, and water to change on a cutting. Watering, care, checks and the rest are hidden, and the page ends with a line that the rest can wait until tomorrow.</value>
+    <comment>Answer to "What is Easy day?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WhatIsEasyDayA2" xml:space="preserve">
+    <value>It asks for no reason and counts nothing. It ends by itself at midnight, and &lt;em&gt;Show everything&lt;/em&gt; ends it sooner. Time away and the welcome back list show as usual.</value>
+    <comment>Answer to "What is Easy day?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="CanLookAtJustOnePlantQ" xml:space="preserve">
+    <value>Can I look at just one plant?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="CanLookAtJustOnePlantA1" xml:space="preserve">
+    <value>Yes. Tap &lt;em&gt;Just one plant&lt;/em&gt; on Today, or at the start of a round. It opens one plant: a plant flagged &lt;em&gt;Needs attention&lt;/em&gt; first, the one flagged longest ago before the others, and otherwise the plant that has gone longest since you looked at it. Plants that are dormant or have left, and everything while you're away, are left out.</value>
+    <comment>Answer to "Can I look at just one plant?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="CanLookAtJustOnePlantA2" xml:space="preserve">
+    <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, like in a round. Then choose &lt;em&gt;That's enough&lt;/em&gt; to go back to Today, or &lt;em&gt;One more&lt;/em&gt; for the next one. Nothing else is saved.</value>
+    <comment>Answer to "Can I look at just one plant?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LostTrackWateringQ" xml:space="preserve">
+    <value>I haven't logged watering for ages. Will that confuse the reminders?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="LostTrackWateringA1" xml:space="preserve">
+    <value>It can. The reminder learns how long a plant goes between waterings, so a long gap with nothing logged can make it think the plant needs water rarely. Tap &lt;em&gt;I lost track of watering&lt;/em&gt; in the watering part of the plant's page, which shows up once the last watering is far longer ago than usual. From then on watering counts from today, and the earlier waterings stay in the history.</value>
+    <comment>Answer to "I haven't logged watering for ages. Will that confuse the reminders?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="LostTrackWateringA2" xml:space="preserve">
+    <value>The same action is on a room's page for every plant in the room, and it is the first choice on the welcome back list after time away, for all plants or one room.</value>
+    <comment>Answer to "I haven't logged watering for ages. Will that confuse the reminders?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="NeedsAHandQ" xml:space="preserve">
+    <value>How do I mark a plant that's hard to reach?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="NeedsAHandA1" xml:space="preserve">
+    <value>Open the plant's edit form and pick &lt;em&gt;Needs a hand&lt;/em&gt;. Tap &lt;em&gt;High up&lt;/em&gt;, &lt;em&gt;Hanging&lt;/em&gt; or &lt;em&gt;Heavy&lt;/em&gt;, or add a mark of your own like &lt;em&gt;Behind the sofa&lt;/em&gt;. The marks you have used before come up as choices next time.</value>
+    <comment>Answer to "How do I mark a plant that's hard to reach?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="NeedsAHandA2" xml:space="preserve">
+    <value>The marks show on the plant's page, on its card in Go round, on the plant-sitter sheet as &lt;em&gt;Ask someone to help&lt;/em&gt;, and next to the plant on Today when it is flagged &lt;em&gt;Needs attention&lt;/em&gt;, so a helper knows before they go. Go round has a switch at its start to leave out the plants that need a hand, for that day on this device.</value>
+    <comment>Answer to "How do I mark a plant that's hard to reach?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="RemovedByMistakeQ" xml:space="preserve">
     <value>I deleted something by mistake. Can I get it back?</value>

@@ -1886,4 +1886,108 @@
     <value>Couldn't log the water change: {0}</value>
     <comment>Error on Today. {0} is what went wrong.</comment>
   </data>
+  <data name="TodayEasyDay" xml:space="preserve">
+    <value>Easy day</value>
+    <comment>The button on Today for a day with little energy. Shows only what is worse for waiting.</comment>
+  </data>
+  <data name="TodayEasyRestCanWait" xml:space="preserve">
+    <value>The rest can wait until tomorrow.</value>
+    <comment>The line that ends Today on an easy day.</comment>
+  </data>
+  <data name="TodayEasyNothing" xml:space="preserve">
+    <value>Nothing today that can't wait.</value>
+    <comment>Shown on an easy day when no treatment, flagged plant or water change is due.</comment>
+  </data>
+  <data name="TodayShowEverything" xml:space="preserve">
+    <value>Show everything</value>
+    <comment>The button that ends an easy day.</comment>
+  </data>
+  <data name="TodayOnePlant" xml:space="preserve">
+    <value>Just one plant</value>
+    <comment>The button on Today and on Go round that opens one plant to look at.</comment>
+  </data>
+  <data name="OnePlantTitle" xml:space="preserve">
+    <value>Just one plant</value>
+    <comment>Heading of the page that opens one plant to look at.</comment>
+  </data>
+  <data name="OnePlantPageTitle" xml:space="preserve">
+    <value>Just one plant</value>
+    <comment>Browser tab title of the Just one plant page.</comment>
+  </data>
+  <data name="OnePlantAway" xml:space="preserve">
+    <value>You're away, so there's nothing to look at.</value>
+    <comment>Shown on Just one plant during away or quiet time.</comment>
+  </data>
+  <data name="OnePlantNone" xml:space="preserve">
+    <value>There are no plants to look at yet.</value>
+    <comment>Shown on Just one plant when the collection has no plant to pick.</comment>
+  </data>
+  <data name="OnePlantAll" xml:space="preserve">
+    <value>That was every plant.</value>
+    <comment>Shown on Just one plant after One more when every plant has been shown.</comment>
+  </data>
+  <data name="OnePlantEnough" xml:space="preserve">
+    <value>That's enough</value>
+    <comment>Button on Just one plant that goes back to Today.</comment>
+  </data>
+  <data name="OnePlantOneMore" xml:space="preserve">
+    <value>One more</value>
+    <comment>Button on Just one plant that picks the next plant.</comment>
+  </data>
+  <data name="LostTrackPlant" xml:space="preserve">
+    <value>I lost track of watering</value>
+    <comment>Small action on a plant's page, offered when it hasn't been watered for much longer than usual. Sets the day watering counts from to today.</comment>
+  </data>
+  <data name="LostTrackRoom" xml:space="preserve">
+    <value>I lost track of watering here</value>
+    <comment>Action on a room's page. Sets the day watering counts from to today for every plant in the room.</comment>
+  </data>
+  <data name="LostTrackAway" xml:space="preserve">
+    <value>I lost track of watering while I was away</value>
+    <comment>First choice on the Welcome back list on Today after time away.</comment>
+  </data>
+  <data name="LostTrackConfirm" xml:space="preserve">
+    <value>Watering will count from today. Earlier waterings stay in the history.</value>
+    <comment>The line that asks before I lost track is saved.</comment>
+  </data>
+  <data name="LostTrackConfirmButton" xml:space="preserve">
+    <value>Count from today</value>
+    <comment>Button that saves I lost track.</comment>
+  </data>
+  <data name="LostTrackSaved" xml:space="preserve">
+    <value>Watering counts from today.</value>
+    <comment>Said after I lost track was saved for one plant.</comment>
+  </data>
+  <data name="LostTrackSavedPlants_One" xml:space="preserve">
+    <value>Watering counts from today for {0} plant.</value>
+    <comment>Said after I lost track was saved. {0} is the number of plants, here exactly one.</comment>
+  </data>
+  <data name="LostTrackSavedPlants_Other" xml:space="preserve">
+    <value>Watering counts from today for {0} plants.</value>
+    <comment>Said after I lost track was saved. {0} is the number of plants.</comment>
+  </data>
+  <data name="LostTrackAllPlants" xml:space="preserve">
+    <value>All plants</value>
+    <comment>Choice on the I lost track question: every plant in the collection.</comment>
+  </data>
+  <data name="LostTrackOneRoom" xml:space="preserve">
+    <value>One room</value>
+    <comment>Choice on the I lost track question: the plants in a room.</comment>
+  </data>
+  <data name="LostTrackNone" xml:space="preserve">
+    <value>There are no plants there to count from today.</value>
+    <comment>Said when the choice on I lost track has no plants.</comment>
+  </data>
+  <data name="RoundLeaveOutHand" xml:space="preserve">
+    <value>Leave out plants that need a hand</value>
+    <comment>Switch at the start of Go round. Off by default, and kept only for that day on the device.</comment>
+  </data>
+  <data name="RoundEveryoneNeedsHand" xml:space="preserve">
+    <value>Every plant here needs a hand, so none is left in the round.</value>
+    <comment>Shown at the end of Go round when the switch to leave out plants that need a hand leaves nothing.</comment>
+  </data>
+  <data name="LostTrackAlready" xml:space="preserve">
+    <value>Watering already counts from today.</value>
+    <comment>Said after I lost track when every plant already counted watering from today.</comment>
+  </data>
 </root>
