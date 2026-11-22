@@ -227,7 +227,7 @@ else
                     <div class="room-section room-lost">
                         @if (lostSavedCount is { } savedCount)
                         {
-                            <p class="settings-message" role="status">@Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other)</p>
+                            <p class="settings-message" role="status">@(savedCount == 0 ? Strings.Care.LostTrackAlready : Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other))</p>
                         }
                         else if (confirmingLost)
                         {
@@ -349,8 +349,7 @@ else
         try
         {
             var plants = here.Plants.Select(r => r.Plant).ToList();
-            await PlantService.LostTrackAsync(plants);
-            lostSavedCount = plants.Count;
+            lostSavedCount = await PlantService.LostTrackAsync(plants);
             confirmingLost = false;
         }
         catch (Exception ex)

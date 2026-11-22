@@ -69,6 +69,24 @@ public class NeedsAHandTests
     }
 
     [Fact]
+    public async Task Changing_the_marks_writes_a_line_for_each_one_added_or_removed()
+    {
+        var plants = new FakePlantRepository();
+        var timeline = new FakeTimelineRepository();
+        var service = new PlantService(plants, timeline, Time);
+        var plant = new Plant { Nickname = "Hoya", NeedsAHand = ["High up", "Heavy"] };
+        await plants.SaveAsync(plant);
+
+        var after = plant.Copy();
+        after.NeedsAHand = ["heavy", "Hanging"];
+        await service.UpdateAsync(plant, after, e => e.ToString());
+
+        var entry = Assert.Single(timeline.Entries);
+        Assert.Equal(["MarkedNeedsAHand", "NoLongerNeedsAHand"], entry.Lines!.Select(l => l.Key));
+        Assert.Equal("Needs a hand: Hanging\nNo longer needs a hand: High up", entry.Text);
+    }
+
+    [Fact]
     public void The_line_is_lower_case_and_empty_means_none()
     {
         Assert.Equal("high up, heavy", NeedsAHand.Line(new Plant { NeedsAHand = ["High up", "Heavy"] }));

@@ -102,6 +102,8 @@ public class HistoryTextTests
         (L("OuterPotSubmerged"), "Now sits in the outer pot's water"),
         (L("Tagged", "Variegated"), "Tagged Variegated"),
         (L("Untagged", "Flowering"), "No longer tagged Flowering"),
+        (L("MarkedNeedsAHand", "High up"), "Needs a hand: High up"),
+        (L("NoLongerNeedsAHand", "High up"), "No longer needs a hand: High up"),
         (L("PutInQuarantine"), "Put in quarantine"),
         (L("OutOfQuarantine"), "Out of quarantine"),
         (L("WentDormant"), "Went dormant"),

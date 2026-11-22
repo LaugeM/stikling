@@ -369,14 +369,19 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
     /// "I lost track of watering": from today on, watering counts from today for the plants, so the gap isn't
     /// learned as how long they go without water. The earlier entries stay in the history, and nothing goes on it.
     /// </summary>
-    public async Task LostTrackAsync(IEnumerable<Plant> selected)
+    /// <returns>How many plants were changed. Plants that already count from today are left as they are.</returns>
+    public async Task<int> LostTrackAsync(IEnumerable<Plant> selected)
     {
         var today = time.Today();
+        var changed = 0;
         foreach (var plant in selected.Where(p => !p.IsDeleted && p.WateringSince != today))
         {
             plant.WateringSince = today;
             await plants.SaveAsync(plant);
+            changed++;
         }
+
+        return changed;
     }
 
     /// <summary>Pins a plant to the top of the list, or unpins it. Nothing goes on the history.</summary>

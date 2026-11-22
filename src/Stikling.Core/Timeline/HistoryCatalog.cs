@@ -66,6 +66,8 @@ public static partial class HistoryText
         Add("OuterPotSubmerged");
         Add("Tagged", Txt());
         Add("Untagged", Txt());
+        Add("MarkedNeedsAHand", Txt());
+        Add("NoLongerNeedsAHand", Txt());
         Add("PutInQuarantine");
         Add("OutOfQuarantine");
         Add("WentDormant");

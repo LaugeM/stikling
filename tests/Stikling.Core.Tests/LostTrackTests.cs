@@ -73,7 +73,8 @@ public class LostTrackTests
         await plants.SaveAsync(second);
         var service = new PlantService(plants, timeline, new FixedTime(Now));
 
-        await service.LostTrackAsync([first, second]);
+        Assert.Equal(2, await service.LostTrackAsync([first, second]));
+        Assert.Equal(0, await service.LostTrackAsync([first, second]));
 
         Assert.Equal(Today, plants.Plants[first.Id].WateringSince);
         Assert.Equal(Today, plants.Plants[second.Id].WateringSince);

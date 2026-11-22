@@ -197,7 +197,7 @@ else
             <div class="back-lost">
                 @if (lostSavedCount is { } savedCount)
                 {
-                    <p class="back-lost-text" role="status">@Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other)</p>
+                    <p class="back-lost-text" role="status">@(savedCount == 0 ? Strings.Care.LostTrackAlready : Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other))</p>
                 }
                 else if (!lostOpen)
                 {
@@ -1498,8 +1498,7 @@ else
         awayBusy = true;
         try
         {
-            await PlantService.LostTrackAsync(chosen);
-            lostSavedCount = chosen.Count;
+            lostSavedCount = await PlantService.LostTrackAsync(chosen);
             await LoadAsync();
         }
         finally

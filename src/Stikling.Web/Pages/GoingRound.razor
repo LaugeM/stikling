@@ -307,6 +307,7 @@ else
     private bool placeMissing;
     private bool busy;
     private bool endHandled;
+    private bool roundPutOff;
     private bool moveForward = true;
     private bool focusNext;
     private string? status;
@@ -359,6 +360,14 @@ else
     private async Task LeaveOutHandAsync(bool on)
     {
         leaveOutHand = on;
+        BuildQueue(GoingRoundLogic.StartAt(cards, days));
+        // Turned off from an empty round that had been put off for the day: it is still to do
+        if (roundPutOff && queue.Count > 0)
+        {
+            roundPutOff = false;
+            endHandled = false;
+            await PutOffService.PutOffAsync(PutOffs.DailyRound, Today);
+        }
         await Files.SetAsync(LeaveOutHandKey, on ? Today.ToString("yyyy-MM-dd") : null);
         BuildQueue(GoingRoundLogic.StartAt(cards, days));
         moveForward = true;
@@ -652,11 +661,15 @@ else
     // Reaching the end of the daily round finishes it for the day
     private async Task CheckEndAsync()
     {
-        if (pos < queue.Count || endHandled || cards.Count == 0)
+        // A round with nothing shown, like one where every plant needs a hand, isn't finished and isn't put off
+        if (pos < queue.Count || endHandled || queue.Count == 0)
             return;
         endHandled = true;
         if (Daily)
+        {
+            roundPutOff = true;
             await PutOffService.PutOffAsync(PutOffs.DailyRound, Today.AddDays(1));
+        }
     }
 
     private void GoThroughSkipped()
