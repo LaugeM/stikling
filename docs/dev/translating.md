@@ -200,11 +200,18 @@ The text of the front page is in `FrontPage.resx`, and the page is `StaticPages/
 
 This is done once, by the owner of the repository.
 
-1. Apply for the free Libre plan on Hosted Weblate (hosted.weblate.org) for an open source project, and create the project Stikling.
+1. Create the project Stikling on Hosted Weblate (hosted.weblate.org). A new project starts as a trial, and the free Libre plan is asked for from there. Approvals have been slow, and a project whose trial ran out while the request was waiting has been told it would be removed. So set up everything below during the trial, ask for the Libre plan on the first day it can be asked for, and keep the thread. Weblate wants the source public and a licence approved by the OSI or the FSF, which the AGPL in `LICENSE` is.
 2. Connect the GitHub repository. Weblate needs access to push branches and to open pull requests.
 3. Use component discovery, so every English file becomes its own component. The file mask is written the way Weblate's discovery documents it, with the groups `component` and `language`, and has to match `src/<project>/Resources/<Area>.<language>.resx`, for example `src/Stikling.Web/Resources/Settings.da.resx`. The English file is `<Area>.resx` in the same folder. Run it once for each project that has a `Resources` folder, `Stikling.Web` and `Stikling.Core`, with a component name prefix for each (like `web-` and `core-`), since both have areas with the same name.
-4. For each component, set English as the source language and the file format to ".NET resource file".
+4. For each component, set English as the source language and the file format to ".NET resource file". Give `Common`, `Layout`, `Settings` and `Labels` a higher priority, so translators start where it shows most, and leave `FrontPage` and `WhatsNew` last.
 5. Set it to push its changes as pull requests, not straight to `main`.
-6. Check that a new translation of one component opens a pull request, and that the tests pass on it.
+6. Turn on the checks that matter as enforced checks, so a mistake shows as Needs editing before it reaches a pull request: placeholders (Weblate's C# format check, since `c-format` is not the right one for `{0}`), and kept HTML tags. Add a `max-length` flag on button and menu texts, since German and Finnish run about 30 percent longer than English.
+7. Let new translators only suggest, and leave machine translation and automatic suggestions off, so pasted machine text isn't committed unread. Turn on reviews and set the quality filter to approved only, with the owner or a trusted translator approving.
+8. Fill in the glossary from the Danish word list above, with each English term and a line on what it means for plants (cutting, propagation, node, corm, offset, mother plant, pot up). Let the translator of each language choose which hobby words stay English, and write the choice in the glossary. Put the rules from this file in the project's translation instructions.
+9. Check that a new translation of one component opens a pull request, and that the tests pass on it.
+
+The .resx format has no plurals on Weblate, so `Plant_One` and `Plant_Other` show as two separate texts. Every pair needs a `<comment>` saying which is which ("Used for exactly 1" and "Used for any other number, including 0"), or a translator may not know they belong together.
+
+Merge Weblate's pull requests with a merge commit, never squashed, or Weblate's later updates can fail. Before a release, lock the components on Weblate for a week as a string freeze, so nothing changes under it, and say so on the project page. When the English meaning of a text changes, give it a new key, so the old translations aren't kept under a meaning they no longer have.
 
 Each pull request from Weblate is then read with the `translator` agent in check mode before it is merged, see "Checking the translations".
