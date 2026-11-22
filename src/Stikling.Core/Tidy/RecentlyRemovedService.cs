@@ -101,9 +101,21 @@ public sealed class RecentlyRemovedService(
         // A photo of something that is removed too would be put back where nobody can see it
         await PutBackOwnerAsync(photo.SubjectType, photo.SubjectId);
 
+        var removedAt = photo.DeletedAt!.Value;
         photo.DeletedAt = null;
         await photos.UpdateAsync(photo);
         await images.QueueUploadAsync(id);
+
+        // Deleting the last photo of an entry with no text deletes the entry in the same step, so it comes back
+        // too. An entry deleted on its own at another time stays deleted.
+        var emptied = (await store.GetAllAsync(RecordKinds.Timeline)).Where(e =>
+            e.IsDeleted && e.SubjectId == photo.SubjectId && string.IsNullOrWhiteSpace(e.Text) && e.PhotoIds.Contains(id)
+            && (e.DeletedAt!.Value - removedAt).Duration() <= TimeSpan.FromMinutes(1));
+        foreach (var entry in emptied)
+        {
+            entry.DeletedAt = null;
+            await timeline.UpdateAsync(entry);
+        }
         return true;
     }
 

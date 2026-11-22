@@ -182,4 +182,27 @@ public class RecentlyRemovedTests
         Assert.False(done);
         Assert.NotNull(plants.Plants[stripped.Id].DeletedAt);
     }
+
+    [Fact]
+    public async Task Putting_back_a_photo_also_puts_back_the_empty_entry_deleted_with_it()
+    {
+        var plant = new Plant { Nickname = "Hoya", CreatedAt = Now.AddDays(-90), UpdatedAt = Now.AddDays(-90) };
+        plants.Plants[plant.Id] = plant;
+        await store.PutAsync(RecordKinds.Plants, plant);
+        var photo = await RemovedPhoto(plant.Id, Now.AddDays(-2));
+        var withIt = await RemovedEntry(plant.Id, TimelineKind.Photo, Now.AddDays(-2).AddSeconds(1));
+        withIt.Text = null;
+        withIt.PhotoIds = [photo.Id];
+        await store.PutAsync(RecordKinds.Timeline, withIt);
+        var earlier = await RemovedEntry(plant.Id, TimelineKind.Photo, Now.AddDays(-5));
+        earlier.Text = null;
+        earlier.PhotoIds = [photo.Id];
+        await store.PutAsync(RecordKinds.Timeline, earlier);
+        var item = (await Service().GetAsync()).Of(RemovedKind.Photo).Single();
+
+        await Service().PutBackAsync(item);
+
+        Assert.Contains(withIt.Id, timeline.Updated);
+        Assert.DoesNotContain(earlier.Id, timeline.Updated);
+    }
 }
