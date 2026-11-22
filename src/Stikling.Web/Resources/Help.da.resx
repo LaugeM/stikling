@@ -382,7 +382,7 @@
     <value>Hvordan sletter jeg en plante jeg har tilføjet ved en fejl?</value>
   </data>
   <data name="DeletePlantByMistakeA1" xml:space="preserve">
-    <value>Åbn planten, gå ned i bunden af dens oplysninger under Familie, og tryk på &lt;em&gt;Slet plante&lt;/em&gt;. Den spørger én gang til før noget bliver slettet. Linket ligger dernede så man ikke kommer til at trykke på det. Sletter du planten, forsvinder dens billeder, noter og historik også, så det er til en plante der er tilføjet to gange eller ved en fejl. Er den død eller givet væk, så brug de tre prikker i stedet, som ovenfor. En stikling har det samme link i bunden af sin side. Sletter du den forkerte, kan du få den tilbage ved at gendanne en backup fra før.</value>
+    <value>Åbn planten, gå ned i bunden af dens oplysninger under Familie, og tryk på &lt;em&gt;Slet plante&lt;/em&gt;. Den spørger én gang til før noget bliver slettet. Linket ligger dernede så man ikke kommer til at trykke på det. Sletter du planten, forsvinder dens billeder, noter og historik også, så det er til en plante der er tilføjet to gange eller ved en fejl. Er den død eller givet væk, så brug de tre prikker i stedet, som ovenfor. En stikling har det samme link i bunden af sin side. Sletter du den forkerte, kan du sætte den tilbage fra &lt;em&gt;Fjernet for nylig&lt;/em&gt; under Ryd op inden for 30 dage, eller gendanne en backup fra før.</value>
   </data>
   <data name="HaveTwoSamePlantTypeQ" xml:space="preserve">
     <value>Jeg har to af den samme plante. Skal jeg skrive det hele ind to gange?</value>
@@ -1540,7 +1540,7 @@
     <value>Kan appen pege på det der skal ryddes op i?</value>
   </data>
   <data name="TidyUpA1" xml:space="preserve">
-    <value>Ja. &lt;em&gt;Ryd op&lt;/em&gt; i Indstillinger, under Dine data, viser aktive planter uden slægt, billede eller rum, stiklinger hvis moderplante er væk, planter der måske er lagt ind to gange (samme navn i samme rum, eller samme slægt, art og kultivar uden kælenavne), og tags, produkter og jordblandinger ingen bruger. Tryk på en plante for at åbne den og rette den der. Hvis to planter i virkeligheden er forskellige, så tryk på &lt;em&gt;Ikke den samme&lt;/em&gt;, og de holder op med at vise sig. Et tag, produkt eller en jordblanding ingen bruger, har en knap Fjern der spørger først. Det er altid én ad gangen, og intet ændres før du vælger det. Et afsnit uden noget i vises ikke, og når alt er ryddet, siger siden det.</value>
+    <value>Ja. &lt;em&gt;Ryd op&lt;/em&gt; i Indstillinger, under Dine data, viser aktive planter uden slægt, billede eller rum, stiklinger hvis moderplante er væk, planter der måske er lagt ind to gange (samme navn i samme rum, eller samme slægt, art og kultivar uden kælenavne), og tags, produkter og jordblandinger ingen bruger. Tryk på en plante for at åbne den og rette den der. Hvis to planter i virkeligheden er forskellige, så tryk på &lt;em&gt;Ikke den samme&lt;/em&gt;, og de holder op med at vise sig. Et tag, produkt eller en jordblanding ingen bruger, har en knap Fjern der spørger først. Det er altid én ad gangen, og intet ændres før du vælger det. Et afsnit uden noget i vises ikke, og når alt er ryddet, siger siden det. &lt;em&gt;Fjernet for nylig&lt;/em&gt; øverst har det du har slettet de seneste 30 dage.</value>
   </data>
   <data name="NotSureWhichParentQ" xml:space="preserve">
     <value>Hvad hvis jeg ikke er sikker på hvilken plante en stikling kommer fra?</value>
@@ -1682,5 +1682,11 @@
   </data>
   <data name="SoilBatchA1" xml:space="preserve">
     <value>Ja. På siden Jordblandinger trykker du på Bland en batch ved en blanding og skriver hvor meget du blandede. Det bliver en batch med dato, og med Fyld på blander du mere i den samme, når den er ved at slippe op. Markér en batch som Brugt op, når den er væk. Ved en plante eller stikling kan du vælge hvilken batch den står i, og så viser dens side datoen. Skal det du blander, trækkes fra lageret, trykker du én gang på Kobl til lager ved blandingen og vælger hvilken vare hver ingrediens kommer fra. Det ændrer ikke opskriften. Når du har blandet en batch eller fyldt på, viser appen hvad der skal trækkes fra hver vare, ud fra opskriften og mængden. Ret en mængde eller fjern et flueben, og bekræft. Tælles en vare i kilo eller stk., mens opskriften måler i rumfang, står linjen tom, så du selv kan skrive mængden.</value>
+  </data>
+  <data name="RemovedByMistakeQ" xml:space="preserve">
+    <value>Jeg har slettet noget ved en fejl. Kan jeg få det tilbage?</value>
+  </data>
+  <data name="RemovedByMistakeA1" xml:space="preserve">
+    <value>Ja. &lt;em&gt;Fjernet for nylig&lt;/em&gt; under &lt;em&gt;Ryd op&lt;/em&gt; i Indstillinger gemmer de planter, stiklinger, billeder og noter du har slettet, i 30 dage. Tryk på &lt;em&gt;Sæt tilbage&lt;/em&gt; ved en af dem, så er den der igen med alt det den havde. Et billede eller en note hvis plante er slettet, sætter også planten tilbage. Når du er logget ind, kan noget kun sættes tilbage på den enhed hvor du slettede det, for serveren gemmer kun at det er slettet. Efter 30 dage vises det ikke længere, men en gendannelse af en backup fra før kan stadig få det tilbage.</value>
   </data>
 </root>

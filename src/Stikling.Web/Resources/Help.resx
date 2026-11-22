@@ -505,7 +505,7 @@
     <comment>Question in the "Plants" part of the Help page.</comment>
   </data>
   <data name="DeletePlantByMistakeA1" xml:space="preserve">
-    <value>Open the plant and go to the bottom of its details, under Family, and tap &lt;em&gt;Delete plant&lt;/em&gt;. It asks once more before anything is deleted. The link is kept down there so it isn't tapped by accident. Deleting removes the plant along with its photos, notes and history, so it is for a plant added twice or by mistake. For one that died or was given away, use the three dots instead, as above. A propagation has the same link at the bottom of its page. If you delete the wrong one, restoring a backup from before brings it back.</value>
+    <value>Open the plant and go to the bottom of its details, under Family, and tap &lt;em&gt;Delete plant&lt;/em&gt;. It asks once more before anything is deleted. The link is kept down there so it isn't tapped by accident. Deleting removes the plant along with its photos, notes and history, so it is for a plant added twice or by mistake. For one that died or was given away, use the three dots instead, as above. A propagation has the same link at the bottom of its page. If you delete the wrong one, put it back from &lt;em&gt;Recently removed&lt;/em&gt; under Tidy up within 30 days, or restore a backup from before.</value>
     <comment>Answer to "How do I delete a plant I added by mistake?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="HaveTwoSamePlantTypeQ" xml:space="preserve">
@@ -2028,7 +2028,7 @@
     <comment>Question on the Help page.</comment>
   </data>
   <data name="TidyUpA1" xml:space="preserve">
-    <value>Yes. &lt;em&gt;Tidy up&lt;/em&gt; in Settings, under Your data, lists active plants with no genus, no photo or no room, cuttings whose parent plant is gone, plants that may be the same one entered twice (the same name in the same room, or the same genus, species and cultivar with no names), and tags, products and soil mixes nothing uses. Tap a plant to open it and fix it there. If two plants really are different, tap &lt;em&gt;Not the same&lt;/em&gt; and they stop showing. An unused tag, product or soil mix has a Remove button that asks first. It is always one at a time and nothing changes until you pick it. A part with nothing in it isn't shown, and when nothing is left the page says so.</value>
+    <value>Yes. &lt;em&gt;Tidy up&lt;/em&gt; in Settings, under Your data, lists active plants with no genus, no photo or no room, cuttings whose parent plant is gone, plants that may be the same one entered twice (the same name in the same room, or the same genus, species and cultivar with no names), and tags, products and soil mixes nothing uses. Tap a plant to open it and fix it there. If two plants really are different, tap &lt;em&gt;Not the same&lt;/em&gt; and they stop showing. An unused tag, product or soil mix has a Remove button that asks first. It is always one at a time and nothing changes until you pick it. A part with nothing in it isn't shown, and when nothing is left the page says so. &lt;em&gt;Recently removed&lt;/em&gt; at the top has what you deleted in the last 30 days.</value>
     <comment>Answer to "Can the app point out what needs tidying?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="NotSureWhichParentQ" xml:space="preserve">
@@ -2218,5 +2218,13 @@
   <data name="SoilBatchA1" xml:space="preserve">
     <value>Yes. On the Soil mixes page, tap Mix a batch on a mix and say how much you mixed. It becomes a dated batch, and Top up mixes more into the same one as it runs low. Mark a batch as Used up when it is gone. A plant or cutting can say which batch it was potted in, and its page shows the date. To take what went into a batch off the stock, tap Link to stock on the mix once and say which supply each ingredient comes out of. This doesn&apos;t change the recipe. After a batch or a top-up the app lists what comes off each supply, from the recipe and the amount. Change an amount or untick a line, then confirm. If a supply is counted in kilograms or pieces and the recipe is in parts of a volume, the line is left empty for you to fill in.</value>
     <comment>Answer to &quot;Can I keep track of the soil I mixed?&quot; on the Help page.</comment>
+  </data>
+  <data name="RemovedByMistakeQ" xml:space="preserve">
+    <value>I deleted something by mistake. Can I get it back?</value>
+    <comment>Question in the "Plants" part of the Help page.</comment>
+  </data>
+  <data name="RemovedByMistakeA1" xml:space="preserve">
+    <value>Yes. &lt;em&gt;Recently removed&lt;/em&gt; under &lt;em&gt;Tidy up&lt;/em&gt; in Settings keeps the plants, cuttings, photos and notes you deleted for 30 days. Tap &lt;em&gt;Put back&lt;/em&gt; on one and it is there again with everything it had. A photo or a note whose plant is deleted puts the plant back too. When you are signed in, something can only be put back on the device it was deleted on, since the server only keeps that it was deleted. After 30 days it is no longer listed, but restoring a backup from before can still bring it back.</value>
+    <comment>Answer to "I deleted something by mistake. Can I get it back?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
 </root>

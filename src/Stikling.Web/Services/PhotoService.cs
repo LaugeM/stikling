@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
 using Stikling.Core.Text;
+using Stikling.Core.Tidy;
 using Stikling.Core.Timeline;
 using Strings = Stikling.Web.Resources;
 
@@ -32,7 +33,7 @@ public sealed record PhotoSaveResult(IReadOnlyList<Photo> Saved, int Failed, int
 /// Saves and shows photos. Image data is handled by wwwroot/js/photos.js;
 /// the metadata goes through <see cref="IPhotoRepository"/>.
 /// </summary>
-public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimeProvider time) : JsModule(js, ModulePath)
+public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimeProvider time) : JsModule(js, ModulePath), IRemovedPhotoImages
 {
     internal const string ModulePath = "./js/photos.js";
 
@@ -169,12 +170,19 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
     public async Task<bool> FetchSharedAsync(Uri address, Guid storeAs) =>
         await (await Module).InvokeAsync<bool>("fetchShared", address.ToString(), storeAs);
 
-    /// <summary>Removes the photo: its metadata is soft-deleted and the image data is freed.</summary>
-    public async Task DeleteAsync(Guid id)
-    {
-        await photos.DeleteAsync(id);
-        await RemoveBytesAsync(id);
-    }
+    /// <summary>
+    /// Removes the photo: its metadata is soft-deleted. The images stay on the device for 30 days, so it can be put
+    /// back from Recently removed. <see cref="FreeOldDeletedAsync"/> frees them after that.
+    /// </summary>
+    public async Task DeleteAsync(Guid id) => await photos.DeleteAsync(id);
+
+    /// <summary>Puts a photo that was put back on the list of images to send to the server.</summary>
+    public async Task QueueUploadAsync(Guid id) =>
+        await (await Module).InvokeVoidAsync("queueUpload", id);
+
+    /// <summary>Frees the images of photos deleted more than 30 days ago. Run once when the app starts.</summary>
+    public async Task FreeOldDeletedAsync() =>
+        await (await Module).InvokeVoidAsync("freeOldDeleted", (time.GetUtcNow() - RemovedRules.Window).ToString("O"));
 
     /// <summary>Frees the image data only, for a photo whose metadata is already marked deleted.</summary>
     public async Task RemoveBytesAsync(Guid id) =>

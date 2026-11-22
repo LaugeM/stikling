@@ -3,7 +3,7 @@
 // and sending to and fetching from the sync API. Full-size camera photos (often 5-10 MB)
 // never cross into .NET.
 
-import { getBlob, hasBlob, putPhotoImages, putFetchedImage, removePhotoImages } from "./db.js";
+import { getBlob, hasBlob, putPhotoImages, putFetchedImage, removePhotoImages, queuePhotoUpload, freeDeletedPhotoImages } from "./db.js";
 
 const FULL_SIZE = 1600;   // longest side in pixels
 const THUMB_SIZE = 360;
@@ -184,6 +184,15 @@ export async function getUrl(id, thumb) {
 export async function remove(id) {
     forgetUrls(id);
     await removePhotoImages(id);
+}
+
+export async function queueUpload(id) {
+    await queuePhotoUpload(id);
+}
+
+// Frees the images of photos deleted before the cutoff. Their addresses on screen are old by then.
+export async function freeOldDeleted(cutoff) {
+    await freeDeletedPhotoImages(cutoff);
 }
 
 function forgetUrls(id) {

@@ -1,6 +1,7 @@
 @inherits LayoutComponentBase
 @implements IAsyncDisposable
 @inject IndexedDb Db
+@inject PhotoService Photos
 @inject ThemeService Theme
 @inject LanguageService Language
 @inject DisplayPreferences Display
@@ -145,6 +146,21 @@
         Navigation.LocationChanged += OnLocationChanged;
         await AdoptSellersAsync();
         await CheckPestsAsync();
+        await FreeOldPhotoImagesAsync();
+    }
+
+    // A deleted photo keeps its images for 30 days, so it can be put back. Once a start, the images of
+    // the ones deleted before that are freed. The photo records stay.
+    private async Task FreeOldPhotoImagesAsync()
+    {
+        try
+        {
+            await Photos.FreeOldDeletedAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogWarning(ex, "Freeing the images of old deleted photos failed");
+        }
     }
 
     [CascadingParameter]
