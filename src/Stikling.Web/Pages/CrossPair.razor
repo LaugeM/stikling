@@ -1,0 +1,95 @@
+@page "/crosses/{Id:guid}/pair"
+@inject CrossService Crosses
+
+<PageTitle>@Strings.Crosses.PairPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="crosses/@Id">@Strings.Crosses.PairBack</a>
+
+@if (view is null || pair is null)
+{
+    <p class="text-body-secondary">@(loaded ? Strings.Crosses.NotFound : Strings.Shared.Loading)</p>
+}
+else
+{
+    <div class="page-heading">
+        <h1>@Strings.Crosses.PairTitle</h1>
+    </div>
+    <p class="detail-sub">@view.Title</p>
+    <p class="pair-total">@TotalLine()</p>
+
+    <ul class="item-list list-grid">
+        @foreach (var row in pair.Rows)
+        {
+            var cross = row.View.Cross;
+            <li>
+                <a class="item-card" href="crosses/@cross.Id">
+                    <div class="item-text">
+                        <div class="item-name">@row.View.FullName</div>
+                        <div class="item-meta">
+                            <span>@Labels.Date(cross.PollinatedOn)</span>
+                            <span class="@(cross.Outcome == CrossOutcome.Took ? "cross-took" : null)">@CrossLabels.Outcome(cross.Outcome)</span>
+                            @if (cross.PodsSet is { } pods)
+                            {
+                                <span>@Plural.Of(pods, Strings.Crosses.PairPods_One, Strings.Crosses.PairPods_Other)</span>
+                            }
+                            @if (SeedAmounts.Describe(cross) is { } amount)
+                            {
+                                <span>@F(Strings.Crosses.PairSeed, amount)</span>
+                            }
+                            @if (row.Seedlings.Sown > 0)
+                            {
+                                <span>@F(Strings.Crosses.CountSown, row.Seedlings.Sown)</span>
+                            }
+                            @if (row.Seedlings.CameUp > 0)
+                            {
+                                <span>@F(Strings.Crosses.CountCameUp, row.Seedlings.CameUp)</span>
+                            }
+                            @if (row.Seedlings.Alive > 0)
+                            {
+                                <span>@F(Strings.Crosses.CountAlive, row.Seedlings.Alive)</span>
+                            }
+                        </div>
+                    </div>
+                </a>
+            </li>
+        }
+    </ul>
+}
+
+@code {
+    [Parameter]
+    public Guid Id { get; set; }
+
+    private CrossView? view;
+    private PairHistory? pair;
+    private bool loaded;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await LoadAsync();
+        loaded = true;
+    }
+
+    private async Task LoadAsync()
+    {
+        var book = await Crosses.GetBookAsync();
+        view = book.ViewOf(Id);
+        pair = view is null ? null : book.PairOf(view.Cross);
+    }
+
+    // "3 crosses · 2 took · 20 sown · 12 came up · 8 alive", leaving out what is not known
+    private string TotalLine()
+    {
+        var parts = new List<string> { Plural.Of(pair!.Count, Strings.Crosses.PairCrosses_One, Strings.Crosses.PairCrosses_Other) };
+        if (pair.Took > 0)
+            parts.Add(F(Strings.Crosses.PairTook, pair.Took));
+        if (pair.Sown > 0)
+            parts.Add(F(Strings.Crosses.CountSown, pair.Sown));
+        if (pair.CameUp > 0)
+            parts.Add(F(Strings.Crosses.CountCameUp, pair.CameUp));
+        if (pair.Alive > 0)
+            parts.Add(F(Strings.Crosses.CountAlive, pair.Alive));
+        return string.Join(" · ", parts);
+    }
+}

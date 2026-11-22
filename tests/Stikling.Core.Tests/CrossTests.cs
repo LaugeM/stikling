@@ -343,6 +343,112 @@ public class CrossTests
 
         Assert.Null(propagation.SeedLotId);
     }
+
+    private static Cross Typed(string pod, string pollen, DateOnly on) =>
+        new() { PodParentName = pod, PollenParentName = pollen, PollinatedOn = on };
+
+    [Fact]
+    public void A_pair_history_counts_both_directions_newest_first()
+    {
+        var a = Hoya("A");
+        var b = Hoya("B");
+        var c = Hoya("C");
+        var older = Pair(a, b);
+        older.PollinatedOn = new DateOnly(2026, 5, 1);
+        var newer = Pair(b, a);
+        newer.PollinatedOn = new DateOnly(2026, 7, 1);
+        var other = Pair(a, c);
+        var book = Book([older, newer, other], [], [], [a, b, c]);
+
+        var pair = book.PairOf(older);
+
+        Assert.Equal([newer.Id, older.Id], pair.Rows.Select(r => r.View.Cross.Id));
+        Assert.Equal(2, pair.Count);
+    }
+
+    [Fact]
+    public void A_pair_history_matches_names_ignoring_case_and_spaces()
+    {
+        var one = Typed("Dark Star", "Mum", new DateOnly(2026, 5, 1));
+        var two = Typed("  mum ", "DARK star", new DateOnly(2026, 6, 1));
+        var other = Typed("Dark Star", "Dad", new DateOnly(2026, 6, 1));
+        var book = Book([one, two, other], [], [], []);
+
+        Assert.Equal(2, book.PairOf(one).Count);
+    }
+
+    [Fact]
+    public void A_side_with_a_plant_never_matches_a_side_with_only_a_name()
+    {
+        var a = Hoya("A");
+        var withId = new Cross { PodParentPlantId = a.Id, PodParentName = "A", PollenParentName = "B", PollinatedOn = Today };
+        var nameOnly = Typed("A", "B", Today);
+        var book = Book([withId, nameOnly], [], [], [a]);
+
+        Assert.Equal(1, book.PairOf(withId).Count);
+        Assert.Equal(1, book.PairOf(nameOnly).Count);
+    }
+
+    [Fact]
+    public void A_cross_with_an_unknown_parent_has_a_history_of_itself()
+    {
+        var unknown = new Cross { PodParentName = "A", PollinatedOn = Today };
+        var another = new Cross { PodParentName = "A", PollinatedOn = Today };
+        var book = Book([unknown, another], [], [], []);
+
+        Assert.Equal([unknown.Id], book.PairOf(unknown).Rows.Select(r => r.View.Cross.Id));
+    }
+
+    [Fact]
+    public void A_pair_history_leaves_out_deleted_crosses()
+    {
+        var a = Hoya("A");
+        var b = Hoya("B");
+        var kept = Pair(a, b);
+        var gone = Pair(a, b);
+        gone.DeletedAt = DateTimeOffset.UtcNow;
+        var book = Book([kept, gone], [], [], [a, b]);
+
+        Assert.Equal(1, book.PairOf(kept).Count);
+    }
+
+    [Fact]
+    public void Selfings_pair_only_with_selfings_of_the_same_plant()
+    {
+        var a = Hoya("A");
+        var b = Hoya("B");
+        var self1 = Pair(a, a);
+        var self2 = Pair(a, a);
+        var selfB = Pair(b, b);
+        var cross = Pair(a, b);
+        var book = Book([self1, self2, selfB, cross], [], [], [a, b]);
+
+        Assert.Equal(2, book.PairOf(self1).Count);
+        Assert.Equal(1, book.PairOf(selfB).Count);
+        Assert.Equal(1, book.PairOf(cross).Count);
+    }
+
+    [Fact]
+    public void A_pair_history_adds_up_what_came_of_the_crosses()
+    {
+        var a = Hoya("A");
+        var b = Hoya("B");
+        var took = Pair(a, b);
+        took.Outcome = CrossOutcome.Took;
+        var failed = Pair(b, a);
+        failed.Outcome = CrossOutcome.DidNotTake;
+        var lot = new SeedLot { CrossId = took.Id };
+        var sowing = new Propagation { SeedLotId = lot.Id, InitialCount = 10, SeedsGerminated = 6, StartedOn = Today };
+        var book = Book([took, failed], [lot], [sowing], [a, b]);
+
+        var pair = book.PairOf(took);
+
+        Assert.Equal(2, pair.Count);
+        Assert.Equal(1, pair.Took);
+        Assert.Equal(10, pair.Sown);
+        Assert.Equal(6, pair.CameUp);
+        Assert.Equal(book.SeedlingsOf(took).Alive, pair.Alive);
+    }
 }
 
 public class SeedLotTests

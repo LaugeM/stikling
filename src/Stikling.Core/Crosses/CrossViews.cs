@@ -71,6 +71,13 @@ public sealed record CrossSeedlings(
 /// <summary>A cross in the log with what came of it.</summary>
 public sealed record CrossRow(CrossView View, CrossSeedlings Seedlings);
 
+/// <summary>Every cross of one pair of parents with the totals. "Kept" is seedlings alive until keep or pass exists.</summary>
+/// <param name="Rows">The crosses, newest pollination first.</param>
+public sealed record PairHistory(IReadOnlyList<CrossRow> Rows, int Took, int Sown, int CameUp, int Alive)
+{
+    public int Count => Rows.Count;
+}
+
 /// <summary>Which crosses the log shows.</summary>
 public enum CrossLogFilter
 {
