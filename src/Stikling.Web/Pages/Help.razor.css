@@ -126,6 +126,17 @@
     margin: 0 1rem 0.75rem;
 }
 
+.help-write-me {
+    margin-top: 1.5rem;
+    color: var(--pa-muted);
+}
+
+/* The link under each answer is added by help.js, so it doesn't carry this page's scope attribute */
+.help-item ::deep .help-write {
+    margin: 0 1rem 1rem;
+    font-size: 0.875rem;
+}
+
 .help-item p:last-child {
     margin-bottom: 1rem;
 }

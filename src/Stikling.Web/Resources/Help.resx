@@ -2239,4 +2239,24 @@
     <value>Yes. &lt;em&gt;Recently removed&lt;/em&gt; under &lt;em&gt;Tidy up&lt;/em&gt; in Settings keeps the plants, cuttings, photos and notes you deleted for 30 days. Tap &lt;em&gt;Put back&lt;/em&gt; on one and it is there again with everything it had. A photo or a note whose plant is deleted puts the plant back too. When you are signed in, something can only be put back on the device it was deleted on, since the server only keeps that it was deleted. After 30 days it is no longer listed, but restoring a backup from before can still bring it back.</value>
     <comment>Answer to "I deleted something by mistake. Can I get it back?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
+  <data name="ReportProblemQ" xml:space="preserve">
+    <value>How do I report a problem or suggest something?</value>
+    <comment>Question in the "Getting started" part of the Help page.</comment>
+  </data>
+  <data name="ReportProblemA1" xml:space="preserve">
+    <value>Open &lt;em&gt;Write to me&lt;/em&gt; in Settings, or use the link under any answer here, which fills in that question. Pick &lt;em&gt;Something is broken&lt;/em&gt; or &lt;em&gt;I have an idea&lt;/em&gt; to open a form on GitHub (it needs a GitHub account), or &lt;em&gt;Write to me&lt;/em&gt; to open an email. The app version, your browser and the language are filled in for you, and you see everything before you send it. The app sends nothing by itself, and no plants or notes go with it.</value>
+    <comment>Answer to "How do I report a problem or suggest something?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WriteToMeParagraph" xml:space="preserve">
+    <value>Can't find the answer?</value>
+    <comment>Line above a button on the Help page that opens the Write to me sheet.</comment>
+  </data>
+  <data name="WriteToMeButton" xml:space="preserve">
+    <value>Write to me</value>
+    <comment>Button on the Help page that opens the Write to me sheet.</comment>
+  </data>
+  <data name="WriteToMeLink" xml:space="preserve">
+    <value>Didn't answer it? Write to me</value>
+    <comment>Link added at the end of every answer on the Help page. It opens the Write to me sheet with that question filled in.</comment>
+  </data>
 </root>

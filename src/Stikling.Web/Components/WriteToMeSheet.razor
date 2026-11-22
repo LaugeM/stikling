@@ -1,0 +1,56 @@
+@* The sheet for saying what went wrong, an idea, or a question. The app sends nothing itself: each row is a plain
+   link to a prefilled GitHub form or an email draft, which the person reads before sending. The links are built in
+   Stikling.Core (FeedbackLinks). Nothing is stored and no tap is counted. *@
+@using System.Globalization
+@using Stikling.Core.Feedback
+@inject IJSRuntime JS
+
+<Sheet Title="@Strings.Feedback.Title" Open="Open" OpenChanged="OpenChanged">
+    <div class="settings-rows">
+        <SettingsRow Href="@links.Bug" Title="@Strings.Feedback.Broken" Detail="@Strings.Feedback.BrokenDetail" External="true" />
+        <SettingsRow Href="@links.Idea" Title="@Strings.Feedback.Idea" Detail="@Strings.Feedback.IdeaDetail" External="true" />
+        <SettingsRow Href="@links.Mail" Title="@Strings.Feedback.Write" Detail="@Strings.Feedback.WriteDetail" />
+    </div>
+    <p class="write-to-me-note">@Strings.Feedback.Note</p>
+</Sheet>
+
+@code {
+    /// <summary>The Help question the person came from, which goes into the title and the text.</summary>
+    [Parameter]
+    public string? Question { get; set; }
+
+    [Parameter]
+    public bool Open { get; set; }
+
+    [Parameter]
+    public EventCallback<bool> OpenChanged { get; set; }
+
+    private string browser = "";
+    private FeedbackLinks links = Build("", null);
+    private bool wasOpen;
+
+    private static FeedbackLinks Build(string browser, string? question) =>
+        FeedbackLinks.Create(
+            AppVersion.Date is { } date ? $"{date} ({AppVersion.ShortCommit})" : "development build",
+            browser,
+            CultureInfo.CurrentUICulture.TwoLetterISOLanguageName,
+            question);
+
+    protected override async Task OnParametersSetAsync()
+    {
+        if (Open && !wasOpen)
+        {
+            try
+            {
+                await using var module = await JS.InvokeAsync<IJSObjectReference>("import", "./js/feedback.js");
+                browser = await module.InvokeAsync<string>("browserText");
+            }
+            catch (Exception ex) when (ex is JSException or JSDisconnectedException)
+            {
+                browser = "unknown browser";
+            }
+        }
+        wasOpen = Open;
+        links = Build(browser, Question);
+    }
+}

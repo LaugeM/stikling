@@ -2,7 +2,9 @@
 // through Blazor, since the answers are markup in Help.razor and not data. Every word typed has to be in
 // the question or its answer. A topic with nothing left is hidden, and when only a few answers match
 // they open. Returns something to call dispose() on when the page goes away.
-export function attachSearch(input, noMatch) {
+// With dotNet and linkText, every answer also gets a link at its end that calls dotNet.WriteAbout with the
+// question, for the Write to me sheet. The link is added after the search text is taken, so it never matches.
+export function attachSearch(input, noMatch, dotNet, linkText) {
     // The page can be left before this runs, and the elements are gone by then
     if (!input || !noMatch)
         return { setValue: () => { }, clear: () => { }, dispose: () => { } };
@@ -14,6 +16,28 @@ export function attachSearch(input, noMatch) {
         section,
         items: [...section.querySelectorAll(".help-item")].map(item => ({ item, text: fold(item.textContent) }))
     }));
+    const writeLinks = [];
+    if (dotNet && linkText) {
+        for (const { items } of sections) {
+            for (const { item } of items) {
+                const summary = item.querySelector("summary");
+                if (!summary)
+                    continue;
+                const question = summary.textContent.trim();
+                const paragraph = document.createElement("p");
+                paragraph.className = "help-write";
+                const button = document.createElement("button");
+                button.type = "button";
+                button.className = "btn btn-link p-0 align-baseline";
+                button.textContent = linkText;
+                button.addEventListener("click", () => dotNet.invokeMethodAsync("WriteAbout", question));
+                paragraph.append(button);
+                item.append(paragraph);
+                writeLinks.push(paragraph);
+            }
+        }
+    }
+
     // The ones the search opened, so it closes them again without closing what someone opened by hand
     const opened = new Set();
 
@@ -106,6 +130,8 @@ export function attachSearch(input, noMatch) {
         },
         dispose: () => {
             observer?.disconnect();
+            for (const paragraph of writeLinks)
+                paragraph.remove();
             input.removeEventListener("input", filter);
             input.removeEventListener("keydown", onKey);
         }
