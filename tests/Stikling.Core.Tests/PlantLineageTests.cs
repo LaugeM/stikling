@@ -22,6 +22,48 @@ public class PlantLineageTests
         all = [mother, childA, childB, grandchild, stranger];
     }
 
+    private static readonly DateOnly Today = new(2026, 11, 22);
+
+    private Propagation Taken(DateOnly on, int count = 1, PropagationType type = PropagationType.Cutting) =>
+        new() { ParentPlantId = mother.Id, StartedOn = on, InitialCount = count, Type = type };
+
+    [Fact]
+    public void Last_taken_is_null_when_nothing_was_taken()
+    {
+        Assert.Null(PlantLineage.LastTaken(mother, [], Today));
+        Assert.Null(PlantLineage.LastTaken(mother, [new Propagation { ParentPlantId = stranger.Id, StartedOn = Today }], Today));
+    }
+
+    [Fact]
+    public void Last_taken_ignores_seed_sowings_and_deleted_propagations()
+    {
+        var deleted = Taken(Today);
+        deleted.DeletedAt = DateTimeOffset.UtcNow;
+        Assert.Null(PlantLineage.LastTaken(mother, [Taken(Today, 10, PropagationType.Seed), deleted], Today));
+    }
+
+    [Fact]
+    public void Last_taken_is_the_newest_start_day()
+    {
+        var last = PlantLineage.LastTaken(mother, [Taken(Today.AddDays(-20)), Taken(Today.AddDays(-3)), Taken(Today.AddDays(-9))], Today);
+        Assert.Equal(Today.AddDays(-3), last!.On);
+    }
+
+    [Fact]
+    public void Last_taken_sums_the_year_and_a_day_exactly_a_year_ago_is_outside()
+    {
+        var last = PlantLineage.LastTaken(mother,
+            [Taken(Today, 2), Taken(Today.AddDays(-364), 3, PropagationType.Division), Taken(Today.AddDays(-365), 7)], Today);
+        Assert.Equal(5, last!.InLastYear);
+    }
+
+    [Fact]
+    public void Last_taken_over_a_year_ago_has_none_in_the_last_year()
+    {
+        var last = PlantLineage.LastTaken(mother, [Taken(Today.AddDays(-400), 4)], Today);
+        Assert.Equal(new LastTaken(Today.AddDays(-400), 0), last);
+    }
+
     [Fact]
     public void Offspring_are_direct_children_only()
     {

@@ -354,6 +354,11 @@ else
                 <p class="profile-facts">@string.Join(" · ", GivenParts)</p>
             }
 
+            @if (PlantLineage.LastTaken(plant, propagations, Today) is { } lastTaken)
+            {
+                <p class="profile-facts">@PlantGivenText.LastTakenLine(lastTaken, Today)</p>
+            }
+
             @if (HasFamily)
             {
                 <p class="profile-facts">
