@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="Title" xml:space="preserve">
+    <value>Write to me</value>
+    <comment>Title of the sheet that opens from Settings and from Help.</comment>
+  </data>
+  <data name="Broken" xml:space="preserve">
+    <value>Something is broken</value>
+    <comment>Row on the Write to me sheet. Opens a form on GitHub.</comment>
+  </data>
+  <data name="BrokenDetail" xml:space="preserve">
+    <value>Opens a form on GitHub</value>
+    <comment>Line under "Something is broken".</comment>
+  </data>
+  <data name="Idea" xml:space="preserve">
+    <value>I have an idea</value>
+    <comment>Row on the Write to me sheet. Opens a form on GitHub.</comment>
+  </data>
+  <data name="IdeaDetail" xml:space="preserve">
+    <value>Opens a form on GitHub</value>
+    <comment>Line under "I have an idea".</comment>
+  </data>
+  <data name="Write" xml:space="preserve">
+    <value>Write to me</value>
+    <comment>Row on the Write to me sheet. Opens an email draft.</comment>
+  </data>
+  <data name="WriteDetail" xml:space="preserve">
+    <value>Opens an email in your email app</value>
+    <comment>Line under the "Write to me" row.</comment>
+  </data>
+  <data name="Note" xml:space="preserve">
+    <value>Stikling sends nothing by itself. Each choice opens GitHub or your email app with the app version, your browser and the language filled in, and you see everything before you send it. No plants or notes go with it. GitHub needs an account, and the email doesn't.</value>
+    <comment>Note under the rows of the Write to me sheet.</comment>
+  </data>
+</root>

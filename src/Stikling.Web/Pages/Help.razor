@@ -78,6 +78,11 @@
     </details>
 
     <details class="help-item">
+        <summary>@Strings.Help.ReportProblemQ</summary>
+        <p>@((MarkupString)Strings.Help.ReportProblemA1)</p>
+    </details>
+
+    <details class="help-item">
         <summary>@Strings.Help.SeeStiklingMadeQ</summary>
         <p>@((MarkupString)Strings.Help.SeeStiklingMadeA1)</p>
     </details>
@@ -1263,7 +1268,21 @@
     </details>
 </section>
 
+@* Only after the first render, like the search, since the sheet needs JavaScript and the plain HTML copy has none *@
+@if (searchReady)
+{
+    <p class="help-write-me">
+        @Strings.Help.WriteToMeParagraph
+        <button type="button" class="btn btn-link p-0 align-baseline" @onclick="() => OpenWriteToMe(null)">@Strings.Help.WriteToMeButton</button>
+    </p>
+}
+
 </div>
+
+@if (searchReady)
+{
+    <WriteToMeSheet Question="@writeQuestion" @bind-Open="writeOpen" />
+}
 
 @code {
     /// <summary>A search to start on, from the Search page.</summary>
@@ -1278,6 +1297,23 @@
     private IJSObjectReference? searchModule;
     private IJSObjectReference? search;
     private bool disposed;
+    private bool writeOpen;
+    private string? writeQuestion;
+    private DotNetObjectReference<Help>? self;
+
+    private void OpenWriteToMe(string? question)
+    {
+        writeQuestion = question;
+        writeOpen = true;
+    }
+
+    /// <summary>Called by help.js when the link under an answer is tapped, with the question the answer belongs to.</summary>
+    [JSInvokable]
+    public void WriteAbout(string question)
+    {
+        OpenWriteToMe(question);
+        StateHasChanged();
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -1302,7 +1338,8 @@
             }
             searchModule = importedModule;
 
-            var attached = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch);
+            var attached = await searchModule.InvokeAsync<IJSObjectReference>("attachSearch", searchInput, noMatch,
+                self ??= DotNetObjectReference.Create(this), Strings.Help.WriteToMeLink);
             if (disposed)
             {
                 await ReleaseAsync(attached, "dispose");
@@ -1350,6 +1387,7 @@
         catch (JSDisconnectedException)
         {
         }
+        self?.Dispose();
     }
 
     private static (string Id, string Title)[] topics =>

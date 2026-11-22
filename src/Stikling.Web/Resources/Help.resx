@@ -2219,4 +2219,24 @@
     <value>Yes. On the Soil mixes page, tap Mix a batch on a mix and say how much you mixed. It becomes a dated batch, and Top up mixes more into the same one as it runs low. Mark a batch as Used up when it is gone. A plant or cutting can say which batch it was potted in, and its page shows the date. To take what went into a batch off the stock, tap Link to stock on the mix once and say which supply each ingredient comes out of. This doesn&apos;t change the recipe. After a batch or a top-up the app lists what comes off each supply, from the recipe and the amount. Change an amount or untick a line, then confirm. If a supply is counted in kilograms or pieces and the recipe is in parts of a volume, the line is left empty for you to fill in.</value>
     <comment>Answer to &quot;Can I keep track of the soil I mixed?&quot; on the Help page.</comment>
   </data>
+  <data name="ReportProblemQ" xml:space="preserve">
+    <value>How do I report a problem or suggest something?</value>
+    <comment>Question in the "Getting started" part of the Help page.</comment>
+  </data>
+  <data name="ReportProblemA1" xml:space="preserve">
+    <value>Open &lt;em&gt;Write to me&lt;/em&gt; in Settings, or use the link under any answer here, which fills in that question. Pick &lt;em&gt;Something is broken&lt;/em&gt; or &lt;em&gt;I have an idea&lt;/em&gt; to open a form on GitHub (it needs a GitHub account), or &lt;em&gt;Write to me&lt;/em&gt; to open an email. The app version, your browser and the language are filled in for you, and you see everything before you send it. The app sends nothing by itself, and no plants or notes go with it.</value>
+    <comment>Answer to "How do I report a problem or suggest something?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="WriteToMeParagraph" xml:space="preserve">
+    <value>Can't find the answer?</value>
+    <comment>Line above a button on the Help page that opens the Write to me sheet.</comment>
+  </data>
+  <data name="WriteToMeButton" xml:space="preserve">
+    <value>Write to me</value>
+    <comment>Button on the Help page that opens the Write to me sheet.</comment>
+  </data>
+  <data name="WriteToMeLink" xml:space="preserve">
+    <value>Didn't answer it? Write to me</value>
+    <comment>Link added at the end of every answer on the Help page. It opens the Write to me sheet with that question filled in.</comment>
+  </data>
 </root>
