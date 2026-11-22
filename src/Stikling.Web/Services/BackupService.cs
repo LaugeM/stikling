@@ -85,7 +85,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
 
         var culture = CultureInfo.CurrentUICulture;
         var places = new Places(data.Places);
-        var plan = BackupParts.Plan(data, places, sizeOf: small ? _ => SmallPhotoBytes : null, culture: culture);
+        var plan = small
+            ? BackupParts.Plan(data, places, SmallPartBytes, _ => SmallPhotoBytes, culture)
+            : BackupParts.Plan(data, places, culture: culture);
         var covers = options.Readable ? await ThumbnailUrisAsync(ReadableIndex.CoverPhotoIds(data).Values) : new Dictionary<Guid, string>();
         var today = time.Today();
 
@@ -100,7 +102,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                 var partPhotoIds = new List<Guid>();
                 foreach (var photo in data.Photos.Where(p => !p.IsDeleted && part.PhotoIds.Contains(p.Id)))
                 {
-                    partPhotoIds.Add(photo.Id);
+                    // Only photos of plants and cuttings are shown in the readable file
+                    if (photo.SubjectType is SubjectType.Plant or SubjectType.Propagation)
+                        partPhotoIds.Add(photo.Id);
                     if (small)
                     {
                         await AddPhotoAsync(zip, photo.Id, thumbnail: true);
@@ -180,6 +184,11 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
 
     // What a thumbnail is counted as when working out the parts of a backup that only has those
     private const long SmallPhotoBytes = 40_000;
+
+    // The part limit for a backup with only thumbnails. Every thumbnail in a part is also inline in its readable
+    // file as base64 text, held several times over while the file is written (the strings, the page, its bytes),
+    // so a part of thumbnails costs many times its size in memory where full size photos don't.
+    private const long SmallPartBytes = 75_000_000;
 
     // Thumbnails as data addresses for the readable file. A photo without a thumbnail on this device is left out.
     private async Task<Dictionary<Guid, string>> ThumbnailUrisAsync(IEnumerable<Guid> photoIds)
