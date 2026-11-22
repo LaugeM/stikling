@@ -1886,4 +1886,24 @@
     <value>Couldn't log the water change: {0}</value>
     <comment>Error on Today. {0} is what went wrong.</comment>
   </data>
+  <data name="TodayEasyDay" xml:space="preserve">
+    <value>Easy day</value>
+    <comment>The button on Today for a day with little energy. Shows only what is worse for waiting.</comment>
+  </data>
+  <data name="TodayEasyRestCanWait" xml:space="preserve">
+    <value>The rest can wait until tomorrow.</value>
+    <comment>The line that ends Today on an easy day.</comment>
+  </data>
+  <data name="TodayEasyNothing" xml:space="preserve">
+    <value>Nothing today that can't wait.</value>
+    <comment>Shown on an easy day when no treatment, flagged plant or water change is due.</comment>
+  </data>
+  <data name="TodayShowEverything" xml:space="preserve">
+    <value>Show everything</value>
+    <comment>The button that ends an easy day.</comment>
+  </data>
+  <data name="TodayOnePlant" xml:space="preserve">
+    <value>Just one plant</value>
+    <comment>The button on Today and on Go round that opens one plant to look at.</comment>
+  </data>
 </root>

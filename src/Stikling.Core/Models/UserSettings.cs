@@ -22,6 +22,12 @@ public sealed class UserSettings : Entity
     /// </summary>
     public string? Language { get; set; }
 
+    /// <summary>
+    /// The day Easy day was turned on from Today. It only counts on that day, so it ends by itself at
+    /// midnight and nothing needs clearing. Null reads as off. Older settings without it read as null.
+    /// </summary>
+    public DateOnly? EasyDay { get; set; }
+
     /// <summary>The monthly photo reminder on Today. Off until turned on in Settings.</summary>
     public bool PhotoReminder { get; set; }
 

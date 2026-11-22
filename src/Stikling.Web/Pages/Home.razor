@@ -100,7 +100,19 @@ else
         @Labels.Plants(plants.Count(p => p.InCollection)) · @Plural.Of(active.Count, Strings.Care.TodayPropagationsGoing_One, Strings.Care.TodayPropagationsGoing_Other)@(monthResult is null ? "" : " · " + F(Strings.Care.TodayPottedUp, monthResult.PottedUp, monthResult.Total))
     </p>
 
-    @if (exampleLoaded && Access.CanEdit)
+    @if (!sections.Away)
+    {
+        @* Two quiet buttons for a day with little energy *@
+        <div class="today-hard">
+            @if (!Easy)
+            {
+                <button type="button" class="btn btn-outline-primary btn-sm" disabled="@easyBusy" @onclick="StartEasyDayAsync">@Strings.Care.TodayEasyDay</button>
+            }
+            <IfCan Log><a class="btn btn-outline-primary btn-sm" href="today/one-plant">@Strings.Care.TodayOnePlant</a></IfCan>
+        </div>
+    }
+
+    @if (exampleLoaded && Access.CanEdit && !Easy)
     {
         <div class="reminder">
             @if (confirmingRemoval)
@@ -121,7 +133,7 @@ else
         }
     }
 
-    @if (upcoming is not null)
+    @if (upcoming is not null && !Easy)
     {
         <div class="reminder">
             <span><b>@(F(Strings.Care.TodayAwayFrom, TextCulture.Date(upcoming.From, Strings.Care.TodayLongDayFormat)))</b> @Strings.Care.TodayAwayLeaveSheet</span>
@@ -208,7 +220,7 @@ else
         </section>
     }
 
-    @if (!sections.Away && backupReminder is { } reminder)
+    @if (!sections.Away && !Easy && backupReminder is { } reminder)
     {
         <div class="reminder">
             <span>@reminder</span>
@@ -216,7 +228,7 @@ else
         </div>
     }
 
-    @if (!sections.Away && waitingPhotos > 0 && Access.CanLog)
+    @if (!sections.Away && !Easy && waitingPhotos > 0 && Access.CanLog)
     {
         <div class="reminder">
             <span>@Plural.Of(waitingPhotos, Strings.AddPhotos.TodayWaiting_One, Strings.AddPhotos.TodayWaiting_Other)</span>
@@ -225,7 +237,7 @@ else
     }
 
     @* From 64rem the sections that ask for something sit in a wide column with the rest beside it. The markup keeps the phone order. *@
-    <div class="today-columns" data-tour="today">
+    <div class="today-columns @(Easy ? "today-easy" : null)" data-tour="today">
     <div class="today-todo">
     @if (!sections.Away && sections.RoundSuggestion is { } suggested && Access.CanLog)
     {
@@ -469,7 +481,7 @@ else
         </section>
     }
 
-    @if (!sections.Away && !sections.Holding && flowerMatches.Count > 0)
+    @if (!sections.Away && !Easy && !sections.Holding && flowerMatches.Count > 0)
     {
         <section class="today-section">
             <h2>@Strings.Crosses.TodayHeading</h2>
@@ -687,7 +699,7 @@ else
         </section>
     }
 
-    @if (!sections.Away && (sections.WateringOn || data.CareIntervals.Count > 0))
+    @if (!sections.Away && !Easy && (sections.WateringOn || data.CareIntervals.Count > 0))
     {
         <p class="today-week">
             <a class="today-go-round" href="week">
@@ -732,7 +744,7 @@ else
         </section>
     }
 
-    @if (!sections.Away && !sections.Holding)
+    @if (!sections.Away && !Easy && !sections.Holding)
     {
     <section class="today-section worth-a-look">
         <h2>@Strings.Care.TodayWorthALook</h2>
@@ -783,7 +795,17 @@ else
     </section>
     }
 
+    @if (Easy && !sections.Away)
+    {
+        <div class="easy-end">
+            <p>@(EasyShowsSomething ? Strings.Care.TodayEasyRestCanWait : Strings.Care.TodayEasyNothing)</p>
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@easyBusy" @onclick="EndEasyDayAsync">@Strings.Care.TodayShowEverything</button>
+        </div>
+    }
+
     </div>
+    @if (!Easy)
+    {
     <div class="today-rest">
     @if (memory is not null)
     {
@@ -942,6 +964,7 @@ else
         <p class="year-link"><a href="year">@Strings.Care.TodayYearSoFar</a></p>
     }
     </div>
+    }
     </div>
 
     <Sheet Title="@Strings.Care.TodayHowDoesItLookTitle" Open="looking is not null" OpenChanged="open => { if (!open) looking = null; }">
@@ -962,6 +985,32 @@ else
     private string EmptyText => Collections.Open?.OwnerName is { Length: > 0 } owner
         ? F(Strings.People.EmptyToday, owner)
         : Strings.People.EmptyTodayNoOwner;
+
+    // Easy day: Today shows only what is worse for waiting, for the day it was turned on
+    private bool Easy => sections.IsEasyDay;
+
+    private bool EasyShowsSomething =>
+        sections.DueTreatments.Count > 0 || sections.FlaggedNow.Count > 0 || (!sections.Holding && sections.WaterChanges.Count > 0);
+
+    private bool easyBusy;
+
+    private async Task StartEasyDayAsync() => await SetEasyDayAsync(Today);
+
+    private async Task EndEasyDayAsync() => await SetEasyDayAsync(null);
+
+    private async Task SetEasyDayAsync(DateOnly? day)
+    {
+        easyBusy = true;
+        try
+        {
+            await SettingsService.SetEasyDayAsync(day);
+            await LoadAsync();
+        }
+        finally
+        {
+            easyBusy = false;
+        }
+    }
 
     private bool FirstRun => loaded && plants.Count == 0 && propagations.Count == 0;
 
@@ -1209,7 +1258,7 @@ else
     // After something changed: the sections again from the records, keeping the care plan the page has ticked things off in
     private void Recompute()
     {
-        sections = TodaySections.For(data, Today, Time, sections.CareItems);
+        sections = TodaySections.For(data, Today, Time, sections.CareItems).Shown();
         WatchOuterPot();
     }
 
@@ -1255,7 +1304,7 @@ else
         propagations = data.Propagations;
         active = propagations.Where(p => p.IsActive).ToList();
         careDone.Clear();
-        sections = TodaySections.For(data, Today, Time);
+        sections = TodaySections.For(data, Today, Time).Shown();
         WatchOuterPot();
         // The pollen card needs the flowerings and crosses only when there is pollen to offer
         allPollen = await PollenBook.GetAllAsync();
