@@ -1,7 +1,10 @@
+using System.Globalization;
 using System.IO.Compression;
+using System.Text;
 using System.Text.Json;
 using Stikling.Core.Backup;
 using Stikling.Core.Models;
+using Stikling.Core.Rooms;
 using Stikling.Core.Sync;
 
 namespace Stikling.Web.Services;
@@ -15,6 +18,11 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
     public bool ChangedRecords => Added > 0 || Updated > 0 || BroughtBack > 0;
 }
 
+/// <summary>What a backup made: what it holds, how many ZIP files it was split into, and whether it was made without the full size photos.</summary>
+/// <param name="Folder">The name of the folder the backup was saved in, or null when it was downloaded.</param>
+/// <param name="FolderFailed">True when a folder is set but couldn't be written to, so the backup was downloaded instead.</param>
+public sealed record BackupExport(BackupCounts Counts, int Parts, bool Small, string? Folder = null, bool FolderFailed = false);
+
 /// <summary>How many photos went into the photo folders download, and how many couldn't be found on this device.</summary>
 public sealed record PhotoFolderSummary(int Added, int Skipped);
 
@@ -23,7 +31,7 @@ public sealed record PhotoFolderSummary(int Added, int Skipped);
 /// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own,
 /// and the attached files under files/ as the PDFs and images they are.
 /// </summary>
-public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentService attachments, SyncRunner sync, DeviceFiles files, TimeProvider time)
+public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentService attachments, SyncRunner sync, DeviceFiles files, BackupFolder folder, TimeProvider time)
 {
     internal const string DataFile = "data.json";
 
@@ -46,46 +54,138 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
         return false;
     }
 
-    /// <summary>Builds the backup and hands it to the browser as a download, named with the prefix and today's date.</summary>
-    public async Task<BackupCounts> ExportAsync(string filePrefix = "stikling-backup")
+    /// <summary>
+    /// Builds the backup and hands it to the browser as a download, named with the prefix and today's date. What goes in it
+    /// follows the choices on the backup page (<see cref="BackupOptions"/>), which are kept on the device. A collection with
+    /// more photos than <see cref="BackupParts.MaxPartBytes"/> is saved as several ZIP files, each a whole backup.
+    /// </summary>
+    /// <param name="allowSmall">False for a backup that is a safety net, like the one before a restore, which is always whole.</param>
+    public async Task<BackupExport> ExportAsync(string filePrefix = "stikling-backup", bool allowSmall = true)
     {
+        // Before anything slow: the browser only gives the permission to write to the folder back on a tap, and the
+        // tap stops counting after a few seconds, which building the ZIP takes longer than
+        var useFolder = false;
+        var folderFailed = false;
+        if (await folder.GetNameAsync() is not null)
+        {
+            useFolder = await folder.RequestPermissionAsync();
+            folderFailed = !useFolder;
+        }
+
+        var options = await files.GetBackupOptionsAsync();
+        var small = options.Small && allowSmall;
+        var savedInFolder = false;
+
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
         var data = new BackupData { ExportedAt = time.GetUtcNow() };
         foreach (var list in BackupData.Lists)
             await list.ExportAsync(data, db);
 
-        using var buffer = new MemoryStream();
-        using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
+        var culture = CultureInfo.CurrentUICulture;
+        var places = new Places(data.Places);
+        var plan = BackupParts.Plan(data, places, sizeOf: small ? _ => SmallPhotoBytes : null, culture: culture);
+        var thumbnails = options.Readable ? await IndexThumbnailsAsync(data) : new Dictionary<Guid, string>();
+        var today = time.Today();
+
+        foreach (var part in plan.Parts)
         {
-            await using (var entry = zip.CreateEntry(DataFile, CompressionLevel.SmallestSize).Open())
-                await JsonSerializer.SerializeAsync(entry, data, Json);
-
-            foreach (var photo in data.Photos.Where(p => !p.IsDeleted))
+            using var buffer = new MemoryStream();
+            using (var zip = new ZipArchive(buffer, ZipArchiveMode.Create, leaveOpen: true))
             {
-                // On a synced device, a photo from another device only has its full size here once opened
-                if (!await photos.HasBytesAsync(photo.Id))
-                    await sync.FetchPhotoAsync(photo.Id, PhotoSize.Full);
+                await using (var entry = zip.CreateEntry(DataFile, CompressionLevel.SmallestSize).Open())
+                    await JsonSerializer.SerializeAsync(entry, data, Json);
 
-                await AddPhotoAsync(zip, photo.Id, thumbnail: false);
-                await AddPhotoAsync(zip, photo.Id, thumbnail: true);
+                var photoPaths = new Dictionary<Guid, string>();
+                foreach (var photo in data.Photos.Where(p => !p.IsDeleted && part.PhotoIds.Contains(p.Id)))
+                {
+                    if (small)
+                    {
+                        if (await AddPhotoAsync(zip, photo.Id, thumbnail: true) is { } smallPath)
+                            photoPaths[photo.Id] = smallPath;
+                        continue;
+                    }
+
+                    // On a synced device, a photo from another device only has its full size here once opened
+                    if (!await photos.HasBytesAsync(photo.Id))
+                        await sync.FetchPhotoAsync(photo.Id, PhotoSize.Full);
+
+                    var full = await AddPhotoAsync(zip, photo.Id, thumbnail: false);
+                    await AddPhotoAsync(zip, photo.Id, thumbnail: true);
+                    if (full is not null)
+                        photoPaths[photo.Id] = full;
+                }
+
+                foreach (var file in data.Files.Where(f => !f.IsDeleted && part.FileIds.Contains(f.Id)))
+                {
+                    // A file added on another device only has its bytes here once it has been opened. One that
+                    // still can't be had is left out, and the record stays in data.json.
+                    if (!await attachments.HasBytesAsync(file.Id))
+                        await sync.FetchFileAsync(file.Id);
+
+                    await AddFileAsync(zip, file.Id);
+                }
+
+                if (options.Readable)
+                {
+                    var pageOptions = new ReadableOptions
+                    {
+                        Label = Labels.For,
+                        EnglishLabel = Labels.English,
+                        PropagationLabel = Labels.For,
+                        Date = Labels.Date,
+                        LooseDate = Labels.Date,
+                        Zone = time.LocalTimeZone,
+                        Culture = culture,
+                        Today = today,
+                        SmallPhotos = small
+                    };
+                    foreach (var page in ReadablePages.Build(data, places, pageOptions, plan, part.Number, photoPaths, thumbnails))
+                    {
+                        await using var entry = zip.CreateEntry(page.Path, CompressionLevel.Optimal).Open();
+                        await entry.WriteAsync(new UTF8Encoding(false).GetBytes(page.Content));
+                    }
+                }
             }
 
-            foreach (var file in data.Files.Where(f => !f.IsDeleted))
+            var fileName = BackupParts.FileName(filePrefix, today, part.Number, plan.Count, small);
+            var bytes = buffer.ToArray();
+            if (useFolder)
             {
-                // A file added on another device only has its bytes here once it has been opened. One that
-                // still can't be had is left out, and the record stays in data.json.
-                if (!await attachments.HasBytesAsync(file.Id))
-                    await sync.FetchFileAsync(file.Id);
+                if (await folder.WriteAsync(fileName, bytes) is not null)
+                {
+                    savedInFolder = true;
+                    continue;
+                }
 
-                await AddFileAsync(zip, file.Id);
+                // The folder was removed or the browser said no, so this part and the rest are downloaded
+                useFolder = false;
+                folderFailed = true;
             }
+            await files.DownloadAsync(fileName, bytes);
         }
 
-        var today = time.Today();
-        await files.DownloadAsync($"{filePrefix}-{today:yyyy-MM-dd}.zip", buffer.ToArray());
-        await files.SetLastBackupAsync(today);
+        // A backup without the full size photos can't bring them back, so it doesn't count as the last one
+        if (!small)
+            await files.SetLastBackupAsync(today);
 
-        return data.Counts;
+        return new BackupExport(data.Counts, plan.Count, small, savedInFolder ? await folder.GetNameAsync() : null, folderFailed);
+    }
+
+    // What a thumbnail is counted as when working out the parts of a backup that only has those
+    private const long SmallPhotoBytes = 40_000;
+
+    // The pictures in the index of the readable pages, as data addresses, for the photo each plant and cutting shows
+    private async Task<Dictionary<Guid, string>> IndexThumbnailsAsync(BackupData data)
+    {
+        var result = new Dictionary<Guid, string>();
+        foreach (var id in ReadableIndex.CoverPhotoIds(data).Values.Distinct())
+        {
+            if (await photos.GetBytesAsync(id, thumbnail: true) is not { } bytes)
+                continue;
+            var type = (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).ContentType;
+            result[id] = $"data:{type};base64,{Convert.ToBase64String(bytes)}";
+        }
+        return result;
     }
 
     /// <summary>
@@ -218,15 +318,18 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
         return new ImportSummary(counts.Added, counts.Updated, counts.BroughtBack, counts.Skipped, restoredPhotos);
     }
 
-    private async Task AddPhotoAsync(ZipArchive zip, Guid id, bool thumbnail)
+    /// <summary>Adds the image and returns its path in the ZIP, or null when it isn't on this device.</summary>
+    private async Task<string?> AddPhotoAsync(ZipArchive zip, Guid id, bool thumbnail)
     {
         if (await photos.GetBytesAsync(id, thumbnail) is not { } bytes)
-            return;
+            return null;
 
         // WebP and JPEG data is already compressed; packing it again only costs time
         var extension = (PhotoRules.FormatOf(bytes) ?? ImageFormat.Jpeg).Extension;
-        await using var entry = zip.CreateEntry(PhotoPath(id, thumbnail, extension), CompressionLevel.NoCompression).Open();
+        var path = PhotoPath(id, thumbnail, extension);
+        await using var entry = zip.CreateEntry(path, CompressionLevel.NoCompression).Open();
         await entry.WriteAsync(bytes);
+        return path;
     }
 
     private async Task AddFileAsync(ZipArchive zip, Guid id)

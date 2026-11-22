@@ -3,6 +3,11 @@ using Stikling.Core.People;
 
 namespace Stikling.Web.Services;
 
+/// <summary>What a backup made on this device contains, set on the backup page.</summary>
+/// <param name="Readable">Also write the collection as pages that open in any browser.</param>
+/// <param name="Small">Leave out the full size photos and keep the thumbnails. Such a backup can't bring the photos back at full size.</param>
+public sealed record BackupOptions(bool Readable = true, bool Small = false);
+
 /// <summary>
 /// Saving a file to the device, and the small values that belong to this device only: when the
 /// last backup was taken, and whether someone is signed in here (<see cref="AccountService"/>).
@@ -12,6 +17,8 @@ public sealed class DeviceFiles(IJSRuntime js) : JsModule(js, ModulePath)
 {
     internal const string ModulePath = "./js/files.js";
     internal const string LastBackupKey = "last-backup";
+    internal const string BackupReadableKey = "backup-readable";
+    internal const string BackupSmallKey = "backup-small";
 
     /// <summary>Offers the bytes to the browser as a download.</summary>
     public async Task DownloadAsync(string fileName, byte[] bytes) =>
@@ -47,4 +54,14 @@ public sealed class DeviceFiles(IJSRuntime js) : JsModule(js, ModulePath)
 
     public async Task SetLastBackupAsync(DateOnly date) =>
         await SetAsync(await KeyForOpenAsync(LastBackupKey), date.ToString("yyyy-MM-dd"));
+
+    /// <summary>The choices on the backup page. They belong to this device, like when it last took a backup.</summary>
+    public async Task<BackupOptions> GetBackupOptionsAsync() =>
+        new(await GetAsync(BackupReadableKey) != "0", await GetAsync(BackupSmallKey) == "1");
+
+    public async Task SetBackupOptionsAsync(BackupOptions options)
+    {
+        await SetAsync(BackupReadableKey, options.Readable ? "1" : "0");
+        await SetAsync(BackupSmallKey, options.Small ? "1" : "0");
+    }
 }
