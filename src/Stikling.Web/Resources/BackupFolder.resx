@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OptionReadable" xml:space="preserve">
+    <value>Readable pages</value>
+    <comment>Checkbox on the backup page.</comment>
+  </data>
+  <data name="OptionReadableHint" xml:space="preserve">
+    <value>Also opens as pages in any browser, without the app.</value>
+    <comment>Under the Readable pages checkbox.</comment>
+  </data>
+  <data name="OptionSmall" xml:space="preserve">
+    <value>Without full size photos</value>
+    <comment>Checkbox on the backup page. Leaves out the full size images and keeps the thumbnails.</comment>
+  </data>
+  <data name="OptionSmallWarning" xml:space="preserve">
+    <value>This backup can't bring back your photos at full size.</value>
+    <comment>Shown when Without full size photos is ticked.</comment>
+  </data>
+  <data name="OptionSmallNotLast" xml:space="preserve">
+    <value>It doesn't count as your last backup, so the reminder keeps counting from your last full one.</value>
+    <comment>Shown when Without full size photos is ticked, next to the warning.</comment>
+  </data>
+  <data name="SavedSmall" xml:space="preserve">
+    <value>It has the photos in a small size only, so it doesn't count as your last backup.</value>
+    <comment>Added to the line after a backup made without full size photos.</comment>
+  </data>
+  <data name="SavedParts" xml:space="preserve">
+    <value>It was split into {0} files, since it is large. Each one is a whole backup that restores what is in it.</value>
+    <comment>Added to the line after a large backup. {0} is how many files.</comment>
+  </data>
+  <data name="FolderHeading" xml:space="preserve">
+    <value>Save backups to a folder</value>
+    <comment>Only in browsers that can write to a folder on the device, like Chrome and Edge.</comment>
+  </data>
+  <data name="FolderIntro" xml:space="preserve">
+    <value>Backups go straight into a folder you choose, with nothing to find in your downloads. Old backups are never deleted or overwritten. The browser asks for permission again when you back up after closing Stikling.</value>
+  </data>
+  <data name="FolderChoose" xml:space="preserve">
+    <value>Choose folder</value>
+  </data>
+  <data name="FolderChange" xml:space="preserve">
+    <value>Change folder</value>
+  </data>
+  <data name="FolderStop" xml:space="preserve">
+    <value>Stop using a folder</value>
+    <comment>Forgets the folder, so backups are downloaded again.</comment>
+  </data>
+  <data name="FolderIn" xml:space="preserve">
+    <value>Backups go to the folder {0}.</value>
+    <comment>{0} is the name of the folder.</comment>
+  </data>
+  <data name="SavedInFolder" xml:space="preserve">
+    <value>Saved a backup with {0}, {1} and {2} in the folder {3}.</value>
+    <comment>{0} is a number of plants, {1} of propagations, {2} of photos and {3} the name of the folder.</comment>
+  </data>
+  <data name="FolderFailed" xml:space="preserve">
+    <value>Couldn't write to the folder, so the backup was downloaded instead.</value>
+    <comment>Shown when the browser refused permission or the folder is gone.</comment>
+  </data>
+</root>

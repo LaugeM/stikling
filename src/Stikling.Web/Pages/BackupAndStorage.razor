@@ -28,6 +28,19 @@
         @(signedIn ? Strings.Account.BackupIntroSignedIn : Strings.Account.BackupIntroLocal)
     </p>
 
+    <label class="form-check">
+        <input type="checkbox" class="form-check-input" checked="@backupOptions.Readable" disabled="@busy" @onchange="e => SetOptionsAsync(backupOptions with { Readable = (bool)e.Value! })" />
+        <span class="form-check-label">@Strings.BackupFolder.OptionReadable<br /><span class="settings-hint">@Strings.BackupFolder.OptionReadableHint</span></span>
+    </label>
+    <label class="form-check">
+        <input type="checkbox" class="form-check-input" checked="@backupOptions.Small" disabled="@busy" @onchange="e => SetOptionsAsync(backupOptions with { Small = (bool)e.Value! })" />
+        <span class="form-check-label">@Strings.BackupFolder.OptionSmall</span>
+    </label>
+    @if (backupOptions.Small)
+    {
+        <p class="settings-hint" role="status">@Strings.BackupFolder.OptionSmallWarning @Strings.BackupFolder.OptionSmallNotLast</p>
+    }
+
     <div class="settings-actions">
         <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">@Strings.Account.BackupSave</button>
         @* Restoring writes into the collection, which a helper or a viewer can't change *@
@@ -149,6 +162,7 @@
     /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
     private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
 
+    private BackupOptions backupOptions = new();
     private DateOnly? lastBackup;
     private StorageEstimate? storage;
     private PendingRestore? pending;
@@ -171,6 +185,7 @@
     protected override async Task OnInitializedAsync()
     {
         lastBackup = await Files.GetLastBackupAsync();
+        backupOptions = await Files.GetBackupOptionsAsync();
         storage = await Db.EstimateAsync();
         photoCount = (await Db.GetAllAsync(RecordKinds.Photos)).Count(p => !p.IsDeleted);
         // Only for the wording of the hint, and read without loading Clerk
@@ -185,6 +200,12 @@
             focusFallback = false;
             await fallbackButton.FocusAsync();
         }
+    }
+
+    private async Task SetOptionsAsync(BackupOptions chosen)
+    {
+        backupOptions = chosen;
+        await Files.SetBackupOptionsAsync(chosen);
     }
 
     private async Task ExportPlantsCsvAsync()
@@ -208,11 +229,17 @@
 
         try
         {
-            var counts = await Backup.ExportAsync();
-            lastBackup = TodayDate;
+            var made = await Backup.ExportAsync();
+            var counts = made.Counts;
+            // A backup without the full size photos doesn't count as the last one
+            lastBackup = await Files.GetLastBackupAsync();
             message = F(Strings.Account.BackupSaved, Labels.Plants(counts.Plants),
                 Plural.Of(counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
                 Plural.Of(counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other));
+            if (made.Small)
+                message += " " + Strings.BackupFolder.SavedSmall;
+            if (made.Parts > 1)
+                message += " " + F(Strings.BackupFolder.SavedParts, made.Parts);
         }
         catch (Exception ex)
         {
@@ -305,9 +332,10 @@
             {
                 if (await Backup.HasAnythingToSaveAsync())
                 {
-                    await Backup.ExportAsync("stikling-before-restore");
+                    // Always whole, since it is what undoes the restore
+                    var saved = await Backup.ExportAsync("stikling-before-restore", allowSmall: false);
                     lastBackup = TodayDate;
-                    savedAs = $"stikling-before-restore-{TodayDate:yyyy-MM-dd}.zip";
+                    savedAs = BackupParts.FileName("stikling-before-restore", TodayDate, 1, saved.Parts);
                 }
             }
             catch (Exception ex)
