@@ -1978,4 +1978,12 @@
     <value>There are no plants there to count from today.</value>
     <comment>Said when the choice on I lost track has no plants.</comment>
   </data>
+  <data name="RoundLeaveOutHand" xml:space="preserve">
+    <value>Leave out plants that need a hand</value>
+    <comment>Switch at the start of Go round. Off by default, and kept only for that day on the device.</comment>
+  </data>
+  <data name="RoundEveryoneNeedsHand" xml:space="preserve">
+    <value>Every plant here needs a hand, so none is left in the round.</value>
+    <comment>Shown at the end of Go round when the switch to leave out plants that need a hand leaves nothing.</comment>
+  </data>
 </root>

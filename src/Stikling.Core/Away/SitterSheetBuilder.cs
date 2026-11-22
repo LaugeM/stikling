@@ -208,7 +208,10 @@ public static class SitterSheetBuilder
                 _ => null
             },
             sheet.HideHowWatered || item.Entity is not Plant waterPlant ? null : PotWeight.SitterLine(waterPlant.WaterType),
-            item.Entity is Plant weighedPlant ? PotWeight.SitterWeight(weighedPlant) : null);
+            item.Entity is Plant weighedPlant ? PotWeight.SitterWeight(weighedPlant) : null,
+            item.Entity is Plant { NeedsAHand.Count: > 0 } handPlant && NeedsAHand.Line(handPlant) is { } hand
+                ? F(Strings.Care.SitterAskHelp, hand)
+                : null);
     }
 
     private static (int UsualDays, DateOnly CheckOn)? PaceOf(WateringGuess? guess) =>

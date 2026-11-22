@@ -33,6 +33,7 @@ public sealed record SitterBox(IReadOnlyList<string> Check, IReadOnlyList<Sitter
 /// <param name="Number">Its collection number, or null.</param>
 /// <param name="Water">"Use rain water" for a plant that gets demineralised or rain water, else null. Hidden with how it is watered.</param>
 /// <param name="Weight">"To check by lifting: about 840 g when dry, 1,320 g just watered.", or null when the pot isn't weighed.</param>
+/// <param name="Help">"Ask someone to help: high up" for a plant marked as needing a hand, else null. Shown whatever else is hidden.</param>
 /// <param name="CheckNote">"Check it each time you visit" without dates, "Should be fine until you're back" with none of the visits, otherwise null.</param>
 public sealed record SitterSubject(
     Guid Id,
@@ -52,7 +53,8 @@ public sealed record SitterSubject(
     string? CheckNote,
     string? Number = null,
     string? Water = null,
-    string? Weight = null)
+    string? Weight = null,
+    string? Help = null)
 {
     /// <summary>The name, with its collection number before it when it has one: "#117 Big Monstera".</summary>
     public string Label => Number is null ? Name : $"#{Number} {Name}";

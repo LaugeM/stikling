@@ -925,7 +925,7 @@
     <comment>Answer to "How do I make a sheet for a plant-sitter?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="MakeSheetForPlantSitterA4" xml:space="preserve">
-    <value>Each plant watered from the top can be set to &lt;em&gt;From the bottom&lt;/em&gt;, &lt;em&gt;From the top&lt;/em&gt; or &lt;em&gt;Soak&lt;/em&gt;, in its edit form or in the list at the bottom of the page, and the card only says so when it differs from your usual way. You can write the usual way in your own words instead. Plants in water or on a reservoir are only topped up. A plant's edit form also has a note for a plant-sitter. If a plant gets rain water or demineralised water, its card says so. If you have weighed its pot, the card gives the weights too, as another way to check by lifting it.</value>
+    <value>Each plant watered from the top can be set to &lt;em&gt;From the bottom&lt;/em&gt;, &lt;em&gt;From the top&lt;/em&gt; or &lt;em&gt;Soak&lt;/em&gt;, in its edit form or in the list at the bottom of the page, and the card only says so when it differs from your usual way. You can write the usual way in your own words instead. Plants in water or on a reservoir are only topped up. A plant's edit form also has a note for a plant-sitter, and plants marked as needing a hand say &lt;em&gt;Ask someone to help&lt;/em&gt; with what they need, like high up. If a plant gets rain water or demineralised water, its card says so. If you have weighed its pot, the card gives the weights too, as another way to check by lifting it.</value>
     <comment>Answer to "How do I make a sheet for a plant-sitter?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="MakeSheetForPlantSitterA5" xml:space="preserve">
@@ -993,11 +993,11 @@
     <comment>Question in the "Today" part of the Help page.</comment>
   </data>
   <data name="GoRoundRoomA1" xml:space="preserve">
-    <value>Open a room from Today's round, tap &lt;em&gt;Go round these&lt;/em&gt; under Water on Today, filter the Plants list to a room and tap &lt;em&gt;Go round&lt;/em&gt;, or tap &lt;em&gt;Go round&lt;/em&gt; on a room under Rooms and tags. Each plant gets a card with a meter reading, &lt;em&gt;Watered&lt;/em&gt;, &lt;em&gt;Looked over&lt;/em&gt;, a photo, or &lt;em&gt;Skip&lt;/em&gt;. The propagations come after the plants.</value>
+    <value>Open a room from Today's round, tap &lt;em&gt;Go round these&lt;/em&gt; under Water on Today, filter the Plants list to a room and tap &lt;em&gt;Go round&lt;/em&gt;, or tap &lt;em&gt;Go round&lt;/em&gt; on a room under Rooms and tags. Each plant gets a card with a meter reading, &lt;em&gt;Watered&lt;/em&gt;, &lt;em&gt;Looked over&lt;/em&gt;, a photo, or &lt;em&gt;Skip&lt;/em&gt;. The propagations come after the plants. A plant marked as needing a hand says so on its card.</value>
     <comment>Answer to "How do I go round a room?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="GoRoundRoomA2" xml:space="preserve">
-    <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, and tells the watering reminder that the plant isn't ready yet. You can leave halfway. Opening the round again the same day starts at the first one with nothing logged.</value>
+    <value>&lt;em&gt;Looked over&lt;/em&gt; goes on the plant's history, and tells the watering reminder that the plant isn't ready yet. You can leave halfway. Opening the round again the same day starts at the first one with nothing logged. At the start there is a link to &lt;em&gt;Just one plant&lt;/em&gt;, and a switch to leave out plants that need a hand.</value>
     <comment>Answer to "How do I go round a room?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
   <data name="WalkingOrderQ" xml:space="preserve">
@@ -2254,5 +2254,17 @@
   <data name="LostTrackWateringA2" xml:space="preserve">
     <value>The same action is on a room's page for every plant in the room, and it is the first choice on the welcome back list after time away, for all plants or one room.</value>
     <comment>Answer to "I haven't logged watering for ages. Will that confuse the reminders?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="NeedsAHandQ" xml:space="preserve">
+    <value>How do I mark a plant that's hard to reach?</value>
+    <comment>Question on the Help page.</comment>
+  </data>
+  <data name="NeedsAHandA1" xml:space="preserve">
+    <value>Open the plant's edit form and pick &lt;em&gt;Needs a hand&lt;/em&gt;. Tap &lt;em&gt;High up&lt;/em&gt;, &lt;em&gt;Hanging&lt;/em&gt; or &lt;em&gt;Heavy&lt;/em&gt;, or add a mark of your own like &lt;em&gt;Behind the sofa&lt;/em&gt;. The marks you have used before come up as choices next time.</value>
+    <comment>Answer to "How do I mark a plant that's hard to reach?" on the Help page. Keep the HTML tags where they are.</comment>
+  </data>
+  <data name="NeedsAHandA2" xml:space="preserve">
+    <value>The marks show on the plant's page, on its card in Go round, on the plant-sitter sheet as &lt;em&gt;Ask someone to help&lt;/em&gt;, and next to the plant on Today when it is flagged &lt;em&gt;Needs attention&lt;/em&gt;, so a helper knows before they go. Go round has a switch at its start to leave out the plants that need a hand, for that day on this device.</value>
+    <comment>Answer to "How do I mark a plant that's hard to reach?" on the Help page. Keep the HTML tags where they are.</comment>
   </data>
 </root>

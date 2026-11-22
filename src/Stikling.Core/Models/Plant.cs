@@ -280,6 +280,13 @@ public sealed class Plant : Entity
     /// <summary>Your own labels, e.g. "variegated", "rare" or "for swap". See <see cref="Plants.PlantTags"/>.</summary>
     public List<string> Tags { get; set; } = [];
 
+    /// <summary>
+    /// Short texts for what makes the plant hard for someone else to look after, like "High up", "Hanging" or
+    /// "Heavy". Shown to a helper and on the plant-sitter sheet. See <see cref="Plants.NeedsAHand"/>. Older plants
+    /// and older versions of the app read it as empty.
+    /// </summary>
+    public List<string> NeedsAHand { get; set; } = [];
+
     /// <summary>Short texts for what the plant shows, like "dark new leaves" or "silver splash", to see what a cross passes on. See <see cref="Plants.Traits"/>.</summary>
     public List<string> Traits { get; set; } = [];
 
@@ -499,6 +506,7 @@ public sealed class Plant : Entity
     {
         var copy = (Plant)MemberwiseClone();
         copy.Tags = [.. Tags];
+        copy.NeedsAHand = [.. NeedsAHand];
         copy.Traits = [.. Traits];
         copy.ArrivalProblems = [.. ArrivalProblems];
         copy.OwnFields = new(OwnFields);
@@ -537,6 +545,7 @@ public sealed class Plant : Entity
         WaterBy = WaterBy,
         WaterType = WaterType,
         Tags = [.. Tags],
+        NeedsAHand = [.. NeedsAHand],
         Traits = [.. Traits],
         OwnFields = new(OwnFields),
         ParentPlantId = ParentPlantId,

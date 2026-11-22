@@ -25,6 +25,7 @@
 @inject SubjectPhotos SubjectPhotos
 @inject CameraService Camera
 @inject IPhotoRepository PhotoRepository
+@inject DeviceFiles Files
 @inject TimeProvider Time
 
 <PageTitle>@(F(Strings.Care.RoundPageTitle, Title))</PageTitle>
@@ -91,6 +92,11 @@ else if (pos >= queue.Count)
         {
             <p class="round-meta">@EndMeta(summary)</p>
         }
+        @if (queue.Count == 0)
+        {
+            <p class="round-meta">@Strings.Care.RoundEveryoneNeedsHand</p>
+            @RoundStart
+        }
         <div class="round-end-actions">
             <a class="btn btn-primary" href="">@Strings.Care.RoundBackToTodayButton</a>
             @if (summary.Skipped > 0)
@@ -122,12 +128,9 @@ else
             <progress class="round-progress" max="@queue.Count" value="@pos" aria-label="@Strings.Care.RoundProgress"></progress>
         </div>
 
-        @* Where a round begins: a way out for a day with little energy *@
         @if (pos == 0)
         {
-            <div class="round-start">
-                <a class="round-text-btn" href="today/one-plant">@Strings.Care.TodayOnePlant</a>
-            </div>
+            @RoundStart
         }
 
         @if (card.Heading is { } heading && (pos == 0 || index == 0 || cards[index - 1].Heading != heading))
@@ -162,6 +165,10 @@ else
                     @if (SpeciesOf(card.Subject) is { } species)
                     {
                         <div class="round-species"><BotanicalName Genus="@species.Genus" Species="@species.Species" Cultivar="@species.Cultivar" /></div>
+                    }
+                    @if (plant is not null && NeedsAHand.Line(plant) is { } handLine)
+                    {
+                        <p class="round-meta">@F(Strings.Plants.NeedsAHandLine, handLine)</p>
                     }
                     @if (MetaOf(card, day) is { Length: > 0 } meta)
                     {
@@ -318,6 +325,46 @@ else
     // The plants and cuttings that have a photo of their own to line up with
     private HashSet<Guid> hasPhoto = [];
 
+    // Where a round begins: a way out for a day with little energy, and a switch for plants that need a hand
+    private RenderFragment RoundStart => __builder =>
+    {
+        <div class="round-start">
+            <a class="round-text-btn" href="today/one-plant">@Strings.Care.TodayOnePlant</a>
+            @if (anyNeedsHand)
+            {
+                <div class="form-check form-switch round-hand-switch">
+                    <input class="form-check-input" type="checkbox" role="switch" id="round-leave-out-hand" checked="@leaveOutHand"
+                           disabled="@busy" @onchange="e => LeaveOutHandAsync(e.Value is true)" />
+                    <label class="form-check-label" for="round-leave-out-hand">@Strings.Care.RoundLeaveOutHand</label>
+                </div>
+            }
+        </div>
+    };
+
+    // Kept on the device for the day it was turned on, so it ends by itself. It is not a setting.
+    private const string LeaveOutHandKey = "round-leave-out-hand";
+    private bool leaveOutHand;
+    private bool anyNeedsHand;
+
+    private bool Hidden(int index) => leaveOutHand && cards[index].Subject is Plant { NeedsAHand.Count: > 0 };
+
+    // The round's order, without what is left out. It starts at the first card of the order with nothing logged.
+    private void BuildQueue(int startAt)
+    {
+        queue = [.. Enumerable.Range(0, cards.Count).Where(i => !Hidden(i))];
+        var start = queue.FindIndex(i => i >= startAt);
+        pos = start < 0 ? queue.Count : start;
+    }
+
+    private async Task LeaveOutHandAsync(bool on)
+    {
+        leaveOutHand = on;
+        await Files.SetAsync(LeaveOutHandKey, on ? Today.ToString("yyyy-MM-dd") : null);
+        BuildQueue(GoingRoundLogic.StartAt(cards, days));
+        moveForward = true;
+        focusNext = true;
+    }
+
     private string MoveClass => moveForward ? "from-right" : "from-left";
 
     protected override async Task OnInitializedAsync()
@@ -379,8 +426,9 @@ else
         }
 
         days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);
-        queue = [.. Enumerable.Range(0, cards.Count)];
-        pos = GoingRoundLogic.StartAt(cards, days);
+        anyNeedsHand = cards.Any(c => c.Subject is Plant { NeedsAHand.Count: > 0 });
+        leaveOutHand = anyNeedsHand && await Files.GetAsync(LeaveOutHandKey) == Today.ToString("yyyy-MM-dd");
+        BuildQueue(GoingRoundLogic.StartAt(cards, days));
         loaded = true;
         focusNext = true;
         await CheckEndAsync();
@@ -613,7 +661,7 @@ else
 
     private void GoThroughSkipped()
     {
-        queue = [.. Enumerable.Range(0, cards.Count).Where(i => !days[i].Any)];
+        queue = [.. Enumerable.Range(0, cards.Count).Where(i => !days[i].Any && !Hidden(i))];
         pos = 0;
         moveForward = true;
         focusNext = true;

@@ -398,7 +398,7 @@ else
                             <div class="item-text">
                                 <div class="item-name">@item.Name</div>
                                 <div class="item-meta">
-                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @(item.From is { } from ? Labels.FlagFrom(from) : Labels.DaysAgo(item.Attention.DaysSince(Today)))</span>
+                                    <span class="flag-line"><b>@item.Attention.Reason</b> · @(item.From is { } from ? Labels.FlagFrom(from) : Labels.DaysAgo(item.Attention.DaysSince(Today)))@if (item.Subject is Plant handPlant && NeedsAHand.Line(handPlant) is { } hand){<text> · @F(Strings.Plants.NeedsAHandToday, hand)</text>}</span>
                                 </div>
                             </div>
                         </a>

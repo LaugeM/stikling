@@ -697,7 +697,7 @@
     <value>Arket siger hvornår en plante skal tjekkes, aldrig hvornår den skal vandes. En boks betyder at planten skal ses til den dag. Planter du har vandet nogle gange, bliver tjekket omkring det tidspunkt hvor de plejer at skulle have vand, og resten ved hvert besøg. Siden viser også planter der trænger til et kig før du rejser, og de kommer ikke med på det udskrevne ark. Boksen øverst fortæller hvad man skal gøre først: aflæse fugtmåleren hvis der er en, ellers stikke en finger i jorden, og lade planten være medmindre den er tør hele vejen ned. Først derefter står der hvordan man vander, og de trin kan du lade være ude.</value>
   </data>
   <data name="MakeSheetForPlantSitterA4" xml:space="preserve">
-    <value>Hver plante der vandes fra oven, kan sættes til &lt;em&gt;Fra bunden&lt;/em&gt;, &lt;em&gt;Fra toppen&lt;/em&gt; eller &lt;em&gt;I blød&lt;/em&gt; i dens redigeringsformular eller i listen nederst på siden, og kortet nævner det kun når det er anderledes end din sædvanlige måde. Du kan også beskrive din sædvanlige måde med dine egne ord. Planter i vand eller på et reservoir skal kun fyldes op. En plantes redigeringsformular har også en note til plantesitteren. Hvis en plante får regnvand eller demineraliseret vand, står det på dens kort. Har du vejet potten, står vægten der også, så plantesitteren kan løfte den og mærke efter.</value>
+    <value>Hver plante der vandes fra oven, kan sættes til &lt;em&gt;Fra bunden&lt;/em&gt;, &lt;em&gt;Fra toppen&lt;/em&gt; eller &lt;em&gt;I blød&lt;/em&gt; i dens redigeringsformular eller i listen nederst på siden, og kortet nævner det kun når det er anderledes end din sædvanlige måde. Du kan også beskrive din sædvanlige måde med dine egne ord. Planter i vand eller på et reservoir skal kun fyldes op. En plantes redigeringsformular har også en note til plantesitteren, og planter der skal have hjælp, siger &lt;em&gt;Bed om hjælp&lt;/em&gt; med det de skal have hjælp til, som højt oppe. Hvis en plante får regnvand eller demineraliseret vand, står det på dens kort. Har du vejet potten, står vægten der også, så plantesitteren kan løfte den og mærke efter.</value>
   </data>
   <data name="MakeSheetForPlantSitterA5" xml:space="preserve">
     <value>Tryk på &lt;em&gt;Print eller gem som PDF&lt;/em&gt; for at printe arket eller gemme det som PDF, eller på &lt;em&gt;Del som tekst&lt;/em&gt; for at sende det i en besked. Intet bliver lagt på nettet.</value>
@@ -748,10 +748,10 @@
     <value>Hvordan går jeg runde i et rum?</value>
   </data>
   <data name="GoRoundRoomA1" xml:space="preserve">
-    <value>Åbn et rum fra dagens runde i I dag, tryk på &lt;em&gt;Gå en runde med dem&lt;/em&gt; under Vand i I dag, filtrér plantelisten til et rum og tryk på &lt;em&gt;Gå runden&lt;/em&gt;, eller tryk på &lt;em&gt;Gå runden&lt;/em&gt; ved et rum under Rum og tags. Hver plante får et kort med en fugtmåling, &lt;em&gt;Vandet&lt;/em&gt;, &lt;em&gt;Tjekket&lt;/em&gt;, et billede eller &lt;em&gt;Spring over&lt;/em&gt;. Stiklingerne kommer efter planterne.</value>
+    <value>Åbn et rum fra dagens runde i I dag, tryk på &lt;em&gt;Gå en runde med dem&lt;/em&gt; under Vand i I dag, filtrér plantelisten til et rum og tryk på &lt;em&gt;Gå runden&lt;/em&gt;, eller tryk på &lt;em&gt;Gå runden&lt;/em&gt; ved et rum under Rum og tags. Hver plante får et kort med en fugtmåling, &lt;em&gt;Vandet&lt;/em&gt;, &lt;em&gt;Tjekket&lt;/em&gt;, et billede eller &lt;em&gt;Spring over&lt;/em&gt;. Stiklingerne kommer efter planterne. En plante, der skal have hjælp, siger det på sit kort.</value>
   </data>
   <data name="GoRoundRoomA2" xml:space="preserve">
-    <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer i plantens historik og fortæller vandingspåmindelsen at planten ikke er klar endnu. Du kan sagtens stoppe halvvejs. Åbner du runden igen samme dag, starter den ved den første uden noget logget.</value>
+    <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer i plantens historik og fortæller vandingspåmindelsen at planten ikke er klar endnu. Du kan sagtens stoppe halvvejs. Åbner du runden igen samme dag, starter den ved den første uden noget logget. I starten er der et link til &lt;em&gt;Bare én plante&lt;/em&gt; og en kontakt, der springer planter over, som skal have hjælp.</value>
   </data>
   <data name="WalkingOrderQ" xml:space="preserve">
     <value>Kan jeg selv vælge rækkefølgen når jeg går runden i et rum?</value>
@@ -1687,7 +1687,7 @@
     <value>Hvad er Let dag?</value>
   </data>
   <data name="WhatIsEasyDayA1" xml:space="preserve">
-    <value>Har du en dårlig morgen, så tryk på &lt;em&gt;Let dag&lt;/em&gt; under tallene på Today. Så viser Today kun det, der er værst at vente med: en skadedyrsbehandling, der skal gives, en plante du har markeret som &lt;em&gt;Kræver opmærksomhed&lt;/em&gt;, og vand der skal skiftes på en stikling. Vanding, pleje, tjek og resten er skjult, og siden slutter med en linje om, at resten kan vente til i morgen.</value>
+    <value>Har du en dårlig morgen, så tryk på &lt;em&gt;Let dag&lt;/em&gt; under tallene i I dag. Så viser I dag kun det, der er værst at vente med: en skadedyrsbehandling, der skal gives, en plante du har markeret som &lt;em&gt;Kræver opmærksomhed&lt;/em&gt;, og vand der skal skiftes på en stikling. Vanding, pleje, tjek og resten er skjult, og siden slutter med en linje om, at resten kan vente til i morgen.</value>
   </data>
   <data name="WhatIsEasyDayA2" xml:space="preserve">
     <value>Den spørger ikke om en grund og tæller ikke noget. Den slutter af sig selv ved midnat, og &lt;em&gt;Vis det hele&lt;/em&gt; slutter den før. Tid væk og velkommen-tilbage-listen vises som sædvanligt.</value>
@@ -1696,10 +1696,10 @@
     <value>Kan jeg nøjes med at se til én plante?</value>
   </data>
   <data name="CanLookAtJustOnePlantA1" xml:space="preserve">
-    <value>Ja. Tryk på &lt;em&gt;Bare én plante&lt;/em&gt; på Today eller i starten af en runde. Den åbner én plante: først en plante markeret med &lt;em&gt;Kræver opmærksomhed&lt;/em&gt;, den der blev markeret for længst tid siden før de andre, og ellers den plante, du har set til for længst tid siden. Planter der hviler eller er rejst væk, og alt mens du er væk, er sprunget over.</value>
+    <value>Ja. Tryk på &lt;em&gt;Bare én plante&lt;/em&gt; i I dag eller i starten af en runde. Den åbner én plante: først en plante markeret med &lt;em&gt;Kræver opmærksomhed&lt;/em&gt;, den der blev markeret for længst tid siden før de andre, og ellers den plante, du har set til for længst tid siden. Planter der hviler eller er rejst væk, og alt mens du er væk, er sprunget over.</value>
   </data>
   <data name="CanLookAtJustOnePlantA2" xml:space="preserve">
-    <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer på plantens historik, som i en runde. Vælg derefter &lt;em&gt;Det er nok&lt;/em&gt; for at gå tilbage til Today, eller &lt;em&gt;Én til&lt;/em&gt; for den næste. Der bliver ikke gemt andet.</value>
+    <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer på plantens historik, som i en runde. Vælg derefter &lt;em&gt;Det er nok&lt;/em&gt; for at gå tilbage til I dag, eller &lt;em&gt;Én til&lt;/em&gt; for den næste. Der bliver ikke gemt andet.</value>
   </data>
   <data name="LostTrackWateringQ" xml:space="preserve">
     <value>Jeg har ikke logget vanding i lang tid. Forvirrer det påmindelserne?</value>
@@ -1709,5 +1709,14 @@
   </data>
   <data name="LostTrackWateringA2" xml:space="preserve">
     <value>Den samme handling findes på et rums side for alle planterne i rummet, og den er det første valg på velkommen-tilbage-listen efter tid væk, for alle planter eller ét rum.</value>
+  </data>
+  <data name="NeedsAHandQ" xml:space="preserve">
+    <value>Hvordan markerer jeg en plante, der er svær at nå?</value>
+  </data>
+  <data name="NeedsAHandA1" xml:space="preserve">
+    <value>Åbn plantens redigeringsformular og vælg &lt;em&gt;Skal have hjælp&lt;/em&gt;. Tryk på &lt;em&gt;Højt oppe&lt;/em&gt;, &lt;em&gt;Hængende&lt;/em&gt; eller &lt;em&gt;Tung&lt;/em&gt;, eller tilføj et mærke af dit eget som &lt;em&gt;Bag sofaen&lt;/em&gt;. De mærker du har brugt før, kommer med som valg næste gang.</value>
+  </data>
+  <data name="NeedsAHandA2" xml:space="preserve">
+    <value>Mærkerne vises på plantens side, på dens kort i Gå runden, på plantepasserarket som &lt;em&gt;Bed om hjælp&lt;/em&gt;, og ved planten i I dag, når den er markeret med &lt;em&gt;Kræver opmærksomhed&lt;/em&gt;, så en hjælper ved det, før vedkommende går. Gå runden har en kontakt i starten, der springer de planter over, der skal have hjælp, for den dag på denne enhed.</value>
   </data>
 </root>

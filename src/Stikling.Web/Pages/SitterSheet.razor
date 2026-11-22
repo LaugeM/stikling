@@ -440,6 +440,10 @@
             {
                 <p class="sheet-pace">@pace</p>
             }
+            @if (subject.Help is { } help)
+            {
+                <p>@help</p>
+            }
             @if (subject.Note is { } note)
             {
                 <p>@note</p>

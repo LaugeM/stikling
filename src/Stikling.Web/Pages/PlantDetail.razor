@@ -318,6 +318,10 @@ else
                             Suggestions="AttentionPanel.PlantReasons" OnSave="SetAttentionAsync" />
 
             <p class="profile-facts">@string.Join(" · ", Facts)</p>
+            @if (NeedsAHand.Line(plant) is { } handLine)
+            {
+                <p class="profile-facts">@F(Strings.Plants.NeedsAHandLine, handLine)</p>
+            }
             @if (wateringLine is not null)
             {
                 <p class="profile-facts">@wateringLine</p>

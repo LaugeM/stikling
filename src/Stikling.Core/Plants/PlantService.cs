@@ -24,6 +24,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
             plant.CoverPhotoId ??= PhotoEntries.Cover(photos).Id;
 
         plant.Tags = PlantTags.Normalize(plant.Tags);
+        plant.NeedsAHand = NeedsAHand.Normalize(plant.NeedsAHand);
         Normalize(plant);
         // Only a create run again has history to look through, so a first one doesn't read the whole store
         var again = await plants.GetAsync(plant.Id) is not null;
@@ -135,6 +136,7 @@ public sealed class PlantService(IPlantRepository plants, ITimelineRepository ti
         Func<Guid?, Guid?, IReadOnlyList<HistoryLine>>? lampLines = null)
     {
         after.Tags = PlantTags.Normalize(after.Tags);
+        after.NeedsAHand = NeedsAHand.Normalize(after.NeedsAHand);
         Normalize(after, numberChanged: after.CollectionNumber != before.CollectionNumber);
         // The day it died, left or came back is what the year in review reads
         if (before.Status != after.Status)

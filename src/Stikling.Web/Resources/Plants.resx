@@ -1067,4 +1067,32 @@
     <value>{0}, {1}, used up</value>
     <comment>Chip for a batch of soil that is marked used up but is still the one a plant is in. {0} is a date, {1} is a volume.</comment>
   </data>
+  <data name="NeedsAHandLabel" xml:space="preserve">
+    <value>Needs a hand</value>
+    <comment>Heading of the section on the plant form for marks like high up, hanging or heavy, which tell a helper the plant is hard for someone else to look after.</comment>
+  </data>
+  <data name="NeedsAHandHint" xml:space="preserve">
+    <value>Short marks like high up or heavy, so a helper knows before they go. They show on the plant, in Go round and on the plant-sitter sheet.</value>
+    <comment>Hint under the Needs a hand picker on the plant form.</comment>
+  </data>
+  <data name="NeedsAHandHigh" xml:space="preserve">
+    <value>High up</value>
+    <comment>A suggested mark on the plant form for a plant that is out of reach.</comment>
+  </data>
+  <data name="NeedsAHandHanging" xml:space="preserve">
+    <value>Hanging</value>
+    <comment>A suggested mark on the plant form for a hanging plant.</comment>
+  </data>
+  <data name="NeedsAHandHeavy" xml:space="preserve">
+    <value>Heavy</value>
+    <comment>A suggested mark on the plant form for a plant that is heavy to lift.</comment>
+  </data>
+  <data name="NeedsAHandLine" xml:space="preserve">
+    <value>Needs a hand: {0}</value>
+    <comment>A line on the plant page and on its card in Go round. {0} is the marks, like "high up, heavy".</comment>
+  </data>
+  <data name="NeedsAHandToday" xml:space="preserve">
+    <value>needs a hand: {0}</value>
+    <comment>Added to a plant's Needs attention row on Today, so a helper knows before they go. {0} is the marks, like "high up".</comment>
+  </data>
 </root>

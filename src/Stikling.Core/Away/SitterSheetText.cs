@@ -106,6 +106,8 @@ public static class SitterSheetText
                     text.AppendLine(weight);
                 if (subject.Pace is { } pace)
                     text.AppendLine(pace);
+                if (subject.Help is { } help)
+                    text.AppendLine(help);
                 if (subject.Note is { } subjectNote)
                     text.AppendLine(F(Strings.Care.SitterTextNote, subjectNote));
 
