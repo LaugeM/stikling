@@ -331,6 +331,29 @@ export async function removePhotoImages(id) {
     await transact(["photoBlobs", "photoUploads", "photoDownloads"], "readwrite", tx => forgetPhoto(tx, id));
 }
 
+// Puts a photo that was put back on the list to send, when its full image is still here
+export async function queuePhotoUpload(id) {
+    await transact(["photoBlobs", "photoUploads"], "readwrite", tx => {
+        const request = tx.objectStore("photoBlobs").count(id);
+        request.onsuccess = () => {
+            if (request.result > 0) tx.objectStore("photoUploads").put({ id });
+        };
+    });
+}
+
+// A deleted photo keeps its images for 30 days so it can be put back. This frees the images of the ones
+// deleted before the cutoff, and takes them off both photo lists. The photo records stay.
+export async function freeDeletedPhotoImages(cutoff) {
+    const before = Date.parse(cutoff);
+    await transact(["photos", "photoBlobs", "photoUploads", "photoDownloads"], "readwrite", tx => {
+        const request = tx.objectStore("photos").getAll();
+        request.onsuccess = () => {
+            for (const photo of request.result)
+                if (photo.deletedAt && Date.parse(photo.deletedAt) < before) forgetPhoto(tx, photo.id);
+        };
+    });
+}
+
 function forgetPhoto(tx, id) {
     tx.objectStore("photoBlobs").delete(id);
     tx.objectStore("photoBlobs").delete(`${id}:thumb`);

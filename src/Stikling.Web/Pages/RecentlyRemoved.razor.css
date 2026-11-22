@@ -1,0 +1,48 @@
+.removed-section {
+    margin-top: 1.5rem;
+}
+
+.removed-count {
+    margin-inline-start: 0.25rem;
+    font-weight: 400;
+    color: var(--pa-muted);
+}
+
+.removed-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.removed-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding-block: 0.5rem;
+    border-top: 1px solid var(--pa-border);
+}
+
+.removed-row:last-child {
+    border-bottom: 1px solid var(--pa-border);
+}
+
+.removed-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.removed-name {
+    overflow-wrap: anywhere;
+}
+
+.removed-sub {
+    font-size: 0.875rem;
+    color: var(--pa-muted);
+    overflow-wrap: anywhere;
+}
+
+.removed-note {
+    margin-top: 1.5rem;
+}

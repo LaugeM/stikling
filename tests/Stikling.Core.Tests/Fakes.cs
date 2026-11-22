@@ -89,7 +89,7 @@ internal abstract class FakeRepository<T> : IRepository<T> where T : Entity
 }
 
 /// <summary>In-memory repositories for testing services without a browser database.</summary>
-internal sealed class FakePlantRepository : FakeRepository<Plant>, IPlantRepository
+internal sealed class FakePlantRepository(bool stampsDates = false) : FakeRepository<Plant>(stampsDates), IPlantRepository
 {
     public Dictionary<Guid, Plant> Plants => Records;
 

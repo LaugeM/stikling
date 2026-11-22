@@ -910,7 +910,7 @@ else
         backupMessage = null;
         try
         {
-            await Backup.ExportAsync();
+            await Backup.ExportAsync(allowSmall: false);
             backupMessage = Strings.People.BackupSaved;
         }
         catch (Exception e) when (e is JSException or InvalidOperationException or IOException)

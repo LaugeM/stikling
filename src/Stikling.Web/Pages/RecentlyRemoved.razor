@@ -1,0 +1,161 @@
+@page "/settings/tidy-up/removed"
+@attribute [NeedsAccess(AccessLevel.Edit)]
+@inject RecentlyRemovedService Removed
+@inject TimeProvider Time
+@inject ILogger<RecentlyRemoved> Logger
+
+<PageTitle>@Strings.Tidy.RemovedPageTitle</PageTitle>
+<ReloadOnSync Reload="LoadAsync" />
+
+<a class="back-link" href="settings/tidy-up">@Strings.Tidy.Title</a>
+<h1>@Strings.Tidy.RemovedTitle</h1>
+
+@if (report is null)
+{
+    <p class="text-body-secondary">@Strings.Plants.Loading</p>
+}
+else
+{
+    @if (message is not null)
+    {
+        <p class="settings-message" role="status">
+            @message
+            @if (openLink is not null)
+            {
+                <a href="@openLink">@Strings.Tidy.PutBackOpen</a>
+            }
+        </p>
+    }
+
+    @if (report.Items.Count == 0)
+    {
+        <div class="empty-state">
+            <p>@Strings.Tidy.RemovedEmpty</p>
+        </div>
+    }
+    else
+    {
+        <p class="settings-hint">@Strings.Tidy.RemovedIntro</p>
+
+        @Group("plants", Strings.Tidy.RemovedSectionPlants, RemovedKind.Plant)
+        @Group("cuttings", Strings.Tidy.RemovedSectionCuttings, RemovedKind.Propagation)
+        @Group("photos", Strings.Tidy.RemovedSectionPhotos, RemovedKind.Photo)
+        @Group("notes", Strings.Tidy.RemovedSectionNotes, RemovedKind.Note)
+    }
+
+    <p class="settings-hint removed-note">@Strings.Tidy.RemovedOlder</p>
+    @if (report.Stripped > 0)
+    {
+        <p class="settings-hint">@F(report.Stripped, Strings.Tidy.RemovedElsewhere_One, Strings.Tidy.RemovedElsewhere_Other, report.Stripped)</p>
+    }
+}
+
+@code {
+    private RemovedReport? report;
+    private string? message;
+    private string? openLink;
+    private bool busy;
+
+    protected override Task OnInitializedAsync() => LoadAsync();
+
+    private async Task LoadAsync() => report = await Removed.GetAsync();
+
+    private RenderFragment Group(string key, string heading, RemovedKind kind) => __builder =>
+    {
+        var items = report!.Of(kind).ToList();
+        if (items.Count == 0)
+            return;
+
+        var id = "removed-" + key;
+        <section class="removed-section" aria-labelledby="@id">
+            <h2 class="section-label" id="@id">@heading <span class="removed-count">@items.Count</span></h2>
+            <ul class="removed-list">
+                @foreach (var item in items)
+                {
+                    var name = TitleOf(item);
+                    <li class="removed-row">
+                        <div class="item-thumb @(item.Kind == RemovedKind.Plant ? "potted" : null)" aria-hidden="true">
+                            @if (item.PhotoId is { } photoId)
+                            {
+                                <PhotoImage PhotoId="photoId" />
+                            }
+                            else
+                            {
+                                <svg viewBox="0 0 24 24">@Icons.Sprout</svg>
+                            }
+                        </div>
+                        <div class="removed-text">
+                            <span class="removed-name">@name</span>
+                            @if (SubLine(item) is { } sub)
+                            {
+                                <span class="removed-sub">@sub</span>
+                            }
+                            <span class="removed-sub">@F(Strings.Tidy.RemovedWhen, Labels.DaysAgo(DaysSince(item)))</span>
+                            @if (item.Owner is { IsRemoved: true } owner)
+                            {
+                                <span class="removed-sub">@F(Strings.Tidy.RemovedAlsoPutsBack, owner.Name)</span>
+                            }
+                        </div>
+                        <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy"
+                                aria-label="@F(Strings.Tidy.PutBackNamed, name)"
+                                @onclick="() => PutBackAsync(item)">@Strings.Tidy.PutBack</button>
+                    </li>
+                }
+            </ul>
+        </section>
+    };
+
+    private int DaysSince(RemovedItem item) =>
+        Math.Max(0, Time.Today().DayNumber - DateOnly.FromDateTime(item.RemovedAt.ToLocalTime().DateTime).DayNumber);
+
+    private static string TitleOf(RemovedItem item) => item.Kind switch
+    {
+        RemovedKind.Photo => F(Strings.Tidy.RemovedPhotoOf, item.Owner?.Name ?? ""),
+        RemovedKind.Note => item.Text ?? Strings.Tidy.RemovedNoteNoText,
+        _ => item.Name ?? ""
+    };
+
+    private static string? SubLine(RemovedItem item) =>
+        item.Kind == RemovedKind.Note && item.Owner is { } owner ? F(Strings.Tidy.RemovedNoteOn, owner.Name) : null;
+
+    private static string LinkOf(RemovedItem item) => item.Kind switch
+    {
+        RemovedKind.Plant => $"plants/{item.Id}",
+        RemovedKind.Propagation => $"propagations/{item.Id}",
+        _ => item.Owner is { Type: SubjectType.Propagation } owner ? $"propagations/{owner.Id}" : $"plants/{item.Owner?.Id}"
+    };
+
+    private async Task PutBackAsync(RemovedItem item)
+    {
+        busy = true;
+        try
+        {
+            if (await Removed.PutBackAsync(item))
+            {
+                message = item.Kind switch
+                {
+                    RemovedKind.Photo => F(Strings.Tidy.PutBackDonePhoto, item.Owner?.Name ?? ""),
+                    RemovedKind.Note => F(Strings.Tidy.PutBackDoneNote, item.Owner?.Name ?? ""),
+                    _ => F(Strings.Tidy.PutBackDonePlant, item.Name ?? "")
+                };
+                openLink = LinkOf(item);
+            }
+            else
+            {
+                message = Strings.Tidy.PutBackFailed;
+                openLink = null;
+            }
+            await LoadAsync();
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Putting back from Recently removed failed");
+            message = F(Strings.Tidy.Error, ex.Message);
+            openLink = null;
+        }
+        finally
+        {
+            busy = false;
+        }
+    }
+}

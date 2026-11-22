@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="OptionReadable" xml:space="preserve">
+    <value>Læsbare sider</value>
+  </data>
+  <data name="OptionReadableHint" xml:space="preserve">
+    <value>Kan også åbnes som sider i en hvilken som helst browser, uden appen.</value>
+  </data>
+  <data name="OptionSmall" xml:space="preserve">
+    <value>Uden billeder i fuld størrelse</value>
+  </data>
+  <data name="OptionSmallWarning" xml:space="preserve">
+    <value>Den her sikkerhedskopi er til at gemme eller sende de læsbare sider. Gendanner du den, får du dine data tilbage, men ingen billeder.</value>
+  </data>
+  <data name="OptionSmallNotLast" xml:space="preserve">
+    <value>Den tæller ikke som din seneste sikkerhedskopi, så påmindelsen tæller videre fra den seneste fulde.</value>
+  </data>
+  <data name="SavedSmall" xml:space="preserve">
+    <value>Den har kun billederne i lille størrelse, så den giver ingen billeder tilbage ved gendannelse, og den tæller ikke som din seneste sikkerhedskopi.</value>
+  </data>
+  <data name="SavedParts" xml:space="preserve">
+    <value>Den er stor, så den er delt i {0} filer. Hver af dem er en hel sikkerhedskopi af det der er i den.</value>
+  </data>
+  <data name="FolderHeading" xml:space="preserve">
+    <value>Gem sikkerhedskopier i en mappe</value>
+  </data>
+  <data name="FolderIntro" xml:space="preserve">
+    <value>Sikkerhedskopier lægges direkte i en mappe du vælger, så du ikke skal lede i dine downloads. Gamle sikkerhedskopier bliver aldrig slettet eller overskrevet. Browseren spørger om tilladelse igen når du tager en sikkerhedskopi efter at have lukket Stikling.</value>
+  </data>
+  <data name="FolderChoose" xml:space="preserve">
+    <value>Vælg mappe</value>
+  </data>
+  <data name="FolderChange" xml:space="preserve">
+    <value>Skift mappe</value>
+  </data>
+  <data name="FolderStop" xml:space="preserve">
+    <value>Stop med at bruge mappen</value>
+  </data>
+  <data name="FolderIn" xml:space="preserve">
+    <value>Sikkerhedskopier lægges i mappen {0}.</value>
+  </data>
+  <data name="SavedInFolder" xml:space="preserve">
+    <value>Sikkerhedskopien er gemt i mappen {3} med {0}, {1} og {2}.</value>
+  </data>
+  <data name="FolderFailed" xml:space="preserve">
+    <value>Den kunne ikke gemmes i mappen, så den er lagt i dine downloads i stedet.</value>
+  </data>
+  <data name="SavedAsFolder" xml:space="preserve">
+    <value>Det der var her før, er gemt som {0} i mappen {1}.</value>
+  </data>
+  <data name="SavedAsParts" xml:space="preserve">
+    <value>Det der var her før, er gemt i {0} filer, den første hedder {1}. Se i dine downloads.</value>
+  </data>
+  <data name="SavedAsPartsFolder" xml:space="preserve">
+    <value>Det der var her før, er gemt i {0} filer i mappen {1}, den første hedder {2}.</value>
+  </data>
+</root>
