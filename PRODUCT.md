@@ -15,6 +15,8 @@ Two further audiences are real:
 - **Houseplant hobbyists.** The app is public on GitHub Pages so anyone can use it. Some of them are casual plant owners who will never take a cutting. Features aimed at them, mainly watering and care logging, are built on purpose even though the developer does not use them.
 - **Developers.** The repository is public and the code gets read as closely as the app gets used. Both have to hold up. Reach and real use matter more here than revenue, which is why the app is free and stays free.
 
+Those who track their plants at all are mostly collectors with 50 plants or more, kept in a spreadsheet. They don't want fixed watering schedules, and they worry about getting their data back out.
+
 Danish speakers may be the easier early audience, because the subject is niche and the app has a Danish name.
 
 ## Product Purpose
