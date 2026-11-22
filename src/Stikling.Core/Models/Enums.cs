@@ -356,6 +356,14 @@ public static class Weekdays
         day == DayOfWeek.Sunday ? Weekday.Sunday : (Weekday)((int)day - 1);
 }
 
+/// <summary>How much a wish is wanted. Three levels, since more are hard to tell apart.</summary>
+public enum WishPriority
+{
+    MustHave,
+    Want,
+    Maybe
+}
+
 /// <summary>
 /// How sure a name is, the way collectors write it: "Hoya cf. carnosa", "Hoya aff. carnosa",
 /// "Hoya sp." or a name lost with the tag.

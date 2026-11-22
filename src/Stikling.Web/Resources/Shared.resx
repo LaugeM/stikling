@@ -1822,4 +1822,36 @@ Maybe</value>
     <value>Where it stands: {0} · {1}</value>
     <comment>Line on a plant or cutting. {0} are the latest readings, {1} the day.</comment>
   </data>
+  <data name="WishPriorityFilterLabel" xml:space="preserve">
+    <value>Show wishes by how much you want them</value>
+    <comment>Label of the filter row on the wishlist.</comment>
+  </data>
+  <data name="WishPriorityAll" xml:space="preserve">
+    <value>All</value>
+    <comment>Filter on the wishlist: every wish.</comment>
+  </data>
+  <data name="WishPriorityMustHave" xml:space="preserve">
+    <value>Must have</value>
+    <comment>A level of wanting a wish: the most.</comment>
+  </data>
+  <data name="WishPriorityWant" xml:space="preserve">
+    <value>Want</value>
+    <comment>A level of wanting a wish: the middle. Wishes with no level count here.</comment>
+  </data>
+  <data name="WishPriorityMaybe" xml:space="preserve">
+    <value>Maybe</value>
+    <comment>A level of wanting a wish: the least.</comment>
+  </data>
+  <data name="WishPriorityNoMatch" xml:space="preserve">
+    <value>No wishes at this level.</value>
+    <comment>Shown when the level filter on the wishlist hides every wish.</comment>
+  </data>
+  <data name="WishEditPriority" xml:space="preserve">
+    <value>How much do you want it?</value>
+    <comment>Label of the Must have, Want, Maybe choice when editing a wish.</comment>
+  </data>
+  <data name="WishlistSharePriority" xml:space="preserve">
+    <value>Say how much I want each</value>
+    <comment>Switch in the share sheet. Adds "(must have)" or "(maybe)" after a wish.</comment>
+  </data>
 </root>

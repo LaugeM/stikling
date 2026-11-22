@@ -212,4 +212,47 @@ public class WishlistTests
         Assert.EndsWith("\n\nKept in Stikling, stikling.app", plain);
         Assert.Contains("\n  Big fenestrations\n  Would pay up to 250\n", full);
     }
+
+    private static Wish Level(string name, WishPriority? priority) => new() { Name = name, Priority = priority };
+
+    [Fact]
+    public void Open_wishes_are_ordered_by_level_with_none_as_want()
+    {
+        var ordered = WishOrder.ByRank([Level("a-maybe", WishPriority.Maybe), Level("b-none", null), Level("c-must", WishPriority.MustHave), Level("d-want", WishPriority.Want)])
+            .Select(w => w.Name);
+
+        Assert.Equal(["c-must", "b-none", "d-want", "a-maybe"], ordered);
+    }
+
+    [Fact]
+    public void A_wish_with_no_level_counts_as_want()
+    {
+        Assert.Equal(WishPriority.Want, WishOrder.Level(Level("x", null)));
+        Assert.Equal(WishPriority.Maybe, WishOrder.Level(Level("x", WishPriority.Maybe)));
+    }
+
+    [Fact]
+    public void A_priority_is_stored_as_text_and_an_unknown_one_reads_as_none()
+    {
+        var web = new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web);
+        var json = System.Text.Json.JsonSerializer.Serialize(Level("x", WishPriority.MustHave), web);
+        Assert.Contains("\"priority\":\"MustHave\"", json);
+        Assert.Equal(WishPriority.MustHave, System.Text.Json.JsonSerializer.Deserialize<Wish>(json, web)!.Priority);
+
+        Assert.Null(System.Text.Json.JsonSerializer.Deserialize<Wish>("{\"name\":\"x\",\"priority\":\"MustHaveItNow\"}", web)!.Priority);
+        Assert.Null(System.Text.Json.JsonSerializer.Deserialize<Wish>("{\"name\":\"x\"}", web)!.Priority);
+    }
+
+    [Fact]
+    public void Shared_text_orders_by_level_then_name_and_names_the_level_only_when_asked()
+    {
+        var wishes = new[] { Level("Zeta", WishPriority.MustHave), Level("Alpha", WishPriority.Maybe), Level("Mid", null), Level("Beta", WishPriority.Want) };
+
+        var plain = Text(new WishlistTextOptions(AppLine: false), wishes);
+        var said = Text(new WishlistTextOptions(AppLine: false, Priority: true), wishes);
+
+        Assert.Equal(["- Zeta", "- Beta", "- Mid", "- Alpha"], plain.Split('\n').Skip(1).ToArray());
+        Assert.DoesNotContain("must have", plain);
+        Assert.Equal(["- Zeta (must have)", "- Beta", "- Mid", "- Alpha (maybe)"], said.Split('\n').Skip(1).ToArray());
+    }
 }

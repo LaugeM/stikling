@@ -17,6 +17,10 @@ public sealed class Wish : Entity
     [JsonConverter(typeof(TolerantNameQualifierConverter))]
     public NameQualifier? NameQualifier { get; set; }
 
+    /// <summary>How much it is wanted. Null when not set, which sorts and filters as Want.</summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<WishPriority>))]
+    public WishPriority? Priority { get; set; }
+
     /// <summary>A locality or collector code that goes with the name, like "Sumatra EPC 123".</summary>
     public string? NameNote { get; set; }
 
