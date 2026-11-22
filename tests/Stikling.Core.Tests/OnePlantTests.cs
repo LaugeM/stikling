@@ -27,7 +27,7 @@ public class OnePlantTests
     }
 
     private async Task<Plant?> PickAsync(params Guid[] seen) =>
-        OnePlant.Pick(plants, await timeline.GetLastActivityBeforeAsync(Now.AddDays(1)), stretches, Today, seen.ToHashSet());
+        OnePlant.Pick(plants, await timeline.GetLastActivityBeforeAsync(Now.AddDays(1)), stretches, Today, new FixedTime(Now), seen.ToHashSet());
 
     private async Task LookedAsync(Plant plant, int daysAgo)
     {
@@ -56,6 +56,19 @@ public class OnePlantTests
 
         Assert.Equal(never.Id, (await PickAsync())?.Id);
         Assert.Equal(old.Id, (await PickAsync(never.Id))?.Id);
+    }
+
+    [Fact]
+    public async Task A_plant_looked_over_today_is_skipped_even_when_flagged()
+    {
+        var looked = Add("Looked", p => p.Attention = new("Drooping", Today.AddDays(-5)));
+        var other = Add("Other", p => p.Attention = new("Yellow leaves", Today.AddDays(-1)));
+        await LookedAsync(looked, 0);
+
+        Assert.Equal(other.Id, (await PickAsync())?.Id);
+
+        await LookedAsync(other, 0);
+        Assert.Null(await PickAsync());
     }
 
     [Fact]

@@ -25,6 +25,16 @@
 }
 
 /* The line that ends an easy day, with the way out */
+/* The mark for a plant that needs a hand, on its own line so the flag row's ellipsis never hides it */
+.hand-line {
+    display: block;
+    margin-top: 0.15rem;
+    font-size: 0.8rem;
+    color: var(--pa-muted);
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+
 .easy-end {
     display: flex;
     flex-wrap: wrap;

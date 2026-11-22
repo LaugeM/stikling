@@ -19,19 +19,23 @@ public static class OnePlant
     /// (<see cref="Timeline.ITimelineRepository.GetLastActivityBeforeAsync"/>). A plant with none counts as the
     /// longest ago, and the display name decides between two equals.
     /// </param>
+    /// <param name="time">For the day of each look. A plant looked at today is left out.</param>
     /// <param name="seen">The plants already shown in this visit, so One more never gives the same one twice.</param>
     public static Plant? Pick(
         IEnumerable<Plant> plants,
         IReadOnlyDictionary<Guid, DateTimeOffset> lastLooked,
         IReadOnlyList<AwayStretch> stretches,
         DateOnly today,
+        TimeProvider time,
         IReadOnlySet<Guid>? seen = null)
     {
         if (AwayTime.Current(stretches, today) is not null)
             return null;
 
         var candidates = plants
-            .Where(p => !p.IsDeleted && p.InCollection && !p.IsDormant && seen?.Contains(p.Id) != true)
+            .Where(p => !p.IsDeleted && p.InCollection && !p.IsDormant && seen?.Contains(p.Id) != true
+                // Looked over today, here or in a round, so it isn't asked for again
+                && !(lastLooked.TryGetValue(p.Id, out var last) && time.LocalDay(last) == today))
             .ToList();
 
         var flagged = candidates
