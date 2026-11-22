@@ -427,6 +427,7 @@
                 <SettingsRow Href="privacy" Title="@Strings.Settings.Privacy" Detail="@Strings.Settings.PrivacyDetail" />
                 <SettingsRow Href="settings/whats-new" Title="@Strings.Settings.WhatsNew" Detail="@AppVersion.Label" />
                 <SettingsRow Href="plant-names" Title="@Strings.Settings.PlantNames" Detail="@Strings.Settings.PlantNamesDetail" />
+                <SettingsRow Href="#" Title="@Strings.Settings.WriteToMe" Detail="@Strings.Settings.WriteToMeDetail" OnClick="@(() => writeOpen = true)" />
                 <SettingsRow Href="https://github.com/LaugeM/stikling" Title="@Strings.Settings.SourceCode" Detail="@Strings.Settings.SourceCodeDetail" External="true" />
             </div>
             @if (tourFailed)
@@ -436,6 +437,8 @@
         </section>
     </div>
 </div>
+
+<WriteToMeSheet @bind-Open="writeOpen" />
 
 <Sheet Title="@Strings.Settings.CollectionNumbers" @bind-Open="numberingOpen">
     @if (numberingPlan is { } plan)
@@ -469,6 +472,8 @@
 </Sheet>
 
 @code {
+    private bool writeOpen;
+
     /// <summary>
     /// The names of the people who translated the language the app is in, or null when the translation
     /// still has the placeholder from the English file, or the app is in English.
