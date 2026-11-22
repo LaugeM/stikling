@@ -25,7 +25,7 @@
     <comment>Checkbox on the backup page. Leaves out the full size images and keeps the thumbnails.</comment>
   </data>
   <data name="OptionSmallWarning" xml:space="preserve">
-    <value>This backup can't bring back your photos at full size.</value>
+    <value>This backup is for keeping or sending the readable pages. Restoring it brings back your records but no photos.</value>
     <comment>Shown when Without full size photos is ticked.</comment>
   </data>
   <data name="OptionSmallNotLast" xml:space="preserve">
@@ -33,7 +33,7 @@
     <comment>Shown when Without full size photos is ticked, next to the warning.</comment>
   </data>
   <data name="SavedSmall" xml:space="preserve">
-    <value>It has the photos in a small size only, so it doesn't count as your last backup.</value>
+    <value>It has the photos in a small size only, so restoring it brings back no photos, and it doesn't count as your last backup.</value>
     <comment>Added to the line after a backup made without full size photos.</comment>
   </data>
   <data name="SavedParts" xml:space="preserve">
@@ -68,5 +68,17 @@
   <data name="FolderFailed" xml:space="preserve">
     <value>Couldn't write to the folder, so the backup was downloaded instead.</value>
     <comment>Shown when the browser refused permission or the folder is gone.</comment>
+  </data>
+  <data name="SavedAsFolder" xml:space="preserve">
+    <value>What was here before is saved as {0} in the folder {1}.</value>
+    <comment>{0} is a file name and {1} the name of the folder. Shown after a restore.</comment>
+  </data>
+  <data name="SavedAsParts" xml:space="preserve">
+    <value>What was here before is saved in {0} files, starting with {1}. Check your downloads.</value>
+    <comment>{0} is how many files and {1} the name of the first. Shown after a restore.</comment>
+  </data>
+  <data name="SavedAsPartsFolder" xml:space="preserve">
+    <value>What was here before is saved in {0} files in the folder {1}, starting with {2}.</value>
+    <comment>{0} is how many files, {1} the name of the folder and {2} the name of the first file. Shown after a restore.</comment>
   </data>
 </root>

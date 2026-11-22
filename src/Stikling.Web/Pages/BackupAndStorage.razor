@@ -377,7 +377,13 @@
                     // Always whole, since it is what undoes the restore
                     var saved = await Backup.ExportAsync("stikling-before-restore", allowSmall: false);
                     lastBackup = TodayDate;
-                    savedAs = BackupParts.FileName("stikling-before-restore", TodayDate, 1, saved.Parts);
+                    savedAs = saved switch
+                    {
+                        { Folder: { } inFolder, Parts: > 1 } => F(Strings.BackupFolder.SavedAsPartsFolder, saved.Parts, inFolder, saved.FirstFile),
+                        { Folder: { } inFolder } => F(Strings.BackupFolder.SavedAsFolder, saved.FirstFile, inFolder),
+                        { Parts: > 1 } => F(Strings.BackupFolder.SavedAsParts, saved.Parts, saved.FirstFile),
+                        _ => F(Strings.Account.BackupSavedAs, saved.FirstFile)
+                    };
                 }
             }
             catch (Exception ex)
@@ -415,7 +421,7 @@
                 _ => Strings.Account.BackupAlreadyHere
             };
             if (savedAs is not null)
-                message += " " + F(Strings.Account.BackupSavedAs, savedAs);
+                message += " " + savedAs;
         }
         catch (Exception ex)
         {

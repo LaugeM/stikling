@@ -22,13 +22,13 @@
     <value>Uden billeder i fuld størrelse</value>
   </data>
   <data name="OptionSmallWarning" xml:space="preserve">
-    <value>Den her sikkerhedskopi kan ikke give dig billederne tilbage i fuld størrelse.</value>
+    <value>Den her sikkerhedskopi er til at gemme eller sende de læsbare sider. Gendanner du den, får du dine data tilbage, men ingen billeder.</value>
   </data>
   <data name="OptionSmallNotLast" xml:space="preserve">
     <value>Den tæller ikke som din seneste sikkerhedskopi, så påmindelsen tæller videre fra den seneste fulde.</value>
   </data>
   <data name="SavedSmall" xml:space="preserve">
-    <value>Den har kun billederne i lille størrelse, så den tæller ikke som din seneste sikkerhedskopi.</value>
+    <value>Den har kun billederne i lille størrelse, så den giver ingen billeder tilbage ved gendannelse, og den tæller ikke som din seneste sikkerhedskopi.</value>
   </data>
   <data name="SavedParts" xml:space="preserve">
     <value>Den er stor, så den er delt i {0} filer. Hver af dem er en hel sikkerhedskopi af det der er i den.</value>
@@ -56,5 +56,14 @@
   </data>
   <data name="FolderFailed" xml:space="preserve">
     <value>Den kunne ikke gemmes i mappen, så den er lagt i dine downloads i stedet.</value>
+  </data>
+  <data name="SavedAsFolder" xml:space="preserve">
+    <value>Det der var her før, er gemt som {0} i mappen {1}.</value>
+  </data>
+  <data name="SavedAsParts" xml:space="preserve">
+    <value>Det der var her før, er gemt i {0} filer, den første hedder {1}. Se i dine downloads.</value>
+  </data>
+  <data name="SavedAsPartsFolder" xml:space="preserve">
+    <value>Det der var her før, er gemt i {0} filer i mappen {1}, den første hedder {2}.</value>
   </data>
 </root>

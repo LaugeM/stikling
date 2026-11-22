@@ -31,10 +31,11 @@ public sealed record BackupPlan(IReadOnlyList<BackupPart> Parts)
 public static class BackupParts
 {
     /// <summary>
-    /// The most image data in one part, 1 GB. The ZIP is built in the browser's memory, where a tab runs out
-    /// well before the device does, so a larger collection is saved as several files instead of failing.
+    /// The most image data in one part, 300 MB. The ZIP is built in a MemoryStream, which can grow to twice its size while it
+    /// fills, then copied by ToArray and copied again into JavaScript, so the peak in a browser tab is several times the part.
+    /// A larger collection is saved as several files instead of running the tab out of memory.
     /// </summary>
-    public const long MaxPartBytes = 1_000_000_000;
+    public const long MaxPartBytes = 300_000_000;
 
     /// <summary>
     /// A guess at how big a photo's two images are, from its pixels, since the real size is only known by reading it.

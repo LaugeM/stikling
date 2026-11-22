@@ -20,8 +20,9 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
 
 /// <summary>What a backup made: what it holds, how many ZIP files it was split into, and whether it was made without the full size photos.</summary>
 /// <param name="Folder">The name of the folder the backup was saved in, or null when it was downloaded.</param>
+/// <param name="FirstFile">The name the first file was saved or downloaded as, which is what the folder gave it when an old one was already there.</param>
 /// <param name="FolderFailed">True when a folder is set but couldn't be written to, so the backup was downloaded instead.</param>
-public sealed record BackupExport(BackupCounts Counts, int Parts, bool Small, string? Folder = null, bool FolderFailed = false);
+public sealed record BackupExport(BackupCounts Counts, int Parts, bool Small, string? Folder = null, bool FolderFailed = false, string? FirstFile = null);
 
 /// <summary>How many photos went into the photo folders download, and how many couldn't be found on this device.</summary>
 public sealed record PhotoFolderSummary(int Added, int Skipped);
@@ -75,6 +76,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
         var options = await files.GetBackupOptionsAsync();
         var small = options.Small && allowSmall;
         var savedInFolder = false;
+        string? firstFile = null;
 
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
         var data = new BackupData { ExportedAt = time.GetUtcNow() };
@@ -151,8 +153,9 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
             var bytes = buffer.ToArray();
             if (useFolder)
             {
-                if (await folder.WriteAsync(fileName, bytes) is not null)
+                if (await folder.WriteAsync(fileName, bytes) is { } writtenAs)
                 {
+                    firstFile ??= writtenAs;
                     savedInFolder = true;
                     continue;
                 }
@@ -161,6 +164,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                 useFolder = false;
                 folderFailed = true;
             }
+            firstFile ??= fileName;
             await files.DownloadAsync(fileName, bytes);
         }
 
@@ -168,7 +172,7 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
         if (!small)
             await files.SetLastBackupAsync(today);
 
-        return new BackupExport(data.Counts, plan.Count, small, savedInFolder ? await folder.GetNameAsync() : null, folderFailed);
+        return new BackupExport(data.Counts, plan.Count, small, savedInFolder ? await folder.GetNameAsync() : null, folderFailed, firstFile);
     }
 
     // What a thumbnail is counted as when working out the parts of a backup that only has those
@@ -283,9 +287,8 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
             }
         }
 
-        // A delete carried over from the backup frees the image too
-        foreach (var photo in (photoMeta?.ToSave ?? []).Where(p => p.IsDeleted))
-            await photos.RemoveBytesAsync(photo.Id);
+        // A delete carried over from the backup keeps its image like any other deleted photo: it is freed by the
+        // start-up sweep (FreeOldDeletedAsync) once DeletedAt is more than 30 days old, so it can be put back until then
 
         // Every photo in the backup gets its image back when it's missing here, not only the ones
         // saved just now. A restore that stopped halfway, e.g. when storage ran out, has already
