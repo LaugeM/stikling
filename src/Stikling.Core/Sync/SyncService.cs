@@ -260,6 +260,11 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
             {
                 if (!here.TryGetValue(stamp.Id, out var current))
                     copies.Add(new ServerCopy(data, null));
+                else if (IsOwnDeletionComingBack(stamp, current.Stamp))
+                {
+                    // The server hands back the stripped copy of what this device deleted, with the same
+                    // dates. The copy here still has everything, which Put back in Recently removed needs.
+                }
                 else if (SyncRules.Replaces(stamp, json, current.Stamp, current.Json))
                     copies.Add(new ServerCopy(data, current.UpdatedAt));
             }
@@ -271,6 +276,16 @@ public sealed class SyncService(ISyncStore store, ISyncServer server)
 
         return saved;
     }
+
+    /// <summary>
+    /// True when both copies are the same deletion: deleted at the same moment, with the same updatedAt.
+    /// The copy here is kept, since the server's copy of it is stripped and tying on the JSON could
+    /// let the stripped one win.
+    /// </summary>
+    private static bool IsOwnDeletionComingBack(RecordStamp incoming, RecordStamp current) =>
+        incoming.DeletedAt is not null
+        && incoming.DeletedAt == current.DeletedAt
+        && incoming.UpdatedAt == current.UpdatedAt;
 
     /// <summary>
     /// The kinds a helper may add also remember who added them, and the server is where that is known.

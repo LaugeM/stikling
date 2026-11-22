@@ -1,0 +1,146 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype">
+    <value>text/microsoft-resx</value>
+  </resheader>
+  <resheader name="version">
+    <value>2.0</value>
+  </resheader>
+  <resheader name="reader">
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <resheader name="writer">
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+  </resheader>
+  <data name="IndexTitle" xml:space="preserve">
+    <value>Your collection</value>
+    <comment>Title and heading of index.html, in the readable pages inside a backup ZIP. These pages are opened in a browser, outside the app.</comment>
+  </data>
+  <data name="IndexIntro" xml:space="preserve">
+    <value>Made by Stikling on {0}. Open a plant or a cutting to read about it.</value>
+    <comment>{0} is the date the backup was made.</comment>
+  </data>
+  <data name="PartNote" xml:space="preserve">
+    <value>This is part {0} of {1} of the backup. Plants and cuttings kept in another part are marked with that part.</value>
+    <comment>Only when a backup is split into several ZIP files. {0} is this part, {1} how many there are.</comment>
+  </data>
+  <data name="InPart" xml:space="preserve">
+    <value>in part {0}</value>
+    <comment>Beside a plant or cutting that is in another ZIP file. {0} is the part number.</comment>
+  </data>
+  <data name="PlantsHeading" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading above the plants on the index.</comment>
+  </data>
+  <data name="CuttingsHeading" xml:space="preserve">
+    <value>Cuttings</value>
+    <comment>Heading above the cuttings on the index, and on a plant's page above the cuttings taken from it.</comment>
+  </data>
+  <data name="PlantCount_One" xml:space="preserve">
+    <value>{0} plant</value>
+  </data>
+  <data name="PlantCount_Other" xml:space="preserve">
+    <value>{0} plants</value>
+  </data>
+  <data name="CuttingCount_One" xml:space="preserve">
+    <value>{0} cutting</value>
+  </data>
+  <data name="CuttingCount_Other" xml:space="preserve">
+    <value>{0} cuttings</value>
+  </data>
+  <data name="NoRoom" xml:space="preserve">
+    <value>No room</value>
+    <comment>Group of plants that have no room.</comment>
+  </data>
+  <data name="LeftCollection" xml:space="preserve">
+    <value>No longer in the collection</value>
+    <comment>Group of plants that died, were given away or sold.</comment>
+  </data>
+  <data name="NothingYet" xml:space="preserve">
+    <value>Nothing here yet.</value>
+    <comment>Shown when the collection is empty.</comment>
+  </data>
+  <data name="NumberOf" xml:space="preserve">
+    <value>No. {0}</value>
+    <comment>The collection number. {0} is the number.</comment>
+  </data>
+  <data name="ReceivedOn" xml:space="preserve">
+    <value>Received {0}</value>
+    <comment>On the index. {0} is a date.</comment>
+  </data>
+  <data name="StartedOn" xml:space="preserve">
+    <value>Started {0}</value>
+    <comment>On the index, for a cutting. {0} is a date.</comment>
+  </data>
+  <data name="BackToIndex" xml:space="preserve">
+    <value>All plants and cuttings</value>
+    <comment>Link back to the index from a page.</comment>
+  </data>
+  <data name="BotanicalName" xml:space="preserve">
+    <value>Botanical name</value>
+  </data>
+  <data name="Number" xml:space="preserve">
+    <value>Collection number</value>
+  </data>
+  <data name="Place" xml:space="preserve">
+    <value>Place</value>
+  </data>
+  <data name="Status" xml:space="preserve">
+    <value>Status</value>
+  </data>
+  <data name="Type" xml:space="preserve">
+    <value>Kind</value>
+  </data>
+  <data name="Received" xml:space="preserve">
+    <value>Received</value>
+  </data>
+  <data name="Started" xml:space="preserve">
+    <value>Started</value>
+  </data>
+  <data name="Rooted" xml:space="preserve">
+    <value>Rooted</value>
+  </data>
+  <data name="Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="Source" xml:space="preserve">
+    <value>Got it from</value>
+  </data>
+  <data name="From" xml:space="preserve">
+    <value>From</value>
+    <comment>The parent plant of a cutting or plant.</comment>
+  </data>
+  <data name="ProbablyFrom" xml:space="preserve">
+    <value>Probably from</value>
+    <comment>Same, when the parent is a guess.</comment>
+  </data>
+  <data name="TakenFromIt" xml:space="preserve">
+    <value>Cuttings taken from it</value>
+  </data>
+  <data name="LastWatered" xml:space="preserve">
+    <value>Last watered</value>
+  </data>
+  <data name="LastFed" xml:space="preserve">
+    <value>Last fed</value>
+  </data>
+  <data name="NotesHeading" xml:space="preserve">
+    <value>Notes</value>
+  </data>
+  <data name="HistoryHeading" xml:space="preserve">
+    <value>History</value>
+  </data>
+  <data name="PhotosHeading" xml:space="preserve">
+    <value>Photos</value>
+  </data>
+  <data name="ReferencePhoto" xml:space="preserve">
+    <value>Reference photo</value>
+  </data>
+  <data name="SmallPhotosNote" xml:space="preserve">
+    <value>This backup has the photos in a small size only.</value>
+    <comment>Shown on every page when the backup was made without full size photos.</comment>
+  </data>
+  <data name="ReadMe" xml:space="preserve">
+    <value>Open index.html in a browser to read your collection. data.json and the photos folder are the backup Stikling restores from.</value>
+    <comment>Text file in the ZIP, next to index.html. Plain text, no HTML.</comment>
+  </data>
+</root>

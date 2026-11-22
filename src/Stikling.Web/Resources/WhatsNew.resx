@@ -44,12 +44,6 @@
   <data name="ComingNextAndroid" xml:space="preserve">
     <value>Stikling as an app you can install on Android.</value>
   </data>
-  <data name="ComingNextWriteToMe" xml:space="preserve">
-    <value>A simple way to tell me something is broken, send an idea or write to me. The app sends nothing on its own.</value>
-  </data>
-  <data name="ComingNextSafeData" xml:space="preserve">
-    <value>A backup that also opens as pages in any browser, a way to put back what you deleted in the last 30 days, and backups saved to a folder you choose.</value>
-  </data>
   <data name="ComingNextEasierToUse" xml:space="preserve">
     <value>Easier to read and press: larger text, higher contrast, less motion, large buttons, the screen kept on during a round, and better support for screen readers.</value>
   </data>
@@ -387,12 +381,24 @@
   <data name="Nov2026Crosses" xml:space="preserve">
     <value>You can record crosses. Write down the pod parent, the pollen parent, the day and how you did it, then what came of it. Seed goes into seed lots you can sow from, a seedling keeps both parents in the family tree, and the cross log shows what came of every cross.</value>
   </data>
+  <data name="Nov2026ReadablePages" xml:space="preserve">
+    <value>Backups also open as pages in any browser, without the app.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026BackupFolder" xml:space="preserve">
+    <value>On Chrome and Edge, backups can go to a folder you choose.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
   <data name="Nov2026OutsideLinks" xml:space="preserve">
     <value>Guides now end with a short list of pages from other sites, and a pest case, a plant and a genus in the dictionary link to the page about their pest or plant group. They open in a new tab and need a connection.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
   </data>
   <data name="Nov2026Pollen" xml:space="preserve">
     <value>Crossbreeding is complete. Keep pollen with where it came from, when you collected it and where it is kept. Today shows a plant coming into flower with the pollen you have stored from other plants of its genus, add traits to plants and seedlings, and compare the seedlings from one cross side by side.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026WriteToMe" xml:space="preserve">
+    <value>Write to me from Settings or under any Help answer, to report a problem or suggest an idea.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
   </data>
   <data name="Nov2026Batches" xml:space="preserve">
@@ -413,6 +419,10 @@
   </data>
   <data name="Nov2026NeedsAHand" xml:space="preserve">
     <value>Mark plants that need a hand, like high up or heavy.</value>
+    <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
+  </data>
+  <data name="Nov2026RecentlyRemoved" xml:space="preserve">
+    <value>Put back plants, cuttings, photos and notes you removed, from Recently removed under Tidy up.</value>
     <comment>A line on the list of changes. New lines are added here, in English and Danish, with a key named for the month and what changed.</comment>
   </data>
 </root>

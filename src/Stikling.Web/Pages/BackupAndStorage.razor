@@ -4,6 +4,7 @@
 @inject BackupService Backup
 @inject ILogger<BackupAndStorage> Logger
 @inject DeviceFiles Files
+@inject BackupFolder Folder
 @inject IPlantRepository Plants
 @inject IPropagationRepository PropagationRepository
 @inject RoomService RoomService
@@ -28,6 +29,19 @@
         @(signedIn ? Strings.Account.BackupIntroSignedIn : Strings.Account.BackupIntroLocal)
     </p>
 
+    <label class="form-check">
+        <input type="checkbox" class="form-check-input" checked="@backupOptions.Readable" disabled="@busy" @onchange="e => SetOptionsAsync(backupOptions with { Readable = (bool)e.Value! })" />
+        <span class="form-check-label">@Strings.BackupFolder.OptionReadable<br /><span class="settings-hint">@Strings.BackupFolder.OptionReadableHint</span></span>
+    </label>
+    <label class="form-check">
+        <input type="checkbox" class="form-check-input" checked="@backupOptions.Small" disabled="@busy" @onchange="e => SetOptionsAsync(backupOptions with { Small = (bool)e.Value! })" />
+        <span class="form-check-label">@Strings.BackupFolder.OptionSmall</span>
+    </label>
+    @if (backupOptions.Small)
+    {
+        <p class="settings-hint" role="status">@Strings.BackupFolder.OptionSmallWarning @Strings.BackupFolder.OptionSmallNotLast</p>
+    }
+
     <div class="settings-actions">
         <button type="button" class="btn btn-primary" disabled="@busy" @onclick="ExportAsync">@Strings.Account.BackupSave</button>
         @* Restoring writes into the collection, which a helper or a viewer can't change *@
@@ -47,6 +61,24 @@
             <text>@Strings.Account.BackupNoneYet</text>
         }
     </p>
+
+    @* Only where the browser can write into a folder, like Chrome and Edge. The others keep the download. *@
+    @if (folderSupported)
+    {
+        <h3 class="h6 mt-4 mb-1">@Strings.BackupFolder.FolderHeading</h3>
+        <p class="settings-hint">@Strings.BackupFolder.FolderIntro</p>
+        @if (folderName is not null)
+        {
+            <p class="settings-hint">@F(Strings.BackupFolder.FolderIn, folderName)</p>
+        }
+        <div class="settings-actions">
+            <button type="button" class="btn btn-outline-primary btn-sm" disabled="@busy" @onclick="ChooseFolderAsync">@(folderName is null ? Strings.BackupFolder.FolderChoose : Strings.BackupFolder.FolderChange)</button>
+            @if (folderName is not null)
+            {
+                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="StopFolderAsync">@Strings.BackupFolder.FolderStop</button>
+            }
+        </div>
+    }
 
     @if (pending is { } file)
     {
@@ -127,6 +159,7 @@
         <p class="settings-hint">
             @F(Strings.Account.BackupUsing, Labels.Bytes(estimate.Usage))
         </p>
+        <p class="settings-hint">@Strings.Account.BackupRemovedPhotos</p>
         @if (estimate.Persisted)
         {
             <p class="settings-hint">@Strings.Account.BackupPersisted</p>
@@ -149,6 +182,9 @@
     /// <summary>A chosen file, read and described, waiting for the restore to be confirmed.</summary>
     private sealed record PendingRestore(string Name, BackupData Data, MemoryStream Zip);
 
+    private BackupOptions backupOptions = new();
+    private bool folderSupported;
+    private string? folderName;
     private DateOnly? lastBackup;
     private StorageEstimate? storage;
     private PendingRestore? pending;
@@ -171,6 +207,9 @@
     protected override async Task OnInitializedAsync()
     {
         lastBackup = await Files.GetLastBackupAsync();
+        backupOptions = await Files.GetBackupOptionsAsync();
+        folderSupported = await Folder.IsSupportedAsync();
+        folderName = folderSupported ? await Folder.GetNameAsync() : null;
         storage = await Db.EstimateAsync();
         photoCount = (await Db.GetAllAsync(RecordKinds.Photos)).Count(p => !p.IsDeleted);
         // Only for the wording of the hint, and read without loading Clerk
@@ -185,6 +224,24 @@
             focusFallback = false;
             await fallbackButton.FocusAsync();
         }
+    }
+
+    private async Task ChooseFolderAsync()
+    {
+        if (await Folder.ChooseAsync() is { } name)
+            folderName = name;
+    }
+
+    private async Task StopFolderAsync()
+    {
+        await Folder.ForgetAsync();
+        folderName = null;
+    }
+
+    private async Task SetOptionsAsync(BackupOptions chosen)
+    {
+        backupOptions = chosen;
+        await Files.SetBackupOptionsAsync(chosen);
     }
 
     private async Task ExportPlantsCsvAsync()
@@ -208,11 +265,23 @@
 
         try
         {
-            var counts = await Backup.ExportAsync();
-            lastBackup = TodayDate;
-            message = F(Strings.Account.BackupSaved, Labels.Plants(counts.Plants),
-                Plural.Of(counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other),
-                Plural.Of(counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other));
+            var made = await Backup.ExportAsync();
+            var counts = made.Counts;
+            // A backup without the full size photos doesn't count as the last one
+            lastBackup = await Files.GetLastBackupAsync();
+            var plants = Labels.Plants(counts.Plants);
+            var cuttings = Plural.Of(counts.Propagations, Strings.Account.Propagation_One, Strings.Account.Propagation_Other);
+            var photos = Plural.Of(counts.Photos, Strings.Account.Photo_One, Strings.Account.Photo_Other);
+            message = made.Folder is { } saved
+                ? F(Strings.BackupFolder.SavedInFolder, plants, cuttings, photos, saved)
+                : F(Strings.Account.BackupSaved, plants, cuttings, photos);
+            if (made.FolderFailed)
+                message += " " + Strings.BackupFolder.FolderFailed;
+            folderName = await Folder.GetNameAsync();
+            if (made.Small)
+                message += " " + Strings.BackupFolder.SavedSmall;
+            if (made.Parts > 1)
+                message += " " + F(Strings.BackupFolder.SavedParts, made.Parts);
         }
         catch (Exception ex)
         {
@@ -305,9 +374,16 @@
             {
                 if (await Backup.HasAnythingToSaveAsync())
                 {
-                    await Backup.ExportAsync("stikling-before-restore");
+                    // Always whole, since it is what undoes the restore
+                    var saved = await Backup.ExportAsync("stikling-before-restore", allowSmall: false);
                     lastBackup = TodayDate;
-                    savedAs = $"stikling-before-restore-{TodayDate:yyyy-MM-dd}.zip";
+                    savedAs = saved switch
+                    {
+                        { Folder: { } inFolder, Parts: > 1 } => F(Strings.BackupFolder.SavedAsPartsFolder, saved.Parts, inFolder, saved.FirstFile),
+                        { Folder: { } inFolder } => F(Strings.BackupFolder.SavedAsFolder, saved.FirstFile, inFolder),
+                        { Parts: > 1 } => F(Strings.BackupFolder.SavedAsParts, saved.Parts, saved.FirstFile),
+                        _ => F(Strings.Account.BackupSavedAs, saved.FirstFile)
+                    };
                 }
             }
             catch (Exception ex)
@@ -345,7 +421,7 @@
                 _ => Strings.Account.BackupAlreadyHere
             };
             if (savedAs is not null)
-                message += " " + F(Strings.Account.BackupSavedAs, savedAs);
+                message += " " + savedAs;
         }
         catch (Exception ex)
         {

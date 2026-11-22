@@ -292,4 +292,100 @@
     <value>Couldn't add the propagations on this device. Nothing was added, so you can try again.</value>
     <comment>Shown when the import of propagations failed before anything was added.</comment>
   </data>
+  <data name="RemovedLink" xml:space="preserve">
+    <value>Recently removed</value>
+    <comment>Link at the top of the Tidy up page to the page of things removed in the last 30 days.</comment>
+  </data>
+  <data name="RemovedPageTitle" xml:space="preserve">
+    <value>Recently removed · Stikling</value>
+    <comment>Title of the browser tab on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedTitle" xml:space="preserve">
+    <value>Recently removed</value>
+    <comment>Heading of the Recently removed page.</comment>
+  </data>
+  <data name="RemovedIntro" xml:space="preserve">
+    <value>Plants, cuttings, photos and notes you removed in the last 30 days. Put one back and it is there again with everything it had.</value>
+    <comment>Line under the heading of the Recently removed page.</comment>
+  </data>
+  <data name="RemovedEmpty" xml:space="preserve">
+    <value>Nothing removed in the last 30 days.</value>
+    <comment>Shown on the Recently removed page when there is nothing to put back.</comment>
+  </data>
+  <data name="RemovedSectionPlants" xml:space="preserve">
+    <value>Plants</value>
+    <comment>Heading of a section on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedSectionCuttings" xml:space="preserve">
+    <value>Cuttings</value>
+    <comment>Heading of a section on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedSectionPhotos" xml:space="preserve">
+    <value>Photos</value>
+    <comment>Heading of a section on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedSectionNotes" xml:space="preserve">
+    <value>Notes</value>
+    <comment>Heading of a section on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedWhen" xml:space="preserve">
+    <value>Removed {0}</value>
+    <comment>Under a row on the Recently removed page. {0} is when, like today, yesterday or 3 days ago.</comment>
+  </data>
+  <data name="RemovedPhotoOf" xml:space="preserve">
+    <value>Photo of {0}</value>
+    <comment>Name of a removed photo on the Recently removed page. {0} is the name of its plant or cutting.</comment>
+  </data>
+  <data name="RemovedNoteOn" xml:space="preserve">
+    <value>On {0}</value>
+    <comment>Under a removed note. {0} is the name of its plant or cutting.</comment>
+  </data>
+  <data name="RemovedNoteNoText" xml:space="preserve">
+    <value>Note with photos</value>
+    <comment>Shown for a removed note that has no text, only photos.</comment>
+  </data>
+  <data name="RemovedAlsoPutsBack" xml:space="preserve">
+    <value>Also puts back {0}</value>
+    <comment>Under a removed photo or note whose plant or cutting is removed too. {0} is its name.</comment>
+  </data>
+  <data name="PutBack" xml:space="preserve">
+    <value>Put back</value>
+    <comment>Button that puts a removed plant, cutting, photo or note back.</comment>
+  </data>
+  <data name="PutBackNamed" xml:space="preserve">
+    <value>Put back {0}</value>
+    <comment>Spoken name of the Put back button. {0} is what it puts back.</comment>
+  </data>
+  <data name="PutBackDonePlant" xml:space="preserve">
+    <value>{0} is back.</value>
+    <comment>Shown after a plant or cutting is put back. {0} is its name.</comment>
+  </data>
+  <data name="PutBackDonePhoto" xml:space="preserve">
+    <value>The photo of {0} is back.</value>
+    <comment>Shown after a photo is put back. {0} is the name of its plant or cutting.</comment>
+  </data>
+  <data name="PutBackDoneNote" xml:space="preserve">
+    <value>The note on {0} is back.</value>
+    <comment>Shown after a note is put back. {0} is the name of its plant or cutting.</comment>
+  </data>
+  <data name="PutBackOpen" xml:space="preserve">
+    <value>Open</value>
+    <comment>Link after the message that something was put back, to open it.</comment>
+  </data>
+  <data name="PutBackFailed" xml:space="preserve">
+    <value>It couldn't be put back, because it isn't here in full any more.</value>
+    <comment>Shown when Put back did nothing, for example because it was put back on another screen already.</comment>
+  </data>
+  <data name="RemovedOlder" xml:space="preserve">
+    <value>Things removed more than 30 days ago are no longer listed, but are still kept, so a backup restore can tell they were removed.</value>
+    <comment>Under the list on the Recently removed page.</comment>
+  </data>
+  <data name="RemovedElsewhere_One" xml:space="preserve">
+    <value>{0} thing removed on another device can only be put back on that device.</value>
+    <comment>Under the list on the Recently removed page. One thing, which this device only has the stripped copy of.</comment>
+  </data>
+  <data name="RemovedElsewhere_Other" xml:space="preserve">
+    <value>{0} things removed on another device can only be put back on that device.</value>
+    <comment>Under the list on the Recently removed page. {0} is how many.</comment>
+  </data>
 </root>

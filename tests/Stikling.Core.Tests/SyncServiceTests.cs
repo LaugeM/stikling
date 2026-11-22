@@ -210,6 +210,40 @@ public class SyncServiceTests
     }
 
     [Fact]
+    public async Task The_stripped_copy_of_a_deletion_does_not_replace_the_full_copy_on_the_device_that_deleted_it()
+    {
+        var plant = Plant("Monstera", Monday);
+        plant.DeletedAt = plant.UpdatedAt = Monday.AddDays(1);
+        // The device writes its fields in its own order. Here the full copy's JSON sorts before the
+        // stripped one, which is the case where the tie would otherwise go to the stripped copy.
+        phone.Records[(Plants, plant.Id)] = JsonSerializer.Deserialize<JsonElement>(
+            $$"""{"createdAt":"{{plant.CreatedAt:O}}","deletedAt":"{{plant.DeletedAt:O}}","id":"{{plant.Id}}","nickname":"Monstera","updatedAt":"{{plant.UpdatedAt:O}}"}""");
+        var stripped = JsonSerializer.Deserialize<JsonElement>(SyncRules.AsStored(Json(plant)));
+        server.Add(collectionId, Plants, stripped);
+
+        await Sync(phone);
+
+        var kept = phone.Get<Plant>(Plants, plant.Id);
+        Assert.Equal("Monstera", kept?.Nickname);
+        Assert.True(kept?.IsDeleted);
+    }
+
+    [Fact]
+    public async Task A_deletion_from_another_device_still_replaces_a_copy_that_isnt_deleted()
+    {
+        var plant = Plant("Monstera", Monday);
+        phone.Keep(Plants, plant);
+        var deleted = Plant("Monstera", Monday.AddDays(1), plant.Id);
+        deleted.DeletedAt = deleted.UpdatedAt;
+        server.Add(collectionId, Plants, JsonSerializer.Deserialize<JsonElement>(SyncRules.AsStored(Json(deleted))));
+
+        await Sync(phone);
+
+        Assert.True(phone.Get<Plant>(Plants, plant.Id)?.IsDeleted);
+        Assert.Null(phone.Get<Plant>(Plants, plant.Id)?.Nickname);
+    }
+
+    [Fact]
     public void A_record_that_isnt_deleted_is_kept_as_it_is()
     {
         var json = Json(Plant("Monstera", Monday));
