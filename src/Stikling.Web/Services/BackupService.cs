@@ -19,7 +19,9 @@ public sealed record ImportSummary(int Added, int Updated, int BroughtBack, int 
 }
 
 /// <summary>What a backup made: what it holds, how many ZIP files it was split into, and whether it was made without the full size photos.</summary>
-public sealed record BackupExport(BackupCounts Counts, int Parts, bool Small);
+/// <param name="Folder">The name of the folder the backup was saved in, or null when it was downloaded.</param>
+/// <param name="FolderFailed">True when a folder is set but couldn't be written to, so the backup was downloaded instead.</param>
+public sealed record BackupExport(BackupCounts Counts, int Parts, bool Small, string? Folder = null, bool FolderFailed = false);
 
 /// <summary>How many photos went into the photo folders download, and how many couldn't be found on this device.</summary>
 public sealed record PhotoFolderSummary(int Added, int Skipped);
@@ -29,7 +31,7 @@ public sealed record PhotoFolderSummary(int Added, int Skipped);
 /// stores, plus the photos as ordinary .webp or .jpg files, whichever each was saved as, so the pictures are usable on their own,
 /// and the attached files under files/ as the PDFs and images they are.
 /// </summary>
-public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentService attachments, SyncRunner sync, DeviceFiles files, TimeProvider time)
+public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentService attachments, SyncRunner sync, DeviceFiles files, BackupFolder folder, TimeProvider time)
 {
     internal const string DataFile = "data.json";
 
@@ -60,8 +62,19 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
     /// <param name="allowSmall">False for a backup that is a safety net, like the one before a restore, which is always whole.</param>
     public async Task<BackupExport> ExportAsync(string filePrefix = "stikling-backup", bool allowSmall = true)
     {
+        // Before anything slow: the browser only gives the permission to write to the folder back on a tap, and the
+        // tap stops counting after a few seconds, which building the ZIP takes longer than
+        var useFolder = false;
+        var folderFailed = false;
+        if (await folder.GetNameAsync() is not null)
+        {
+            useFolder = await folder.RequestPermissionAsync();
+            folderFailed = !useFolder;
+        }
+
         var options = await files.GetBackupOptionsAsync();
         var small = options.Small && allowSmall;
+        var savedInFolder = false;
 
         // Deleted items travel too, so a restore doesn't bring back what was deleted elsewhere
         var data = new BackupData { ExportedAt = time.GetUtcNow() };
@@ -134,14 +147,28 @@ public sealed class BackupService(IndexedDb db, PhotoService photos, AttachmentS
                 }
             }
 
-            await files.DownloadAsync(BackupParts.FileName(filePrefix, today, part.Number, plan.Count, small), buffer.ToArray());
+            var fileName = BackupParts.FileName(filePrefix, today, part.Number, plan.Count, small);
+            var bytes = buffer.ToArray();
+            if (useFolder)
+            {
+                if (await folder.WriteAsync(fileName, bytes) is not null)
+                {
+                    savedInFolder = true;
+                    continue;
+                }
+
+                // The folder was removed or the browser said no, so this part and the rest are downloaded
+                useFolder = false;
+                folderFailed = true;
+            }
+            await files.DownloadAsync(fileName, bytes);
         }
 
         // A backup without the full size photos can't bring them back, so it doesn't count as the last one
         if (!small)
             await files.SetLastBackupAsync(today);
 
-        return new BackupExport(data.Counts, plan.Count, small);
+        return new BackupExport(data.Counts, plan.Count, small, savedInFolder ? await folder.GetNameAsync() : null, folderFailed);
     }
 
     // What a thumbnail is counted as when working out the parts of a backup that only has those
