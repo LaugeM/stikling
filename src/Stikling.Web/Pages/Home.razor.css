@@ -494,6 +494,33 @@
     color: var(--pa-muted);
 }
 
+.back-lost {
+    margin: 0 0 0.75rem;
+}
+
+.back-lost .chip-row {
+    margin-bottom: 0.5rem;
+}
+
+.back-lost-text {
+    margin: 0.5rem 0;
+    font-size: 0.9rem;
+    color: var(--pa-muted);
+}
+
+.back-lost-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.back-lost .btn {
+    min-height: 2.75rem;
+    display: inline-flex;
+    align-items: center;
+}
+
 .back-rows {
     list-style: none;
     margin: 0;

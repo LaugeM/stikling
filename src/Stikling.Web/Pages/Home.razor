@@ -192,6 +192,40 @@ else
                 @(back.Kind == AwayKind.Away ? Plural.Of(backDays, Strings.Care.TodayBackAway_One, Strings.Care.TodayBackAway_Other) : Plural.Of(backDays, Strings.Care.TodayBackQuiet_One, Strings.Care.TodayBackQuiet_Other))
                 @Strings.Care.TodayBackLead
             </p>
+            @* The first choice: nobody kept track of the watering, so it counts from today *@
+            <IfCan Edit>
+            <div class="back-lost">
+                @if (lostSavedCount is { } savedCount)
+                {
+                    <p class="back-lost-text" role="status">@Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other)</p>
+                }
+                else if (!lostOpen)
+                {
+                    <button type="button" class="btn btn-outline-primary btn-sm" @onclick="() => lostOpen = true">@Strings.Care.LostTrackAway</button>
+                }
+                else
+                {
+                    var lostPlants = LostPlants;
+                    <div class="chip-row" role="group" aria-label="@Strings.Care.LostTrackAway">
+                        <button type="button" class="chip @(lostAll ? "picked" : null)" aria-pressed="@(lostAll ? "true" : "false")" @onclick="() => lostAll = true">@Strings.Care.LostTrackAllPlants</button>
+                        <button type="button" class="chip @(lostAll ? null : "picked")" aria-pressed="@(lostAll ? "false" : "true")" @onclick="() => lostAll = false">@Strings.Care.LostTrackOneRoom</button>
+                    </div>
+                    @if (!lostAll)
+                    {
+                        <RoomPicker @bind-Value="lostPlace" Rooms="LostRooms" Label="@Strings.Care.LostTrackOneRoom" />
+                    }
+                    <p class="back-lost-text">@Strings.Care.LostTrackConfirm</p>
+                    @if (!lostAll && lostPlace is not null && lostPlants.Count == 0)
+                    {
+                        <p class="back-lost-text">@Strings.Care.LostTrackNone</p>
+                    }
+                    <div class="back-lost-actions">
+                        <button type="button" class="btn btn-primary btn-sm" disabled="@(awayBusy || lostPlants.Count == 0)" @onclick="LostTrackAsync">@Strings.Care.LostTrackConfirmButton</button>
+                        <button type="button" class="btn btn-link btn-sm" @onclick="() => lostOpen = false">@Strings.Common.Cancel</button>
+                    </div>
+                }
+            </div>
+            </IfCan>
             <ol class="back-rows">
                 @foreach (var (row, index) in sections.BackRows.Select((r, i) => (r, i)))
                 {
@@ -1432,6 +1466,46 @@ else
             ? F(Strings.Care.TodayBarLabelVisits, from, until, dayNumber, total,
                 Plural.Of(visitDates.Count, Strings.Care.TodayVisits_One, Strings.Care.TodayVisits_Other))
             : F(Strings.Care.TodayBarLabel, from, until, dayNumber, total);
+    }
+
+    // I lost track of watering while I was away: all plants or the ones in a room
+    private bool lostOpen;
+    private bool lostAll = true;
+    private string? lostPlace;
+    private int? lostSavedCount;
+
+    private IReadOnlyList<Room> LostRooms => Room.List(data.Places, plants, []);
+
+    private IReadOnlyList<Plant> LostPlants
+    {
+        get
+        {
+            var here = plants.Where(p => !p.IsDeleted && p.InCollection);
+            if (lostAll)
+                return here.ToList();
+            return data.Places.Named(lostPlace) is { } place
+                ? here.Where(p => data.Places.IsIn(p.PlaceId, place.Id)).ToList()
+                : [];
+        }
+    }
+
+    private async Task LostTrackAsync()
+    {
+        var chosen = LostPlants;
+        if (chosen.Count == 0)
+            return;
+
+        awayBusy = true;
+        try
+        {
+            await PlantService.LostTrackAsync(chosen);
+            lostSavedCount = chosen.Count;
+            await LoadAsync();
+        }
+        finally
+        {
+            awayBusy = false;
+        }
     }
 
     private async Task ImBackAsync()

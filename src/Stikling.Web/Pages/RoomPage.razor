@@ -4,6 +4,7 @@
 @inject MovingService Moving
 @inject ShelfService Shelf
 @inject PhotoService Photos
+@inject PlantService PlantService
 @inject IPlantRepository PlantRepository
 @inject IPropagationRepository PropagationRepository
 @inject TimeProvider Time
@@ -218,6 +219,31 @@ else
                 <SettingsRow Href="@($"plants?room={placeId}")" Title="@Strings.Shared.RoomPageShowInPlants" Detail="@Strings.Shared.RoomPageShowInPlantsDetail" />
                 <SettingsRow Href="rooms-and-tags" Title="@Strings.Shared.RoomPageManage" Detail="@Strings.Shared.RoomPageManageDetail" />
             </div>
+
+            @* Watering counts from today for what stands here, so a stretch nobody kept track of isn't learned as the pace *@
+            @if (here.Plants.Count > 0 && leftOn is null)
+            {
+                <IfCan Edit>
+                    <div class="room-section room-lost">
+                        @if (lostSavedCount is { } savedCount)
+                        {
+                            <p class="settings-message" role="status">@Plural.Of(savedCount, Strings.Care.LostTrackSavedPlants_One, Strings.Care.LostTrackSavedPlants_Other)</p>
+                        }
+                        else if (confirmingLost)
+                        {
+                            <p class="settings-hint">@Strings.Care.LostTrackConfirm</p>
+                            <div class="add-actions">
+                                <button type="button" class="btn btn-primary btn-sm" disabled="@busy" @onclick="LostTrackAsync">@Strings.Care.LostTrackConfirmButton</button>
+                                <button type="button" class="btn btn-link btn-sm" disabled="@busy" @onclick="() => confirmingLost = false">@Strings.Common.Cancel</button>
+                            </div>
+                        }
+                        else
+                        {
+                            <button type="button" class="btn btn-link btn-sm link-action" disabled="@busy" @onclick="() => confirmingLost = true">@Strings.Care.LostTrackRoom</button>
+                        }
+                    </div>
+                </IfCan>
+            }
         </div>
     </div>
 }
@@ -306,6 +332,31 @@ else
         {
             Logger.LogError(ex, "Bringing a room from before a move back into use failed");
             message = F(Strings.Moving.Error, ex.Message);
+        }
+
+        busy = false;
+    }
+
+    private bool confirmingLost;
+    private int? lostSavedCount;
+
+    private async Task LostTrackAsync()
+    {
+        if (view is not { } here)
+            return;
+
+        busy = true;
+        try
+        {
+            var plants = here.Plants.Select(r => r.Plant).ToList();
+            await PlantService.LostTrackAsync(plants);
+            lostSavedCount = plants.Count;
+            confirmingLost = false;
+        }
+        catch (Exception ex)
+        {
+            Logger.LogError(ex, "Saving I lost track for a room failed");
+            message = F(Strings.Care.RoundSaveFailed, ex.Message);
         }
 
         busy = false;

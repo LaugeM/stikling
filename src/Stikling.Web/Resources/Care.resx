@@ -1934,4 +1934,48 @@
     <value>One more</value>
     <comment>Button on Just one plant that picks the next plant.</comment>
   </data>
+  <data name="LostTrackPlant" xml:space="preserve">
+    <value>I lost track of watering</value>
+    <comment>Small action on a plant's page, offered when it hasn't been watered for much longer than usual. Sets the day watering counts from to today.</comment>
+  </data>
+  <data name="LostTrackRoom" xml:space="preserve">
+    <value>I lost track of watering here</value>
+    <comment>Action on a room's page. Sets the day watering counts from to today for every plant in the room.</comment>
+  </data>
+  <data name="LostTrackAway" xml:space="preserve">
+    <value>I lost track of watering while I was away</value>
+    <comment>First choice on the Welcome back list on Today after time away.</comment>
+  </data>
+  <data name="LostTrackConfirm" xml:space="preserve">
+    <value>Watering will count from today. Earlier waterings stay in the history.</value>
+    <comment>The line that asks before I lost track is saved.</comment>
+  </data>
+  <data name="LostTrackConfirmButton" xml:space="preserve">
+    <value>Count from today</value>
+    <comment>Button that saves I lost track.</comment>
+  </data>
+  <data name="LostTrackSaved" xml:space="preserve">
+    <value>Watering counts from today.</value>
+    <comment>Said after I lost track was saved for one plant.</comment>
+  </data>
+  <data name="LostTrackSavedPlants_One" xml:space="preserve">
+    <value>Watering counts from today for {0} plant.</value>
+    <comment>Said after I lost track was saved. {0} is the number of plants, here exactly one.</comment>
+  </data>
+  <data name="LostTrackSavedPlants_Other" xml:space="preserve">
+    <value>Watering counts from today for {0} plants.</value>
+    <comment>Said after I lost track was saved. {0} is the number of plants.</comment>
+  </data>
+  <data name="LostTrackAllPlants" xml:space="preserve">
+    <value>All plants</value>
+    <comment>Choice on the I lost track question: every plant in the collection.</comment>
+  </data>
+  <data name="LostTrackOneRoom" xml:space="preserve">
+    <value>One room</value>
+    <comment>Choice on the I lost track question: the plants in a room.</comment>
+  </data>
+  <data name="LostTrackNone" xml:space="preserve">
+    <value>There are no plants there to count from today.</value>
+    <comment>Said when the choice on I lost track has no plants.</comment>
+  </data>
 </root>
