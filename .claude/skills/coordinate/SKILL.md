@@ -21,7 +21,10 @@ A batch of 21 small features built with parallel workers came to about a third t
 
 ## 1. Note the usage
 
-Note the plan usage (weekly and 5-hour percentage) before the first worker starts, whether the user ran `/coordinate` or this session started the skill after a plan was approved. `mcp__ccd_session_mgmt__get_usage` reads it. It's reported at the end, with the usage after.
+Note the usage before the first worker starts, whether the user ran `/coordinate` or this session started the skill after a plan was approved. It's reported at the end, with the usage after.
+
+- In the desktop app, `mcp__ccd_session_mgmt__get_usage` reads the plan usage (weekly and 5-hour percentage).
+- Where that tool is missing, as in T3, note the time in UTC (`date -u +%Y-%m-%dT%H:%M`). At the end, run `python ~/.claude/scripts/session-cost.py <id>` with this session's id, which is the newest `.jsonl` in this project's folder under `~/.claude/projects`. It counts the workers too, since they are its subagents. If the id isn't clear, use `--since` with the noted time instead, and say that other sessions running meanwhile are counted too.
 
 ## 2. Plan
 
@@ -78,13 +81,13 @@ Don't run the parts in parallel. Each one builds on the one before, and they sha
 
 If the workers added or changed text, run the `translator` agent once over the whole branch for the Danish pass, as "Before opening a pull request" in CLAUDE.md says. Workers still write the Danish, so the build and tests pass while they work; the pass is what makes it read naturally.
 
-Check any UI change in the browser at phone width by running the `browser-check` agent, not by driving the browser here, then follow "Before opening a pull request" in CLAUDE.md. Don't review the finished branch in this session. Run the `reviewer` agent, which reads it with a fresh context.
+Check any UI change in the browser at phone width by running the `browser-check` agent (`browser-check-t3` in T3), not by driving the browser here, then follow "Before opening a pull request" in CLAUDE.md. Don't review the finished branch in this session. Run the `reviewer` agent, which reads it with a fresh context.
 
 ## 7. Report
 
 In the chat, not in the pull request, tell the user:
 
-- the plan usage before and after
+- the plan usage before and after, or in T3 the cost `session-cost.py` reports
 - how many workers ran, how many came back with questions and how many were sent back for fixes
 - every Danish line the translator changed, with the English, the old Danish and the new
 - what the reviewer found
