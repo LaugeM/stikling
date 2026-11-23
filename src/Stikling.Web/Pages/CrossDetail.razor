@@ -35,6 +35,10 @@ else
     {
         <p class="detail-sub">@view.Title</p>
     }
+    @if (pair is { Count: > 1 })
+    {
+        <p><a class="btn btn-link btn-sm link-action" href="crosses/@cross.Id/pair">@F(Strings.Crosses.PairLink, pair.Count)</a></p>
+    }
 
     <section class="detail-card">
         <h2>@Strings.Crosses.ParentsHeading</h2>
@@ -209,6 +213,7 @@ else
     private CrossBook? book;
     private CrossView? view;
     private CrossSeedlings? seedlings;
+    private PairHistory? pair;
     private bool loaded;
     private bool comparing;
     private readonly HashSet<Guid> picked = [];
@@ -228,6 +233,7 @@ else
         book = await Crosses.GetBookAsync();
         view = book.ViewOf(Id);
         seedlings = view is null ? null : book.SeedlingsOf(view.Cross);
+        pair = view is null ? null : book.PairOf(view.Cross);
         usedPollen = view?.Cross.PollenId is { } pollenId ? (await Pollens.GetAllAsync()).FirstOrDefault(p => p.Pollen.Id == pollenId) : null;
     }
 

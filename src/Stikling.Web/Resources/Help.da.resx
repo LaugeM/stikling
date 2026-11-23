@@ -762,9 +762,6 @@
   <data name="GoRoundRoomA2" xml:space="preserve">
     <value>&lt;em&gt;Tjekket&lt;/em&gt; kommer i plantens historik og fortæller vandingspåmindelsen at planten ikke er klar endnu. Du kan sagtens stoppe halvvejs. Åbner du runden igen samme dag, starter den ved den første uden noget logget. I starten er der et link til &lt;em&gt;Bare én plante&lt;/em&gt; og en kontakt til at springe de planter over der kræver en ekstra hånd.</value>
   </data>
-  <data name="GoRoundRoomA3" xml:space="preserve">
-    <value>Hvis din browser tillader det, holder appen skærmen tændt mens du går runden, så telefonen ikke låser mellem planterne. Det gælder også Vand planter, billedrunden i I dag, plantesitterarket og når du blander en batch. Du kan slå det fra med &lt;em&gt;Hold skærmen tændt under en runde&lt;/em&gt; i Indstillinger.</value>
-  </data>
   <data name="WalkingOrderQ" xml:space="preserve">
     <value>Kan jeg selv vælge rækkefølgen når jeg går runden i et rum?</value>
   </data>
@@ -1374,15 +1371,6 @@
   <data name="UseInchesA1" xml:space="preserve">
     <value>Ja. I Indstillinger, under Udseende, kan du vise længder i centimeter eller tommer, skrive datoer med dagen, måneden eller året først og bruge et 24-timers eller 12-timers ur. Når du er logget ind, følger valgene med til dine andre enheder. Størrelser gemmes altid i centimeter, så du mister ikke noget ved at skifte tilbage. Doser beholder enhederne fra flasken, milliliter og liter, og datovælgere følger din browser.</value>
   </data>
-  <data name="BiggerTextQ" xml:space="preserve">
-    <value>Kan teksten være større, eller knapperne nemmere at trykke på?</value>
-  </data>
-  <data name="BiggerTextA1" xml:space="preserve">
-    <value>Ja. Under &lt;em&gt;Udseende&lt;/em&gt; i Indstillinger kan du sætte teksten til &lt;em&gt;Større&lt;/em&gt; eller &lt;em&gt;Størst&lt;/em&gt;, oven i den tekststørrelse din telefon eller browser er sat til. &lt;em&gt;Højere kontrast&lt;/em&gt; giver mørkere tekst og tydeligere kanter, og &lt;em&gt;Mindre bevægelse&lt;/em&gt; fjerner de glidende og tonende overgange. Begge er også slået til når din telefon er sat til det. &lt;em&gt;Store knapper&lt;/em&gt; giver større knapper med mere plads imellem på runden og på Vand planter.</value>
-  </data>
-  <data name="BiggerTextA2" xml:space="preserve">
-    <value>Valgene gemmes med dine indstillinger, så de følger med til alle de enheder du er logget ind på.</value>
-  </data>
   <data name="KeepTrackSemiHydroReservoirQ" xml:space="preserve">
     <value>Hvordan holder jeg styr på reservoiret hos en semi-hydro-plante?</value>
   </data>
@@ -1651,7 +1639,7 @@
     <value>Åbn planten der bærer frøkapslen, tryk på Mere og vælg &lt;em&gt;Registrer en krydsning, som frøforælder&lt;/em&gt;. Vælg pollenforælderen blandt dine planter, eller skriv et navn hvis den ikke er en af dem. Udfyld dagen og hvordan du gjorde det, og senere hvad der kom ud af det. Efter den første krydsning kommer der et afsnit der hedder &lt;em&gt;Krydsninger&lt;/em&gt; på siden Stiklinger.</value>
   </data>
   <data name="RecordCrossA2" xml:space="preserve">
-    <value>Giv krydsningen et arbejdsnavn, for eksempel Mørk Stjerne. Det vises på frøplanterne indtil de får et kaldenavn eller et kultivarnavn. Krydsningsloggen viser alle krydsninger, om de lykkedes, og hvor mange frøplanter der er i live.</value>
+    <value>Giv krydsningen et arbejdsnavn, for eksempel Mørk Stjerne. Det vises på frøplanterne indtil de får et kaldenavn eller et kultivarnavn. Krydsningsloggen viser alle krydsninger, om de lykkedes, og hvor mange frøplanter der er i live. På en krydsning fører linket "Alle krydsninger mellem de to" til hver gang du har krydset de samme to forældre, uanset hvilken af dem der var frøforælder, med hvordan det gik hver gang og en linje der samler det hele.</value>
   </data>
   <data name="SeedLotQ" xml:space="preserve">
     <value>Hvad er et frøparti, og hvordan sår jeg fra det?</value>
@@ -1760,5 +1748,17 @@
   </data>
   <data name="WriteToMeLink" xml:space="preserve">
     <value>Fik du ikke svar? Skriv til mig</value>
+  </data>
+  <data name="GoRoundRoomA3" xml:space="preserve">
+    <value>Hvis din browser tillader det, holder appen skærmen tændt mens du går runden, så telefonen ikke låser mellem planterne. Det gælder også Vand planter, billedrunden i I dag, plantesitterarket og når du blander en batch. Du kan slå det fra med &lt;em&gt;Hold skærmen tændt under en runde&lt;/em&gt; i Indstillinger.</value>
+  </data>
+  <data name="BiggerTextQ" xml:space="preserve">
+    <value>Kan teksten være større, eller knapperne nemmere at trykke på?</value>
+  </data>
+  <data name="BiggerTextA1" xml:space="preserve">
+    <value>Ja. Under &lt;em&gt;Udseende&lt;/em&gt; i Indstillinger kan du sætte teksten til &lt;em&gt;Større&lt;/em&gt; eller &lt;em&gt;Størst&lt;/em&gt;, oven i den tekststørrelse din telefon eller browser er sat til. &lt;em&gt;Højere kontrast&lt;/em&gt; giver mørkere tekst og tydeligere kanter, og &lt;em&gt;Mindre bevægelse&lt;/em&gt; fjerner de glidende og tonende overgange. Begge er også slået til når din telefon er sat til det. &lt;em&gt;Store knapper&lt;/em&gt; giver større knapper med mere plads imellem på runden og på Vand planter.</value>
+  </data>
+  <data name="BiggerTextA2" xml:space="preserve">
+    <value>Valgene gemmes med dine indstillinger, så de følger med til alle de enheder du er logget ind på.</value>
   </data>
 </root>

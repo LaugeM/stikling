@@ -736,4 +736,44 @@
     <value>More about this pollen</value>
     <comment>Heading of the folded group on the pollen form with amount, used up day and note.</comment>
   </data>
+  <data name="PairLink" xml:space="preserve">
+    <value>Every cross of these two ({0})</value>
+    <comment>Link on a cross to the page of every time the same two parents were crossed. {0} is how many crosses.</comment>
+  </data>
+  <data name="PairTitle" xml:space="preserve">
+    <value>Every cross of these two</value>
+    <comment>Heading of the page that lists every cross of one pair of parents.</comment>
+  </data>
+  <data name="PairPageTitle" xml:space="preserve">
+    <value>Every cross of these two · Stikling</value>
+    <comment>Browser tab title of the pair history.</comment>
+  </data>
+  <data name="PairBack" xml:space="preserve">
+    <value>Back to the cross</value>
+    <comment>Back link on the pair history page.</comment>
+  </data>
+  <data name="PairCrosses_One" xml:space="preserve">
+    <value>{0} cross</value>
+    <comment>Total line of a pair history, exactly one cross.</comment>
+  </data>
+  <data name="PairCrosses_Other" xml:space="preserve">
+    <value>{0} crosses</value>
+    <comment>Total line of a pair history, more than one cross.</comment>
+  </data>
+  <data name="PairTook" xml:space="preserve">
+    <value>{0} took</value>
+    <comment>Total line of a pair history: how many crosses took.</comment>
+  </data>
+  <data name="PairPods_One" xml:space="preserve">
+    <value>{0} pod set</value>
+    <comment>On a cross in a pair history, exactly one pod set.</comment>
+  </data>
+  <data name="PairPods_Other" xml:space="preserve">
+    <value>{0} pods set</value>
+    <comment>On a cross in a pair history, several pods set.</comment>
+  </data>
+  <data name="PairSeed" xml:space="preserve">
+    <value>Seed: {0}</value>
+    <comment>On a cross in a pair history. {0} is the amount of seed, like 20 seeds.</comment>
+  </data>
 </root>
