@@ -61,6 +61,16 @@
     gap: 0.5rem;
 }
 
+/* Typed into on a phone, so the field and its buttons get a full tap target */
+.viewer-describe input,
+.viewer-describe-buttons .btn {
+    min-height: 44px;
+}
+
+.viewer-describe-buttons .btn {
+    min-width: 5.5rem;
+}
+
 .viewer-close {
     width: 2.75rem;
     height: 2.75rem;
