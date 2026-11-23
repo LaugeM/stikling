@@ -32,6 +32,23 @@ public static class PlantLineage
     }
 
     /// <summary>
+    /// When a cutting, pup, division or the like was last taken from the plant, and how many were taken in the
+    /// year up to today. Seed sowings are left out, since seeds aren't taken off the plant. Null when nothing counts.
+    /// </summary>
+    public static LastTaken? LastTaken(Plant plant, IEnumerable<Propagation> propagations, DateOnly today)
+    {
+        var taken = propagations
+            .Where(p => !p.IsDeleted && p.ParentPlantId == plant.Id && p.Type != PropagationType.Seed)
+            .ToList();
+        if (taken.Count == 0)
+            return null;
+        var yearAgo = today.AddDays(-365);
+        return new LastTaken(
+            taken.Max(p => p.StartedOn),
+            taken.Where(p => p.StartedOn > yearAgo).Sum(p => p.StartedCount));
+    }
+
+    /// <summary>
     /// How many generations a plant is from the oldest ancestor in its line: the number of ancestors,
     /// counting those that died, left or live elsewhere. Null when it has no parent.
     /// </summary>
@@ -187,6 +204,10 @@ public static class PlantLineage
             broughtIn > 0 ? broughtIn : null);
     }
 }
+
+/// <param name="On">The newest day something was taken from the plant.</param>
+/// <param name="InLastYear">Units taken in the 365 days up to today, 0 when the last was longer ago.</param>
+public sealed record LastTaken(DateOnly On, int InLastYear);
 
 /// <param name="Number">1 for a direct child of the oldest ancestor, 2 for its grandchild and so on.</param>
 /// <param name="Oldest">The oldest ancestor you have.</param>
