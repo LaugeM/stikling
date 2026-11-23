@@ -1165,6 +1165,20 @@ else
     [SupplyParameterFromQuery(Name = "entry")]
     public Guid? Entry { get; set; }
 
+    /// <summary>A photo to open full screen once the history is here, from All photos. Nothing happens if it isn't on this page.</summary>
+    [SupplyParameterFromQuery(Name = "photo")]
+    public Guid? PhotoToOpen { get; set; }
+
+    private Guid? photoOpened;
+
+    private void OpenLinkedPhoto()
+    {
+        if (PhotoToOpen is not { } photoId || photoOpened == photoId || timeline is null)
+            return;
+        photoOpened = photoId;
+        timeline.OpenPhoto(photoId);
+    }
+
     private enum StageView { None, Stage, PotUp, Failed, GaveAway, SplitOff, PassOn }
 
     private enum More { None, Menu, Flag, Dormant, Swap, Leaf, ThisLeaf }
@@ -1584,6 +1598,8 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        OpenLinkedPhoto();
+
         if (!scrollToPlants || propagation is null)
             return;
         scrollToPlants = false;
