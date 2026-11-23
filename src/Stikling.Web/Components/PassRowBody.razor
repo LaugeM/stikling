@@ -1,0 +1,24 @@
+@* The text and buttons of one plant or cutting on Water plants. A screen reader gets it as a group named by one
+   sentence, like "Monstera, dry, watered 3 days ago". The look is the page's: the content and styles stay there. *@
+
+<div class="pass-body" role="group" aria-label="@Sentence">
+    @ChildContent
+</div>
+
+@code {
+    [Parameter, EditorRequired]
+    public required string Name { get; set; }
+
+    /// <summary>What was logged today, like "Watered with Feed". The rest of the lines are then left out.</summary>
+    [Parameter]
+    public string? DoneText { get; set; }
+
+    /// <summary>The lines the row shows under the name.</summary>
+    [Parameter]
+    public IReadOnlyList<string?> Lines { get; set; } = [];
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string Sentence => CardSentences.WaterRow(Name, DoneText, [.. Lines]);
+}

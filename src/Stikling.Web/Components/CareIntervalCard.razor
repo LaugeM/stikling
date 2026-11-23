@@ -7,7 +7,7 @@
         <div class="care-head">
             <span class="care-tile" aria-hidden="true">@Icon</span>
             <div class="care-head-text">
-                <div class="care-label">@Group.Label</div>
+                <div class="care-label" tabindex="-1" @ref="label">@Group.Label</div>
                 <div class="care-meta">@(F(Strings.Care.CardDoneFor, Labels.Plants(all.Items.Count)))</div>
             </div>
             <button type="button" class="btn btn-outline-primary" disabled="@busy" @onclick="() => UndoAsync(all)">@Strings.Care.CardUndo</button>
@@ -18,7 +18,7 @@
         <div class="care-head">
             <span class="care-tile" aria-hidden="true">@Icon</span>
             <div class="care-head-text">
-                <div class="care-label">@Group.Label</div>
+                <div class="care-label" tabindex="-1" @ref="label">@Group.Label</div>
                 <div class="care-meta">@Labels.Plants(Group.Items.Count) · @CareIntervals.EveryText(Group.Interval)</div>
             </div>
             @if (!Coming && Remaining.Count >= 2 && Access.CanLog)
@@ -41,9 +41,9 @@
                 }
                 else
                 {
-                    <TodayRow @key="item.Plant.Id" DoneIsCare="true" DoneLabel="@(F(Strings.Care.CardDoneLabel, Group.Label))" OnDone="() => DoneAsync(item)"
+                    <TodayRow @key="item.Plant.Id" @ref="rows[item.Plant.Id]" DoneIsCare="true" DoneLabel="@(F(Strings.Care.CardDoneLabel, Group.Label))" OnDone="() => DoneAsync(item)"
                               OnPutOff="days => PutOffAsync(item, days)">
-                        <a class="item-card" href="plants/@item.Plant.Id">
+                        <a class="item-card" href="plants/@item.Plant.Id" aria-label="@CardSentences.CareRow(item.Plant.DisplayName, DaysSinceLast(item), Coming ? item.Due.DayNumber - Today.DayNumber : null)">
                             <SubjectThumb Subject="item.Plant" />
                             <div class="item-text">
                                 <div class="item-name">@item.Plant.DisplayName</div>
@@ -94,6 +94,38 @@
 
     private bool showAll;
     private bool busy;
+    private ElementReference label;
+    private readonly Dictionary<Guid, TodayRow> rows = [];
+
+    // Where focus goes after the render that follows an action: a row, or the name of the card
+    private Func<Task>? focusAfter;
+
+    /// <summary>Moves focus to the row of a plant, or to the name of the card when that row isn't shown.</summary>
+    public async Task FocusAsync(Guid? plantId)
+    {
+        try
+        {
+            if (plantId is { } id && rows.TryGetValue(id, out var row) && Shown.Any(i => i.Plant.Id == id && ActionOf(i) is null))
+                await row.FocusAsync();
+            else
+                await label.FocusAsync(preventScroll: true);
+        }
+        catch
+        {
+            // A card that has gone has nothing to focus
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (focusAfter is { } focus)
+        {
+            focusAfter = null;
+            await focus();
+        }
+    }
+
+    private int? DaysSinceLast(IntervalItem item) => item.Last is { } day ? Today.DayNumber - day.DayNumber : null;
 
     private CareAction? ActionOf(IntervalItem item) =>
         Done.TryGetValue((item.Interval.Id, item.Plant.Id), out var action) ? action : null;
@@ -137,13 +169,30 @@
         </svg>;
     };
 
-    private Task DoneAsync(IntervalItem item) =>
-        RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, [item], false)));
+    // The row is done and stays in the card, so focus goes to the next one still to do, or the name of the card
+    private async Task DoneAsync(IntervalItem item)
+    {
+        var next = Shown.SkipWhile(i => i.Plant.Id != item.Plant.Id).Skip(1).FirstOrDefault(i => ActionOf(i) is null && i.Plant.Id != item.Plant.Id);
+        await RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, [item], false)));
+        focusAfter = () => FocusAsync(next?.Plant.Id);
+        StateHasChanged();
+    }
 
-    private Task DoneForAllAsync() =>
-        RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, Remaining, true)));
+    private async Task DoneForAllAsync()
+    {
+        await RunAsync(() => OnLog.InvokeAsync(new CareLogRequest(Group, Remaining, true)));
+        focusAfter = () => FocusAsync(null);
+        StateHasChanged();
+    }
 
-    private Task UndoAsync(CareAction action) => RunAsync(() => OnUndo.InvokeAsync(action));
+    // The rows are to do again, so focus goes to the first of them
+    private async Task UndoAsync(CareAction action)
+    {
+        await RunAsync(() => OnUndo.InvokeAsync(action));
+        var first = action.Items.Count > 0 ? action.Items[0].Plant.Id : (Guid?)null;
+        focusAfter = () => FocusAsync(first);
+        StateHasChanged();
+    }
 
     private Task PutOffAsync(IntervalItem item, int days) =>
         RunAsync(() => OnPutOff.InvokeAsync(new CarePutOffRequest(item, days)));

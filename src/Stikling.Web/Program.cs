@@ -65,6 +65,7 @@ builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.H
 builder.Services.AddScoped<ThemeService>();
 builder.Services.AddScoped<LookService>();
 builder.Services.AddScoped<ScreenAwake>();
+builder.Services.AddScoped<Announcer>();
 builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<DisplayPreferences>();
 builder.Services.AddScoped<IAppLanguage>(services => services.GetRequiredService<LanguageService>());

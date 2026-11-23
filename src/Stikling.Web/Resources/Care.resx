@@ -1990,4 +1990,32 @@
     <value>Watering already counts from today.</value>
     <comment>Said after I lost track when every plant already counted watering from today.</comment>
   </data>
+  <data name="TodayEmptiedAnnounce" xml:space="preserve">
+    <value>{0}: emptied</value>
+    <comment>Read out by a screen reader after the outer pot is emptied. {0} is the plant's name, or how many plants, like '3 plants'.</comment>
+  </data>
+  <data name="TodayPutOffAnnounce" xml:space="preserve">
+    <value>{0}: put off</value>
+    <comment>Read out by a screen reader after a row on Today is put off. {0} is the plant's name.</comment>
+  </data>
+  <data name="TodayNotYetAnnounce" xml:space="preserve">
+    <value>{0}: not yet</value>
+    <comment>Read out by a screen reader after 'Still wet' or 'Not yet' on a watering row on Today. {0} is the plant's name.</comment>
+  </data>
+  <data name="TodayWaterChangedAnnounce" xml:space="preserve">
+    <value>{0}: water changed</value>
+    <comment>Read out by a screen reader after the water of a cutting is changed from Today. {0} is the cutting's name.</comment>
+  </data>
+  <data name="TodayCareDoneAnnounce" xml:space="preserve">
+    <value>{0}: done for {1}</value>
+    <comment>Read out by a screen reader after care from an interval is ticked off on Today. {0} is the kind of care, {1} the plant's name or how many plants.</comment>
+  </data>
+  <data name="TodayCareUndoneAnnounce" xml:space="preserve">
+    <value>{0}: undone for {1}</value>
+    <comment>Read out by a screen reader after a tick on a care card on Today is taken back. {0} is the kind of care, {1} the plant's name or how many plants.</comment>
+  </data>
+  <data name="RoundLookedOverAnnounce" xml:space="preserve">
+    <value>{0}: looked over</value>
+    <comment>Read out by a screen reader after Looked over on Go round. {0} is the plant's or cutting's name.</comment>
+  </data>
 </root>

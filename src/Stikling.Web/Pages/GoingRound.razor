@@ -7,6 +7,7 @@
 @using Stikling.Core.Settings
 @implements IAsyncDisposable
 @inject ScreenAwake Awake
+@inject Announcer Announcer
 @inject CoverPhotos Covers
 @inject IPlantRepository Plants
 @inject ILogger<GoingRound> Logger
@@ -117,6 +118,14 @@ else
     var day = days[index];
     var plant = card.Subject as Plant;
     var form = card.Form;
+    // What the card says, as one sentence for a screen reader
+    var lastWatered = form is { } watering && CareSummary.Latest(careLogs, card.Subject.Id, WateringForms.DoneKind(watering), Today) is { } lastLog
+        ? (int?)lastLog.DaysAgo : null;
+    (int, int)? lastReading = day.Reading is null && form is not null && CareSummary.LatestMoisture(careLogs, card.Subject.Id, Today) is { } latestReading
+        ? (latestReading.Value, latestReading.DaysAgo) : null;
+    var handLine = plant is not null && NeedsAHand.Line(plant) is { } hand ? F(Strings.Plants.NeedsAHandLine, hand) : null;
+    var dueLine = card.DueNow && card.Guess is { } dueGuess && plant is not null && day.WateredId is null
+        ? WateringText.Row(new WateringDue(plant, dueGuess, (dueGuess.CheckOn ?? Today) <= Today, Today, false), Today) : null;
     <div class="round" tabindex="-1" @ref="wrapper" @onkeydown="OnKeyAsync">
         <div class="round-head">
             <h1>@Title</h1>
@@ -140,7 +149,9 @@ else
             <h2 class="section-label round-heading">@heading</h2>
         }
 
-        <article class="round-card @MoveClass" @key="pos" aria-label="@card.Name">
+        <RoundCardFrame @key="pos" @ref="frame" Class="@($"round-card {MoveClass}")" Name="@card.Name" Place="@card.Heading" Form="form"
+                        LastWateredDaysAgo="lastWatered" ReadingToday="day.Reading?.Value" LastReading="lastReading" DueLine="@dueLine"
+                        HandLine="@handLine" Dormant="card.Dormant" LookedOverToday="day.LookedOverId is not null" PhotoToday="day.Photo">
             <div class="round-photo">
                 @if (CoverOf(card.Subject) is { } coverId)
                 {
@@ -168,17 +179,17 @@ else
                     {
                         <div class="round-species"><BotanicalName Genus="@species.Genus" Species="@species.Species" Cultivar="@species.Cultivar" /></div>
                     }
-                    @if (plant is not null && NeedsAHand.Line(plant) is { } handLine)
+                    @if (handLine is not null)
                     {
-                        <p class="round-meta">@F(Strings.Plants.NeedsAHandLine, handLine)</p>
+                        <p class="round-meta">@handLine</p>
                     }
                     @if (MetaOf(card, day) is { Length: > 0 } meta)
                     {
                         <p class="round-meta">@meta</p>
                     }
-                    @if (card.DueNow && card.Guess is { } guess && plant is not null && day.WateredId is null)
+                    @if (dueLine is not null)
                     {
-                        <p class="round-meta">@WateringText.Row(new WateringDue(plant, guess, (guess.CheckOn ?? Today) <= Today, Today, false), Today)</p>
+                        <p class="round-meta">@dueLine</p>
                     }
                     @if (card.Dormant)
                     {
@@ -261,11 +272,11 @@ else
 
                     @if (status is not null)
                     {
-                        <p class="today-row-status" role="status">@status</p>
+                        <p class="today-row-status">@status</p>
                     }
                 </div>
             </div>
-        </article>
+        </RoundCardFrame>
 
         <p class="round-keys">@Strings.Care.RoundKeys</p>
     </div>
@@ -324,6 +335,7 @@ else
     private List<int> queue = [];
     private int pos;
     private ElementReference wrapper;
+    private RoundCardFrame? frame;
     private ElementReference photoInput;
     private bool cameraAvailable;
     private bool cameraOpen;
@@ -456,7 +468,11 @@ else
         if (focusNext && loaded && pos < queue.Count)
         {
             focusNext = false;
-            try { await wrapper.FocusAsync(preventScroll: true); } catch { }
+            // The card takes focus, so its sentence is read out. Without a card it is the round itself.
+            if (frame is not null)
+                await frame.FocusAsync();
+            else
+                try { await wrapper.FocusAsync(preventScroll: true); } catch { }
         }
     }
 
@@ -528,7 +544,7 @@ else
         days = GoingRoundLogic.Days(cards, careLogs, todayEntries, Time);
     }
 
-    private async Task RunAsync(Func<Task> action, bool advance)
+    private async Task RunAsync(Func<Task> action, bool advance, string? announce = null)
     {
         if (busy)
             return;
@@ -538,6 +554,7 @@ else
         {
             await action();
             await RefreshAsync();
+            Announcer.Say(announce);
             if (advance)
                 await MoveAsync(1);
         }
@@ -545,6 +562,7 @@ else
         {
             Logger.LogError(ex, "A step in the daily round failed");
             status = F(Strings.Care.RoundSaveFailed, ex.Message);
+            Announcer.Say(status);
         }
         busy = false;
     }
@@ -556,7 +574,8 @@ else
         var (card, day) = Current;
         if (day.Reading?.Value == reading)
             return Task.CompletedTask;
-        return RunAsync(() => Answers.ReadingAsync(card.Subject.Id, reading, day.Reading?.Id, Labels.For), advance: false);
+        return RunAsync(() => Answers.ReadingAsync(card.Subject.Id, reading, day.Reading?.Id, Labels.For), advance: false,
+            announce: F(Strings.Care.WaterReads, card.Name, reading));
     }
 
     private Task WaterAsync()
@@ -565,8 +584,9 @@ else
         if (card.Form is not { } form)
             return Task.CompletedTask;
         if (day.WateredId is { } watered)
-            return RunAsync(() => Care.DeleteAsync(watered), advance: false);
-        return RunAsync(() => Answers.WaterAsync(card.Subject.Id, form, Labels.For), advance: true);
+            return RunAsync(() => Care.DeleteAsync(watered), advance: false, announce: F(Strings.Care.WaterUndone, card.Name));
+        return RunAsync(() => Answers.WaterAsync(card.Subject.Id, form, Labels.For), advance: true,
+            announce: F(Strings.Care.WaterWateredAnnounce, card.Name, WateringText.DoneLabel(form).ToLowerInvariant()));
     }
 
     // The reminder waits started by Looked over in this visit, by the entry's id, so taking one back can end its wait
@@ -583,7 +603,7 @@ else
                 // Taking it back also takes back the wait it started, so the plant is due on Today again
                 if (lookedOverWaits.Remove(looked, out var key))
                     await PutOffService.PutOffAsync(key, Today);
-            }, advance: false);
+            }, advance: false, announce: F(Strings.Care.WaterUndone, card.Name));
         }
 
         return RunAsync(async () =>
@@ -594,7 +614,7 @@ else
             if (card.Subject is Plant plant && card.DueNow && card.Guess is { } guess && day.WateredId is null
                 && await Answers.NotYetAsync(plant, guess, day.Reading?.Value, logReading: false, Labels.For) is { } wait)
                 lookedOverWaits[entry.Id] = wait.Key;
-        }, advance: true);
+        }, advance: true, announce: F(Strings.Care.RoundLookedOverAnnounce, card.Name));
     }
 
     private async Task PhotoAsync()
@@ -607,6 +627,7 @@ else
         {
             var (message, saved) = await SubjectPhotos.TakeAsync(photoInput, Current.Card.Subject);
             status = message;
+            Announcer.Say(message);
             if (saved)
                 await RefreshAsync();
         }
@@ -614,6 +635,7 @@ else
         {
             Logger.LogError(ex, "Adding a photo in the daily round failed");
             status = F(Strings.Care.PhotoRowFailed, ex.Message);
+            Announcer.Say(status);
         }
         busy = false;
     }
@@ -631,6 +653,7 @@ else
         {
             var (message, saved) = await SubjectPhotos.FinishAsync(Current.Card.Subject, shot);
             status = message;
+            Announcer.Say(message);
             if (saved)
             {
                 hasPhoto.Add(Current.Card.Subject.Id);
@@ -641,6 +664,7 @@ else
         {
             Logger.LogError(ex, "Adding a photo in the daily round failed");
             status = F(Strings.Care.PhotoRowFailed, ex.Message);
+            Announcer.Say(status);
         }
         busy = false;
     }
