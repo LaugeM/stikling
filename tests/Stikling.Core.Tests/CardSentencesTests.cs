@@ -85,7 +85,7 @@ public class CardSentencesTests
         In("da", () =>
         {
             Assert.Equal("Monstera, Stue, vandet for 6 dage siden", Round(place: "Stue"));
-            Assert.Equal("Monstera, vandet i dag, viser 4", Round(watered: 0, reading: 4));
+            Assert.Equal("Monstera, vandet i dag, målt til 4", Round(watered: 0, reading: 4));
             Assert.Equal("Monstera, vandet i går, seneste måling 7, i går", Round(watered: 1, last: (7, 1)));
             Assert.Equal("Monstera, ikke vandet endnu", Round(watered: null));
             Assert.Equal("Bregne, fyldt på for 3 dage siden", Round("Bregne", form: WateringForm.Reservoir, watered: 3));
