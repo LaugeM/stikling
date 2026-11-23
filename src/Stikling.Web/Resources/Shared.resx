@@ -1822,4 +1822,60 @@ Maybe</value>
     <value>Where it stands: {0} · {1}</value>
     <comment>Line on a plant or cutting. {0} are the latest readings, {1} the day.</comment>
   </data>
+  <data name="AllPhotosTitle" xml:space="preserve">
+    <value>All photos</value>
+    <comment>Heading and link text for the page with every photo of the plants and cuttings, by month.</comment>
+  </data>
+  <data name="AllPhotosPageTitle" xml:space="preserve">
+    <value>All photos · Stikling</value>
+    <comment>Browser tab title of the All photos page.</comment>
+  </data>
+  <data name="AllPhotosPlantLabel" xml:space="preserve">
+    <value>Plant</value>
+    <comment>Label of the plant dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosAllPlants" xml:space="preserve">
+    <value>All plants</value>
+    <comment>First choice in the plant dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosRoomLabel" xml:space="preserve">
+    <value>Room</value>
+    <comment>Label of the room dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosAllRooms" xml:space="preserve">
+    <value>All rooms</value>
+    <comment>First choice in the room dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosTagLabel" xml:space="preserve">
+    <value>Tag</value>
+    <comment>Label of the tag dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosAllTags" xml:space="preserve">
+    <value>All tags</value>
+    <comment>First choice in the tag dropdown on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosEmpty" xml:space="preserve">
+    <value>Photos you add to plants and cuttings show here.</value>
+    <comment>Empty state on the All photos page when there are no photos at all.</comment>
+  </data>
+  <data name="AllPhotosEmptyLink" xml:space="preserve">
+    <value>See your plants</value>
+    <comment>Link under the empty state on the All photos page.</comment>
+  </data>
+  <data name="AllPhotosNoMatch" xml:space="preserve">
+    <value>No photos match.</value>
+    <comment>Shown on the All photos page when the dropdowns leave no photos.</comment>
+  </data>
+  <data name="AllPhotosTileLabel" xml:space="preserve">
+    <value>{0}, {1}</value>
+    <comment>Spoken label of a photo on the All photos page. {0} is the plant or cutting, {1} the date.</comment>
+  </data>
+  <data name="AllPhotosShowEarlier" xml:space="preserve">
+    <value>Show earlier</value>
+    <comment>Button at the end of the All photos page that adds twelve more months.</comment>
+  </data>
+  <data name="AllPhotosLoading" xml:space="preserve">
+    <value>Loading…</value>
+    <comment>Shown on the All photos page while the photos are read.</comment>
+  </data>
 </root>

@@ -45,6 +45,7 @@
             <button type="button" class="btn btn-link btn-sm link-action phone-link" disabled="@(ShareCount == 0)" @onclick="OpenShare">@Strings.Plants.ListShareAsText</button>
             <a class="btn btn-link btn-sm link-action phone-link" href="plants/collection">@Strings.Plants.ListCollection</a>
             <a class="btn btn-link btn-sm link-action phone-link" href="wishlist">@Strings.Plants.ListWishlist</a>
+            <a class="btn btn-link btn-sm link-action phone-link" href="photos">@Strings.Shared.AllPhotosTitle</a>
             @if (scanAvailable)
             {
                 <a class="btn btn-link btn-sm link-action phone-link" href="scan">@Strings.QrLabels.ScanTitle</a>
@@ -125,6 +126,10 @@ else
             <a class="btn btn-link btn-sm link-action list-side-link" href="wishlist">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20s-7.5-4.6-7.5-10A4.3 4.3 0 0 1 12 7.4 4.3 4.3 0 0 1 19.5 10c0 5.4-7.5 10-7.5 10Z" /></svg>
                 @Strings.Plants.ListWishlist
+            </a>
+            <a class="btn btn-link btn-sm link-action list-side-link" href="photos">
+                <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 5.5h16v13H4ZM4 16l4.5-4.5 3.5 3.5 3-3 5 5" /><circle cx="9" cy="9.5" r="1.5" /></svg>
+                @Strings.Shared.AllPhotosTitle
             </a>
             @if (scanAvailable)
             {
