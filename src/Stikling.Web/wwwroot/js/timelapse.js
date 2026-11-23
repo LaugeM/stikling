@@ -50,8 +50,10 @@ export async function check(ids) {
     return { small, missing };
 }
 
+// The Reduce motion switch in Settings counts as well as the phone's own setting
 export function prefersReducedMotion() {
-    return window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
+    return window.stiklingTheme?.reducedMotion?.()
+        ?? window.matchMedia?.("(prefers-reduced-motion: reduce)").matches === true;
 }
 
 // ---- Drawing a frame ----

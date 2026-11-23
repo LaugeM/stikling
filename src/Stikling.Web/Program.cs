@@ -63,6 +63,8 @@ builder.Logging.AddSentry(options =>
 builder.Services.AddSingleton(TimeProvider.System);
 builder.Services.AddScoped(_ => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddScoped<ThemeService>();
+builder.Services.AddScoped<LookService>();
+builder.Services.AddScoped<ScreenAwake>();
 builder.Services.AddScoped<LanguageService>();
 builder.Services.AddScoped<DisplayPreferences>();
 builder.Services.AddScoped<IAppLanguage>(services => services.GetRequiredService<LanguageService>());

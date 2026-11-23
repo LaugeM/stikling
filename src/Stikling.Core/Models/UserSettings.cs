@@ -178,4 +178,35 @@ public sealed class UserSettings : Entity
     /// </summary>
     [JsonConverter(typeof(TolerantNullableEnumConverter<ClockStyle>))]
     public ClockStyle? Clock { get; set; }
+
+    /// <summary>
+    /// How big the text is, on top of the text size set on the phone or in the browser. Null means
+    /// <see cref="Models.TextSize.Normal"/>. Older settings without it read as null.
+    /// </summary>
+    [JsonConverter(typeof(TolerantNullableEnumConverter<TextSize>))]
+    public TextSize? TextSize { get; set; }
+
+    /// <summary>
+    /// Higher contrast, always. Off follows the phone, which can ask for more contrast itself. Older
+    /// settings without it read as off.
+    /// </summary>
+    public bool HighContrast { get; set; }
+
+    /// <summary>
+    /// Less motion, always. Off follows the phone, which can ask for less motion itself. Older
+    /// settings without it read as off.
+    /// </summary>
+    public bool ReduceMotion { get; set; }
+
+    /// <summary>
+    /// Bigger buttons with more room between them in Go round and Water plants. Older settings
+    /// without it read as off.
+    /// </summary>
+    public bool LargeButtons { get; set; }
+
+    /// <summary>
+    /// Whether the screen is kept on while Water plants, Go round and the like are open. Null and true
+    /// mean on, false means off. Older settings without it read as null.
+    /// </summary>
+    public bool? KeepScreenOn { get; set; }
 }

@@ -9,7 +9,7 @@ export function attach(nav, bubble) {
     let current = null; // the letter button the slide is on
 
     const buttons = () => [...nav.querySelectorAll("button[data-letter]")];
-    const reduced = () => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reduced = () => window.stiklingTheme.reducedMotion();
 
     const scrollTo = (button, smooth) => {
         document.getElementById(button.dataset.target)?.scrollIntoView({
