@@ -46,6 +46,17 @@ else
         <fieldset>
             <legend>@Strings.Shared.WishEditGettingIt</legend>
             <div class="mb-3">
+                <div class="form-label" id="wish-priority-label">@Strings.Shared.WishEditPriority</div>
+                <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="wish-priority-label">
+                    @foreach (var (option, label) in PriorityOptions)
+                    {
+                        var id = $"wish-priority-{option}";
+                        <input type="radio" class="btn-check" name="wish-priority" id="@id" checked="@(ShownPriority == option)" @onchange="() => ChoosePriority(option)" />
+                        <label class="btn btn-outline-primary" for="@id">@label</label>
+                    }
+                </div>
+            </div>
+            <div class="mb-3">
                 <label class="form-label" for="found-at">@Strings.Shared.WishEditFoundAt</label>
                 <InputText id="found-at" class="form-control" @bind-Value="wish.FoundAt" placeholder="@Strings.Shared.WishEditFoundAtPlaceholder" />
             </div>
@@ -145,6 +156,22 @@ else
     private bool loadedOnce;
 
     private bool IsNew => Id is null;
+
+    // A wish with no level shows Want, and keeps none unless the choice is touched
+    private WishPriority ShownPriority => wish?.Priority ?? WishPriority.Want;
+
+    private static (WishPriority Option, string Label)[] PriorityOptions =>
+    [
+        (WishPriority.MustHave, Strings.Shared.WishPriorityMustHave),
+        (WishPriority.Want, Strings.Shared.WishPriorityWant),
+        (WishPriority.Maybe, Strings.Shared.WishPriorityMaybe)
+    ];
+
+    private void ChoosePriority(WishPriority option)
+    {
+        if (wish is not null)
+            wish.Priority = option;
+    }
 
     protected override async Task OnParametersSetAsync()
     {
