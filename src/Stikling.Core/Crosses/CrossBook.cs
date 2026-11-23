@@ -135,6 +135,40 @@ public sealed class CrossBook
             .OrderByDescending(c => c.PollinatedOn).ThenByDescending(c => c.CreatedAt)
             .Select(c => new CrossRow(ViewOf(c), SeedlingsOf(c)))];
 
+    /// <summary>
+    /// Every cross of the same two parents as this one, in either direction, this one included, newest
+    /// pollination first. Nothing is stored: it is found by comparing the parents of the crosses.
+    /// </summary>
+    public PairHistory PairOf(Cross cross)
+    {
+        var rows = crosses
+            .Where(c => c.Id == cross.Id || SamePair(c, cross))
+            .OrderByDescending(c => c.PollinatedOn).ThenByDescending(c => c.CreatedAt)
+            .Select(c => new CrossRow(ViewOf(c), SeedlingsOf(c)))
+            .ToList();
+        return new PairHistory(
+            rows,
+            rows.Count(r => r.View.Cross.Outcome == CrossOutcome.Took),
+            rows.Sum(r => r.Seedlings.Sown),
+            rows.Sum(r => r.Seedlings.CameUp),
+            rows.Sum(r => r.Seedlings.Alive));
+    }
+
+    private static bool SamePair(Cross a, Cross b) =>
+        SameParent(a.PodParentPlantId, a.PodParentName, b.PodParentPlantId, b.PodParentName)
+            && SameParent(a.PollenParentPlantId, a.PollenParentName, b.PollenParentPlantId, b.PollenParentName)
+        || SameParent(a.PodParentPlantId, a.PodParentName, b.PollenParentPlantId, b.PollenParentName)
+            && SameParent(a.PollenParentPlantId, a.PollenParentName, b.PodParentPlantId, b.PodParentName);
+
+    // A plant id only matches a plant id. Without one the kept or typed name decides, and no name matches nothing.
+    private static bool SameParent(Guid? idA, string? nameA, Guid? idB, string? nameB)
+    {
+        if (idA is not null || idB is not null)
+            return idA is not null && idA == idB;
+        return !string.IsNullOrWhiteSpace(nameA) && !string.IsNullOrWhiteSpace(nameB)
+            && string.Equals(nameA.Trim(), nameB.Trim(), StringComparison.CurrentCultureIgnoreCase);
+    }
+
     /// <summary>The crosses a plant was a parent in, newest first, as pod parent or as pollen parent.</summary>
     public IReadOnlyList<CrossView> CrossesOf(Plant plant, bool asPollenParent) =>
         [.. crosses

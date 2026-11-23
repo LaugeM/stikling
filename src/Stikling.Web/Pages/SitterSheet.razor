@@ -1,6 +1,7 @@
 @page "/sitter-sheet"
 @attribute [NeedsAccess(AccessLevel.Edit)]
-@implements IDisposable
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @* The page has the model's name, so the model is called by another *@
 @using SheetChoices = Stikling.Core.Models.SitterSheet
 @inject SitterSheetService SheetService
@@ -197,6 +198,15 @@
 </div>
 
 @code {
+    // Keeps the screen on while the sheet is open
+    private AwakeKeeper? keeper;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(true);
+    }
+
     private static (SheetLayout Value, string Label)[] layoutOptions =>
     [
         (SheetLayout.Labels, Strings.Care.SitterLayoutLabels),
@@ -316,7 +326,12 @@
         }
     }
 
-    public void Dispose() => disposed = true;
+    public async ValueTask DisposeAsync()
+    {
+        disposed = true;
+        if (keeper is not null)
+            await keeper.DisposeAsync();
+    }
 
     private RenderFragment ActionButtons => @<text>
         <button type="button" class="btn btn-primary" @onclick="PrintAsync">@Strings.Care.SitterPrint</button>

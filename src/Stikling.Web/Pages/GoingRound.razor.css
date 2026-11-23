@@ -354,3 +354,58 @@
     justify-content: center;
     min-height: 2.75rem;
 }
+
+/* Large buttons (Settings, Look): every target 48px or more with at least 8px between them. The meter
+   readings are 48px squares, Watered and Looked over sit one under the other, and Photo, Same angle
+   and Skip become outline buttons. The photo is shorter to make room. */
+:root[data-large-buttons] .round-photo {
+    max-height: 26vh;
+}
+
+:root[data-large-buttons] .round-readings .answer-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 24rem;
+}
+
+:root[data-large-buttons] .round-readings .chip {
+    min-height: 3rem;
+    font-size: 1rem;
+}
+
+:root[data-large-buttons] .round-actions,
+:root[data-large-buttons] .round-actions:has(.round-action:only-child) {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+}
+
+:root[data-large-buttons] .round-action {
+    min-height: 3.5rem;
+    font-size: 1.0625rem;
+}
+
+:root[data-large-buttons] .round-more {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+    margin-top: 0.5rem;
+}
+
+:root[data-large-buttons] .round-text-btn {
+    order: 2;
+    justify-content: center;
+    min-height: 3.25rem;
+    padding: 0 0.75rem;
+    border: 2px solid var(--pa-green);
+    border-radius: var(--bs-border-radius);
+    font-size: 1rem;
+}
+
+:root[data-large-buttons] label.round-text-btn {
+    order: 1;
+}
+
+:root[data-large-buttons] .round-same-angle {
+    order: 3;
+    grid-column: 1 / -1;
+}

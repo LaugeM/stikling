@@ -1,5 +1,7 @@
 @page "/treatment-recipes"
 @layout WideLayout
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @inject ITreatmentRecipeRepository Repository
 @inject IPestTreatmentRepository Treatments
 
@@ -194,6 +196,15 @@ else
 }
 
 @code {
+    // Keeps the screen on while a batch is being mixed
+    private AwakeKeeper? keeper;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(mixing is not null);
+    }
+
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "show")]
     public Guid? Show { get; set; }
@@ -319,5 +330,11 @@ else
         {
             busy = false;
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keeper is not null)
+            await keeper.DisposeAsync();
     }
 }

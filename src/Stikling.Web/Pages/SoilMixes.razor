@@ -1,6 +1,8 @@
 @page "/soil-mixes"
 @attribute [NeedsAccess(AccessLevel.Edit)]
 @layout WideLayout
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @inject ISoilMixRepository Repository
 @inject SoilMixService MixService
 @inject TimeProvider Time
@@ -377,6 +379,15 @@ else
 </Sheet>
 
 @code {
+    // Keeps the screen on while a batch is being mixed
+    private AwakeKeeper? keeper;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(batching is not null);
+    }
+
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
     [SupplyParameterFromQuery(Name = "show")]
     public Guid? Show { get; set; }
@@ -762,5 +773,11 @@ else
         {
             busy = false;
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keeper is not null)
+            await keeper.DisposeAsync();
     }
 }
