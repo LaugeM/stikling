@@ -8,7 +8,7 @@ using static Stikling.Core.Text.Format;
 namespace Stikling.Core.Wishlist;
 
 /// <summary>What goes in the text of a shared wishlist. Notes and the price are left out unless asked for.</summary>
-public sealed record WishlistTextOptions(bool Notes = false, bool MostToPay = false, bool AppLine = true);
+public sealed record WishlistTextOptions(bool Notes = false, bool MostToPay = false, bool AppLine = true, bool Priority = false);
 
 /// <summary>The wishlist as plain text, to send in a message. Only the wishes still open are in it.</summary>
 public static class WishlistText
@@ -17,15 +17,21 @@ public static class WishlistText
 
     public static string Write(IEnumerable<Wish> wishes, EverydayNameBook? names, WishlistTextOptions options)
     {
-        var open = wishes
-            .Where(w => !w.IsDeleted && !w.IsGot)
-            .OrderBy(w => w.DisplayName, StringComparer.CurrentCultureIgnoreCase)
+        var open = WishOrder.ByRank(wishes.Where(w => !w.IsDeleted && !w.IsGot))
+            .ThenBy(w => w.DisplayName, StringComparer.CurrentCultureIgnoreCase)
             .ToList();
 
         var text = new StringBuilder(Strings.Shared.WishlistTextHeading);
         foreach (var wish in open)
         {
             text.Append("\n- ").Append(Line(wish, names));
+            if (options.Priority && wish.Priority switch
+                {
+                    WishPriority.MustHave => Strings.Shared.WishlistTextMustHave,
+                    WishPriority.Maybe => Strings.Shared.WishlistTextMaybe,
+                    _ => null
+                } is { } level)
+                text.Append(" (").Append(level).Append(')');
             if (options.Notes && wish.Notes?.Trim() is { Length: > 0 } notes)
                 text.Append("\n  ").Append(notes.ReplaceLineEndings(" "));
             if (options.MostToPay && wish.MostToPay is { } price)

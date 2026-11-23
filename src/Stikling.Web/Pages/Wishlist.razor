@@ -46,6 +46,18 @@ else
         </div>
     }
 
+    @if (HasLevels)
+    {
+        <div class="btn-group segmented mb-3" role="radiogroup" aria-label="@Strings.Shared.WishPriorityFilterLabel">
+            @foreach (var (option, label) in LevelOptions)
+            {
+                var id = $"wish-level-{option?.ToString() ?? "all"}";
+                <input type="radio" class="btn-check" name="wish-level" id="@id" checked="@(level == option)" @onchange="() => SetLevel(option)" />
+                <label class="btn btn-outline-primary" for="@id">@label</label>
+            }
+        </div>
+    }
+
     @if (wishes.Count == 0)
     {
         <div class="empty-state">
@@ -62,6 +74,10 @@ else
     else if (wishes.Count > 0 && !Searching && open.Count == 0)
     {
         <p class="text-body-secondary">@Strings.Shared.WishlistNoOpen</p>
+    }
+    else if (LevelFiltering && shownOpen.Count == 0)
+    {
+        <p class="text-body-secondary">@Strings.Shared.WishPriorityNoMatch</p>
     }
 
     @if (shownOpen.Count > 0)
@@ -215,6 +231,10 @@ else
         <input type="checkbox" class="form-check-input" id="share-price" role="switch" @bind="sharePrice" />
         <label class="form-check-label" for="share-price">@Strings.Shared.WishlistSharePrice</label>
     </div>
+    <div class="form-check form-switch mb-2">
+        <input type="checkbox" class="form-check-input" id="share-priority" role="switch" @bind="sharePriority" />
+        <label class="form-check-label" for="share-priority">@Strings.Shared.WishlistSharePriority</label>
+    </div>
     <div class="form-check form-switch mb-3">
         <input type="checkbox" class="form-check-input" id="share-app" role="switch" @bind="shareApp" />
         <label class="form-check-label" for="share-app">@F(Strings.Shared.WishlistShareApp, WishlistText.AppLine)</label>
@@ -251,14 +271,34 @@ else
     private bool shareOpen;
     private bool shareNotes;
     private bool sharePrice;
+    private bool sharePriority;
     private bool shareApp = true;
+    private WishPriority? level;
     private string shareStatus = "";
     private bool disposed;
 
     private bool Searching => !string.IsNullOrWhiteSpace(search);
 
+    // The filter by level is only offered once a wish has one, and only applies while it is offered
+    private bool HasLevels => open.Any(w => w.Priority is not null);
+    private bool LevelFiltering => HasLevels && level is not null;
+
+    private IEnumerable<(WishPriority? Option, string Label)> LevelOptions =>
+    [
+        (null, Strings.Shared.WishPriorityAll),
+        (WishPriority.MustHave, Strings.Shared.WishPriorityMustHave),
+        (WishPriority.Want, Strings.Shared.WishPriorityWant),
+        (WishPriority.Maybe, Strings.Shared.WishPriorityMaybe)
+    ];
+
+    private void SetLevel(WishPriority? value)
+    {
+        level = value;
+        Refresh();
+    }
+
     private string ShareText => WishlistText.Write(open, dictionary?.EverydayNames,
-        new WishlistTextOptions(shareNotes, sharePrice, shareApp));
+        new WishlistTextOptions(shareNotes, sharePrice, shareApp, sharePriority));
 
     // The newest photo of each wish that has one, by the wish's id
     private IReadOnlyDictionary<Guid, Photo> photos = new Dictionary<Guid, Photo>();
@@ -274,7 +314,7 @@ else
         photos = await WishService.GetNewestPhotosAsync();
         onOrder = await OrderService.WishesOnTheWayAsync();
         ordersOnTheWay = [.. (await OrderService.GetAllAsync()).Where(o => o.IsOnTheWay)];
-        open = [.. all.Where(w => !w.IsGot).OrderBy(w => w.CreatedAt)];
+        open = [.. WishOrder.ByRank(all.Where(w => !w.IsGot)).ThenBy(w => w.CreatedAt)];
         got = [.. all.Where(w => w.IsGot).OrderByDescending(w => w.GotOn)];
         wishes = all;
         Refresh();
@@ -282,17 +322,18 @@ else
 
     private void Refresh()
     {
+        var byLevel = LevelFiltering ? open.Where(w => WishOrder.Level(w) == level).ToList() : open;
         if (Searching)
         {
             var found = WishSearch.Wishes(wishes ?? [], search, dictionary).ToHashSet();
-            shownOpen = open.Where(found.Contains).ToList();
+            shownOpen = byLevel.Where(found.Contains).ToList();
             shownGot = got.Where(found.Contains).ToList();
             havePlants = WishSearch.Plants(plants, search, dictionary);
             havePropagations = WishSearch.Propagations(propagations, search, dictionary);
         }
         else
         {
-            shownOpen = open;
+            shownOpen = byLevel;
             shownGot = got;
             havePlants = [];
             havePropagations = [];
@@ -316,6 +357,10 @@ else
     private static string MetaFor(Wish wish)
     {
         var parts = new List<string>();
+        if (wish.Priority == WishPriority.MustHave)
+            parts.Add(Strings.Shared.WishPriorityMustHave);
+        else if (wish.Priority == WishPriority.Maybe)
+            parts.Add(Strings.Shared.WishPriorityMaybe);
         if (!string.IsNullOrWhiteSpace(wish.FoundAt))
             parts.Add(wish.FoundAt.Trim());
         if (wish.MostToPay is { } price)
