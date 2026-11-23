@@ -180,6 +180,14 @@
     <value>{0} and {1}</value>
     <comment>Joins a list: {0} is the earlier items with commas, {1} the last.</comment>
   </data>
+  <data name="LastTaken" xml:space="preserve">
+    <value>Last taken {0}</value>
+    <comment>{0} is how long ago, like "today" or "12 days ago".</comment>
+  </data>
+  <data name="LastTakenWithYear" xml:space="preserve">
+    <value>Last taken {0} · {1} in the last year</value>
+    <comment>{0} is how long ago, like "12 days ago". {1} is a number.</comment>
+  </data>
   <data name="GrownInTurn_One" xml:space="preserve">
     <value>{0} plant grown from those in turn</value>
     <comment>{0} is a number.</comment>

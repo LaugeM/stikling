@@ -4,6 +4,7 @@
 @using Stikling.Core.Settings
 @using Stikling.Core.Sync
 @inject ThemeService Theme
+@inject LookService Look
 @inject PublicPageService PublicPages
 @inject LanguageService Language
 @inject DisplayPreferences Display
@@ -129,6 +130,43 @@
                     <label class="btn btn-outline-primary" for="@id">@option.Label</label>
                 }
             </div>
+            <div class="theme-label mt-4" id="text-size-label">@Strings.Settings.TextSize</div>
+            <div class="btn-group segmented w-100" role="radiogroup" aria-labelledby="text-size-label" aria-describedby="text-size-hint">
+                @foreach (var option in textSizeOptions)
+                {
+                    var id = $"text-size-{option.Size.ToString().ToLowerInvariant()}";
+                    <input type="radio" class="btn-check" name="text-size" id="@id"
+                           checked="@(textSize == option.Size)" @onchange="() => SetTextSizeAsync(option.Size)" />
+                    <label class="btn btn-outline-primary" for="@id">@option.Label</label>
+                }
+            </div>
+            <p class="settings-hint" id="text-size-hint">
+                @Strings.Settings.TextSizeHint
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="high-contrast"
+                       checked="@highContrast" @onchange="SetHighContrastAsync" />
+                <label class="form-check-label" for="high-contrast">@Strings.Settings.HighContrast</label>
+            </div>
+            <p class="settings-hint">
+                @Strings.Settings.HighContrastHint
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="reduce-motion"
+                       checked="@reduceMotion" @onchange="SetReduceMotionAsync" />
+                <label class="form-check-label" for="reduce-motion">@Strings.Settings.ReduceMotion</label>
+            </div>
+            <p class="settings-hint">
+                @Strings.Settings.ReduceMotionHint
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="large-buttons"
+                       checked="@largeButtons" @onchange="SetLargeButtonsAsync" />
+                <label class="form-check-label" for="large-buttons">@Strings.Settings.LargeButtons</label>
+            </div>
+            <p class="settings-hint">
+                @Strings.Settings.LargeButtonsHint
+            </p>
         </section>
 
         <section class="settings-group @Closed("care")" id="care">
@@ -182,6 +220,14 @@
             </div>
             <p class="settings-hint">
                 @Strings.Settings.DailyRoundHint
+            </p>
+            <div class="form-check form-switch mt-4">
+                <input class="form-check-input" type="checkbox" role="switch" id="keep-screen-on"
+                       checked="@keepScreenOn" @onchange="SetKeepScreenOnAsync" />
+                <label class="form-check-label" for="keep-screen-on">@Strings.Settings.KeepScreenOn</label>
+            </div>
+            <p class="settings-hint">
+                @Strings.Settings.KeepScreenOnHint
             </p>
             <div class="theme-label mt-4" id="round-days-label">@Strings.Settings.RoundDays</div>
             <div class="chip-row" role="group" aria-labelledby="round-days-label">
@@ -552,6 +598,13 @@
         (ThemeMode.Dark, Strings.Settings.ThemeDark)
     ];
 
+    private static (TextSize Size, string Label)[] textSizeOptions =>
+    [
+        (TextSize.Normal, Strings.Settings.TextSizeNormal),
+        (TextSize.Larger, Strings.Settings.TextSizeLarger),
+        (TextSize.Largest, Strings.Settings.TextSizeLargest)
+    ];
+
     private static (EverydayNameLanguage Language, string Label)[] everydayOptions =>
     [
         (EverydayNameLanguage.English, Strings.Settings.EverydayEnglish),
@@ -583,6 +636,11 @@
     private int tagCount;
     private DateOnly? lastBackup;
     private bool photoReminder;
+    private TextSize textSize;
+    private bool highContrast;
+    private bool reduceMotion;
+    private bool largeButtons;
+    private bool keepScreenOn = true;
     private bool wateringReminder;
     private int emptyOuterPotMinutes;
 
@@ -615,6 +673,11 @@
         mode = await Theme.GetModeAsync();
         var settings = await SettingsService.GetAsync();
         photoReminder = settings.PhotoReminder;
+        textSize = settings.TextSize ?? TextSize.Normal;
+        highContrast = settings.HighContrast;
+        reduceMotion = settings.ReduceMotion;
+        largeButtons = settings.LargeButtons;
+        keepScreenOn = settings.KeepScreenOn ?? true;
         googlePhotos = settings.GooglePhotos;
         errorReportsOff = settings.ErrorReportsOff;
         wateringReminder = settings.WateringReminder;
@@ -951,6 +1014,36 @@
             await SettingsService.SetClockAsync(clock);
             await Display.ApplySavedAsync();
         }
+    }
+
+    private async Task SetTextSizeAsync(TextSize size)
+    {
+        textSize = size;
+        await Look.SetTextSizeAsync(size);
+    }
+
+    private async Task SetHighContrastAsync(ChangeEventArgs e)
+    {
+        highContrast = e.Value is true;
+        await Look.SetHighContrastAsync(highContrast);
+    }
+
+    private async Task SetReduceMotionAsync(ChangeEventArgs e)
+    {
+        reduceMotion = e.Value is true;
+        await Look.SetReduceMotionAsync(reduceMotion);
+    }
+
+    private async Task SetLargeButtonsAsync(ChangeEventArgs e)
+    {
+        largeButtons = e.Value is true;
+        await Look.SetLargeButtonsAsync(largeButtons);
+    }
+
+    private async Task SetKeepScreenOnAsync(ChangeEventArgs e)
+    {
+        keepScreenOn = e.Value is true;
+        await SettingsService.SetKeepScreenOnAsync(keepScreenOn);
     }
 
     private async Task SetModeAsync(ThemeMode newMode)

@@ -5,6 +5,8 @@
 @attribute [NeedsAccess(AccessLevel.Log)]
 @using GoingRoundLogic = Stikling.Core.Today.GoingRound
 @using Stikling.Core.Settings
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @inject CoverPhotos Covers
 @inject IPlantRepository Plants
 @inject ILogger<GoingRound> Logger
@@ -246,7 +248,7 @@ else
                                @ref="photoInput" @onchange="PhotoAsync" disabled="@busy" />
                         @if (cameraAvailable && hasPhoto.Contains(card.Subject.Id))
                         {
-                            <button type="button" class="round-text-btn" disabled="@busy" @onclick="() => cameraOpen = true">
+                            <button type="button" class="round-text-btn round-same-angle" disabled="@busy" @onclick="() => cameraOpen = true">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.EmptyPhoto</svg>
                                 @Strings.Camera.SameAngle
                             </button>
@@ -274,6 +276,9 @@ else
 }
 
 @code {
+    // Keeps the screen on while the page is open
+    private AwakeKeeper? keeper;
+
     [Parameter]
     public Guid PlaceId { get; set; }
 
@@ -445,6 +450,9 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(true);
+
         if (focusNext && loaded && pos < queue.Count)
         {
             focusNext = false;
@@ -708,5 +716,11 @@ else
                 Back();
                 break;
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keeper is not null)
+            await keeper.DisposeAsync();
     }
 }

@@ -45,6 +45,49 @@ public class SettingsServiceTests
     }
 
     [Fact]
+    public async Task The_look_settings_are_off_until_set_and_each_is_saved_on_its_own()
+    {
+        var fresh = await service.GetAsync();
+        Assert.Null(fresh.TextSize);
+        Assert.False(fresh.HighContrast);
+        Assert.False(fresh.ReduceMotion);
+        Assert.False(fresh.LargeButtons);
+        Assert.Null(fresh.KeepScreenOn);
+
+        await service.SetThemeAsync(ThemeMode.Dark);
+        await service.SetTextSizeAsync(TextSize.Largest);
+        await service.SetHighContrastAsync(true);
+        await service.SetReduceMotionAsync(true);
+        await service.SetLargeButtonsAsync(true);
+        await service.SetKeepScreenOnAsync(false);
+
+        var saved = Assert.Single(repository.Settings.Values);
+        Assert.Equal(TextSize.Largest, saved.TextSize);
+        Assert.True(saved.HighContrast);
+        Assert.True(saved.ReduceMotion);
+        Assert.True(saved.LargeButtons);
+        Assert.False(saved.KeepScreenOn);
+        Assert.Equal(ThemeMode.Dark, saved.Theme);
+
+        await service.SetHighContrastAsync(false);
+        Assert.False((await service.GetAsync()).HighContrast);
+        Assert.Equal(TextSize.Largest, (await service.GetAsync()).TextSize);
+    }
+
+    [Fact]
+    public void A_text_size_a_later_version_adds_reads_as_not_set_and_the_rest_still_reads()
+    {
+        var settings = System.Text.Json.JsonSerializer.Deserialize<UserSettings>(
+            """{"theme":"Dark","textSize":"Huge","highContrast":true}""",
+            new System.Text.Json.JsonSerializerOptions(System.Text.Json.JsonSerializerDefaults.Web));
+
+        Assert.NotNull(settings);
+        Assert.Null(settings.TextSize);
+        Assert.True(settings.HighContrast);
+        Assert.Equal(ThemeMode.Dark, settings.Theme);
+    }
+
+    [Fact]
     public async Task Changing_the_reminder_saves_it_and_keeps_the_theme()
     {
         await service.SetThemeAsync(ThemeMode.Light);

@@ -28,6 +28,15 @@ public static class PlantGivenText
             };
     }
 
+    /// <summary>"Last taken 3 days ago · 5 in the last year", or only the first part when none were taken in the last year.</summary>
+    public static string LastTakenLine(LastTaken last, DateOnly today)
+    {
+        var ago = Labels.DaysAgo(today.DayNumber - last.On.DayNumber);
+        return last.InLastYear > 0
+            ? F(Strings.PlantDetail.LastTakenWithYear, ago, last.InLastYear)
+            : F(Strings.PlantDetail.LastTaken, ago);
+    }
+
     private static string Taken(PlantGiven given) => JoinAnd(given.TakenByType.Select(t => t.Key switch
     {
         PropagationType.Offset => Plural.Of(t.Value, Strings.PlantDetail.TakenPup_One, Strings.PlantDetail.TakenPup_Other),

@@ -16,7 +16,7 @@ export function showAlert(id) {
     const element = document.getElementById(id);
     if (!element)
         return;
-    element.scrollIntoView({ behavior: "smooth", block: "center" });
+    element.scrollIntoView({ behavior: window.stiklingTheme.reducedMotion() ? "auto" : "smooth", block: "center" });
     element.focus({ preventScroll: true });
 }
 
@@ -31,7 +31,7 @@ export function focusField(id) {
 
 // Brings a section that was just opened on the page into view
 export function scrollToId(id) {
-    document.getElementById(id)?.scrollIntoView({ behavior: "smooth", block: "start" });
+    document.getElementById(id)?.scrollIntoView({ behavior: window.stiklingTheme.reducedMotion() ? "auto" : "smooth", block: "start" });
 }
 
 // Settings on a phone is one long page, so a link to a section scrolls to it. From 64rem only one

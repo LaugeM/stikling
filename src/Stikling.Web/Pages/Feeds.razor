@@ -1,5 +1,7 @@
 @page "/feeds"
 @layout WideLayout
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @inject IFeedRepository Repository
 @inject FeedService FeedService
 @inject IProductRepository ProductRepository
@@ -288,6 +290,15 @@ else
 </Sheet>
 
 @code {
+    // Keeps the screen on while a batch is being mixed
+    private AwakeKeeper? keeper;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(mixing is not null);
+    }
+
     [CascadingParameter]
     private MemberAccess Access { get; set; } = MemberAccess.Full(Guid.Empty);
 
@@ -534,5 +545,11 @@ else
         {
             busy = false;
         }
+    }
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keeper is not null)
+            await keeper.DisposeAsync();
     }
 }
