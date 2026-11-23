@@ -1112,6 +1112,7 @@ else
                             </a>
                         </li>
                         @CopyLinkAction
+                        @DescribeAction
                         <li>
                             <a class="sheet-action" href="plants/@plant.Id/story">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
@@ -1189,6 +1190,7 @@ else
                             </a>
                         </li>
                         @CopyLinkAction
+                        @DescribeAction
                         <li>
                             <a class="sheet-action" href="plants/@plant.Id/story">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
@@ -1306,6 +1308,7 @@ else
                             </a>
                         </li>
                         @CopyLinkAction
+                        @DescribeAction
                         <li>
                             <a class="sheet-action" href="plants/@plant.Id/story">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
@@ -1328,6 +1331,7 @@ else
                             </a>
                         </li>
                         @CopyLinkAction
+                        @DescribeAction
                         <li>
                             <a class="sheet-action" href="plants/@plant.Id/story">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
@@ -1348,6 +1352,10 @@ else
                         </li>
                     }
                 </ul>
+                break;
+
+            case More.Describe:
+                <DescribePlant Sections="DescribeSections" OnBack="() => more = More.Menu" />
                 break;
 
             case More.PotTogether:
@@ -1803,7 +1811,7 @@ else
         timeline.OpenPhoto(photoId);
     }
 
-    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, FoundPests, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut }
+    private enum More { None, Menu, Swap, Flag, Dormant, Quarantine, Transition, TransitionStep, PestCheck, FoundPests, Status, PassOn, Flowering, ThisFlowering, Leaf, ThisLeaf, Problem, ProblemUpdate, PotTogether, Some, SomeForm, TakeOut, Describe }
     private bool shareOpen;
     private bool shareOnLink;
     private Guid? shareBeforeId;
@@ -2061,6 +2069,7 @@ else
         More.SomeForm when someKind == SomeKind.GaveAway => Strings.PlantDetail.GaveSomeAway,
         More.SomeForm => Strings.PlantDetail.PottedSomeUp,
         More.TakeOut => Strings.PlantDetail.TakeOutAgain,
+        More.Describe => Strings.PlantDetail.DescribeMenu,
         _ => plant?.DisplayName ?? "",
     };
 
@@ -2113,6 +2122,127 @@ else
             };
             return i == 0 ? char.ToUpperInvariant(text[0]) + text[1..] : text;
         }));
+
+    // The text "Describe my plant" can write, part by part. A part with nothing to say is left out.
+    private IReadOnlyList<DescribeSection> DescribeSections
+    {
+        get
+        {
+            var sections = new List<DescribeSection>();
+            if (plant is null)
+                return sections;
+
+            void Add(DescribePart part, IEnumerable<string?> lines)
+            {
+                var kept = lines.OfType<string>().Where(l => l.Length > 0).ToList();
+                if (kept.Count > 0)
+                    sections.Add(new DescribeSection(part, kept));
+            }
+
+            if (plant.BotanicalName is { } botanical)
+            {
+                var called = everyday?.For(plant.Genus, Stikling.Core.Models.PlantNames.SpeciesToLookUp(plant.Species, plant.NameQualifier), plant.Cultivar);
+                Add(DescribePart.Name, [called is { } everydayName ? $"{botanical} ({everydayName})" : botanical]);
+            }
+            else if (!string.IsNullOrWhiteSpace(plant.Nickname))
+                Add(DescribePart.Name, [plant.Nickname.Trim()]);
+
+            if (places.NameOf(plant.PlaceId) is { } room)
+                Add(DescribePart.Room, [F(Strings.PlantDetail.DescribeRoom, room)]);
+
+            var growsIn = Labels.For(plant.Medium);
+            if (PotName(plant.InnerPotId) is { } innerPot)
+                growsIn += ", " + innerPot;
+            if (PotName(plant.OuterPotId) is { } outerPot)
+            {
+                var standingFormat = plant.OuterPotWateringShown switch
+                {
+                    PotWatering.Wick => Strings.PlantDetail.StandingInWithWick,
+                    PotWatering.Submerged => Strings.PlantDetail.StandingInWithWater,
+                    _ => Strings.PlantDetail.StandingIn
+                };
+                growsIn += ". " + F(standingFormat, outerPot);
+            }
+            if (Mix is { } mixUsed)
+            {
+                growsIn += ". " + F(Strings.PlantDetail.MixIn, mixUsed.Name);
+                if (!string.IsNullOrWhiteSpace(mixUsed.Recipe))
+                    growsIn += $" ({mixUsed.Recipe.Trim()})";
+            }
+            Add(DescribePart.Pot, [F(Strings.PlantDetail.DescribeGrowsIn, growsIn)]);
+
+            var stands = string.Join(" · ", new[]
+            {
+                standing is { Any: true } ? ReadingText.Stands(standing) : null,
+                LightText.WindowsLine(places, standingPlace) is { Length: > 0 } windows ? windows : null
+            }.OfType<string>());
+            Add(DescribePart.Light,
+            [
+                plant.Light is { } light ? F(Strings.PlantDetail.DescribeLight, Labels.For(light)) : null,
+                stands.Length > 0 ? stands : null
+            ]);
+
+            if (CareLikes.HasAny(plant))
+            {
+                var likes = string.Join(" · ", new[]
+                {
+                    plant.LikesLight is { } wantsLight ? Labels.For(wantsLight) : null,
+                    plant.LikesWater is { } wantsWater ? Labels.For(wantsWater) : null,
+                    plant.LikesHumidity is { } wantsHumidity ? Labels.For(wantsHumidity) : null
+                }.OfType<string>());
+                var rests = string.Join(", ", new[]
+                {
+                    plant.GrowingSeason is { } season ? Labels.For(season) : null,
+                    plant.RestHow is { } rest ? Labels.For(rest) : null
+                }.OfType<string>());
+                if (rests.Length > 0)
+                    likes += (likes.Length > 0 ? ". " : "") + rests;
+                if (likes.Length > 0)
+                    Add(DescribePart.Likes, [F(Strings.PlantDetail.DescribeLikes, likes)]);
+            }
+
+            var careParts = new List<string>();
+            if (lastWater is { } watered)
+                careParts.Add(WateringText.LastWater(watered, WaterForm));
+            if (headline.FirstOrDefault(h => h.Kind == CareKind.Fertilised).Last is { } fed)
+                careParts.Add(F(Strings.PlantDetail.DescribeFed, Labels.DaysAgo(fed.DaysAgo)));
+            if (careParts.Count > 0)
+            {
+                var careLine = string.Join(", ", careParts);
+                Add(DescribePart.Care, [char.ToUpperInvariant(careLine[0]) + careLine[1..]]);
+            }
+
+            if (recentChanges.Count > 0)
+            {
+                var lately = string.Join(", ", recentChanges.Select(change =>
+                {
+                    var when = Labels.DaysAgo(Today.DayNumber - change.Day.DayNumber);
+                    return change.Kind switch
+                    {
+                        RecentChangeKind.Arrived => F(Strings.PlantDetail.RecentArrived, when),
+                        RecentChangeKind.Repotted => F(Strings.PlantDetail.RecentRepotted, when),
+                        _ => F(Strings.PlantDetail.RecentMoved, when)
+                    };
+                }));
+                Add(DescribePart.Lately, [F(Strings.PlantDetail.DescribeLately, lately)]);
+            }
+
+            Add(DescribePart.Problems, PlantDescription.ProblemLines(openProblems, problemUpdates, Today)
+                .Concat(pests.Where(c => c.IsOpen && !c.IsDeleted).Select(item =>
+                    F(Strings.PlantDetail.DescribePests, Labels.For(item.Pest),
+                        F(Strings.PlantDetail.PestSince, Labels.For(item.Status).ToLower(System.Globalization.CultureInfo.CurrentCulture), Labels.Date(item.StartedOn))))));
+
+            Add(DescribePart.CameFrom, PlantStoryPage.CameFromLines(plant, allPlants, fromPropagation, sellers));
+
+            if (plant.PaidText is { } paid)
+                Add(DescribePart.Price, [F(Strings.PlantDetail.DescribePaid, paid)]);
+
+            if (plant.Tags.Count > 0)
+                Add(DescribePart.Tags, [F(Strings.PlantDetail.DescribeTags, string.Join(", ", plant.Tags))]);
+
+            return sections;
+        }
+    }
 
     // "6 cuttings and 2 leaves taken, 5 rooted · 2 given away and 1 sold"
     private IEnumerable<string> GivenParts => PlantGivenText.Parts(given, withMoney: true);
@@ -2656,6 +2786,16 @@ else
                     false => F(Strings.PlantDetail.CopyLinkFailed, PlantLink),
                     _ => Strings.PlantDetail.CopyLinkHint
                 })</small></span>
+            </button>
+        </li>
+    };
+
+    private RenderFragment DescribeAction => __builder =>
+    {
+        <li>
+            <button type="button" class="sheet-action" @onclick="() => OpenMore(More.Describe)">
+                <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Document</svg>
+                <span class="sheet-action-text"><b>@Strings.PlantDetail.DescribeMenu</b><small>@Strings.PlantDetail.DescribeMenuHint</small></span>
             </button>
         </li>
     };
