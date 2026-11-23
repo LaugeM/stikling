@@ -345,7 +345,7 @@ else
 <PotFitSheet Uses="uses" @bind-Open="fitOpen" StartPotId="fitStart" />
 
 <PhotoViewer PhotoList="viewerPhotos" @bind-Index="viewerIndex" CoverPhotoId="ViewerCoverId"
-             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDelete="DeleteViewerPhotoAsync" />
+             OnSetCover="SetCoverAsync" OnFrame="FrameAsync" OnDescribe="DescribeAsync" OnDelete="DeleteViewerPhotoAsync" />
 
 @code {
     /// <summary>An item to scroll to and mark. Set by Search.</summary>
@@ -706,6 +706,8 @@ else
     }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
+
+    private Task DescribeAsync((Photo Photo, string? Description) change) => Photos.SetDescriptionAsync(change.Photo, change.Description);
 
     private async Task DeleteViewerPhotoAsync(Photo photo)
     {

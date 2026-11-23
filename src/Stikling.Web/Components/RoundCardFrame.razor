@@ -1,0 +1,70 @@
+@* The card on Go round. It is one sentence to a screen reader, like "Monstera, living room, watered 6 days ago", and it
+   can take focus, so each card is read out when it comes up. The look is the page's: the card's content and
+   styles stay in the page. *@
+
+<article class="@Class" tabindex="-1" aria-label="@Sentence" @ref="element">
+    @ChildContent
+</article>
+
+@code {
+    private ElementReference element;
+
+    [Parameter]
+    public string? Class { get; set; }
+
+    [Parameter, EditorRequired]
+    public required string Name { get; set; }
+
+    /// <summary>The spot or room the card sits under, when the round says it.</summary>
+    [Parameter]
+    public string? Place { get; set; }
+
+    /// <summary>How the plant is watered. Null for a propagation.</summary>
+    [Parameter]
+    public WateringForm? Form { get; set; }
+
+    [Parameter]
+    public int? LastWateredDaysAgo { get; set; }
+
+    [Parameter]
+    public int? ReadingToday { get; set; }
+
+    [Parameter]
+    public (int Value, int DaysAgo)? LastReading { get; set; }
+
+    /// <summary>The reminder line the card shows when the plant is due.</summary>
+    [Parameter]
+    public string? DueLine { get; set; }
+
+    /// <summary>The line about a plant that needs a hand.</summary>
+    [Parameter]
+    public string? HandLine { get; set; }
+
+    [Parameter]
+    public bool Dormant { get; set; }
+
+    [Parameter]
+    public bool LookedOverToday { get; set; }
+
+    [Parameter]
+    public bool PhotoToday { get; set; }
+
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+
+    private string Sentence => CardSentences.GoRoundCard(
+        Name, Place, Form, LastWateredDaysAgo, ReadingToday, LastReading, DueLine, HandLine, Dormant, LookedOverToday, PhotoToday);
+
+    /// <summary>Moves focus to the card.</summary>
+    public async ValueTask FocusAsync()
+    {
+        try
+        {
+            await element.FocusAsync(preventScroll: true);
+        }
+        catch
+        {
+            // A card that has gone has nothing to focus
+        }
+    }
+}

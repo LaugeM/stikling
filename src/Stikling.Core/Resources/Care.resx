@@ -575,4 +575,71 @@
     <value>Ask someone to help: {0}</value>
     <comment>A line on a plant's card on the plant-sitter sheet for a plant marked as needing a hand. {0} is the marks, like "high up, heavy".</comment>
   </data>
+  <data name="SentenceToday" xml:space="preserve">
+    <value>today</value>
+    <comment>Said in a card's sentence for a screen reader: when something last happened, like 'watered today'.</comment>
+  </data>
+  <data name="SentenceYesterday" xml:space="preserve">
+    <value>yesterday</value>
+  </data>
+  <data name="SentenceDaysAgo" xml:space="preserve">
+    <value>{0} days ago</value>
+    <comment>{0} is the number of days, 2 or more.</comment>
+  </data>
+  <data name="SentenceWatered" xml:space="preserve">
+    <value>watered {0}</value>
+    <comment>{0} is when, like 'today' or '6 days ago'. This and the lines like it are in a card's sentence for a screen reader.</comment>
+  </data>
+  <data name="SentenceRefilled" xml:space="preserve">
+    <value>refilled {0}</value>
+  </data>
+  <data name="SentenceToppedUp" xml:space="preserve">
+    <value>topped up {0}</value>
+  </data>
+  <data name="SentenceNotWatered" xml:space="preserve">
+    <value>not watered yet</value>
+  </data>
+  <data name="SentenceNotRefilled" xml:space="preserve">
+    <value>not refilled yet</value>
+  </data>
+  <data name="SentenceNotToppedUp" xml:space="preserve">
+    <value>not topped up yet</value>
+  </data>
+  <data name="SentenceReads" xml:space="preserve">
+    <value>reads {0}</value>
+    <comment>{0} is today's meter reading, 0 to 10.</comment>
+  </data>
+  <data name="SentenceLastReading" xml:space="preserve">
+    <value>last reading {0}, {1}</value>
+    <comment>{0} is the reading, {1} is when, like '3 days ago'.</comment>
+  </data>
+  <data name="SentenceDormant" xml:space="preserve">
+    <value>dormant</value>
+  </data>
+  <data name="SentenceLookedOverToday" xml:space="preserve">
+    <value>looked over today</value>
+  </data>
+  <data name="SentencePhotoToday" xml:space="preserve">
+    <value>photo added today</value>
+  </data>
+  <data name="SentenceDoneToday" xml:space="preserve">
+    <value>{0} today</value>
+    <comment>{0} is what was logged, like 'watered'.</comment>
+  </data>
+  <data name="SentenceLast" xml:space="preserve">
+    <value>last {0}</value>
+    <comment>{0} is when, like '6 days ago'. In the sentence of a care row on Today.</comment>
+  </data>
+  <data name="SentenceFirstTime" xml:space="preserve">
+    <value>first time</value>
+  </data>
+  <data name="SentenceDueToday" xml:space="preserve">
+    <value>due today</value>
+  </data>
+  <data name="SentenceDueTomorrow" xml:space="preserve">
+    <value>due tomorrow</value>
+  </data>
+  <data name="SentenceDueIn" xml:space="preserve">
+    <value>due in {0} days</value>
+  </data>
 </root>

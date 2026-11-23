@@ -3,6 +3,7 @@
 @using Stikling.Core.Settings
 @implements IAsyncDisposable
 @inject ScreenAwake Awake
+@inject Announcer Announcer
 @inject IPlantRepository Plants
 @inject IPropagationRepository PropagationRepository
 @inject PropagationCareService CuttingCare
@@ -31,9 +32,7 @@
 <div class="@(stage == Stage.Plants && !showDone ? "page-full " : null)water-page @(check == WaterCheck.Meter ? "water-meter" : "water-soil")">
 <a class="back-link" href="@BackHref">@BackName</a>
 
-<h1>@Strings.Care.WaterTitle</h1>
-
-<div class="visually-hidden" role="status" aria-live="polite">@announcement</div>
+<h1 tabindex="-1" @ref="title">@Strings.Care.WaterTitle</h1>
 
 @if (!loaded)
 {
@@ -224,10 +223,19 @@ else
     private bool showDone;
     private bool focusDone;
     private string? status;
-    private string? announcement;
     private Stage stage = Stage.Rooms;
     private WaterCheck check = WaterCheck.Soil;
     private ElementReference doneHeading;
+    private ElementReference title;
+
+    // After a plant is watered or the watering is taken back, focus goes on to the next plant still to do, or back to
+    // the plant itself. Without it focus is lost with the button that was pressed. The first button of a row is the
+    // first meter number, or Dry, or for the others the Watered button.
+    private Func<Task>? focusAfter;
+    private readonly Dictionary<(Guid, int), ElementReference> chipRefs = [];
+    private readonly Dictionary<Guid, ElementReference> actionRefs = [];
+
+    private enum Focus { Stay, Next, Same }
 
     private IReadOnlyList<Plant> plants = [];
     private IReadOnlyList<CareLog> careLogs = [];
@@ -284,6 +292,53 @@ else
         {
             focusDone = false;
             await doneHeading.FocusAsync();
+        }
+
+        if (focusAfter is { } focus)
+        {
+            focusAfter = null;
+            await focus();
+        }
+    }
+
+    private static async Task FocusAsync(ElementReference element)
+    {
+        try
+        {
+            await element.FocusAsync(preventScroll: true);
+        }
+        catch
+        {
+            // Something that is gone has nothing to focus
+        }
+    }
+
+    private ElementReference FirstButtonOf(Guid id) =>
+        AllRows().FirstOrDefault(r => r.Plant.Id == id) is { } row && row.Form != WateringForm.TopWatered
+            ? actionRefs.GetValueOrDefault(id)
+            : chipRefs.GetValueOrDefault((id, 0));
+
+    // Everything on the page in the order it is shown, with whether it is watered
+    private List<(Guid Id, bool Watered)> Listed() =>
+    [
+        .. groups.SelectMany(g => g.Rows.Where(r => r.Form == WateringForm.TopWatered)
+            .Concat(g.Rows.Where(r => r.Form != WateringForm.TopWatered))
+            .Select(r => (r.Plant.Id, r.DoneTodayId is not null))
+            .Concat(g.Cuttings.Select(c => (c.Propagation.Id, c.DoneTodayId is not null))))
+    ];
+
+    private void MoveFocus(Focus focus, Guid id)
+    {
+        if (focus == Focus.Same)
+        {
+            focusAfter = () => FocusAsync(FirstButtonOf(id));
+        }
+        else if (focus == Focus.Next)
+        {
+            var list = Listed();
+            var at = list.FindIndex(x => x.Id == id);
+            var next = at < 0 ? default : list.Skip(at + 1).FirstOrDefault(x => !x.Watered);
+            focusAfter = next.Id == Guid.Empty ? () => FocusAsync(title) : () => FocusAsync(FirstButtonOf(next.Id));
         }
     }
 
@@ -400,16 +455,17 @@ else
     private static string SaveFailed => Strings.Care.WaterSaveFailed;
 
     // Runs one row's save with only that row disabled, and says what happened for a screen reader
-    private async Task RowAsync(PassRow row, Func<Task<string>> save, string failure)
+    private async Task RowAsync(PassRow row, Func<Task<string>> save, string failure, Focus focus = Focus.Stay)
     {
         if (!saving.Add(row.Plant.Id))
             return;
         status = null;
         try
         {
-            announcement = await save();
+            Announcer.Say(await save());
             careLogs = await CareLogs.GetAllAsync();
             Compute();
+            MoveFocus(focus, row.Plant.Id);
         }
         catch (Exception ex)
         {
@@ -482,7 +538,7 @@ else
             await Care.LogWateringsAsync(
                 [new PassWatering(row.Plant.Id, WateringForms.DoneKind(row.Form), FeedOf(row))], Labels.For);
             return F(Strings.Care.WaterWateredAnnounce, row.Plant.DisplayName, WateringText.DoneLabel(row.Form).ToLowerInvariant());
-        }, "Logging the watering failed");
+        }, "Logging the watering failed", Focus.Next);
 
     private Task UndoAsync(PassRow row)
     {
@@ -492,7 +548,7 @@ else
         {
             await Care.UndoWateringAsync(id);
             return F(Strings.Care.WaterUndone, row.Plant.DisplayName);
-        }, "Undoing a watering failed");
+        }, "Undoing a watering failed", Focus.Same);
     }
 
     // The feed picked for the plant, or the one it gets with its watering when it is due
@@ -627,19 +683,42 @@ else
     private RenderFragment RowTemplate(PassRow row) => __builder =>
     {
         var plantId = row.Plant.Id;
-        var nameId = $"water-{plantId}";
         var busy = saving.Contains(plantId);
         var done = row.DoneTodayId is not null;
         var answer = AnswerOf(row);
         var feed = FeedOf(row);
         var open = pickerOpen.Contains(plantId);
         var lastWater = done ? null : CareSummary.LastWater(careLogs, plantId, Today);
+        var waterNote = done ? null : string.Join(" · ", new[] { PotWeight.Note(row.Plant.WaterType), PotWeight.DryAt(row.Plant) }.Where(n => n is not null));
+
+        // The line under the plant's name, which is also read out in the sentence of the row
+        string? stateLine = null;
+        if (!done && row.Form != WateringForm.TopWatered)
+        {
+            stateLine = (row.Form == WateringForm.InWater ? Strings.Care.WaterCheckWater : Strings.Care.WaterCheckReservoir)
+                + (row.Form == WateringForm.Reservoir && row.Plant.ReservoirFillCm is { } fill ? $" · {F(Strings.Care.ReservoirFillMeta, Lengths.Cm(fill))}" : null)
+                + (lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null);
+        }
+        else if (!done && answer != Answer.None)
+        {
+            stateLine = MetaOf(row);
+        }
+        else if (!done && check == WaterCheck.Meter && CareSummary.LatestMoisture(careLogs, plantId, Today) is { } latest)
+        {
+            stateLine = F(Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo))
+                + (lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null);
+        }
+        else if (!done && lastWater is { } watered)
+        {
+            stateLine = WateringText.LastWater(watered, row.Form);
+        }
 
         <li class="pass-item @(done ? "done" : null)">
             <SubjectThumb Subject="row.Plant" />
-            <div class="pass-body" role="group" aria-labelledby="@nameId">
-                <a id="@nameId" class="pass-name" href="@($"plants/{plantId}")">@row.Plant.DisplayName</a>
-                @if (!done && string.Join(" · ", new[] { PotWeight.Note(row.Plant.WaterType), PotWeight.DryAt(row.Plant) }.Where(n => n is not null)) is { Length: > 0 } waterNote)
+            <PassRowBody Name="@row.Plant.DisplayName" DoneText="@(done ? DoneText(row) : null)"
+                         Lines="@(new[] { waterNote, stateLine?.Replace(" · ", ", ") })">
+                <a class="pass-name" href="@($"plants/{plantId}")">@row.Plant.DisplayName</a>
+                @if (waterNote is { Length: > 0 })
                 {
                     <span class="pass-meta">@waterNote</span>
                 }
@@ -655,22 +734,14 @@ else
                 }
                 else if (row.Form != WateringForm.TopWatered)
                 {
-                    <span class="pass-meta">@(row.Form == WateringForm.InWater ? Strings.Care.WaterCheckWater : Strings.Care.WaterCheckReservoir)@(row.Form == WateringForm.Reservoir && row.Plant.ReservoirFillCm is { } fill ? $" · {F(Strings.Care.ReservoirFillMeta, Lengths.Cm(fill))}" : null)@(lastWater is { } topped ? $" · {WateringText.LastWater(topped, row.Form)}" : null)</span>
+                    <span class="pass-meta">@stateLine</span>
                     @FeedAndButton(row, WateringText.DoneLabel(row.Form), primary: true, busy, feed, open)
                 }
                 else
                 {
-                    @if (answer != Answer.None)
+                    @if (stateLine is not null)
                     {
-                        <span class="pass-meta">@MetaOf(row)</span>
-                    }
-                    else if (check == WaterCheck.Meter && CareSummary.LatestMoisture(careLogs, plantId, Today) is { } latest)
-                    {
-                        <span class="pass-meta">@(F(Strings.Care.RoundLastReading, latest.Value, Labels.DaysAgo(latest.DaysAgo)))@(lastWater is { } was ? $" · {WateringText.LastWater(was, row.Form)}" : null)</span>
-                    }
-                    else if (lastWater is { } watered)
-                    {
-                        <span class="pass-meta">@WateringText.LastWater(watered, row.Form)</span>
+                        <span class="pass-meta">@stateLine</span>
                     }
 
                     @if (check == WaterCheck.Meter)
@@ -681,7 +752,7 @@ else
                                 var value = n;
                                 var isPicked = row.Reading?.Value == n;
                                 <button type="button" class="chip @(isPicked ? "picked" : null)" aria-pressed="@(isPicked ? "true" : "false")"
-                                        disabled="@busy" @onclick="() => ReadingAsync(row, value)">@n</button>
+                                        disabled="@busy" @ref="chipRefs[(plantId, value)]" @onclick="() => ReadingAsync(row, value)">@n</button>
                             }
                         </div>
                     }
@@ -689,7 +760,7 @@ else
                     {
                         <div class="chip-row pass-soil" role="group" aria-label="@(F(Strings.Care.WaterSoilOf, row.Plant.DisplayName))">
                             <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => DryAsync(row)">@Strings.Care.WaterDry</button>
+                                    disabled="@busy" @ref="chipRefs[(plantId, 0)]" @onclick="() => DryAsync(row)">@Strings.Care.WaterDry</button>
                             <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
                                     disabled="@busy" @onclick="() => StillDampAsync(row)">@Strings.Care.WaterStillDamp</button>
                         </div>
@@ -708,21 +779,22 @@ else
                         @FeedAndButton(row, Strings.Care.WateringDoneWatered, primary: false, busy, feed, open)
                     }
                 }
-            </div>
+            </PassRowBody>
         </li>
     };
 
     // Cuttings in soil or bark: the same checks as a plant, saved to the propagation's care log
-    private async Task CuttingAsync(PassCutting cutting, Func<Task<string>> save, string failure)
+    private async Task CuttingAsync(PassCutting cutting, Func<Task<string>> save, string failure, Focus focus = Focus.Stay)
     {
         if (!saving.Add(cutting.Propagation.Id))
             return;
         status = null;
         try
         {
-            announcement = await save();
+            Announcer.Say(await save());
             cuttingLogs = await CuttingCare.GetAllAsync();
             Compute();
+            MoveFocus(focus, cutting.Propagation.Id);
         }
         catch (Exception ex)
         {
@@ -754,7 +826,7 @@ else
             return Task.CompletedTask;
         dryByFeel.Add(id);
         cuttingDamp.Remove(id);
-        announcement = F(Strings.Care.WaterDryAnnounce, cutting.Propagation.DisplayName);
+        Announcer.Say(F(Strings.Care.WaterDryAnnounce, cutting.Propagation.DisplayName));
         return Task.CompletedTask;
     }
 
@@ -765,7 +837,7 @@ else
             return Task.CompletedTask;
         cuttingDamp.Add(id);
         dryByFeel.Remove(id);
-        announcement = F(Strings.Care.WaterDampAnnounce, cutting.Propagation.DisplayName);
+        Announcer.Say(F(Strings.Care.WaterDampAnnounce, cutting.Propagation.DisplayName));
         return Task.CompletedTask;
     }
 
@@ -774,7 +846,7 @@ else
         {
             await CuttingCare.LogAsync(cutting.Propagation, PropagationCareKind.Watered, Today);
             return F(Strings.Care.WaterCuttingWatered, cutting.Propagation.DisplayName);
-        }, "Logging the watering of a cutting failed");
+        }, "Logging the watering of a cutting failed", Focus.Next);
 
     private Task CuttingUndoAsync(PassCutting cutting)
     {
@@ -784,7 +856,7 @@ else
         {
             await CuttingCare.DeleteAsync(id);
             return F(Strings.Care.WaterUndone, cutting.Propagation.DisplayName);
-        }, "Undoing the watering of a cutting failed");
+        }, "Undoing the watering of a cutting failed", Focus.Same);
     }
 
     private Answer AnswerOf(PassCutting cutting)
@@ -822,17 +894,20 @@ else
     private RenderFragment CuttingTemplate(PassCutting cutting) => __builder =>
     {
         var id = cutting.Propagation.Id;
-        var nameId = $"water-{id}";
         var name = cutting.Propagation.DisplayName;
         var busy = saving.Contains(id);
         var done = cutting.DoneTodayId is not null;
         var answer = AnswerOf(cutting);
         var last = done ? null : PropagationCareService.Latest(cuttingLogs, id, PropagationCareKind.Watered, Today);
+        var stateLine = done ? null
+            : answer != Answer.None ? MetaOf(cutting)
+            : last is { } was ? F(Strings.Care.WateringWateredAgo, Labels.DaysAgo(was.DaysAgo))
+            : null;
 
         <li class="pass-item @(done ? "done" : null)">
             <SubjectThumb Subject="cutting.Propagation" />
-            <div class="pass-body" role="group" aria-labelledby="@nameId">
-                <a id="@nameId" class="pass-name" href="@($"propagations/{id}")">@name</a>
+            <PassRowBody Name="@name" DoneText="@(done ? Strings.Care.WateringDoneWatered : null)" Lines="@(new[] { stateLine?.Replace(" · ", ", ") })">
+                <a class="pass-name" href="@($"propagations/{id}")">@name</a>
                 @if (done)
                 {
                     <div class="pass-doneline">
@@ -845,13 +920,9 @@ else
                 }
                 else
                 {
-                    @if (answer != Answer.None)
+                    @if (stateLine is not null)
                     {
-                        <span class="pass-meta">@MetaOf(cutting)</span>
-                    }
-                    else if (last is { } was)
-                    {
-                        <span class="pass-meta">@(F(Strings.Care.WateringWateredAgo, Labels.DaysAgo(was.DaysAgo)))</span>
+                        <span class="pass-meta">@stateLine</span>
                     }
 
                     @if (check == WaterCheck.Meter)
@@ -862,7 +933,7 @@ else
                                 var value = n;
                                 var isPicked = cutting.Reading?.Value == n;
                                 <button type="button" class="chip @(isPicked ? "picked" : null)" aria-pressed="@(isPicked ? "true" : "false")"
-                                        disabled="@busy" @onclick="() => CuttingReadingAsync(cutting, value)">@n</button>
+                                        disabled="@busy" @ref="chipRefs[(id, value)]" @onclick="() => CuttingReadingAsync(cutting, value)">@n</button>
                             }
                         </div>
                     }
@@ -870,7 +941,7 @@ else
                     {
                         <div class="chip-row pass-soil" role="group" aria-label="@(F(Strings.Care.WaterSoilOf, name))">
                             <button type="button" class="chip @(answer == Answer.Dry ? "picked" : null)" aria-pressed="@(answer == Answer.Dry ? "true" : "false")"
-                                    disabled="@busy" @onclick="() => CuttingDryAsync(cutting)">@Strings.Care.WaterDry</button>
+                                    disabled="@busy" @ref="chipRefs[(id, 0)]" @onclick="() => CuttingDryAsync(cutting)">@Strings.Care.WaterDry</button>
                             <button type="button" class="chip @(answer == Answer.Damp ? "picked" : null)" aria-pressed="@(answer == Answer.Damp ? "true" : "false")"
                                     disabled="@busy" @onclick="() => CuttingDampAsync(cutting)">@Strings.Care.WaterStillDamp</button>
                         </div>
@@ -887,7 +958,7 @@ else
                         }
                     </div>
                 }
-            </div>
+            </PassRowBody>
         </li>
     };
 
@@ -899,11 +970,11 @@ else
         <div class="pass-act">
             @if (primary)
             {
-                <button type="button" class="btn btn-primary pass-water" disabled="@busy" @onclick="() => WateredAsync(row)">@text</button>
+                <button type="button" class="btn btn-primary pass-water" disabled="@busy" @ref="actionRefs[plantId]" @onclick="() => WateredAsync(row)">@text</button>
             }
             else
             {
-                <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @onclick="() => WateredAsync(row)">@text</button>
+                <button type="button" class="btn btn-link link-action pass-anyway" disabled="@busy" @ref="actionRefs[plantId]" @onclick="() => WateredAsync(row)">@text</button>
             }
             @if (feedOptions.Count > 0)
             {

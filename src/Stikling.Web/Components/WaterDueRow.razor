@@ -1,0 +1,49 @@
+@* A plant under Water on Today: the row that opens it, with the ticks to log the watering, say it isn't
+   time yet, or put it off. The row is read out as one sentence. *@
+
+@{
+    var form = Due.Guess.Form;
+}
+<TodayRow @ref="row" DoneLabel="@WateringText.DoneLabel(form)" OnDone="OnDone"
+          AnswerLabel="@WateringText.NotYetLabel(form)" OnAnswer="OnAnswer"
+          AnswerChoices="form == WateringForm.TopWatered ? MeterReadings : form == WateringForm.Reservoir ? ReservoirLevels.Choices : null"
+          AnswerChoiceLabel="form == WateringForm.Reservoir ? ReservoirLevels.Text : null"
+          AnswerNoneLabel="@(form == WateringForm.TopWatered ? Strings.Care.TodayNoMeter : form == WateringForm.Reservoir ? Strings.Care.TodayNoReservoirReading : null)"
+          AnswerGroupLabel="@(form == WateringForm.Reservoir ? Strings.Care.TodayReservoirLevel : Strings.Care.RoundMeterReading)"
+          DoneIsCare="true" OnPutOff="OnPutOff">
+    <a class="item-card" href="plants/@Due.Plant.Id" aria-label="@CardSentences.TodayWaterRow(Due.Plant.DisplayName, Line)">
+        <SubjectThumb Subject="Due.Plant" />
+        <div class="item-text">
+            <div class="item-name">@Due.Plant.DisplayName</div>
+            <div class="item-meta wraps">
+                <span>@Line</span>
+            </div>
+        </div>
+    </a>
+</TodayRow>
+
+@code {
+    private static readonly IReadOnlyList<int> MeterReadings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+
+    private TodayRow? row;
+
+    [Parameter, EditorRequired]
+    public required WateringDue Due { get; set; }
+
+    [Parameter, EditorRequired]
+    public DateOnly Today { get; set; }
+
+    [Parameter]
+    public EventCallback OnDone { get; set; }
+
+    [Parameter]
+    public EventCallback<int?> OnAnswer { get; set; }
+
+    [Parameter]
+    public EventCallback<int> OnPutOff { get; set; }
+
+    private string Line => WateringText.Row(Due, Today);
+
+    /// <summary>Moves focus to the first button of the row.</summary>
+    public ValueTask FocusAsync() => row is null ? ValueTask.CompletedTask : row.FocusAsync();
+}

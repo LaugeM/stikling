@@ -703,4 +703,23 @@ public class SharePageTests
         Assert.Equal(20, ShareLinkRules.MaxCreatedPerPersonPerDay);
         Assert.Equal(2000, ShareLinkRules.MaxLeftOutPhotos);
     }
+
+    [Fact]
+    public void A_photos_description_goes_with_it_on_the_page_and_the_cover()
+    {
+        var plant = NewPlant();
+        var described = PhotoOf(plant, At(9, 1));
+        described.Description = "New leaf on the left";
+        var plain = PhotoOf(plant, At(9, 2));
+
+        var page = PageOf(plant, [described, plain]);
+
+        var shown = page.Items.SelectMany(i => i.Photos).ToDictionary(p => p.Id);
+        Assert.Equal("New leaf on the left", shown[described.Id].Description);
+        Assert.Null(shown[plain.Id].Description);
+        Assert.Null(page.Cover?.Description);
+
+        var coverPage = PageOf(plant, [described]);
+        Assert.Equal("New leaf on the left", coverPage.Cover?.Description);
+    }
 }

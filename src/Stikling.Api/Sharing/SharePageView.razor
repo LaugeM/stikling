@@ -33,7 +33,7 @@
     <main class="page">
         @if (Page.Cover is { } top)
         {
-            <img class="cover" src="@Image(top, "full")" alt=""
+            <img class="cover" src="@Image(top, "full")" alt="@(top.Description ?? "")"
                  width="@(top.Width > 0 ? top.Width : null)" height="@(top.Height > 0 ? top.Height : null)"
                  style="@Position(top)" fetchpriority="high">
         }
@@ -104,11 +104,11 @@
                                             <a href="@Image(photo, "full")">
                                                 @if (single)
                                                 {
-                                                    <img src="@Image(photo, "full")" alt="" loading="lazy" style="@Position(photo)">
+                                                    <img src="@Image(photo, "full")" alt="@(photo.Description ?? "")" loading="lazy" style="@Position(photo)">
                                                 }
                                                 else
                                                 {
-                                                    <img src="@Image(photo, "full")" alt=""
+                                                    <img src="@Image(photo, "full")" alt="@(photo.Description ?? "")"
                                                          srcset="@ShareImage.SrcSet(ImagePrefix, photo, Thumbnails.Contains(photo.Id))"
                                                          sizes="@ShareImage.StorySizes" loading="lazy" style="@Position(photo)">
                                                 }

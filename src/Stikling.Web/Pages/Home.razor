@@ -33,6 +33,7 @@
 @inject TimeProvider Time
 @inject ShareInbox ShareInbox
 @inject ScreenAwake Awake
+@inject Announcer Announcer
 @inject YearCardService YearCardsService
 @using Stikling.Core.Year
 @implements IAsyncDisposable
@@ -603,7 +604,7 @@ else
     {
         <section class="today-section">
             <div class="today-section-head">
-                <h2>@Strings.Care.TodayEmptyOuterPot</h2>
+                <h2 tabindex="-1" @ref="outerPotHeading">@Strings.Care.TodayEmptyOuterPot</h2>
                 @if (sections.OuterPot.Due.Count >= 2 && Access.CanEdit)
                 {
                     <button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync(sections.OuterPot.Due)">@Strings.Care.TodayAllEmptied</button>
@@ -620,7 +621,7 @@ else
                                     <div class="item-name">@due.Plant.DisplayName</div>
                                 </div>
                             </a>
-                            <IfCan Edit><button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @onclick="() => EmptiedAsync([due])">@Strings.Care.TodayEmptied</button></IfCan>
+                            <IfCan Edit><button type="button" class="btn btn-outline-primary btn-sm" disabled="@emptying" @ref="emptiedButtons[due.Plant.Id]" @onclick="() => EmptiedAsync([due])">@Strings.Care.TodayEmptied</button></IfCan>
                         </div>
                     </li>
                 }
@@ -634,7 +635,7 @@ else
         var coming = sections.WaterComing;
         <section class="today-section">
             <div class="today-section-head">
-                <h2>@Strings.Care.TodayWater</h2>
+                <h2 tabindex="-1" @ref="waterHeading">@Strings.Care.TodayWater</h2>
                 <div class="today-head-links">
                     <IfCan Log>
                     <a class="today-go-round" href="water">
@@ -684,7 +685,8 @@ else
                 <ul class="item-list">
                     @foreach (var due in now)
                     {
-                        @WaterRow(due)
+                        <WaterDueRow @key="due.Plant.Id" @ref="waterRows[due.Plant.Id]" Due="due" Today="Today" OnDone="() => WaterDoneAsync(due)"
+                                     OnAnswer="reading => NotYetAsync(due, reading)" OnPutOff="days => PutOffWaterAsync(due, days)" />
                     }
                 </ul>
             }
@@ -694,7 +696,8 @@ else
                 <ul class="item-list">
                     @foreach (var due in coming)
                     {
-                        @WaterRow(due)
+                        <WaterDueRow @key="due.Plant.Id" @ref="waterRows[due.Plant.Id]" Due="due" Today="Today" OnDone="() => WaterDoneAsync(due)"
+                                     OnAnswer="reading => NotYetAsync(due, reading)" OnPutOff="days => PutOffWaterAsync(due, days)" />
                     }
                 </ul>
             }
@@ -705,7 +708,7 @@ else
     {
         <section class="today-section care-section">
             <div class="today-section-head">
-                <h2>@Strings.Care.TodayCare</h2>
+                <h2 tabindex="-1" @ref="careHeading">@Strings.Care.TodayCare</h2>
                 <div class="today-head-links">
                     <a class="today-go-round" href="care-intervals">
                         @Strings.Care.IntervalListTitle
@@ -723,7 +726,7 @@ else
             }
             @foreach (var group in sections.CareNow)
             {
-                <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone"
+                <CareIntervalCard @key="CareKey(group)" @ref="careCards[CareKey(group)]" Group="group" Today="Today" Done="careDone"
                                   OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
             }
             @if (sections.CareComing.Count > 0)
@@ -731,7 +734,7 @@ else
                 <h3 class="today-subhead">@Strings.Care.TodayComingUp</h3>
                 @foreach (var group in sections.CareComing)
                 {
-                    <CareIntervalCard @key="CareKey(group)" Group="group" Today="Today" Done="careDone" Coming="true"
+                    <CareIntervalCard @key="CareKey(group)" @ref="careCards[CareKey(group)]" Group="group" Today="Today" Done="careDone" Coming="true"
                                       OnLog="CareLogAsync" OnUndo="CareUndoAsync" OnPutOff="CarePutOffAsync" />
                 }
             }
@@ -751,7 +754,7 @@ else
     @if (!sections.Away && !sections.Holding && sections.WaterChanges.Count > 0)
     {
         <section class="today-section water-changes">
-            <h2>@Strings.Care.TodayChangeWater</h2>
+            <h2 tabindex="-1" @ref="waterChangesHeading">@Strings.Care.TodayChangeWater</h2>
             @if (waterError is not null)
             {
                 <div class="alert alert-danger py-2 px-3" role="alert">@waterError</div>
@@ -771,7 +774,7 @@ else
                                 </div>
                             </a>
                             <IfCan Log>
-                            <button type="button" class="row-btn" title="@Strings.Care.TodayWaterChanged" aria-label="@Strings.Care.TodayWaterChanged" disabled="@waterBusy"
+                            <button type="button" class="row-btn" title="@Strings.Care.TodayWaterChanged" aria-label="@Strings.Care.TodayWaterChanged" disabled="@waterBusy" @ref="waterChangedButtons[due.Propagation.Id]"
                                     @onclick="() => WaterChangedAsync(due.Propagation)">
                                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
                             </button>
@@ -1053,28 +1056,6 @@ else
 
     private bool FirstRun => loaded && plants.Count == 0 && propagations.Count == 0;
 
-    private RenderFragment WaterRow(WateringDue due) => __builder =>
-    {
-        var form = due.Guess.Form;
-        <TodayRow @key="due.Plant.Id" DoneLabel="@WateringText.DoneLabel(form)" OnDone="() => WaterDoneAsync(due)"
-                  AnswerLabel="@WateringText.NotYetLabel(form)" OnAnswer="reading => NotYetAsync(due, reading)"
-                  AnswerChoices="form == WateringForm.TopWatered ? MeterReadings : form == WateringForm.Reservoir ? ReservoirLevels.Choices : null"
-                  AnswerChoiceLabel="form == WateringForm.Reservoir ? ReservoirLevels.Text : null"
-                  AnswerNoneLabel="@(form == WateringForm.TopWatered ? Strings.Care.TodayNoMeter : form == WateringForm.Reservoir ? Strings.Care.TodayNoReservoirReading : null)"
-                  AnswerGroupLabel="@(form == WateringForm.Reservoir ? Strings.Care.TodayReservoirLevel : Strings.Care.RoundMeterReading)"
-                  DoneIsCare="true" OnPutOff="days => PutOffWaterAsync(due, days)">
-            <a class="item-card" href="plants/@due.Plant.Id">
-                <SubjectThumb Subject="due.Plant" />
-                <div class="item-text">
-                    <div class="item-name">@due.Plant.DisplayName</div>
-                    <div class="item-meta wraps">
-                        <span>@WateringText.Row(due, Today)</span>
-                    </div>
-                </div>
-            </a>
-        </TodayRow>;
-    };
-
     private string RoundMeta(DailyRoundSuggestion suggested)
     {
         var parts = new List<string>();
@@ -1086,8 +1067,6 @@ else
             parts.Add(F(Strings.Care.TodayRoundDue, due));
         return string.Join(" · ", parts);
     }
-
-    private static readonly IReadOnlyList<int> MeterReadings = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
 
     // The records and the sections worked out from them, which Core does for Today and the notification alike
     private TodayData data = new();
@@ -1137,6 +1116,60 @@ else
     private ElementReference yearCanvas;
 
     private DateOnly Today => Time.Today();
+
+    // Where focus goes once a row has been dealt with and has left its list: the next row, else the one
+    // before, else the heading of the section. Without it focus is lost with the button that was pressed.
+    private Func<Task>? focusAfter;
+    private ElementReference waterHeading;
+    private ElementReference careHeading;
+    private ElementReference outerPotHeading;
+    private ElementReference waterChangesHeading;
+    private readonly Dictionary<Guid, WaterDueRow> waterRows = [];
+    private readonly Dictionary<string, CareIntervalCard> careCards = [];
+    private readonly Dictionary<Guid, ElementReference> emptiedButtons = [];
+    private readonly Dictionary<Guid, ElementReference> waterChangedButtons = [];
+
+    private static async Task FocusAsync(ElementReference element)
+    {
+        try
+        {
+            await element.FocusAsync(preventScroll: true);
+        }
+        catch
+        {
+            // Something that is gone has nothing to focus
+        }
+    }
+
+    private static Guid? Neighbour(IReadOnlyList<Guid> before, Guid gone, IReadOnlyCollection<Guid> now)
+    {
+        var at = before.ToList().IndexOf(gone);
+        if (at < 0)
+            return null;
+        return before.Skip(at + 1).Cast<Guid?>().FirstOrDefault(id => now.Contains(id!.Value))
+            ?? before.Take(at).Reverse().Cast<Guid?>().FirstOrDefault(id => now.Contains(id!.Value));
+    }
+
+    private void FocusAfterLeaving(Guid gone, IReadOnlyList<Guid> before, IReadOnlyCollection<Guid> now,
+        Func<Guid, Func<Task>?> focusRow, ElementReference heading)
+    {
+        if (now.Contains(gone))
+            return;
+        focusAfter = Neighbour(before, gone, now) is { } next && focusRow(next) is { } focus
+            ? focus
+            : () => FocusAsync(heading);
+    }
+
+    private static Func<Guid, Func<Task>?> ButtonOf(Dictionary<Guid, ElementReference> buttons) =>
+        id => buttons.TryGetValue(id, out var button) && button.Id is not null ? () => FocusAsync(button) : null;
+
+    private List<Guid> WaterIds =>
+        [.. sections.WaterNow.Select(d => d.Plant.Id), .. sections.WaterComing.Select(d => d.Plant.Id)];
+
+    private void FocusAfterWater(Guid id, List<Guid> before) =>
+        FocusAfterLeaving(id, before, WaterIds, next => waterRows.TryGetValue(next, out var row) ? () => row.FocusAsync().AsTask() : null, waterHeading);
+
+    private IEnumerable<IntervalGroup> CareGroups => sections.CareNow.Concat(sections.CareComing);
 
     private IEnumerable<DuePestGroup> AwayHides(IEnumerable<DuePestGroup> groups) =>
         sections.Away ? [] : groups;
@@ -1196,6 +1229,7 @@ else
             foreach (var item in request.Items)
                 careDone[(item.Interval.Id, item.Plant.Id)] = action;
             await Badge.SetAsync(DueCount);
+            Announcer.Say(F(Strings.Care.TodayCareDoneAnnounce, request.Group.Label, CareNames(request.Items)));
         }
         catch (Exception ex)
         {
@@ -1228,6 +1262,7 @@ else
                     careDone.Remove((item.Interval.Id, item.Plant.Id));
             }
             await Badge.SetAsync(DueCount);
+            Announcer.Say(F(Strings.Care.TodayCareUndoneAnnounce, CareGroupLabel(action), CareNames(action.Items)));
         }
         catch (Exception ex)
         {
@@ -1236,8 +1271,31 @@ else
         }
     }
 
-    private Task CarePutOffAsync(CarePutOffRequest request) =>
-        PutOffAsync(PutOffs.Interval(request.Item.Interval.Id, request.Item.Plant.Id, request.Item.Last), Today.AddDays(request.Days));
+    // The name of the one plant, or how many when it was done for several
+    private static string CareNames(IReadOnlyList<IntervalItem> items) =>
+        items.Count == 1 ? items[0].Plant.DisplayName : Labels.Plants(items.Count);
+
+    private string CareGroupLabel(CareAction action) =>
+        CareGroups.FirstOrDefault(g => g.Items.Any(i => action.Items.Any(a => a.Interval.Id == i.Interval.Id)))?.Label ?? Strings.Common.Done;
+
+    private async Task CarePutOffAsync(CarePutOffRequest request)
+    {
+        var item = request.Item;
+        var group = CareGroups.FirstOrDefault(g => g.Items.Any(i => i.Interval.Id == item.Interval.Id && i.Plant.Id == item.Plant.Id));
+        var key = group is null ? null : CareKey(group);
+        var before = group?.Items.Select(i => i.Plant.Id).ToList() ?? [];
+        await PutOffAsync(PutOffs.Interval(item.Interval.Id, item.Plant.Id, item.Last), Today.AddDays(request.Days));
+        Announcer.Say(F(Strings.Care.TodayPutOffAnnounce, item.Plant.DisplayName));
+
+        // The card is gone when it was the last one due, so then focus goes to the heading
+        var left = CareGroups.FirstOrDefault(g => CareKey(g) == key)?.Items.Select(i => i.Plant.Id).ToList() ?? [];
+        if (left.Contains(item.Plant.Id))
+            return;
+        var next = Neighbour(before, item.Plant.Id, left);
+        focusAfter = key is not null && next is { } id && careCards.TryGetValue(key, out var card)
+            ? () => card.FocusAsync(id)
+            : () => FocusAsync(careHeading);
+    }
 
     // What the step uses, for the line under the pest on Today. The recipe's name is already in What.
     private static string? StepWhat(PlanStep step) => Clean(step.What);
@@ -1309,8 +1367,16 @@ else
         emptying = true;
         try
         {
-            await Care.MarkOuterPotEmptiedAsync(due.Select(d => d.CareLogId).ToList());
+            var emptied = due.ToList();
+            var before = sections.OuterPot.Due.Select(d => d.Plant.Id).ToList();
+            await Care.MarkOuterPotEmptiedAsync(emptied.Select(d => d.CareLogId).ToList());
             await LoadAsync();
+            Announcer.Say(F(Strings.Care.TodayEmptiedAnnounce, emptied.Count == 1 ? emptied[0].Plant.DisplayName : Labels.Plants(emptied.Count)));
+            var left = sections.OuterPot.Due.Select(d => d.Plant.Id).ToList();
+            if (emptied.Count == 1)
+                FocusAfterLeaving(emptied[0].Plant.Id, before, left, ButtonOf(emptiedButtons), outerPotHeading);
+            else
+                focusAfter = () => FocusAsync(outerPotHeading);
         }
         finally
         {
@@ -1419,6 +1485,12 @@ else
     {
         keeper ??= Awake.Keeper();
         await keeper.SetAsync(showRound);
+
+        if (focusAfter is { } focus)
+        {
+            focusAfter = null;
+            await focus();
+        }
 
         if (yearTitle is not { } title)
             return;
@@ -1595,18 +1667,25 @@ else
 
     private async Task WaterDoneAsync(WateringDue due)
     {
+        var before = WaterIds;
         await Answers.WaterAsync(due.Plant.Id, due.Guess.Form, Labels.For);
         await WateringAnsweredAsync();
+        Announcer.Say(F(Strings.Care.WaterWateredAnnounce, due.Plant.DisplayName, WateringText.DoneLabel(due.Guess.Form).ToLowerInvariant()));
+        FocusAfterWater(due.Plant.Id, before);
     }
 
     private async Task PutOffWaterAsync(WateringDue due, int days)
     {
+        var before = WaterIds;
         await PutOffAsync(PutOffs.Water(due.Plant.Id, due.Guess.LastWatered), Today.AddDays(days));
+        Announcer.Say(F(Strings.Care.TodayPutOffAnnounce, due.Plant.DisplayName));
+        FocusAfterWater(due.Plant.Id, before);
     }
 
     // "Still wet" with a meter reading, or "No meter" / "Not yet" with none
     private async Task NotYetAsync(WateringDue due, int? reading)
     {
+        var before = WaterIds;
         var putOffAfter = due.Guess.Form == WateringForm.Reservoir
             ? await Answers.ReservoirAsync(due.Plant, due.Guess, reading, Labels.For)
             : await Answers.NotYetAsync(due.Plant, due.Guess, reading, logReading: true, Labels.For);
@@ -1614,6 +1693,10 @@ else
             data.PutOffs.PutOff(putOff.Key, putOff.Until);
 
         await WateringAnsweredAsync();
+        Announcer.Say(reading is { } value && due.Guess.Form == WateringForm.TopWatered
+            ? F(Strings.Care.WaterReads, due.Plant.DisplayName, value)
+            : F(Strings.Care.TodayNotYetAnnounce, due.Plant.DisplayName));
+        FocusAfterWater(due.Plant.Id, before);
     }
 
     private IReadOnlyList<PollenView> allPollen = [];
@@ -1775,8 +1858,12 @@ else
         waterError = null;
         try
         {
+            var before = sections.WaterChanges.Select(d => d.Propagation.Id).ToList();
             await PropagationCare.LogAsync(propagation, PropagationCareKind.ChangedWater, Today);
             await LoadAsync();
+            Announcer.Say(F(Strings.Care.TodayWaterChangedAnnounce, propagation.DisplayName));
+            FocusAfterLeaving(propagation.Id, before, sections.WaterChanges.Select(d => d.Propagation.Id).ToList(),
+                ButtonOf(waterChangedButtons), waterChangesHeading);
         }
         catch (Exception ex)
         {

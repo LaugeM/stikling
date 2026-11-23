@@ -361,4 +361,22 @@ public class ReceivingServiceTests
 
         Assert.Equal(picked, plants.Plants[first.SubjectId].CoverPhotoId);
     }
+
+    [Fact]
+    public async Task A_received_photo_keeps_its_description()
+    {
+        var copy = new ShareCopy(1, SubjectType.Plant, GiverPlant, "Mona", null, null, null, null, null,
+        [
+            new ShareCopyItem(new DateOnly(2026, 9, 1), "first day", ShareItemKind.Photos, null,
+            [
+                CopyPhoto(PhotoA, 9, 1) with { Description = "New leaf on the left" },
+                CopyPhoto(PhotoB, 9, 1)
+            ])
+        ]);
+
+        await service.AddAsync("tok", copy, new ReceiveRequest(null, null, null));
+
+        Assert.Equal("New leaf on the left", photos.Photos[ReceivingService.PhotoIdOf(copy, PhotoA)].Description);
+        Assert.Null(photos.Photos[ReceivingService.PhotoIdOf(copy, PhotoB)].Description);
+    }
 }

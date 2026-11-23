@@ -6,14 +6,14 @@
         @ChildContent
         @if (OnDone.HasDelegate && CanDone)
         {
-            <button type="button" class="row-btn" title="@DoneLabel" aria-label="@DoneLabel" disabled="@busy" @onclick="DoneAsync">
+            <button type="button" class="row-btn" title="@DoneLabel" aria-label="@DoneLabel" disabled="@busy" @onclick="DoneAsync" @ref="doneButton">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Check</svg>
             </button>
         }
         @if (AnswerLabel is not null && OnAnswer.HasDelegate && Access.CanEdit)
         {
             <button type="button" class="row-btn @(answering ? "open" : null)" title="@AnswerLabel" aria-label="@AnswerLabel"
-                    aria-expanded="@(AnswerChoices is null ? null : answering ? "true" : "false")" disabled="@busy" @onclick="AnswerClickedAsync">
+                    aria-expanded="@(AnswerChoices is null ? null : answering ? "true" : "false")" disabled="@busy" @onclick="AnswerClickedAsync" @ref="answerButton">
                 <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4c3 3.5 5.5 6.3 5.5 9.5a5.5 5.5 0 0 1-11 0C6.5 10.3 9 7.5 12 4Z" /></svg>
             </button>
         }
@@ -21,7 +21,7 @@
         @if (Access.CanEdit)
         {
             <button type="button" class="row-btn @(choosing ? "open" : null)" title="@Strings.Care.TodayRowPutOff" aria-label="@Strings.Care.TodayRowPutOff"
-                    aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="TogglePutOff">
+                    aria-expanded="@(choosing ? "true" : "false")" disabled="@busy" @onclick="TogglePutOff" @ref="putOffButton">
                 <svg viewBox="0 0 24 24" aria-hidden="true">@Icons.Clock</svg>
             </button>
         }
@@ -121,6 +121,28 @@
     private bool choosing;
     private bool answering;
     private bool busy;
+    private ElementReference doneButton;
+    private ElementReference answerButton;
+    private ElementReference putOffButton;
+
+    /// <summary>Moves focus to the first button of the row, which is where it goes when the row before was dealt with.</summary>
+    public async ValueTask FocusAsync()
+    {
+        foreach (var button in new[] { doneButton, answerButton, putOffButton })
+        {
+            if (button.Id is null)
+                continue;
+            try
+            {
+                await button.FocusAsync(preventScroll: true);
+            }
+            catch
+            {
+                // A row that has gone is nothing to focus
+            }
+            return;
+        }
+    }
 
     private void TogglePutOff()
     {

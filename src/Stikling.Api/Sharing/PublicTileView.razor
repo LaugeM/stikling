@@ -23,7 +23,7 @@
         <span class="pp-photo">
             @if (Tile.Cover is { } cover)
             {
-                <img src="@Context.LinkPrefix/photos/@cover.Id/full" alt=""
+                <img src="@Context.LinkPrefix/photos/@cover.Id/full" alt="@(cover.Description ?? "")"
                      srcset="@ShareImage.SrcSet(Context.LinkPrefix, cover, Context.Thumbnails.Contains(cover.Id))" sizes="@Sizes"
                      loading="lazy" style="@Position(cover)">
             }

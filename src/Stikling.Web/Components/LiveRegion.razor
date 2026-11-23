@@ -1,0 +1,26 @@
+@* Reads out what Announcer.Say gets, for a screen reader. It is hidden to the eye, and is placed once in the layout.
+   The text is cleared and then set, so the same text said twice is read twice. *@
+@implements IDisposable
+@inject Announcer Announcer
+
+<div class="visually-hidden" role="status" aria-live="polite" aria-atomic="true">@text</div>
+
+@code {
+    // How long the text is empty before the new one is set, so a reader sees a change even when the text is the same
+    private const int ClearMs = 50;
+
+    private string? text;
+
+    protected override void OnInitialized() => Announcer.Said += OnSaid;
+
+    private void OnSaid(string said) => _ = InvokeAsync(async () =>
+    {
+        text = null;
+        StateHasChanged();
+        await Task.Delay(ClearMs);
+        text = said;
+        StateHasChanged();
+    });
+
+    public void Dispose() => Announcer.Said -= OnSaid;
+}

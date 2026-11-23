@@ -24,6 +24,14 @@ public sealed class Photo : Entity, IHasCreatedBy
     /// <summary>How the photo sits where it's cropped, on cards and at the top of a page. Null is centred.</summary>
     public PhotoFrame? Frame { get; set; }
 
+    public const int DescriptionMaxLength = 200;
+
+    /// <summary>
+    /// A line the person wrote on what the photo shows, like "new leaf on the left, brown tip". It is the photo's alt text
+    /// wherever it is drawn. Never made by the app. Null on every photo from before this was kept.
+    /// </summary>
+    public string? Description { get; set; }
+
     /// <summary>
     /// Set on a photo copied from the history a plant or propagation had before it was received.
     /// It is an ordinary photo of the subject, but read-only: it can be framed and set as the

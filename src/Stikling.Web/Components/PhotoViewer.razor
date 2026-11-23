@@ -23,7 +23,7 @@
         else
         {
             <div class="viewer-stage">
-                <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="@Strings.Shared.PhotoViewerAlt" />
+                <PhotoImage PhotoId="photo.Id" Thumbnail="false" Framed="false" Class="viewer-img" Alt="@(photo.Description ?? Strings.Shared.PhotoViewerAlt)" />
                 @if (MarksOf(photo) is { Count: > 0 } marks)
                 {
                     @if (!marksHidden)
@@ -39,10 +39,28 @@
                 }
             </div>
 
+            @if (photo.Description is { Length: > 0 } description)
+            {
+                <p class="viewer-description">@description</p>
+            }
+
             @if (HasActions && AnyActionFor(photo))
             {
                 <div class="viewer-actions @(CanMarkUp ? "markable" : null)">
-                    @if (confirmDelete)
+                    @if (describing)
+                    {
+                        <div class="viewer-describe">
+                            <label for="viewer-describe-input">@Strings.Shared.PhotoViewerDescriptionLabel</label>
+                            <input id="viewer-describe-input" class="form-control form-control-sm" autocomplete="off" maxlength="@Photo.DescriptionMaxLength"
+                                   placeholder="@Strings.Shared.PhotoViewerDescriptionPlaceholder" @bind="draft" @bind:event="oninput"
+                                   @onkeydown="OnDescribeKeyDown" @onkeydown:stopPropagation="true" @ref="describeInput" />
+                            <div class="viewer-describe-buttons">
+                                <button type="button" class="btn btn-light btn-sm" @onclick="() => SaveDescriptionAsync(photo)">@Strings.Common.Save</button>
+                                <button type="button" class="btn btn-outline-light btn-sm" @onclick="CancelDescribe">@Strings.Common.Cancel</button>
+                            </div>
+                        </div>
+                    }
+                    else if (confirmDelete)
                     {
                         <span>@Strings.Shared.PhotoViewerDeleteConfirm</span>
                         <button type="button" class="btn btn-danger btn-sm" @onclick="DeleteAsync">@Strings.Common.Delete</button>
@@ -64,6 +82,10 @@
                         @if (OnFrame.HasDelegate && Access.CanChangeEntry(photo))
                         {
                             <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => framing = true">@Strings.Shared.PhotoViewerFrame</button>
+                        }
+                        @if (OnDescribe.HasDelegate && Access.CanChangeEntry(photo))
+                        {
+                            <button type="button" class="btn btn-outline-light btn-sm" @onclick="() => StartDescribe(photo)">@(photo.Description is { Length: > 0 } ? Strings.Shared.PhotoViewerEditDescription : Strings.Shared.PhotoViewerDescribe)</button>
                         }
                         @* A photo from a received history stays in the history it came with *@
                         @if (CanCompare(photo))
@@ -131,6 +153,10 @@
     [Parameter]
     public EventCallback<(Photo Photo, PhotoFrame? Frame)> OnFrame { get; set; }
 
+    /// <summary>Saves the line the person wrote on what a photo shows (null when cleared). Describe only shows when this is set.</summary>
+    [Parameter]
+    public EventCallback<(Photo Photo, string? Description)> OnDescribe { get; set; }
+
     /// <summary>Opens the photo next to another one. Compare only shows when this is set, for a photo that isn't a reference photo and when there are two or more others to compare.</summary>
     [Parameter]
     public EventCallback<Photo> OnCompare { get; set; }
@@ -148,18 +174,24 @@
     private ElementReference dialog;
     private bool confirmDelete;
     private bool framing;
+    private bool describing;
+    private Guid describingFor;
+    private string? draft;
+    private ElementReference describeInput;
+    private bool focusInputPending;
     private bool marking;
     private bool marksHidden;
     private bool focusPending;
     private Dictionary<Guid, IReadOnlyList<PhotoMarkup>>? markups;
 
     /// <summary>Without any, the viewer is for looking only, like a pot's photos opened from a plant.</summary>
-    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate || CanMarkUp;
+    private bool HasActions => OnSetCover.HasDelegate || OnSetReference.HasDelegate || OnFrame.HasDelegate || OnDescribe.HasDelegate || OnDelete.HasDelegate || OnCompare.HasDelegate || CanMarkUp;
 
     // What is left of the actions once the person's role has taken its share, so a viewer isn't shown an empty bar
     private bool AnyActionFor(Photo photo) =>
         (OnSetCover.HasDelegate && !photo.IsReference && Access.CanEdit)
         || (OnFrame.HasDelegate && Access.CanChangeEntry(photo))
+        || (OnDescribe.HasDelegate && Access.CanChangeEntry(photo))
         || CanCompare(photo)
         || (CanMarkUp && Access.CanEdit)
         || (OnSetReference.HasDelegate && photo.ReceivedHistoryId is null && !Kept(photo) && Access.CanChangeEntry(photo))
@@ -178,8 +210,13 @@
             markups = null;
             marksHidden = false;
             marking = false;
+            describing = false;
             return;
         }
+
+        // Moving to another photo closes the description
+        if (describing && describingFor != Current.Id)
+            describing = false;
 
         focusPending = true;
         if (markups is null || !markups.ContainsKey(Current.Id) && PhotoList.Any(p => !markupsFor.Contains(p.Id)))
@@ -220,6 +257,11 @@
             focusPending = false;
             await dialog.FocusAsync();
         }
+        if (focusInputPending && describing)
+        {
+            focusInputPending = false;
+            await describeInput.FocusAsync();
+        }
     }
 
     private async Task SaveFrameAsync(Photo photo, PhotoFrame? frame)
@@ -229,9 +271,43 @@
         focusPending = true;
     }
 
+    private void StartDescribe(Photo photo)
+    {
+        draft = photo.Description;
+        describingFor = photo.Id;
+        describing = true;
+        focusInputPending = true;
+    }
+
+    private void CancelDescribe()
+    {
+        describing = false;
+        focusPending = true;
+    }
+
+    private async Task SaveDescriptionAsync(Photo photo)
+    {
+        var tidy = PhotoText.TidyDescription(draft);
+        await OnDescribe.InvokeAsync((photo, tidy));
+        photo.Description = tidy;
+        describing = false;
+        focusPending = true;
+    }
+
+    private async Task OnDescribeKeyDown(KeyboardEventArgs e)
+    {
+        if (Current is not { } photo)
+            return;
+        if (e.Key == "Enter")
+            await SaveDescriptionAsync(photo);
+        else if (e.Key == "Escape")
+            CancelDescribe();
+    }
+
     private async Task Move(int step)
     {
         confirmDelete = false;
+        describing = false;
         var next = ((Index ?? 0) + step + PhotoList.Count) % PhotoList.Count;
         await IndexChanged.InvokeAsync(next);
     }
@@ -239,6 +315,7 @@
     private async Task CloseAsync()
     {
         confirmDelete = false;
+        describing = false;
         framing = false;
         marking = false;
         marksHidden = false;

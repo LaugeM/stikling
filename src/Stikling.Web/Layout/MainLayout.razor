@@ -51,6 +51,9 @@
 
     <ShortcutsSheet @bind-Open="shortcutsOpen" />
 
+    @* Reads out what pages say with Announcer, like saved and undone *@
+    <LiveRegion />
+
     <UpdateBanner ReadyChanged="ready => updateReady = ready" />
 
     @* On a device where someone just signed in, the lists stay empty until the first sync brings

@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using Stikling.Core.Models;
+using Stikling.Core.Photos;
 using Stikling.Core.Text;
 using Stikling.Core.Tidy;
 using Stikling.Core.Timeline;
@@ -125,6 +126,16 @@ public sealed class PhotoService(IJSRuntime js, IPhotoRepository photos, TimePro
         photo.Frame = frame;
         await photos.UpdateAsync(photo);
         FrameChanged?.Invoke(photo);
+    }
+
+    /// <summary>Saves the line on what the photo shows. Nothing is written when it's the same as before.</summary>
+    public async Task SetDescriptionAsync(Photo photo, string? description)
+    {
+        var tidy = PhotoText.TidyDescription(description);
+        if (tidy == photo.Description)
+            return;
+        photo.Description = tidy;
+        await photos.UpdateAsync(photo);
     }
 
     /// <summary>
