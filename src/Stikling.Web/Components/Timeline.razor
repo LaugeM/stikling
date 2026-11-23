@@ -25,7 +25,7 @@
             @foreach (var photo in references)
             {
                 <button type="button" class="reference-photo" @onclick="() => viewerIndex = photoIndex[photo.Id]" aria-label="@Strings.Propagations.TlOpenReference" title="@Strings.Propagations.TlOpenReference">
-                    <PhotoImage PhotoId="photo.Id" />
+                    <PhotoImage PhotoId="photo.Id" Alt="@(photo.Description ?? "")" />
                 </button>
             }
         </div>
@@ -286,7 +286,7 @@ else
 }
 
 <PhotoViewer PhotoList="photos" @bind-Index="viewerIndex" CoverPhotoId="CoverPhotoId" PhotoAge="PhotoAge"
-             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" OnCompare="OpenCompare" CanMarkUp="true" />
+             OnSetCover="SetCoverAsync" OnSetReference="SetReferenceAsync" OnFrame="FrameAsync" OnDescribe="DescribeAsync" OnDelete="DeletePhotoAsync" KeptPhotoIds="earlierPhotoIds" OnCompare="OpenCompare" CanMarkUp="true" />
 
 @if (compare is { } open)
 {
@@ -647,6 +647,8 @@ else
     }
 
     private Task FrameAsync((Photo Photo, PhotoFrame? Frame) change) => Photos.SetFrameAsync(change.Photo, change.Frame);
+
+    private Task DescribeAsync((Photo Photo, string? Description) change) => Photos.SetDescriptionAsync(change.Photo, change.Description);
 
     /// <summary>
     /// Opens a photo full screen, e.g. the cover when it's tapped at the top of the page. Before

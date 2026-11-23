@@ -6,8 +6,8 @@ using static Stikling.Core.Text.Format;
 
 namespace Stikling.Core.Sharing;
 
-/// <summary>A photo on the public page. The image is fetched by its id. Width and height are 0 when not known.</summary>
-public sealed record SharePhoto(Guid Id, PhotoFrame? Frame, int Width = 0, int Height = 0);
+/// <summary>A photo on the public page. The image is fetched by its id. Width and height are 0 when not known. Description is the line the person wrote on what it shows, used as its alt text.</summary>
+public sealed record SharePhoto(Guid Id, PhotoFrame? Frame, int Width = 0, int Height = 0, string? Description = null);
 
 /// <summary>What one item on the public page is.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<ShareItemKind>))]
@@ -318,7 +318,7 @@ public static class SharePage
                 PhotoDayCount.Suffix(LabelOf(s)),
                 s.Kind,
                 s.Text,
-                s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame, p.Width, p.Height)).ToList(),
+                s.Photos.OrderBy(p => p.TakenAt).Select(p => new SharePhoto(p.Id, p.Frame, p.Width, p.Height, p.Description)).ToList(),
                 LabelOf(s)))
             .ToList();
 
@@ -334,7 +334,7 @@ public static class SharePage
             card.Latin,
             card.Cultivar,
             ShareLinkRules.Clean(settings.Line) ?? card.Line,
-            cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height),
+            cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height, cover.Description),
             updates.Count > 0 ? updates.Max() : subject.UpdatedAt,
             shown.Count,
             items.Count(i => i.Kind == ShareItemKind.Note),

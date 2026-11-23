@@ -1210,6 +1210,21 @@ Maybe</value>
     <value>Frame</value>
     <comment>Button that opens the framing of a photo: moving and zooming it where it is cropped.</comment>
   </data>
+  <data name="PhotoViewerDescribe" xml:space="preserve">
+    <value>Describe</value>
+    <comment>Button in the photo viewer that opens a line to write what the photo shows.</comment>
+  </data>
+  <data name="PhotoViewerEditDescription" xml:space="preserve">
+    <value>Edit description</value>
+    <comment>Button in the photo viewer, instead of Describe, when the photo already has a description.</comment>
+  </data>
+  <data name="PhotoViewerDescriptionLabel" xml:space="preserve">
+    <value>What the photo shows</value>
+    <comment>Label of the line where a photo is described. It is read out by screen readers as the photo.</comment>
+  </data>
+  <data name="PhotoViewerDescriptionPlaceholder" xml:space="preserve">
+    <value>For example: new leaf on the left, brown tip</value>
+  </data>
   <data name="PhotoViewerCompare" xml:space="preserve">
     <value>Compare</value>
     <comment>Button in the photo viewer that opens the photo next to another one of the same plant.</comment>

@@ -47,7 +47,7 @@ public sealed record ShareCopy(
             item.Label,
             item.Kind,
             item.Text,
-            item.Photos.Select(p => new ShareCopyPhoto(p.Id, p.Width, p.Height, p.Frame, NoonOn(item.Day, zone))).ToList()))
+            item.Photos.Select(p => new ShareCopyPhoto(p.Id, p.Width, p.Height, p.Frame, NoonOn(item.Day, zone), p.Description)).ToList()))
             .ToList();
 
     // The photos only keep the day they belong to on the page, so each is taken at noon that day in the link's zone
@@ -71,4 +71,4 @@ public sealed record ShareCopyPropagation(
 /// <param name="DayCount">The label after the date, frozen, like "day 24". Null when there is none.</param>
 public sealed record ShareCopyItem(DateOnly Day, string? DayCount, ShareItemKind Kind, string? Text, IReadOnlyList<ShareCopyPhoto> Photos);
 
-public sealed record ShareCopyPhoto(Guid Id, int Width, int Height, PhotoFrame? Frame, DateTimeOffset TakenAt);
+public sealed record ShareCopyPhoto(Guid Id, int Width, int Height, PhotoFrame? Frame, DateTimeOffset TakenAt, string? Description = null);

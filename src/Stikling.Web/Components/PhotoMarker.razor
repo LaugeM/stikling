@@ -10,7 +10,7 @@
 <div class="marker" tabindex="-1" role="group" aria-label="@Strings.Shared.MarkupLabel" @ref="root"
      @onkeydown="OnKeyDown" @onkeydown:stopPropagation="true">
     <div class="marker-stage" @ref="stage">
-        <PhotoImage PhotoId="Photo.Id" Thumbnail="false" Framed="false" Class="marker-img" Alt="@Strings.Shared.PhotoViewerAlt" />
+        <PhotoImage PhotoId="Photo.Id" Thumbnail="false" Framed="false" Class="marker-img" Alt="@(Photo.Description ?? Strings.Shared.PhotoViewerAlt)" />
         <PhotoMarkupLayer Marks="Shown" PickedId="pickedId" Interactive="true" OnPick="PickAsync" />
     </div>
 

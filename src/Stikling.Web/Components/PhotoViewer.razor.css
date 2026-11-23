@@ -38,6 +38,29 @@
     color: #b8c2bb;
 }
 
+.viewer-description {
+    margin: 0;
+    padding: 0.4rem 1rem 0;
+    text-align: center;
+    font-size: 0.9rem;
+    color: #b8c2bb;
+    overflow-wrap: anywhere;
+}
+
+.viewer-describe {
+    display: flex;
+    flex-direction: column;
+    gap: 0.35rem;
+    width: min(100%, 32rem);
+    font-size: 0.9rem;
+}
+
+.viewer-describe-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
 .viewer-close {
     width: 2.75rem;
     height: 2.75rem;

@@ -68,7 +68,7 @@
                 <li data-current="@(current ? "true" : null)">
                     <button type="button" class="cmp-tile @(current ? "current" : null)" aria-pressed="@(current ? "true" : "false")"
                             aria-label="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" title="@F(Strings.Shared.ComparePhotoFrom, DateText(photo.Id))" @onclick="() => Pick(photo.Id)">
-                        <PhotoImage PhotoId="photo.Id" />
+                        <PhotoImage PhotoId="photo.Id" Alt="@(photo.Description ?? "")" />
                     </button>
                 </li>
             }

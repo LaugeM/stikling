@@ -1,4 +1,5 @@
 using Stikling.Core.Models;
+using Stikling.Core.Photos;
 using Stikling.Core.Plants;
 using Stikling.Core.Propagations;
 using Stikling.Core.Timeline;
@@ -320,6 +321,7 @@ public sealed class ReceivingService(
                         Width = photo.Width,
                         Height = photo.Height,
                         Frame = photo.Frame,
+                        Description = PhotoText.TidyDescription(photo.Description),
                         ReceivedHistoryId = historyId
                     });
                     done.Add(photo.Id);

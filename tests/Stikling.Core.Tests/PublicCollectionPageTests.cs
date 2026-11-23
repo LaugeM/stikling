@@ -581,4 +581,18 @@ public class PublicCollectionPageTests
         before.HiddenFromPublicPage = true;
         Assert.False(Serves(on, before, null, rooting, own, [plant]));
     }
+
+    [Fact]
+    public void A_tiles_cover_carries_the_photos_description_when_it_has_one()
+    {
+        var plant = APlant("Big Monstera");
+        var described = APhoto(plant, SubjectType.Plant, 0, p => p.Description = "Brown tip on the new leaf");
+        var other = APlant("Other");
+        var plain = APhoto(other, SubjectType.Plant);
+
+        var tiles = PublicCollectionPage.Front(Build(Settings(), [plant, other]), [described, plain], Now).Parts[0].Tiles;
+
+        Assert.Equal("Brown tip on the new leaf", tiles.Single(t => t.Name == "Big Monstera").Cover?.Description);
+        Assert.Null(tiles.Single(t => t.Name == "Other").Cover?.Description);
+    }
 }

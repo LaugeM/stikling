@@ -411,7 +411,7 @@ public static class PublicCollectionPage
             // The page only links to a plant's own address when stories are on, so the id is left out otherwise
             return (Index: index, Plant: new FriendPlant(
                 subjects.Settings.ShowStories ? subject.Id : null, subject.Type, subject.Name, subject.NameGenus, subject.NameSpecies, subject.NameCultivar, spare, count, stage,
-                cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height)));
+                cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height, cover.Description)));
         })
         .OrderBy(p => p.Plant.Spare == FriendSpare.None ? int.MaxValue : (int)p.Plant.Spare)
         .ThenBy(p => p.Index)
@@ -437,7 +437,7 @@ public static class PublicCollectionPage
             subject.Name,
             subject.Latin,
             subject.Cultivar,
-            cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height),
+            cover is null ? null : new SharePhoto(cover.Id, cover.Frame, cover.Width, cover.Height, cover.Description),
             subject.Caption);
     }
 

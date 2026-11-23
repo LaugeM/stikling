@@ -358,7 +358,7 @@ public static class ReadablePages
                 var taken = o.Date(DateOnly.FromDateTime(TimeZoneInfo.ConvertTime(photo.TakenAt, o.Zone).DateTime));
                 var caption = Join(taken, photo.IsReference ? Strings.BackupPages.ReferencePhoto : null, captions.GetValueOrDefault(photo.Id));
                 b.Append("<figure><img alt=\"")
-                    .Append(Encode(captions.GetValueOrDefault(photo.Id) ?? taken)).Append("\" src=\"").Append(Encode(src)).Append("\">")
+                    .Append(Encode(photo.Description ?? captions.GetValueOrDefault(photo.Id) ?? taken)).Append("\" src=\"").Append(Encode(src)).Append("\">")
                     .Append("<figcaption>").Append(Encode(caption)).Append("</figcaption></figure>\n");
             }
             b.Append("</div>\n");
