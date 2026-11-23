@@ -54,6 +54,41 @@ public sealed class SettingsService(ISettingsRepository settings)
         await settings.SaveAsync(current);
     }
 
+    public async Task SetTextSizeAsync(TextSize value)
+    {
+        var current = await GetAsync();
+        current.TextSize = value;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetHighContrastAsync(bool value)
+    {
+        var current = await GetAsync();
+        current.HighContrast = value;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetReduceMotionAsync(bool value)
+    {
+        var current = await GetAsync();
+        current.ReduceMotion = value;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetLargeButtonsAsync(bool value)
+    {
+        var current = await GetAsync();
+        current.LargeButtons = value;
+        await settings.SaveAsync(current);
+    }
+
+    public async Task SetKeepScreenOnAsync(bool value)
+    {
+        var current = await GetAsync();
+        current.KeepScreenOn = value;
+        await settings.SaveAsync(current);
+    }
+
     public async Task SetPhotoReminderAsync(bool on)
     {
         var current = await GetAsync();

@@ -24,6 +24,7 @@ public sealed class SyncRunner(
     IndexedDbSyncStore store,
     IndexedDb db,
     ThemeService theme,
+    LookService look,
     LanguageService language,
     DisplayPreferences display,
     ErrorReports errorReports,
@@ -462,6 +463,7 @@ public sealed class SyncRunner(
             if (result.Received > 0)
             {
                 await theme.ApplySavedAsync();
+                await look.ApplySavedAsync();
                 await language.ApplySavedAsync();
                 await display.ApplySavedAsync();
                 await errorReports.ApplySavedAsync();

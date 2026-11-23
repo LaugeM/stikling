@@ -235,6 +235,15 @@ public enum DateStyle
     YearFirst
 }
 
+/// <summary>How big the text is, on top of the text size set on the phone or in the browser.</summary>
+[JsonConverter(typeof(JsonStringEnumConverter<TextSize>))]
+public enum TextSize
+{
+    Normal,
+    Larger,
+    Largest
+}
+
 /// <summary>Whether the time of day is written on a 24-hour or a 12-hour clock.</summary>
 [JsonConverter(typeof(JsonStringEnumConverter<ClockStyle>))]
 public enum ClockStyle

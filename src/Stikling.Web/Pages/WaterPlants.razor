@@ -1,6 +1,8 @@
 @page "/water"
 @attribute [NeedsAccess(AccessLevel.Log)]
 @using Stikling.Core.Settings
+@implements IAsyncDisposable
+@inject ScreenAwake Awake
 @inject IPlantRepository Plants
 @inject IPropagationRepository PropagationRepository
 @inject PropagationCareService CuttingCare
@@ -208,6 +210,9 @@ else
 </div>
 
 @code {
+    // Keeps the screen on while the page is open
+    private AwakeKeeper? keeper;
+
     private enum Stage { Rooms, Plants }
 
     // What the row says about the plant, from the answer given or the reading
@@ -272,6 +277,9 @@ else
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
+        keeper ??= Awake.Keeper();
+        await keeper.SetAsync(true);
+
         if (focusDone)
         {
             focusDone = false;
@@ -919,4 +927,10 @@ else
             </div>
         }
     };
+
+    public async ValueTask DisposeAsync()
+    {
+        if (keeper is not null)
+            await keeper.DisposeAsync();
+    }
 }

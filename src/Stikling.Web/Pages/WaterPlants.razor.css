@@ -313,3 +313,72 @@ a.pass-name {
         max-width: 48rem;
     }
 }
+
+/* Large buttons (Settings, Look): every target 48px or more with at least 8px between them. Rows are
+   further apart, Dry and Still damp are two equal columns, the meter's squares are 48px and Watered
+   is full width. */
+:root[data-large-buttons] .pass-group .item-list {
+    gap: 1rem;
+}
+
+:root[data-large-buttons] .pass-item {
+    gap: 1rem;
+}
+
+:root[data-large-buttons] .pass-name {
+    font-size: 1rem;
+}
+
+:root[data-large-buttons] .pass-room,
+:root[data-large-buttons] .pass-mode .chip {
+    min-height: 3rem;
+}
+
+:root[data-large-buttons] .chip-row {
+    gap: 0.5rem;
+}
+
+:root[data-large-buttons] .pass-item .answer-grid {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 0.5rem;
+    max-width: 24rem;
+}
+
+:root[data-large-buttons] .pass-item .answer-grid .chip {
+    min-height: 3rem;
+    font-size: 1rem;
+}
+
+:root[data-large-buttons] .pass-soil {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem;
+}
+
+:root[data-large-buttons] .pass-soil .chip {
+    min-height: 3.25rem;
+    font-size: 1rem;
+}
+
+:root[data-large-buttons] .pass-act {
+    gap: 0.5rem 1rem;
+    margin-top: 0.75rem;
+}
+
+:root[data-large-buttons] .pass-water {
+    flex: 1 1 100%;
+    min-height: 3.5rem;
+    font-size: 1.0625rem;
+}
+
+/* Text actions get their own 48px instead of borrowing room from the rows around them */
+:root[data-large-buttons] .pass-act .btn-link,
+:root[data-large-buttons] .pass-doneline .btn-link {
+    min-height: 3rem;
+    margin-block: 0;
+}
+
+:root[data-large-buttons] .pass-actions .btn,
+:root[data-large-buttons] .pass-progress .btn {
+    min-height: 3rem;
+}
