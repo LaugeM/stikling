@@ -16,7 +16,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "pwsh -NoProfile -Command \"git fetch --quiet origin; git merge --ff-only --quiet origin/main 2>&1 | Out-Null; exit 0\"",
+            "command": "pwsh -NoProfile -Command \"git fetch --quiet origin; git merge --ff-only --quiet origin/main 2>&1 | Out-Null; git config merge.keep-both.name 'Keep both sides of added resx keys and WhatsNew lines'; git config merge.keep-both.driver 'python tools/git/merge-keep-both.py %O %A %B %P'; exit 0\"",
             "timeout": 30
           }
         ]

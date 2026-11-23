@@ -1,0 +1,4 @@
+# Branches add text keys and What's new lines at the same spot. tools/git/merge-keep-both.py keeps both.
+# docs/dev/merging.md says how to turn it on.
+*.resx merge=keep-both
+src/Stikling.Web/Pages/WhatsNew.razor merge=keep-both
