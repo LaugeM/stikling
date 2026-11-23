@@ -980,4 +980,128 @@
     <value>From the batch mixed {0}</value>
     <comment>Line under the soil mix on a plant&apos;s page. {0} is the date the batch was mixed.</comment>
   </data>
+  <data name="DescribeMenu" xml:space="preserve">
+    <value>Describe my plant</value>
+    <comment>Title of the action in More on a plant&apos;s page, and of the step it opens.</comment>
+  </data>
+  <data name="DescribeMenuHint" xml:space="preserve">
+    <value>A short text to paste when you ask a friend or a forum about it</value>
+    <comment>Small line under Describe my plant in More on a plant&apos;s page.</comment>
+  </data>
+  <data name="DescribeWhatGoesIn" xml:space="preserve">
+    <value>What goes in</value>
+    <comment>Heading over the checkboxes in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartName" xml:space="preserve">
+    <value>Name</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartRoom" xml:space="preserve">
+    <value>Room</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartPot" xml:space="preserve">
+    <value>Pot and medium</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartLight" xml:space="preserve">
+    <value>Light where it stands</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartLikes" xml:space="preserve">
+    <value>What it likes</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartCare" xml:space="preserve">
+    <value>Last watered and fed</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartLately" xml:space="preserve">
+    <value>What changed lately</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartProblems" xml:space="preserve">
+    <value>Problems and pests</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartCameFrom" xml:space="preserve">
+    <value>Where it came from</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartPrice" xml:space="preserve">
+    <value>Price</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePartTags" xml:space="preserve">
+    <value>Tags</value>
+    <comment>Checkbox label in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePreviewLabel" xml:space="preserve">
+    <value>The text</value>
+    <comment>Label a screen reader reads for the preview of the text in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribePhotoHint" xml:space="preserve">
+    <value>To send a photo too, use Share on the plant&apos;s page.</value>
+    <comment>Small hint under the checkboxes in the Describe my plant step.</comment>
+  </data>
+  <data name="DescribeCopied" xml:space="preserve">
+    <value>Copied</value>
+    <comment>Status under the buttons in the Describe my plant step, after Copy or Share put the text on the clipboard.</comment>
+  </data>
+  <data name="DescribeCopyFailed" xml:space="preserve">
+    <value>Couldn&apos;t copy. Select the text above and copy it yourself.</value>
+    <comment>Status under the buttons in the Describe my plant step, when the text couldn&apos;t be copied.</comment>
+  </data>
+  <data name="DescribeNoneTicked" xml:space="preserve">
+    <value>Tick at least one part.</value>
+    <comment>Shown instead of the preview in the Describe my plant step when every checkbox is off.</comment>
+  </data>
+  <data name="DescribeNothing" xml:space="preserve">
+    <value>There is nothing to describe yet. Add its name, pot or light under Edit.</value>
+    <comment>Shown in the Describe my plant step when the plant has nothing to write about.</comment>
+  </data>
+  <data name="DescribeShare" xml:space="preserve">
+    <value>Share</value>
+    <comment>Button in the Describe my plant step. Sends the text through the phone&apos;s share menu.</comment>
+  </data>
+  <data name="DescribeCopy" xml:space="preserve">
+    <value>Copy</value>
+    <comment>Button in the Describe my plant step. Puts the text on the clipboard.</comment>
+  </data>
+  <data name="DescribeRoom" xml:space="preserve">
+    <value>Room: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is the name of the room or spot.</comment>
+  </data>
+  <data name="DescribeGrowsIn" xml:space="preserve">
+    <value>Grows in: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is the medium, pots and soil mix.</comment>
+  </data>
+  <data name="DescribeLight" xml:space="preserve">
+    <value>Light: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is how much light the plant gets.</comment>
+  </data>
+  <data name="DescribeLikes" xml:space="preserve">
+    <value>Likes: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is what the plant likes, as on its page.</comment>
+  </data>
+  <data name="DescribeFed" xml:space="preserve">
+    <value>fed {0}</value>
+    <comment>Part of the last watered and fed line written by Describe my plant. {0} is how long ago, like 3 days ago.</comment>
+  </data>
+  <data name="DescribeLately" xml:space="preserve">
+    <value>Lately: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is what changed lately, like repotted 6 days ago, moved 3 days ago.</comment>
+  </data>
+  <data name="DescribePests" xml:space="preserve">
+    <value>Pests: {0}, {1}</value>
+    <comment>A line of the text written by Describe my plant. {0} is the pest, {1} is its status and since when.</comment>
+  </data>
+  <data name="DescribeTags" xml:space="preserve">
+    <value>Tags: {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is the plant&apos;s tags, separated by commas.</comment>
+  </data>
+  <data name="DescribePaid" xml:space="preserve">
+    <value>Paid {0}</value>
+    <comment>A line of the text written by Describe my plant. {0} is what the plant cost, a plain number.</comment>
+  </data>
 </root>

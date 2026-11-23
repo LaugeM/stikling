@@ -1,0 +1,133 @@
+@* The step in More on a plant's page that writes a short text about the plant, to paste into a forum post or
+   send to a friend. The page words each part and hands them over as sections. The ticks live only here, so they
+   start over each time the step opens, and nothing is stored. *@
+@implements IDisposable
+@inject ShareCardService Cards
+@inject SitterSheetActions Sharer
+
+@if (Sections.Count == 0)
+{
+    <p>@Strings.PlantDetail.DescribeNothing</p>
+    <div class="form-actions">
+        <button type="button" class="btn btn-link" @onclick="OnBack">@Strings.Common.Back</button>
+    </div>
+}
+else
+{
+    if (Text.Length > 0)
+    {
+        <pre class="describe-preview" tabindex="0" aria-label="@Strings.PlantDetail.DescribePreviewLabel">@Text</pre>
+    }
+    else
+    {
+        <pre class="describe-preview describe-preview-empty" tabindex="0" aria-label="@Strings.PlantDetail.DescribePreviewLabel">@Strings.PlantDetail.DescribeNoneTicked</pre>
+    }
+
+    <fieldset class="describe-parts mb-3">
+        <legend class="form-label">@Strings.PlantDetail.DescribeWhatGoesIn</legend>
+        @foreach (var section in Sections.OrderBy(s => s.Part))
+        {
+            var part = section.Part;
+            var id = $"describe-{part.ToString().ToLowerInvariant()}";
+            <div class="form-check">
+                <input class="form-check-input" type="checkbox" id="@id" checked="@ticked.Contains(part)" @onchange="e => Set(part, e.Value is true)" />
+                <label class="form-check-label" for="@id">@PartLabel(part)</label>
+            </div>
+        }
+    </fieldset>
+
+    <p class="form-text">@Strings.PlantDetail.DescribePhotoHint</p>
+
+    <div class="form-actions">
+        @if (canShare)
+        {
+            <button type="button" class="btn btn-primary" disabled="@(Text.Length == 0)" @onclick="ShareAsync">@Strings.PlantDetail.DescribeShare</button>
+        }
+        <button type="button" class="btn @(canShare ? "btn-outline-primary" : "btn-primary")" disabled="@(Text.Length == 0)" @onclick="CopyAsync">@Strings.PlantDetail.DescribeCopy</button>
+        <button type="button" class="btn btn-link" @onclick="OnBack">@Strings.Common.Back</button>
+    </div>
+    <p role="status" class="form-text">@status</p>
+}
+
+@code {
+    [Parameter, EditorRequired]
+    public IReadOnlyList<DescribeSection> Sections { get; set; } = [];
+
+    [Parameter]
+    public EventCallback OnBack { get; set; }
+
+    private readonly HashSet<DescribePart> ticked = [];
+    private bool canShare;
+    private bool disposed;
+    private string status = "";
+
+    private string Text => PlantDescription.Write(Sections, ticked);
+
+    protected override void OnInitialized()
+    {
+        foreach (var section in Sections)
+            if (PlantDescription.OnAtFirst(section.Part))
+                ticked.Add(section.Part);
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!firstRender || Sections.Count == 0)
+            return;
+        canShare = await Cards.CanShareLinkAsync();
+        if (canShare)
+            StateHasChanged();
+    }
+
+    private void Set(DescribePart part, bool on)
+    {
+        if (on)
+            ticked.Add(part);
+        else
+            ticked.Remove(part);
+    }
+
+    private async Task CopyAsync() =>
+        await ShowAsync(await Cards.CopyTextAsync(Text) ? Strings.PlantDetail.DescribeCopied : Strings.PlantDetail.DescribeCopyFailed);
+
+    private async Task ShareAsync() =>
+        await ShowAsync(await Sharer.ShareTextAsync(Text) switch
+        {
+            "copied" => Strings.PlantDetail.DescribeCopied,
+            "failed" => Strings.PlantDetail.DescribeCopyFailed,
+            _ => ""
+        });
+
+    // Shows the status for three seconds, unless the step was closed by then
+    private async Task ShowAsync(string text)
+    {
+        status = text;
+        if (text.Length == 0)
+            return;
+
+        StateHasChanged();
+        await Task.Delay(3000);
+        if (!disposed)
+        {
+            status = "";
+            StateHasChanged();
+        }
+    }
+
+    private static string PartLabel(DescribePart part) => part switch
+    {
+        DescribePart.Name => Strings.PlantDetail.DescribePartName,
+        DescribePart.Room => Strings.PlantDetail.DescribePartRoom,
+        DescribePart.Pot => Strings.PlantDetail.DescribePartPot,
+        DescribePart.Light => Strings.PlantDetail.DescribePartLight,
+        DescribePart.Likes => Strings.PlantDetail.DescribePartLikes,
+        DescribePart.Care => Strings.PlantDetail.DescribePartCare,
+        DescribePart.Lately => Strings.PlantDetail.DescribePartLately,
+        DescribePart.Problems => Strings.PlantDetail.DescribePartProblems,
+        DescribePart.CameFrom => Strings.PlantDetail.DescribePartCameFrom,
+        DescribePart.Price => Strings.PlantDetail.DescribePartPrice,
+        _ => Strings.PlantDetail.DescribePartTags
+    };
+
+    public void Dispose() => disposed = true;
+}

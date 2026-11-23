@@ -547,4 +547,12 @@
     <value>Write what was released.</value>
     <comment>Shown as an error under a form when it is not filled in right.</comment>
   </data>
+  <data name="DescribeProblem" xml:space="preserve">
+    <value>Problem: {0}, since {1} ({2})</value>
+    <comment>A line of the text written by Describe my plant. {0} is the signs, {1} the day it started, {2} how long it has lasted.</comment>
+  </data>
+  <data name="DescribeProblemUpdate" xml:space="preserve">
+    <value>{0}: {1}</value>
+    <comment>An indented line under a problem in the text written by Describe my plant. {0} is the day, {1} what the update says.</comment>
+  </data>
 </root>

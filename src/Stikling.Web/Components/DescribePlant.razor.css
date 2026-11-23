@@ -1,0 +1,33 @@
+.describe-preview {
+    margin: 0 0 1rem;
+    padding: 0.75rem 1rem;
+    max-height: 16rem;
+    overflow: auto;
+    font: inherit;
+    color: var(--pa-text);
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+    background: var(--pa-bg);
+    border: 1px solid var(--pa-border);
+    border-radius: var(--bs-border-radius);
+}
+
+.describe-preview-empty {
+    color: var(--pa-muted);
+}
+
+.describe-parts {
+    display: grid;
+    grid-template-columns: 1fr;
+    column-gap: 1rem;
+}
+
+.describe-parts legend {
+    grid-column: 1 / -1;
+}
+
+@media (min-width: 22rem) {
+    .describe-parts {
+        grid-template-columns: 1fr 1fr;
+    }
+}
